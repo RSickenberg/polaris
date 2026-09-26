@@ -1,14 +1,15 @@
 # Module boundaries of ADR 0001 (docs/adr/0001-feature-modules.md).
 #
 # Every business module is split in three layers:
-#   <Module>.Domain    Domain/: plain PHP, reachable only from Domain layers.
-#   <Module>.Api       Service/, Entity/, Message/, Event/: what other modules may use.
+#   <Module>.Domain    Domain/: plain PHP, public, depends on no other module.
+#   <Module>.Api       Service/, Entity/, Message/, Event/: public.
 #   <Module>.Internal  everything else (Controller/, Form/, Repository/, MessageHandler/,
 #                      EventListener/, Command/, Twig/...): private to the module.
 #
-# Shared and Extension are public as a whole (apart from their Domain/), Dashboard
-# may use every module's Api but nothing depends on it, and Polaris\Kernel sits
-# outside the modules and depends on none of them.
+# Other modules may use a module's Domain and Api layers, never its Internal layer.
+# Shared and Extension are public as a whole, Dashboard may use every module's
+# public layers but nothing depends on it, and Polaris\Kernel sits outside the
+# modules and depends on none of them.
 #
 # Dependencies inside one layer are always allowed. Layers not listed in a rule set
 # entry are forbidden for that layer.
@@ -161,20 +162,11 @@ deptrac:
     Vendor: ~
     Unassigned: ~
 
-    # Rule 1: Domain/ is plain PHP. It may use Shared\Domain, the Domain/ of any
-    # module except Dashboard, the PSR-20 clock and immutable Carbon.
-    Shared.Domain: &domain
-      - DomainSafeVendor
-      - Shared.Domain
-      - Extension.Domain
-      - Account.Domain
-      - Vehicle.Domain
-      - Lease.Domain
-      - Reading.Domain
-      - Tesla.Domain
-      - Fetching.Domain
-      - Alert.Domain
-    Extension.Domain: *domain
+    # Rule 1: Domain/ is plain PHP. It may use its own module's Domain/ (same layer),
+    # Shared\Domain, the PSR-20 clock and immutable Carbon. No other module's Domain/:
+    # data from other modules is passed in by the module's own Service/ as Shared types.
+    Shared.Domain: [DomainSafeVendor]
+    Extension.Domain: &domain [DomainSafeVendor, Shared.Domain]
     Account.Domain: *domain
     Vehicle.Domain: *domain
     Lease.Domain: *domain
@@ -182,33 +174,33 @@ deptrac:
     Tesla.Domain: *domain
     Fetching.Domain: *domain
     Alert.Domain: *domain
-    Dashboard.Domain: [DomainSafeVendor, Shared.Domain, Extension.Domain, Account.Domain, Vehicle.Domain, Lease.Domain, Reading.Domain, Tesla.Domain, Fetching.Domain, Alert.Domain]
+    Dashboard.Domain: *domain
 
     # Shared is used everywhere and depends on no module.
     Shared: [Vendor, DomainSafeVendor, Shared.Domain]
 
-    # Rule 2: a module reaches another module only through its Api layer. Rule 3:
-    # no module depends on Dashboard, which may read every module's Api.
-    Extension: [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension.Domain, Account.Api, Vehicle.Api, Lease.Api, Reading.Api, Tesla.Api, Fetching.Api, Alert.Api]
-    Dashboard: [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Dashboard.Domain, Account.Api, Vehicle.Api, Lease.Api, Reading.Api, Tesla.Api, Fetching.Api, Alert.Api]
+    # Rule 2: a module reaches another module only through its Domain and Api layers.
+    # Rule 3: no module depends on Dashboard, which may read every module.
+    Extension: [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension.Domain, Account.Domain, Account.Api, Vehicle.Domain, Vehicle.Api, Lease.Domain, Lease.Api, Reading.Domain, Reading.Api, Tesla.Domain, Tesla.Api, Fetching.Domain, Fetching.Api, Alert.Domain, Alert.Api]
+    Dashboard: [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Extension.Domain, Dashboard.Domain, Account.Domain, Account.Api, Vehicle.Domain, Vehicle.Api, Lease.Domain, Lease.Api, Reading.Domain, Reading.Api, Tesla.Domain, Tesla.Api, Fetching.Domain, Fetching.Api, Alert.Domain, Alert.Api]
 
-    Account.Api: &account [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Account.Domain, Account.Api, Account.Internal, Vehicle.Api, Lease.Api, Reading.Api, Tesla.Api, Fetching.Api, Alert.Api]
+    Account.Api: &account [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Extension.Domain, Account.Domain, Account.Api, Account.Internal, Vehicle.Domain, Vehicle.Api, Lease.Domain, Lease.Api, Reading.Domain, Reading.Api, Tesla.Domain, Tesla.Api, Fetching.Domain, Fetching.Api, Alert.Domain, Alert.Api]
     Account.Internal: *account
 
-    Vehicle.Api: &vehicle [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Vehicle.Domain, Vehicle.Api, Vehicle.Internal, Account.Api, Lease.Api, Reading.Api, Tesla.Api, Fetching.Api, Alert.Api]
+    Vehicle.Api: &vehicle [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Extension.Domain, Vehicle.Domain, Vehicle.Api, Vehicle.Internal, Account.Domain, Account.Api, Lease.Domain, Lease.Api, Reading.Domain, Reading.Api, Tesla.Domain, Tesla.Api, Fetching.Domain, Fetching.Api, Alert.Domain, Alert.Api]
     Vehicle.Internal: *vehicle
 
-    Lease.Api: &lease [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Lease.Domain, Lease.Api, Lease.Internal, Account.Api, Vehicle.Api, Reading.Api, Tesla.Api, Fetching.Api, Alert.Api]
+    Lease.Api: &lease [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Extension.Domain, Lease.Domain, Lease.Api, Lease.Internal, Account.Domain, Account.Api, Vehicle.Domain, Vehicle.Api, Reading.Domain, Reading.Api, Tesla.Domain, Tesla.Api, Fetching.Domain, Fetching.Api, Alert.Domain, Alert.Api]
     Lease.Internal: *lease
 
-    Reading.Api: &reading [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Reading.Domain, Reading.Api, Reading.Internal, Account.Api, Vehicle.Api, Lease.Api, Tesla.Api, Fetching.Api, Alert.Api]
+    Reading.Api: &reading [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Extension.Domain, Reading.Domain, Reading.Api, Reading.Internal, Account.Domain, Account.Api, Vehicle.Domain, Vehicle.Api, Lease.Domain, Lease.Api, Tesla.Domain, Tesla.Api, Fetching.Domain, Fetching.Api, Alert.Domain, Alert.Api]
     Reading.Internal: *reading
 
-    Tesla.Api: &tesla [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Tesla.Domain, Tesla.Api, Tesla.Internal, Account.Api, Vehicle.Api, Lease.Api, Reading.Api, Fetching.Api, Alert.Api]
+    Tesla.Api: &tesla [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Extension.Domain, Tesla.Domain, Tesla.Api, Tesla.Internal, Account.Domain, Account.Api, Vehicle.Domain, Vehicle.Api, Lease.Domain, Lease.Api, Reading.Domain, Reading.Api, Fetching.Domain, Fetching.Api, Alert.Domain, Alert.Api]
     Tesla.Internal: *tesla
 
-    Fetching.Api: &fetching [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Fetching.Domain, Fetching.Api, Fetching.Internal, Account.Api, Vehicle.Api, Lease.Api, Reading.Api, Tesla.Api, Alert.Api]
+    Fetching.Api: &fetching [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Extension.Domain, Fetching.Domain, Fetching.Api, Fetching.Internal, Account.Domain, Account.Api, Vehicle.Domain, Vehicle.Api, Lease.Domain, Lease.Api, Reading.Domain, Reading.Api, Tesla.Domain, Tesla.Api, Alert.Domain, Alert.Api]
     Fetching.Internal: *fetching
 
-    Alert.Api: &alert [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Alert.Domain, Alert.Api, Alert.Internal, Account.Api, Vehicle.Api, Lease.Api, Reading.Api, Tesla.Api, Fetching.Api]
+    Alert.Api: &alert [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Extension.Domain, Alert.Domain, Alert.Api, Alert.Internal, Account.Domain, Account.Api, Vehicle.Domain, Vehicle.Api, Lease.Domain, Lease.Api, Reading.Domain, Reading.Api, Tesla.Domain, Tesla.Api, Fetching.Domain, Fetching.Api]
     Alert.Internal: *alert
