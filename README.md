@@ -53,20 +53,24 @@ php -r "echo 'POSTGRES_PASSWORD='.bin2hex(random_bytes(16)).PHP_EOL;" >> .env.lo
 Build and start everything (`compose.override.yaml` adds the development settings automatically):
 
 ```
-docker compose build
-docker compose up -d --wait
+make start
 ```
+
+`make start` runs `docker compose build --pull --no-cache` then `docker compose up --detach --wait`. The `Makefile` wraps the Docker workflow and runs every PHP command inside the `php` container, never with the host PHP; `make` alone lists all targets.
 
 Open https://localhost and accept the self-signed certificate: the Symfony welcome page answers. The first start runs `composer install` if `vendor/` is empty.
 
 Everyday commands:
 
 ```
-docker compose exec php bin/console about
-docker compose exec php bin/phpunit
-docker compose logs -f php worker
+make sh                         # shell in the php container
+make test                       # PHPUnit, options via ARGS="--filter=..."
+make sf ARGS="about"            # any bin/console command
+make composer ARGS="outdated"   # any Composer command
+make logs                       # follow the container logs
+make down                       # stop everything
 docker compose restart worker   # after changing message handlers
-docker compose down             # add -v to also delete the database and Redis data
+docker compose down -v          # also delete the database and Redis data
 ```
 
 Host ports can be changed with environment variables: `HTTP_PORT`, `HTTPS_PORT`, `HTTP3_PORT`, `DATABASE_PORT`, `REDIS_PORT`, `MAILPIT_SMTP_PORT`, `MAILPIT_UI_PORT`. Xdebug is installed in the dev image; enable step debugging with `XDEBUG_MODE=debug docker compose up -d`.
