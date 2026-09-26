@@ -1,0 +1,13 @@
+{
+  "name": "polaris",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Release tooling only. Application assets do not use npm.",
+  "scripts": {
+    "release": "release-it"
+  },
+  "devDependencies": {
+    "@release-it/conventional-changelog": "12.0.2",
+    "release-it": "21.1.0"
+  }
+}

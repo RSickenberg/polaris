@@ -1,0 +1,23 @@
+# Symfony
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/public/assets/
+/assets/vendor/
+/var/
+/vendor/
+
+# Tools
+/.phpunit.cache/
+/.php-cs-fixer.cache
+/phpstan.neon.local
+
+# Node (release tooling only)
+/node_modules/
+
+# OS and IDE
+.DS_Store
+/.idea/
+/.vscode/
