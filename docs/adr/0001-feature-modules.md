@@ -51,8 +51,8 @@ Templates live in `templates/<module>/` (for example `templates/lease/settings.h
 
 ### Dependency rules
 
-1. `Domain/` is plain PHP. It may use `Shared\Domain` and `Psr\Clock\ClockInterface`, nothing from Symfony, Doctrine or HTTP. This is where the calculations live, and they are unit-tested without booting the kernel.
-2. A module calls another module only through that module's `Service/` classes, its entities (read access and Doctrine relations), or Messenger messages and events. Never through another module's controllers, forms, repositories or handlers.
+1. `Domain/` is plain PHP. It may depend only on its own module's `Domain/`, `Shared\Domain`, `Psr\Clock\ClockInterface` and immutable Carbon (`CarbonImmutable`, never the mutable `Carbon`). Nothing from Symfony, Doctrine or HTTP, and no other module's `Domain/`: data from other modules is passed in by the module's own `Service/` as `Shared` types. This is where the calculations live, and they are unit-tested without booting the kernel.
+2. A module calls another module only through that module's `Service/` classes, its entities (read access and Doctrine relations), its `Domain/` types, or Messenger messages and events. Services and entities return and hold `Domain/` types (for example `Lease\Domain\RiskLevel` or a projection result), so callers must be able to reference them without mirror DTOs. Never through another module's controllers, forms, repositories or handlers.
 3. `Dashboard` may read from every module; no module depends on `Dashboard`.
 4. The hosted layer (`polaris-backend`) hooks into Polaris only through `Extension/` interfaces, replaced with service decoration.
 5. The rules are enforced by Deptrac in CI (issue #11), so a violation fails the build instead of relying on review.
@@ -69,6 +69,7 @@ Templates live in `templates/<module>/` (for example `templates/lease/settings.h
 - Everything about one business area sits together, which keeps changes local as the code grows.
 - The boundary with the hosted layer is explicit and checked.
 - The calculations stay framework-free and fast to test.
+- Exposing `Domain/` makes renaming its classes a cross-module change.
 - Cost: a few configuration lines that differ from recipe defaults, longer MakerBundle commands, and Deptrac to maintain.
 - If a second application ever needs to reuse part of Polaris, the module boundaries make extracting a bundle a mechanical refactor.
 
