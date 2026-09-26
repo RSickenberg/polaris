@@ -106,3 +106,96 @@ things up in the project instead of relying on memory:
 - Read the installed source and docblocks under `vendor/`.
 - Docs: https://symfony.com/doc/current/ (switch to the version matching
   `composer.json` if it differs).
+
+## Polaris project rules
+
+Everything above is the generic Symfony guidance from the recipe. The rules below
+are specific to Polaris and win when the two disagree.
+
+### Context
+
+- Polaris tracks a Tesla's odometer against the lease allowance, projects the
+  mileage at lease end and warns before the limit. Decisions are recorded in
+  `docs/adr/`; read them before changing structure.
+- This repository is public (AGPL-3.0-or-later) and is the self-hostable
+  application. A private hosted layer builds on its Docker image and plugs in
+  only through `src/Extension/`. Never add hosted-only code here (billing, plans,
+  sign-up policy, APNs keys).
+- Stack: Symfony 8.1, PHP 8.5, PostgreSQL, Redis (Messenger, Lock, Cache),
+  Tailwind with the Symfony UX Toolkit Shadcn kit, Flowbite charts (ApexCharts)
+  behind one reusable Stimulus controller, PHPUnit 13.
+- Work is tracked on the GitHub Project "Polaris"
+  (https://github.com/users/RSickenberg/projects/4). Each story has acceptance
+  criteria and "blocked by" links: read the issue before starting and do not
+  start a story whose blockers are still open.
+
+### Language and writing
+
+- Code, comments, commit messages, docs and issues are in English, even when the
+  conversation is in French.
+- Do not use the em dash character in prose, comments, strings or docs.
+- If something cannot be verified (a Tesla API behaviour, a package version),
+  say so instead of guessing. Check `vendor/` sources and official docs first.
+
+### Code organization (ADR 0001)
+
+- `src/` is organized by feature module, as namespaces (no bundles): `Shared`,
+  `Account`, `Vehicle`, `Lease`, `Reading`, `Tesla`, `Fetching`, `Alert`,
+  `Dashboard`, `Extension`.
+- Inside a module, use the usual Symfony folders (`Entity/`, `Repository/`,
+  `Service/`, `Message/`, `MessageHandler/`, `Controller/`, `Form/`, `Command/`,
+  `Twig/Components/`) plus `Domain/` for calculations and value objects.
+- `Domain/` is plain PHP: only `Shared\Domain` and `Psr\Clock\ClockInterface`,
+  nothing from Symfony, Doctrine or HTTP. Unit-test it without booting the kernel.
+- A module uses another module only through its `Service/` classes, its entities,
+  or Messenger messages and events. Never through its controllers, forms,
+  repositories or handlers. Nothing depends on `Dashboard`.
+- Templates go in `templates/<module>/`, component templates in
+  `templates/components/<Module>/`.
+- MakerBundle needs absolute class names, for example
+  `bin/console make:entity '\Polaris\Lease\Entity\LeaseContract' --no-interaction`.
+- Deptrac enforces these boundaries in CI once issue #11 lands. Fix the code, not
+  the Deptrac rules, unless an ADR changes them.
+
+### Dates, units and business rules
+
+- UTC everywhere: storage, computation, API, logs. The kernel forces UTC at boot.
+  Get the current time from `ClockInterface`, never from `new \DateTimeImmutable()`
+  or `time()`. Use `CarbonImmutable`, never mutable `Carbon`. The user's time zone
+  is only for display and for converting fetch slots.
+- Distances are stored as integer metres. The Tesla odometer is in miles:
+  1 mi = 1.609344 km.
+- The lease allowance is linear over the whole term: total km = km per year x
+  years, no yearly reset.
+
+### Tesla Fleet API
+
+- Never wake the car automatically. `wake_up` is only called on a manual refresh
+  the user confirmed, within the daily wake cap.
+- Scheduled reads run only when the vehicle state is `online`. Manual refresh is
+  limited to once per hour per vehicle.
+- Request the minimal OAuth scopes. Tokens are encrypted at rest; refresh tokens
+  are single-use and are rotated under a lock.
+- Tesla can revoke API access at any time: manual odometer entry must always keep
+  working.
+
+### Secrets
+
+- Never commit a secret, not even a development `APP_SECRET`. GitGuardian scans
+  every pull request. Generated values go in `.env.local`.
+
+### Git and delivery
+
+- Conventional Commits (`feat`, `fix`, `docs`, `refactor`, `test`, `build`,
+  `ci`, `chore`); pull request titles are checked in CI.
+- Versions and `CHANGELOG.md` are produced by release-it from the commits: do not
+  edit them by hand.
+- One issue per pull request, small, with "Closes #N". Pull requests are
+  squash-merged.
+- No `.bak` or backup copies of files: git is the history.
+
+### Definition of done
+
+- Tests pass (unit tests for `Domain/`, functional tests for controllers and
+  commands), PHPStan passes, php-cs-fixer is clean, Deptrac passes once
+  available, docs are updated, and the story's acceptance criteria are all met.
