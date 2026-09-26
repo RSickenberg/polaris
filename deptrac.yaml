@@ -1,0 +1,214 @@
+# Module boundaries of ADR 0001 (docs/adr/0001-feature-modules.md).
+#
+# Every business module is split in three layers:
+#   <Module>.Domain    Domain/: plain PHP, reachable only from Domain layers.
+#   <Module>.Api       Service/, Entity/, Message/, Event/: what other modules may use.
+#   <Module>.Internal  everything else (Controller/, Form/, Repository/, MessageHandler/,
+#                      EventListener/, Command/, Twig/...): private to the module.
+#
+# Shared and Extension are public as a whole (apart from their Domain/), Dashboard
+# may use every module's Api but nothing depends on it, and Polaris\Kernel sits
+# outside the modules and depends on none of them.
+#
+# Dependencies inside one layer are always allowed. Layers not listed in a rule set
+# entry are forbidden for that layer.
+deptrac:
+  paths:
+    - ./src
+
+  cache_file: ./var/cache/deptrac/.deptrac.cache
+
+  analyser:
+    types:
+      - class
+      - function
+      - use
+      - file
+
+  layers:
+    # --- Outside the modules -----------------------------------------
+
+    - name: Kernel
+      collectors:
+        - { type: classLike, value: '^Polaris\\Kernel$' }
+
+    # Third-party classes that Domain/ may use: the PSR-20 clock and immutable Carbon.
+    - name: DomainSafeVendor
+      collectors:
+        - { type: classLike, value: '^Psr\\Clock\\ClockInterface$' }
+        - { type: classLike, value: '^Carbon\\(?!(Carbon|CarbonPeriod)$)' }
+
+    # Every other third-party class (Symfony, Doctrine, HTTP clients, mutable Carbon...).
+    # PHP built-in classes are left uncovered, so they stay allowed everywhere.
+    - name: Vendor
+      collectors:
+        - type: bool
+          must:
+            - { type: classLike, value: '^(?!Polaris\\)' }
+          must_not:
+            - { type: php_internal, value: '.*' }
+            - { type: layer, value: DomainSafeVendor }
+
+    # --- Shared, Extension, Dashboard --------------------------------
+
+    - name: Shared.Domain
+      collectors:
+        - { type: classLike, value: '^Polaris\\Shared\\Domain\\' }
+    - name: Shared
+      collectors:
+        - { type: classLike, value: '^Polaris\\Shared\\(?!Domain\\)' }
+
+    - name: Extension.Domain
+      collectors:
+        - { type: classLike, value: '^Polaris\\Extension\\Domain\\' }
+    - name: Extension
+      collectors:
+        - { type: classLike, value: '^Polaris\\Extension\\(?!Domain\\)' }
+
+    - name: Dashboard.Domain
+      collectors:
+        - { type: classLike, value: '^Polaris\\Dashboard\\Domain\\' }
+    - name: Dashboard
+      collectors:
+        - { type: classLike, value: '^Polaris\\Dashboard\\(?!Domain\\)' }
+
+    # --- Business modules --------------------------------------------
+
+    - name: Account.Domain
+      collectors:
+        - { type: classLike, value: '^Polaris\\Account\\Domain\\' }
+    - name: Account.Api
+      collectors:
+        - { type: classLike, value: '^Polaris\\Account\\(Service|Entity|Message|Event)\\' }
+    - name: Account.Internal
+      collectors:
+        - { type: classLike, value: '^Polaris\\Account\\(?!(Domain|Service|Entity|Message|Event)\\)' }
+
+    - name: Vehicle.Domain
+      collectors:
+        - { type: classLike, value: '^Polaris\\Vehicle\\Domain\\' }
+    - name: Vehicle.Api
+      collectors:
+        - { type: classLike, value: '^Polaris\\Vehicle\\(Service|Entity|Message|Event)\\' }
+    - name: Vehicle.Internal
+      collectors:
+        - { type: classLike, value: '^Polaris\\Vehicle\\(?!(Domain|Service|Entity|Message|Event)\\)' }
+
+    - name: Lease.Domain
+      collectors:
+        - { type: classLike, value: '^Polaris\\Lease\\Domain\\' }
+    - name: Lease.Api
+      collectors:
+        - { type: classLike, value: '^Polaris\\Lease\\(Service|Entity|Message|Event)\\' }
+    - name: Lease.Internal
+      collectors:
+        - { type: classLike, value: '^Polaris\\Lease\\(?!(Domain|Service|Entity|Message|Event)\\)' }
+
+    - name: Reading.Domain
+      collectors:
+        - { type: classLike, value: '^Polaris\\Reading\\Domain\\' }
+    - name: Reading.Api
+      collectors:
+        - { type: classLike, value: '^Polaris\\Reading\\(Service|Entity|Message|Event)\\' }
+    - name: Reading.Internal
+      collectors:
+        - { type: classLike, value: '^Polaris\\Reading\\(?!(Domain|Service|Entity|Message|Event)\\)' }
+
+    - name: Tesla.Domain
+      collectors:
+        - { type: classLike, value: '^Polaris\\Tesla\\Domain\\' }
+    - name: Tesla.Api
+      collectors:
+        - { type: classLike, value: '^Polaris\\Tesla\\(Service|Entity|Message|Event)\\' }
+    - name: Tesla.Internal
+      collectors:
+        - { type: classLike, value: '^Polaris\\Tesla\\(?!(Domain|Service|Entity|Message|Event)\\)' }
+
+    - name: Fetching.Domain
+      collectors:
+        - { type: classLike, value: '^Polaris\\Fetching\\Domain\\' }
+    - name: Fetching.Api
+      collectors:
+        - { type: classLike, value: '^Polaris\\Fetching\\(Service|Entity|Message|Event)\\' }
+    - name: Fetching.Internal
+      collectors:
+        - { type: classLike, value: '^Polaris\\Fetching\\(?!(Domain|Service|Entity|Message|Event)\\)' }
+
+    - name: Alert.Domain
+      collectors:
+        - { type: classLike, value: '^Polaris\\Alert\\Domain\\' }
+    - name: Alert.Api
+      collectors:
+        - { type: classLike, value: '^Polaris\\Alert\\(Service|Entity|Message|Event)\\' }
+    - name: Alert.Internal
+      collectors:
+        - { type: classLike, value: '^Polaris\\Alert\\(?!(Domain|Service|Entity|Message|Event)\\)' }
+
+    # Any class under Polaris\ that no layer above collects: a new module or a class
+    # at the src/ root. No rule allows it, so it fails until this file and the ADR
+    # are updated.
+    - name: Unassigned
+      collectors:
+        - type: bool
+          must:
+            - { type: classLike, value: '^Polaris\\' }
+          must_not:
+            - { type: classLike, value: '^Polaris\\(Kernel$|(Shared|Extension|Dashboard|Account|Vehicle|Lease|Reading|Tesla|Fetching|Alert)\\)' }
+
+  ruleset:
+    Kernel: [Vendor, DomainSafeVendor]
+    DomainSafeVendor: ~
+    Vendor: ~
+    Unassigned: ~
+
+    # Rule 1: Domain/ is plain PHP. It may use Shared\Domain, the Domain/ of any
+    # module except Dashboard, the PSR-20 clock and immutable Carbon.
+    Shared.Domain: &domain
+      - DomainSafeVendor
+      - Shared.Domain
+      - Extension.Domain
+      - Account.Domain
+      - Vehicle.Domain
+      - Lease.Domain
+      - Reading.Domain
+      - Tesla.Domain
+      - Fetching.Domain
+      - Alert.Domain
+    Extension.Domain: *domain
+    Account.Domain: *domain
+    Vehicle.Domain: *domain
+    Lease.Domain: *domain
+    Reading.Domain: *domain
+    Tesla.Domain: *domain
+    Fetching.Domain: *domain
+    Alert.Domain: *domain
+    Dashboard.Domain: [DomainSafeVendor, Shared.Domain, Extension.Domain, Account.Domain, Vehicle.Domain, Lease.Domain, Reading.Domain, Tesla.Domain, Fetching.Domain, Alert.Domain]
+
+    # Shared is used everywhere and depends on no module.
+    Shared: [Vendor, DomainSafeVendor, Shared.Domain]
+
+    # Rule 2: a module reaches another module only through its Api layer. Rule 3:
+    # no module depends on Dashboard, which may read every module's Api.
+    Extension: [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension.Domain, Account.Api, Vehicle.Api, Lease.Api, Reading.Api, Tesla.Api, Fetching.Api, Alert.Api]
+    Dashboard: [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Dashboard.Domain, Account.Api, Vehicle.Api, Lease.Api, Reading.Api, Tesla.Api, Fetching.Api, Alert.Api]
+
+    Account.Api: &account [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Account.Domain, Account.Api, Account.Internal, Vehicle.Api, Lease.Api, Reading.Api, Tesla.Api, Fetching.Api, Alert.Api]
+    Account.Internal: *account
+
+    Vehicle.Api: &vehicle [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Vehicle.Domain, Vehicle.Api, Vehicle.Internal, Account.Api, Lease.Api, Reading.Api, Tesla.Api, Fetching.Api, Alert.Api]
+    Vehicle.Internal: *vehicle
+
+    Lease.Api: &lease [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Lease.Domain, Lease.Api, Lease.Internal, Account.Api, Vehicle.Api, Reading.Api, Tesla.Api, Fetching.Api, Alert.Api]
+    Lease.Internal: *lease
+
+    Reading.Api: &reading [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Reading.Domain, Reading.Api, Reading.Internal, Account.Api, Vehicle.Api, Lease.Api, Tesla.Api, Fetching.Api, Alert.Api]
+    Reading.Internal: *reading
+
+    Tesla.Api: &tesla [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Tesla.Domain, Tesla.Api, Tesla.Internal, Account.Api, Vehicle.Api, Lease.Api, Reading.Api, Fetching.Api, Alert.Api]
+    Tesla.Internal: *tesla
+
+    Fetching.Api: &fetching [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Fetching.Domain, Fetching.Api, Fetching.Internal, Account.Api, Vehicle.Api, Lease.Api, Reading.Api, Tesla.Api, Alert.Api]
+    Fetching.Internal: *fetching
+
+    Alert.Api: &alert [Vendor, DomainSafeVendor, Shared, Shared.Domain, Extension, Alert.Domain, Alert.Api, Alert.Internal, Account.Api, Vehicle.Api, Lease.Api, Reading.Api, Tesla.Api, Fetching.Api]
+    Alert.Internal: *alert

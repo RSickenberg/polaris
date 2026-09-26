@@ -70,7 +70,29 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
+        ],
+        "test": "@php bin/phpunit",
+        "phpstan": [
+            "@php bin/console cache:warmup --env=dev --no-interaction",
+            "phpstan analyse --no-progress --no-interaction"
+        ],
+        "cs": "php-cs-fixer fix --dry-run --diff --no-interaction",
+        "cs:fix": "php-cs-fixer fix --no-interaction",
+        "deptrac": "deptrac analyse --no-progress --no-interaction --report-uncovered --fail-on-uncovered",
+        "ci": [
+            "@cs",
+            "@phpstan",
+            "@deptrac",
+            "@test"
         ]
+    },
+    "scripts-descriptions": {
+        "test": "Run the PHPUnit test suite",
+        "phpstan": "Warm up the dev container, then run PHPStan (level max)",
+        "cs": "Check the coding standard (PHP-CS-Fixer dry run)",
+        "cs:fix": "Fix the coding standard (PHP-CS-Fixer)",
+        "deptrac": "Check the module boundaries of ADR 0001 (Deptrac)",
+        "ci": "Run every check, as CI does"
     },
     "conflict": {
         "symfony/symfony": "*"

@@ -64,6 +64,8 @@ Everyday commands:
 ```
 make sh                         # shell in the php container
 make test                       # PHPUnit, options via ARGS="--filter=..."
+make ci                         # every CI check: PHP-CS-Fixer, PHPStan, Deptrac, PHPUnit
+make cs-fix                     # apply the coding standard
 make sf ARGS="about"            # any bin/console command
 make composer ARGS="outdated"   # any Composer command
 make logs                       # follow the container logs
@@ -83,6 +85,19 @@ docker compose -f compose.yaml -f compose.prod.yaml up -d --build --wait
 Everything runs in UTC: the containers set `TZ=UTC`, PHP sets `date.timezone = UTC`, PostgreSQL uses `timezone = UTC`, and the kernel forces UTC again when it boots.
 
 Without Docker, PHP 8.5 and Composer are enough to run the console and the tests: `composer install`, `bin/console about`, `vendor/bin/phpunit`.
+
+### Quality checks
+
+CI (`.github/workflows/ci.yml`) runs on every pull request and on `main`, one job per tool, each calling a Composer script that you can run the same way locally (`composer <script>` on the host, `make <target>` in Docker):
+
+| Check | Composer / Make | Configuration |
+| --- | --- | --- |
+| PHPUnit | `composer test` / `make test` | `phpunit.dist.xml` |
+| PHPStan, level max, with the Symfony and PHPUnit extensions | `composer phpstan` / `make phpstan` | `phpstan.dist.neon` |
+| PHP-CS-Fixer (`@Symfony`, `@Symfony:risky`, PHP 8.5 migration), dry run | `composer cs` / `make cs` | `.php-cs-fixer.dist.php` |
+| Deptrac, the module boundaries of [ADR 0001](docs/adr/0001-feature-modules.md) | `composer deptrac` / `make deptrac` | `deptrac.yaml` |
+
+`composer ci` (or `make ci`) runs them all. Fix findings rather than adding PHPStan baselines or ignores.
 
 ## Planned stack
 
