@@ -1,0 +1,61 @@
+---
+# Development environment override, loaded automatically by "docker compose".
+services:
+  php:
+    image: ${IMAGES_PREFIX:-}polaris-php-dev
+    build:
+      context: .
+      target: frankenphp_dev
+    volumes:
+      - ./:/app
+      - ./frankenphp/Caddyfile:/etc/frankenphp/Caddyfile:ro
+      - ./frankenphp/conf.d/20-app.dev.ini:/usr/local/etc/php/app.conf.d/20-app.dev.ini:ro
+      # Keep var/ off the bind-mount for faster I/O on Mac/Windows; comment to inspect from the host.
+      - /app/var
+    environment:
+      FRANKENPHP_WORKER_CONFIG: watch
+      # See https://xdebug.org/docs/all_settings#mode
+      XDEBUG_MODE: "${XDEBUG_MODE:-develop}"
+      APP_ENV: "${APP_ENV:-dev}"
+      MAILER_DSN: smtp://mailer:1025
+    extra_hosts:
+      # Ensure that host.docker.internal is correctly defined on Linux
+      - host.docker.internal:host-gateway
+    tty: true
+    depends_on:
+      mailer:
+        condition: service_started
+
+  worker:
+    image: ${IMAGES_PREFIX:-}polaris-php-dev
+    build:
+      context: .
+      target: frankenphp_dev
+    volumes:
+      - ./:/app
+      - ./frankenphp/conf.d/20-app.dev.ini:/usr/local/etc/php/app.conf.d/20-app.dev.ini:ro
+      - /app/var
+    environment:
+      XDEBUG_MODE: "${XDEBUG_MODE:-develop}"
+      APP_ENV: "${APP_ENV:-dev}"
+      MAILER_DSN: smtp://mailer:1025
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  database:
+    ports:
+      - "127.0.0.1:${DATABASE_PORT:-5432}:5432"
+
+  redis:
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+
+  mailer:
+    image: axllent/mailpit:v1
+    restart: unless-stopped
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    ports:
+      - "127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025"

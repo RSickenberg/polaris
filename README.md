@@ -31,18 +31,58 @@ polaris/
 
 The private hosted platform is built on top of this application's Docker image and adds its own bundle; nothing hosted-only lives here.
 
-## Development
+## Local development
 
-Requirements: PHP 8.5 and Composer. Docker support is coming.
+Requirements: Docker with Compose v2.24 or later. The setup is based on [dunglas/symfony-docker](https://github.com/dunglas/symfony-docker) and runs on [FrankenPHP](https://frankenphp.dev) with PHP 8.5.
+
+| Service | Role | Exposed on the host (dev) |
+| --- | --- | --- |
+| `php` | FrankenPHP web server | https://localhost (HTTP redirects to HTTPS) |
+| `worker` | Same image, runs `messenger:consume` (idle until Messenger is installed) | none |
+| `database` | PostgreSQL 18, time zone UTC | `127.0.0.1:5432` |
+| `redis` | Redis 8 | `127.0.0.1:6379` |
+| `mailer` | Mailpit, catches every email | UI http://localhost:8025, SMTP `127.0.0.1:1025` |
+
+Secrets are never committed. Copy `.env.example` to `.env.local` (git-ignored), which Symfony and every container read, then fill each empty value with a generated secret (`openssl rand -hex 16`):
 
 ```
-php -r "echo 'APP_SECRET='.bin2hex(random_bytes(16)).PHP_EOL;" >> .env.local
-composer install
-bin/console about
-vendor/bin/phpunit
+cp .env.example .env.local
 ```
 
-All dates run in UTC: the kernel forces the runtime time zone to UTC when it boots.
+Build and start everything (`compose.override.yaml` adds the development settings automatically):
+
+```
+make start
+```
+
+`make start` runs `docker compose build --pull --no-cache` then `docker compose up --detach --wait`. The `Makefile` wraps the Docker workflow and runs every PHP command inside the `php` container, never with the host PHP; `make` alone lists all targets.
+
+Open https://localhost and accept the self-signed certificate: the Symfony welcome page answers. The first start runs `composer install` if `vendor/` is empty.
+
+Everyday commands:
+
+```
+make sh                         # shell in the php container
+make test                       # PHPUnit, options via ARGS="--filter=..."
+make sf ARGS="about"            # any bin/console command
+make composer ARGS="outdated"   # any Composer command
+make logs                       # follow the container logs
+make down                       # stop everything
+docker compose restart worker   # after changing message handlers
+docker compose down -v          # also delete the database and Redis data
+```
+
+Host ports can be changed with environment variables: `HTTP_PORT`, `HTTPS_PORT`, `HTTP3_PORT`, `DATABASE_PORT`, `REDIS_PORT`, `MAILPIT_SMTP_PORT`, `MAILPIT_UI_PORT`. Xdebug is installed in the dev image; enable step debugging with `XDEBUG_MODE=debug docker compose up -d`.
+
+To try the production image locally:
+
+```
+docker compose -f compose.yaml -f compose.prod.yaml up -d --build --wait
+```
+
+Everything runs in UTC: the containers set `TZ=UTC`, PHP sets `date.timezone = UTC`, PostgreSQL uses `timezone = UTC`, and the kernel forces UTC again when it boots.
+
+Without Docker, PHP 8.5 and Composer are enough to run the console and the tests: `composer install`, `bin/console about`, `vendor/bin/phpunit`.
 
 ## Planned stack
 

@@ -1,0 +1,15 @@
+---
+# Production override: docker compose -f compose.yaml -f compose.prod.yaml up -d --wait
+# APP_SECRET and POSTGRES_PASSWORD must be provided through .env.local or your own override.
+services:
+  php:
+    image: ${IMAGES_PREFIX:-}polaris-php-prod
+    build:
+      context: .
+      target: frankenphp_prod
+
+  worker:
+    image: ${IMAGES_PREFIX:-}polaris-php-prod
+    build:
+      context: .
+      target: frankenphp_prod
