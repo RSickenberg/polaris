@@ -157,6 +157,12 @@ are specific to Polaris and win when the two disagree.
 - Deptrac enforces these boundaries in CI once issue #11 lands. Fix the code, not
   the Deptrac rules, unless an ADR changes them.
 
+### Data types
+
+- Use DTOs (readonly classes) instead of associative arrays for
+  application-specific data, and backed enums instead of magic strings or array
+  keys. Arrays are fine for plain lists and framework APIs that require them.
+
 ### Dates, units and business rules
 
 - UTC everywhere: storage, computation, API, logs. The kernel forces UTC at boot.

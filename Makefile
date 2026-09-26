@@ -12,7 +12,7 @@ SYMFONY  = $(PHP) bin/console
 # Misc
 .DEFAULT_GOAL = help
 ARGS          =
-.PHONY        : help build up start down logs sh install composer vendor sf cc test release
+.PHONY        : help build up start down logs sh install composer vendor sf cc test phpstan cs cs-fix deptrac ci release
 
 ## —— 🧭 The Polaris Makefile 🧭 ——————————————————————————————————
 help: ## Outputs this help screen
@@ -57,6 +57,21 @@ cc: ## Clear the Symfony cache
 ## —— Quality ✅ ——————————————————————————————————————————————
 test: ## Run the test suite, pass PHPUnit options with ARGS, e.g. make test ARGS="--filter=Kernel"
 	@$(PHP) bin/phpunit $(ARGS)
+
+phpstan: ## Run PHPStan (level max) after warming up the dev container, as CI does
+	@$(COMPOSER) phpstan
+
+cs: ## Check the coding standard (PHP-CS-Fixer dry run), as CI does
+	@$(COMPOSER) cs
+
+cs-fix: ## Fix the coding standard (PHP-CS-Fixer)
+	@$(COMPOSER) cs:fix
+
+deptrac: ## Check the module boundaries of ADR 0001 (Deptrac), as CI does
+	@$(COMPOSER) deptrac
+
+ci: ## Run every check CI runs: coding standard, PHPStan, Deptrac, tests
+	@$(COMPOSER) ci
 
 ## —— Release 📦 ——————————————————————————————————————————————
 release: ## Cut a release with release-it (run locally: main is protected, the CI bot cannot push to it)
