@@ -183,6 +183,9 @@ are specific to Polaris and win when the two disagree.
 
 - Never commit a secret, not even a development `APP_SECRET`. GitGuardian scans
   every pull request. Generated values go in `.env.local`.
+- `.env.example` lists every variable that must be set per install, with empty
+  values. When a change introduces such a variable (a secret, a password, an API
+  key), add it there, empty, in the same pull request.
 
 ### Git and delivery
 

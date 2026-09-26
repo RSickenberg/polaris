@@ -34,6 +34,7 @@ var/
 vendor/
 .editorconfig
 .env.*.local
+.env.example
 .env.local
 .env.local.php
 .env.test

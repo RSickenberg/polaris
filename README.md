@@ -43,11 +43,10 @@ Requirements: Docker with Compose v2.24 or later. The setup is based on [dunglas
 | `redis` | Redis 8 | `127.0.0.1:6379` |
 | `mailer` | Mailpit, catches every email | UI http://localhost:8025, SMTP `127.0.0.1:1025` |
 
-Secrets are never committed. Generate them once in `.env.local` (git-ignored); Symfony and every container read it:
+Secrets are never committed. Copy `.env.example` to `.env.local` (git-ignored), which Symfony and every container read, then fill each empty value with a generated secret (`openssl rand -hex 16`):
 
 ```
-php -r "echo 'APP_SECRET='.bin2hex(random_bytes(16)).PHP_EOL;" >> .env.local
-php -r "echo 'POSTGRES_PASSWORD='.bin2hex(random_bytes(16)).PHP_EOL;" >> .env.local
+cp .env.example .env.local
 ```
 
 Build and start everything (`compose.override.yaml` adds the development settings automatically):
