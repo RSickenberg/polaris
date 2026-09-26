@@ -20,3 +20,42 @@ updates:
     commit-message:
       prefix: chore
       include: scope
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      symfony:
+        patterns: ["symfony/*"]
+      symfony-security:
+        applies-to: security-updates
+        patterns: ["symfony/*"]
+    ignore:
+      # Flex's extra.symfony.require is not honoured by Dependabot: Symfony
+      # minor and major upgrades stay deliberate, only patches are automatic.
+      - dependency-name: "symfony/*"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      docker:
+        patterns: ["*"]
+    commit-message:
+      prefix: chore
+      include: scope
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      docker-compose:
+        patterns: ["*"]
+    commit-message:
+      prefix: chore
+      include: scope
