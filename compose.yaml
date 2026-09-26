@@ -1,0 +1,96 @@
+---
+# Services shared by development and self-hosting.
+# Development: compose.override.yaml is loaded automatically.
+# Production: docker compose -f compose.yaml -f compose.prod.yaml up -d
+#
+# Secrets (APP_SECRET, POSTGRES_PASSWORD) are never committed: put them in .env.local,
+# which every service reads when it exists, or set them in your own compose override.
+services:
+  php:
+    restart: unless-stopped
+    env_file:
+      - path: .env.local
+        required: false
+    environment:
+      SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
+      DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}
+      REDIS_URL: redis://redis:6379
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    ports:
+      - name: http
+        target: 80
+        published: ${HTTP_PORT:-80}
+        protocol: tcp
+      - name: https
+        target: 443
+        published: ${HTTPS_PORT:-443}
+        protocol: tcp
+      - name: http3
+        target: 443
+        published: ${HTTP3_PORT:-443}
+        protocol: udp
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Same image as "php": consumes the Messenger queues (idle until symfony/messenger is installed).
+  worker:
+    restart: unless-stopped
+    command: ["docker-worker"]
+    init: true
+    env_file:
+      - path: .env.local
+        required: false
+    environment:
+      DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}
+      REDIS_URL: redis://redis:6379
+    # The image healthcheck probes the FrankenPHP server, which the worker does not run.
+    healthcheck:
+      disable: true
+    depends_on:
+      php:
+        condition: service_healthy
+
+  database:
+    image: postgres:${POSTGRES_VERSION:-18}-alpine
+    restart: unless-stopped
+    env_file:
+      - path: .env.local
+        required: false
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-polaris}
+      POSTGRES_USER: ${POSTGRES_USER:-polaris}
+      TZ: UTC
+      PGTZ: UTC
+    command: ["postgres", "-c", "timezone=UTC", "-c", "log_timezone=UTC"]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-polaris}", "-U", "${POSTGRES_USER:-polaris}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      # PostgreSQL 18+ images keep the data in a versioned folder under /var/lib/postgresql.
+      - database_data:/var/lib/postgresql
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis_data:/data
+
+volumes:
+  caddy_data:
+  caddy_config:
+  database_data:
+  redis_data:
