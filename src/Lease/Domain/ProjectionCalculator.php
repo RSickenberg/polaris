@@ -63,7 +63,8 @@ final readonly class ProjectionCalculator
             return null;
         }
 
-        $reference = min(array_key_last($timeline), $end);
+        $latest = array_key_last($timeline);
+        $reference = $latest < $end ? $latest : $end;
         $elapsed = $reference - $start;
         $referenceOdometer = self::odometerAt($timeline, $reference);
         $drivenMetres = $referenceOdometer - $startOdometer->metres();
