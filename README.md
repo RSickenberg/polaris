@@ -10,6 +10,17 @@ Polaris tracks your Tesla's odometer against your lease allowance, projects the 
 - Compare the kilometres driven with the lease allowance and project the total at lease end.
 - Give a remaining budget per day, week and month, and alert when the projection crosses the limit.
 
+## How the projection works
+
+Every figure is taken at the latest odometer reading inside the lease (or at the lease end, once a reading comes after it), because nothing is known about the distance driven since:
+
+- **Allowed to date:** the allowance earned so far, linear over the whole term: allowance x time elapsed / lease length, in exact seconds.
+- **Margin:** allowed to date minus the distance driven; negative when over.
+- **Pace:** the overall pace since the lease start, and the pace over the last 30 days (the odometer is interpolated between readings). The blended pace is 0.6 x the last 30 days + 0.4 x overall, or the overall pace alone during the first 30 days.
+- **Projection:** the distance driven plus the blended pace until the lease end.
+
+The weight of the last 30 days is the `polaris.lease.recent_pace_weight` parameter in `config/services.yaml`, in basis points (`6000` = 0.6, from `0` to `10000`).
+
 ## This repository
 
 The open-source, self-hostable edition of Polaris: a Symfony application. It is published as a Docker image on GitHub Container Registry.
