@@ -1,4 +1,7 @@
 parameters:
+    # Weight of the last-30-days pace in the blended pace of the lease projection, in
+    # basis points (6000 = 0.6); the overall pace takes the rest.
+    polaris.lease.recent_pace_weight: 6000
 
 services:
     _defaults:
@@ -10,3 +13,19 @@ services:
         exclude:
             - '../src/Kernel.php'
             - '../src/*/Entity/'
+
+    # Domain/ classes cannot use #[Autowire] (ADR 0001), so the weight is wired here.
+    Polaris\Lease\Domain\ProjectionCalculator:
+        arguments:
+            $recentPaceWeight: !service
+                class: Polaris\Lease\Domain\RecentPaceWeight
+                factory: ['Polaris\Lease\Domain\RecentPaceWeight', 'fromBasisPoints']
+                arguments: ['%polaris.lease.recent_pace_weight%']
+
+when@test:
+    services:
+        # Nothing injects the calculator yet, so the compiler would remove it before the
+        # functional test can fetch it. Drop this alias once a service depends on it (#17).
+        test.polaris.lease.projection_calculator:
+            alias: Polaris\Lease\Domain\ProjectionCalculator
+            public: true
