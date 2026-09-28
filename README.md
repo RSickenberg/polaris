@@ -63,8 +63,11 @@ Everyday commands:
 
 ```
 make sh                         # shell in the php container
-make test                       # PHPUnit, options via ARGS="--filter=..."
+make test                       # PHPUnit, options via ARGS="--filter=..." (prepares the test database first)
 make ci                         # every CI check: PHP-CS-Fixer, PHPStan, Deptrac, PHPUnit
+make migrate                    # apply the pending Doctrine migrations
+make diff                       # generate a migration from the entity mapping
+make test-db                    # create and migrate the polaris_test database
 make cs-fix                     # apply the coding standard
 make sf ARGS="about"            # any bin/console command
 make composer ARGS="outdated"   # any Composer command
@@ -82,18 +85,20 @@ To try the production image locally:
 docker compose -f compose.yaml -f compose.prod.yaml up -d --build --wait
 ```
 
-Everything runs in UTC: the containers set `TZ=UTC`, PHP sets `date.timezone = UTC`, PostgreSQL uses `timezone = UTC`, and the kernel forces UTC again when it boots.
+Everything runs in UTC: the containers set `TZ=UTC`, PHP sets `date.timezone = UTC`, PostgreSQL uses `timezone = UTC`, and the kernel forces UTC again when it boots. Doctrine hydrates every date as a UTC `CarbonImmutable`: calendar dates use the `carbon_date_immutable` type (SQL `DATE`), and `datetime_immutable` is replaced by a type that converts to UTC before writing.
 
-Without Docker, PHP 8.5 and Composer are enough to run the console and the tests: `composer install`, `bin/console about`, `vendor/bin/phpunit`.
+The database schema changes only through Doctrine migrations in `migrations/`. The `php` container applies pending migrations when it starts; `make migrate` does it on demand. `DATABASE_URL` in `.env` holds no password: it reads `${POSTGRES_PASSWORD}` from `.env.local`.
+
+Without Docker, PHP 8.5 and Composer are enough to run the console and the unit tests: `composer install`, `bin/console about`, `vendor/bin/phpunit tests/Unit`. The functional tests need PostgreSQL: point `DATABASE_URL` at a reachable server (for example `127.0.0.1:5432` with the Docker database) in `.env.local`.
 
 ### Quality checks
 
-CI (`.github/workflows/ci.yml`) runs on every pull request and on `main`, one job per tool, each calling a Composer script that you can run the same way locally (`composer <script>` on the host, `make <target>` in Docker):
+CI (`.github/workflows/ci.yml`) runs on every pull request and on `main`, one job per tool, each calling a Composer script that you can run the same way locally (`composer <script>` on the host, `make <target>` in Docker). The PHPUnit job starts PostgreSQL 18, applies the migrations and runs `doctrine:schema:validate` before the tests, so a migration that does not match the mapping fails the build:
 
 | Check | Composer / Make | Configuration |
 | --- | --- | --- |
 | PHPUnit | `composer test` / `make test` | `phpunit.dist.xml` |
-| PHPStan, level max, with the Symfony and PHPUnit extensions | `composer phpstan` / `make phpstan` | `phpstan.dist.neon` |
+| PHPStan, level max, with the Symfony, Doctrine and PHPUnit extensions | `composer phpstan` / `make phpstan` | `phpstan.dist.neon` |
 | PHP-CS-Fixer (`@Symfony`, `@Symfony:risky`, PHP 8.5 migration), dry run | `composer cs` / `make cs` | `.php-cs-fixer.dist.php` |
 | Deptrac, the module boundaries of [ADR 0001](docs/adr/0001-feature-modules.md) | `composer deptrac` / `make deptrac` | `deptrac.yaml` |
 

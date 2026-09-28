@@ -1,0 +1,32 @@
+<?php
+
+declare(strict_types=1);
+
+namespace DoctrineMigrations;
+
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\Migrations\AbstractMigration;
+
+final class Version20260928143102 extends AbstractMigration
+{
+    public function getDescription(): string
+    {
+        return 'Create the vehicle and lease_contract tables';
+    }
+
+    public function up(Schema $schema): void
+    {
+        $this->addSql('CREATE TABLE lease_contract (id UUID NOT NULL, start_date DATE NOT NULL, end_date DATE NOT NULL, end_date_convention VARCHAR(16) NOT NULL, allowance_metres INT NOT NULL, start_odometer_metres INT NOT NULL, excess_cost_per_km_minor INT NOT NULL, currency VARCHAR(3) NOT NULL, tolerance_basis_points SMALLINT NOT NULL, vehicle_id UUID NOT NULL, PRIMARY KEY (id))');
+        $this->addSql('CREATE INDEX IDX_A6F0ACB8545317D1 ON lease_contract (vehicle_id)');
+        $this->addSql('CREATE TABLE vehicle (id UUID NOT NULL, vin VARCHAR(17) NOT NULL, name VARCHAR(100) NOT NULL, PRIMARY KEY (id))');
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_1B80E486B1085141 ON vehicle (vin)');
+        $this->addSql('ALTER TABLE lease_contract ADD CONSTRAINT FK_A6F0ACB8545317D1 FOREIGN KEY (vehicle_id) REFERENCES vehicle (id) NOT DEFERRABLE');
+    }
+
+    public function down(Schema $schema): void
+    {
+        $this->addSql('ALTER TABLE lease_contract DROP CONSTRAINT FK_A6F0ACB8545317D1');
+        $this->addSql('DROP TABLE lease_contract');
+        $this->addSql('DROP TABLE vehicle');
+    }
+}

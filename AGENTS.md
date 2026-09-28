@@ -162,6 +162,10 @@ are specific to Polaris and win when the two disagree.
 - Use DTOs (readonly classes) instead of associative arrays for
   application-specific data, and backed enums instead of magic strings or array
   keys. Arrays are fine for plain lists and framework APIs that require them.
+- Entities are identified by a ULID created in the constructor (ADR 0002):
+  `#[ORM\Id] #[ORM\Column(type: UlidType::NAME)] private Ulid $id;` with
+  `$this->id = new Ulid();`, never `#[ORM\GeneratedValue]`. Bind ids in raw
+  DBAL queries with the `ulid` type.
 
 ### Dates, units and business rules
 

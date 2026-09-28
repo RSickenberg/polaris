@@ -13,18 +13,27 @@
         "php": ">=8.5",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "carbonphp/carbon-doctrine-types": "^3.2",
+        "doctrine/doctrine-bundle": "^3.3",
+        "doctrine/doctrine-migrations-bundle": "^4.0",
+        "doctrine/orm": "^3.7",
+        "nesbot/carbon": "^3.14",
         "symfony/clock": "*",
         "symfony/console": "*",
         "symfony/dotenv": "*",
         "symfony/flex": "^2.11",
         "symfony/framework-bundle": "*",
         "symfony/runtime": "*",
+        "symfony/uid": "8.1.*",
+        "symfony/validator": "8.1.*",
         "symfony/yaml": "*"
     },
     "require-dev": {
+        "dama/doctrine-test-bundle": "^8.6",
         "deptrac/deptrac": "^4.7",
         "friendsofphp/php-cs-fixer": "^3.95",
         "phpstan/phpstan": "^2.2",
+        "phpstan/phpstan-doctrine": "^2.0",
         "phpstan/phpstan-phpunit": "^2.0",
         "phpstan/phpstan-symfony": "^2.0",
         "phpunit/phpunit": "^13.3"
@@ -74,7 +83,7 @@
         "test": "@php bin/phpunit",
         "phpstan": [
             "@php bin/console cache:warmup --env=dev --no-interaction",
-            "phpstan analyse --no-progress --no-interaction"
+            "phpstan analyse --no-progress --no-interaction --memory-limit=1G"
         ],
         "cs": "php-cs-fixer fix --dry-run --diff --no-interaction",
         "cs:fix": "php-cs-fixer fix --no-interaction",
