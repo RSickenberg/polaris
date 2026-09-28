@@ -82,7 +82,7 @@
         "test": "@php bin/phpunit",
         "phpstan": [
             "@php bin/console cache:warmup --env=dev --no-interaction",
-            "phpstan analyse --no-progress --no-interaction"
+            "phpstan analyse --no-progress --no-interaction --memory-limit=1G"
         ],
         "cs": "php-cs-fixer fix --dry-run --diff --no-interaction",
         "cs:fix": "php-cs-fixer fix --no-interaction",
