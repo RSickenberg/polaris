@@ -24,6 +24,7 @@
         "symfony/flex": "^2.11",
         "symfony/framework-bundle": "*",
         "symfony/runtime": "*",
+        "symfony/uid": "8.1.*",
         "symfony/validator": "8.1.*",
         "symfony/yaml": "*"
     },

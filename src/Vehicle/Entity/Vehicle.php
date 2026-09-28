@@ -6,6 +6,8 @@ namespace Polaris\Vehicle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Polaris\Vehicle\Domain\Vin;
+use Symfony\Bridge\Doctrine\Types\UlidType;
+use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity]
 class Vehicle
@@ -13,9 +15,8 @@ class Vehicle
     public const int NAME_MAX_LENGTH = 100;
 
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: UlidType::NAME)]
+    private Ulid $id;
 
     #[ORM\Column(length: 17, unique: true)]
     private string $vin;
@@ -25,11 +26,12 @@ class Vehicle
 
     public function __construct(Vin $vin, string $name)
     {
+        $this->id = new Ulid();
         $this->vin = $vin->value();
         $this->rename($name);
     }
 
-    public function getId(): ?int
+    public function getId(): Ulid
     {
         return $this->id;
     }

@@ -16,6 +16,8 @@ use Polaris\Shared\Domain\Currency;
 use Polaris\Shared\Domain\Distance;
 use Polaris\Shared\Domain\Money;
 use Polaris\Vehicle\Entity\Vehicle;
+use Symfony\Bridge\Doctrine\Types\UlidType;
+use Symfony\Component\Uid\Ulid;
 
 /**
  * The terms of a vehicle's lease.
@@ -27,9 +29,8 @@ use Polaris\Vehicle\Entity\Vehicle;
 class LeaseContract
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: UlidType::NAME)]
+    private Ulid $id;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
@@ -71,6 +72,7 @@ class LeaseContract
             throw new \InvalidArgumentException('The excess cost per km cannot be negative.');
         }
 
+        $this->id = new Ulid();
         $this->vehicle = $vehicle;
         $this->startDate = $term->start();
         $this->endDate = $term->end();
@@ -82,7 +84,7 @@ class LeaseContract
         $this->toleranceBasisPoints = $tolerance->basisPoints();
     }
 
-    public function getId(): ?int
+    public function getId(): Ulid
     {
         return $this->id;
     }

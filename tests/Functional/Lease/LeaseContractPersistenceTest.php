@@ -18,6 +18,7 @@ use Polaris\Shared\Domain\Distance;
 use Polaris\Shared\Domain\Money;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
+use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 #[CoversClass(LeaseContract::class)]
@@ -57,6 +58,8 @@ final class LeaseContractPersistenceTest extends KernelTestCase
         $reloaded = $entityManager->find(LeaseContract::class, $contract->getId());
         self::assertInstanceOf(LeaseContract::class, $reloaded);
         self::assertNotSame($contract, $reloaded);
+        self::assertTrue($contract->getId()->equals($reloaded->getId()));
+        self::assertTrue($vehicle->getId()->equals($reloaded->getVehicle()->getId()));
 
         $reloadedTerm = $reloaded->getTerm();
         foreach ([$reloadedTerm->start(), $reloadedTerm->end()] as $date) {
@@ -84,15 +87,19 @@ final class LeaseContractPersistenceTest extends KernelTestCase
         $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000002'), 'Model Y');
         $term = new LeaseTerm(CarbonImmutable::parse('2026-01-15', 'UTC'), CarbonImmutable::parse('2029-01-15', 'UTC'), EndDateConvention::Exclusive);
         $entityManager->persist($vehicle);
-        $entityManager->persist(new LeaseContract($vehicle, $term, Allowance::fromYearly(Distance::fromKilometres(10_000), $term), Distance::fromMetres(0), Money::ofMinor(0, Currency::EUR), Tolerance::fromBasisPoints(0)));
+        $contract = new LeaseContract($vehicle, $term, Allowance::fromYearly(Distance::fromKilometres(10_000), $term), Distance::fromMetres(0), Money::ofMinor(0, Currency::EUR), Tolerance::fromBasisPoints(0));
+        $entityManager->persist($contract);
         $entityManager->flush();
 
         $row = $entityManager->getConnection()->fetchAssociative(
-            'SELECT start_date, end_date, pg_typeof(start_date)::text AS start_type FROM lease_contract WHERE vehicle_id = ?',
+            'SELECT id::text AS id, pg_typeof(id)::text AS id_type, start_date, end_date, pg_typeof(start_date)::text AS start_type FROM lease_contract WHERE vehicle_id = ?',
             [$vehicle->getId()],
+            [UlidType::NAME],
         );
 
-        self::assertSame(['start_date' => '2026-01-15', 'end_date' => '2029-01-15', 'start_type' => 'date'], $row);
+        self::assertIsArray($row);
+        // The ULID is stored in a native UUID column, in its RFC 4122 form.
+        self::assertSame(['id' => $contract->getId()->toRfc4122(), 'id_type' => 'uuid', 'start_date' => '2026-01-15', 'end_date' => '2029-01-15', 'start_type' => 'date'], $row);
     }
 
     public function testVinIsUnique(): void

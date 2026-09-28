@@ -26,6 +26,7 @@ final class LeaseContractFactoryTest extends TestCase
         $contract = new LeaseContractFactory()->create($vehicle, self::data());
 
         self::assertSame($vehicle, $contract->getVehicle());
+        self::assertFalse($contract->getId()->equals($vehicle->getId()));
         self::assertSame('2026-01-15', $contract->getTerm()->start()->toDateString());
         self::assertSame('2029-01-14', $contract->getTerm()->end()->toDateString());
         self::assertSame(EndDateConvention::Inclusive, $contract->getTerm()->endDateConvention());
