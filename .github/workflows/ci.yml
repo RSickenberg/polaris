@@ -24,7 +24,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: PHPUnit, script: test }
           - { name: PHPStan, script: phpstan }
           - { name: PHP-CS-Fixer, script: cs }
           - { name: Deptrac, script: deptrac }
@@ -54,3 +53,63 @@ jobs:
 
       - name: Run ${{ matrix.name }}
         run: composer ${{ matrix.script }}
+
+  # PHPUnit needs PostgreSQL, and services cannot be switched off per matrix entry,
+  # so it runs in its own job. Same PostgreSQL major version as compose.yaml.
+  phpunit:
+    name: PHPUnit
+    runs-on: ubuntu-latest
+    services:
+      database:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: polaris
+          POSTGRES_USER: polaris
+          # Throwaway database reachable only from this job: no password to commit.
+          POSTGRES_HOST_AUTH_METHOD: trust
+          TZ: UTC
+          PGTZ: UTC
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -d polaris -U polaris"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://polaris@127.0.0.1:5432/polaris?charset=utf8
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql
+          tools: composer:v2
+          coverage: none
+
+      - name: Get the Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v6
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Create the test database and apply the migrations
+        run: |
+          php bin/console doctrine:database:create --env=test --no-interaction
+          php bin/console doctrine:migrations:migrate --env=test --no-interaction --all-or-nothing
+
+      - name: Check that the migrations match the entity mapping
+        run: php bin/console doctrine:schema:validate --env=test
+
+      - name: Run PHPUnit
+        run: composer test

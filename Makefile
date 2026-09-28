@@ -12,7 +12,7 @@ SYMFONY  = $(PHP) bin/console
 # Misc
 .DEFAULT_GOAL = help
 ARGS          =
-.PHONY        : help build up start down logs sh install composer vendor sf cc test phpstan cs cs-fix deptrac ci release
+.PHONY        : help build up start down logs sh install composer vendor sf cc migrate diff test-db test phpstan cs cs-fix deptrac ci release
 
 ## —— 🧭 The Polaris Makefile 🧭 ——————————————————————————————————
 help: ## Outputs this help screen
@@ -54,8 +54,19 @@ sf: ## Run bin/console, pass the command with ARGS, e.g. make sf ARGS="debug:rou
 cc: ## Clear the Symfony cache
 	@$(SYMFONY) cache:clear
 
+## —— Database 🐘 ——————————————————————————————————————————————
+migrate: ## Apply the pending Doctrine migrations
+	@$(SYMFONY) doctrine:migrations:migrate --no-interaction --all-or-nothing
+
+diff: ## Generate a migration from the difference between the entity mapping and the database
+	@$(SYMFONY) doctrine:migrations:diff --no-interaction
+
+test-db: ## Create the test database if needed and apply the migrations to it
+	@$(SYMFONY) doctrine:database:create --env=test --if-not-exists
+	@$(SYMFONY) doctrine:migrations:migrate --env=test --no-interaction --all-or-nothing
+
 ## —— Quality ✅ ——————————————————————————————————————————————
-test: ## Run the test suite, pass PHPUnit options with ARGS, e.g. make test ARGS="--filter=Kernel"
+test: test-db ## Run the test suite, pass PHPUnit options with ARGS, e.g. make test ARGS="--filter=Kernel"
 	@$(PHP) bin/phpunit $(ARGS)
 
 phpstan: ## Run PHPStan (level max) after warming up the dev container, as CI does
@@ -70,7 +81,7 @@ cs-fix: ## Fix the coding standard (PHP-CS-Fixer)
 deptrac: ## Check the module boundaries of ADR 0001 (Deptrac), as CI does
 	@$(COMPOSER) deptrac
 
-ci: ## Run every check CI runs: coding standard, PHPStan, Deptrac, tests
+ci: test-db ## Run every check CI runs: coding standard, PHPStan, Deptrac, tests
 	@$(COMPOSER) ci
 
 ## —— Release 📦 ——————————————————————————————————————————————
