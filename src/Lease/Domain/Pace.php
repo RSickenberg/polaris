@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Polaris\Lease\Domain;
 
+use Carbon\Constants\UnitValue;
+
 /**
  * A driving pace, in metres per day, kept at full float precision.
  *
@@ -12,7 +14,7 @@ namespace Polaris\Lease\Domain;
  */
 final readonly class Pace
 {
-    public const int SECONDS_PER_DAY = 86_400;
+    public const int SECONDS_PER_DAY = UnitValue::HOURS_PER_DAY * UnitValue::MINUTES_PER_HOUR * UnitValue::SECONDS_PER_MINUTE;
 
     private function __construct(
         private float $metresPerDay,
