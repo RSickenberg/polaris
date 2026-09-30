@@ -121,9 +121,14 @@ are specific to Polaris and win when the two disagree.
   application. A private hosted layer builds on its Docker image and plugs in
   only through `src/Extension/`. Never add hosted-only code here (billing, plans,
   sign-up policy, APNs keys).
-- Stack: Symfony 8.1, PHP 8.5, PostgreSQL, Redis (Messenger, Lock, Cache),
-  Tailwind with the Symfony UX Toolkit Shadcn kit, Flowbite charts (ApexCharts)
-  behind one reusable Stimulus controller, PHPUnit 13.
+- Stack in place: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine ORM and
+  Migrations, Carbon, PHPUnit. Planned, not installed yet: Redis (Messenger,
+  Lock, Cache), Tailwind with the Symfony UX Toolkit Shadcn kit, Flowbite charts
+  (ApexCharts) behind one reusable Stimulus controller. Check `composer.json`
+  before assuming a package is there.
+- Run everything through Docker and the `Makefile` (see README): `make start`,
+  `make test`, `make ci`, `make sf ARGS="..."`. This replaces the generic
+  `symfony serve` and `php bin/phpunit` advice above.
 - Work is tracked on the GitHub Project "Polaris"
   (https://github.com/users/RSickenberg/projects/4). Each story has acceptance
   criteria and "blocked by" links: read the issue before starting and do not
@@ -145,16 +150,18 @@ are specific to Polaris and win when the two disagree.
 - Inside a module, use the usual Symfony folders (`Entity/`, `Repository/`,
   `Service/`, `Message/`, `MessageHandler/`, `Controller/`, `Form/`, `Command/`,
   `Twig/Components/`) plus `Domain/` for calculations and value objects.
-- `Domain/` is plain PHP: only `Shared\Domain` and `Psr\Clock\ClockInterface`,
-  nothing from Symfony, Doctrine or HTTP. Unit-test it without booting the kernel.
+- `Domain/` is plain PHP: only its own module's `Domain/`, `Shared\Domain`,
+  `Psr\Clock\ClockInterface` and `CarbonImmutable`; nothing from Symfony,
+  Doctrine or HTTP, and no other module's `Domain/`. Unit-test it without booting
+  the kernel.
 - A module uses another module only through its `Service/` classes, its entities,
-  or Messenger messages and events. Never through its controllers, forms,
-  repositories or handlers. Nothing depends on `Dashboard`.
+  its `Domain/` types, or Messenger messages and events. Never through its
+  controllers, forms, repositories or handlers. Nothing depends on `Dashboard`.
 - Templates go in `templates/<module>/`, component templates in
   `templates/components/<Module>/`.
 - MakerBundle needs absolute class names, for example
   `bin/console make:entity '\Polaris\Lease\Entity\LeaseContract' --no-interaction`.
-- Deptrac enforces these boundaries in CI once issue #11 lands. Fix the code, not
+- Deptrac enforces these boundaries in CI (`make deptrac`). Fix the code, not
   the Deptrac rules, unless an ADR changes them.
 
 ### Data types
@@ -169,7 +176,7 @@ are specific to Polaris and win when the two disagree.
 
 ### Dates, units and business rules
 
-- UTC everywhere: storage, computation, API, logs. The kernel forces UTC at boot.
+- UTC everywhere (ADR 0003): storage, computation, API, logs. The kernel forces UTC at boot.
   Get the current time from `ClockInterface`, never from `new \DateTimeImmutable()`
   or `time()`. Use `CarbonImmutable`, never mutable `Carbon`. The user's time zone
   is only for display and for converting fetch slots.
@@ -180,8 +187,8 @@ are specific to Polaris and win when the two disagree.
 
 ### Tesla Fleet API
 
-- Never wake the car automatically. `wake_up` is only called on a manual refresh
-  the user confirmed, within the daily wake cap.
+- Never wake the car automatically. `wake_up` (after the first release, #32) is
+  only called on a manual refresh the user confirmed, within the daily wake cap.
 - Scheduled reads run only when the vehicle state is `online`. Manual refresh is
   limited to once per hour per vehicle.
 - Request the minimal OAuth scopes. Tokens are encrypted at rest; refresh tokens
@@ -210,5 +217,5 @@ are specific to Polaris and win when the two disagree.
 ### Definition of done
 
 - Tests pass (unit tests for `Domain/`, functional tests for controllers and
-  commands), PHPStan passes, php-cs-fixer is clean, Deptrac passes once
-  available, docs are updated, and the story's acceptance criteria are all met.
+  commands), PHPStan passes, php-cs-fixer is clean, Deptrac passes (`make ci`
+  runs all four), docs are updated, and the story's acceptance criteria are all met.

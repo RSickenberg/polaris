@@ -6,7 +6,7 @@ Polaris tracks your Tesla's odometer against your lease allowance, projects the 
 
 ## What it will do
 
-- Read the odometer from the official Tesla Fleet API, once or twice a day, without waking the car. A manual refresh (at most once per hour) can wake it on request.
+- Read the odometer from the official Tesla Fleet API, once or twice a day, without waking the car, plus a manual refresh at most once per hour. Waking the car on a confirmed manual refresh comes after the first release.
 - Compare the kilometres driven with the lease allowance and project the total at lease end.
 - Give a remaining budget per day, week and month, and alert when the projection crosses the limit.
 
@@ -35,10 +35,15 @@ A standard Symfony application at the repository root (namespace `Polaris\`):
 polaris/
   bin/console
   config/
+  docs/adr/     # architecture decision records
+  migrations/   # Doctrine migrations
   public/index.php
-  src/          # application code, Polaris\
-  tests/        # PHPUnit tests
+  src/          # application code, Polaris\, one namespace per feature module
+  tests/        # PHPUnit tests: Unit/ and Functional/
+  translations/
 ```
+
+`src/` is organized by feature module (`Shared`, `Lease`, `Vehicle`, and more as they arrive), see [ADR 0001](docs/adr/0001-feature-modules.md). Decisions are recorded in [`docs/adr/`](docs/adr/).
 
 The private hosted platform is built on top of this application's Docker image and adds its own bundle; nothing hosted-only lives here.
 
@@ -115,9 +120,11 @@ CI (`.github/workflows/ci.yml`) runs on every pull request and on `main`, one jo
 
 `composer ci` (or `make ci`) runs them all. Fix findings rather than adding PHPStan baselines or ignores.
 
-## Planned stack
+## Stack
 
-Symfony 8.1, PHP 8.5, PostgreSQL, Redis (Messenger queues), Tailwind CSS with the Symfony UX Toolkit Shadcn kit, Flowbite charts. All dates are handled in UTC.
+In place: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine ORM and Migrations, Carbon, ULID identifiers ([ADR 0002](docs/adr/0002-ulid-identifiers.md)). All dates are handled in UTC ([ADR 0003](docs/adr/0003-utc-dates.md)).
+
+Planned: Redis for Messenger queues, Lock and Cache; Tailwind CSS with the Symfony UX Toolkit Shadcn kit; Flowbite charts.
 
 ## Related repositories
 
