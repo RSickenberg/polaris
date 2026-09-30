@@ -7,8 +7,9 @@ namespace Polaris\Lease\Domain;
 enum LeaseStatus: string
 {
     /**
-     * The lease is not final yet. Nothing in the assessment produces or depends on this
-     * status yet: it only exists so that callers can model it.
+     * The user is about to create the contract but is still waiting for the car, for
+     * example a Tesla on order. Nothing in the assessment produces this status yet: a
+     * contract has no draft flag, so callers set it.
      */
     case Draft = 'draft';
 
