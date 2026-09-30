@@ -12,12 +12,23 @@ Polaris tracks your Tesla's odometer against your lease allowance, projects the 
 
 ## How the projection works
 
-Every figure is taken at the latest odometer reading inside the lease (or at the lease end, once a reading comes after it), because nothing is known about the distance driven since:
+Every figure is taken at the latest odometer reading after the lease start (even past the lease end, if the car keeps driving), because nothing is known about the distance driven since:
 
 - **Allowed to date:** the allowance earned so far, linear over the whole term: allowance x time elapsed / lease length, in exact seconds.
 - **Margin:** allowed to date minus the distance driven; negative when over.
 - **Pace:** the overall pace since the lease start, and the pace over the last 30 days (the odometer is interpolated between readings). The blended pace is 0.6 x the last 30 days + 0.4 x overall, or the overall pace alone during the first 30 days.
 - **Projection:** the distance driven plus the blended pace until the lease end.
+
+### Budgets, risk level and excess cost
+
+With A the total allowance and P the projected distance at the lease end:
+
+- **Risk level:** `Over` when P > A. Otherwise `Watch` when P > A x (1 - tolerance), else `OK`. The tolerance is a safety margin below the allowance and is 0 by default (Swiss leases have none), so `Watch` only appears when you set one.
+- **Budget:** what is left of the allowance (zero once it is used up) divided by the time left from the latest reading. A day is 86,400 s, a week 7 days, and a month one lease month: the term divided by its number of months (a 60-month lease has 60 equal months). Rounded half up to the metre.
+- **Weekly cut:** (P - A) per week left. Positive is the distance to cut per week to land on the allowance, negative the room left.
+- **Excess cost:** (P - A) x the contract's excess cost per km, in integer arithmetic from the metres, rounded half up once to the minor unit. It is 0 while P stays within A.
+- **No data:** no reading after the lease start yet, or the lease has not started.
+- **Lease ended:** once the clock reaches the end date, no time is left: budgets are zero and P is the distance driven. The excess cost keeps growing with every new reading.
 
 The weight of the last 30 days is the `polaris.lease.recent_pace_weight` parameter in `config/services.yaml`, in basis points (`6000` = 0.6, from `0` to `10000`).
 

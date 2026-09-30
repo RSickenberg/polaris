@@ -103,16 +103,15 @@ final class ProjectionCalculatorTest extends TestCase
             ['2028-02-29 00:00', 5_900_000, 5_900_000, 0, 100_000.0, 100_000.0, 100_000.0, 36_600_000],
         ];
 
-        // The lease is over, and the latest sample (day 375) comes after its end (day 365):
-        // the odometer at the end is 44,500,000 + 3,000,000 x (365 - 345) / (375 - 345) = 46,500,000.
-        // Driven 36,500,000, allowed the whole 36,500,000, margin 0. Overall 36,500,000 / 365 = 100,000.
-        // Window start day 335, between the lease start and day 345:
-        // 10,000,000 + 34,500,000 x 335 / 345 = 43,500,000; recent (46,500,000 - 43,500,000) / 30 = 100,000.
+        // The lease is over (day 365) and the car kept driving: the latest sample is day 375.
+        // Driven 37,500,000, allowed the whole 36,500,000, margin -1,000,000.
+        // Overall 37,500,000 / 375 = 100,000. Window start day 345 is a sample (44,500,000):
+        // recent (47,500,000 - 44,500,000) / 30 = 100,000.
         // No time left: projected = driven.
         yield 'lease over, sample after the end' => [
             self::term('2026-01-01', '2027-01-01'), 36_500, '2027-03-01 00:00',
             [['2026-12-12 00:00', 44_500_000], ['2027-01-11 00:00', 47_500_000]],
-            ['2027-01-01 00:00', 36_500_000, 36_500_000, 0, 100_000.0, 100_000.0, 100_000.0, 36_500_000],
+            ['2027-01-11 00:00', 37_500_000, 36_500_000, -1_000_000, 100_000.0, 100_000.0, 100_000.0, 37_500_000],
         ];
 
         // The lease is over, but the latest sample is day 300: figures stay at day 300.

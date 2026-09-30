@@ -17,15 +17,16 @@ use Psr\Clock\ClockInterface;
  * of 86,400 seconds. The lease start is the first data point, at the contract's start
  * odometer, and the odometer is assumed linear between two samples.
  *
- * - The reference instant is the latest sample, capped at the lease end: after it, the
- *   odometer at the end is interpolated from the samples around it.
+ * - The reference instant is the latest sample, even after the lease end: a car that keeps
+ *   driving past the end keeps adding to the distance driven.
  * - Allowed to date = allowance x (reference - start) / (end - start), computed in
- *   integers and rounded half up.
+ *   integers and rounded half up. It stops at the whole allowance once the term is over.
  * - Overall pace = driven / (reference - start).
  * - Recent pace = odometer change over the 30 days before the reference instant,
  *   interpolated at the window start; null when the lease is younger than 30 days.
  * - Blended pace = weight x recent + (1 - weight) x overall, or overall alone.
- * - Projected at end = driven + blended pace x (end - reference), rounded half up once.
+ * - Projected at end = driven + blended pace x (end - reference), rounded half up once;
+ *   after the end nothing is left to drive, so it equals the distance driven.
  *
  * Samples may come in any order. Samples at or before the lease start are ignored. A
  * sample after the clock's now, an odometer lower than an earlier one (or than the start
@@ -64,7 +65,7 @@ final readonly class ProjectionCalculator
         }
 
         $latest = array_key_last($timeline);
-        $reference = $latest < $end ? $latest : $end;
+        $reference = $latest;
         $elapsed = $reference - $start;
         $referenceOdometer = self::odometerAt($timeline, $reference);
         $drivenMetres = $referenceOdometer - $startOdometer->metres();
@@ -81,7 +82,7 @@ final readonly class ProjectionCalculator
 
         $driven = Distance::fromMetres((int) round($drivenMetres));
         // round(allowance x elapsed / term), half up, in integers: floor((2 x allowance x elapsed + term) / (2 x term)).
-        $allowedToDate = Distance::fromMetres(intdiv(2 * $allowanceMetres * $elapsed + $termSeconds, 2 * $termSeconds));
+        $allowedToDate = Distance::fromMetres(intdiv(2 * $allowanceMetres * min($elapsed, $termSeconds) + $termSeconds, 2 * $termSeconds));
 
         return new Projection(
             asOf: CarbonImmutable::createFromTimestamp($reference, 'UTC'),
@@ -91,7 +92,7 @@ final readonly class ProjectionCalculator
             overallPace: $overallPace,
             recentPace: $recentPace,
             blendedPace: $blendedPace,
-            projectedAtEnd: Distance::fromMetres((int) round($drivenMetres + $blendedPace->metresIn($end - $reference))),
+            projectedAtEnd: Distance::fromMetres((int) round($drivenMetres + $blendedPace->metresIn(max(0, $end - $reference)))),
         );
     }
 

@@ -24,8 +24,11 @@ services:
 
 when@test:
     services:
-        # Nothing injects the calculator yet, so the compiler would remove it before the
-        # functional test can fetch it. Drop this alias once a service depends on it (#17).
+        # Nothing injects these yet, so the compiler would remove them before the functional
+        # tests can fetch them. Drop the aliases once a controller or command depends on them.
         test.polaris.lease.projection_calculator:
             alias: Polaris\Lease\Domain\ProjectionCalculator
+            public: true
+        test.polaris.lease.assessment_service:
+            alias: Polaris\Lease\Service\LeaseAssessmentService
             public: true
