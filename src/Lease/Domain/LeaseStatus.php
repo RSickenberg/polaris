@@ -6,6 +6,12 @@ namespace Polaris\Lease\Domain;
 
 enum LeaseStatus: string
 {
+    /**
+     * The lease is not final yet. Nothing in the assessment produces or depends on this
+     * status yet: it only exists so that callers can model it.
+     */
+    case Draft = 'draft';
+
     /** The lease end has not been reached yet. */
     case Active = 'active';
 
