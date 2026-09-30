@@ -10,6 +10,7 @@ namespace Polaris\Lease\Domain;
 final readonly class Tolerance
 {
     public const int MAX_BASIS_POINTS = 5000;
+    public const int BASIS_POINTS_IN_ONE = 10_000;
 
     private function __construct(
         private int $basisPoints,
