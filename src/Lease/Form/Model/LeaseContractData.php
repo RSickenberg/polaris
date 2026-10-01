@@ -43,7 +43,7 @@ final class LeaseContractData
 
     /** Per kilometre, in {@see $currency}, with at most two decimals, for example "0.12". */
     #[Assert\NotBlank]
-    #[Assert\Regex(pattern: '/^\d{1,6}(\.\d{1,2})?$/', message: 'Enter an amount such as 0.12, with at most two decimals.')]
+    #[Assert\Regex(pattern: '/^\d{1,6}(\.\d{1,2})?$/', message: 'lease.excess_cost.format')]
     public ?string $excessCostPerKm = null;
 
     #[Assert\NotNull]
@@ -63,7 +63,7 @@ final class LeaseContractData
         try {
             LeaseTerm::fromCalendarDates($this->startDate, $this->endDate, $this->endDateConvention);
         } catch (\InvalidArgumentException) {
-            $context->buildViolation('The lease must last a whole number of months, for example from 2026-01-15 to {{ end }}.')
+            $context->buildViolation('lease.term.whole_months')
                 ->setParameter('{{ end }}', EndDateConvention::Inclusive === $this->endDateConvention ? '2029-01-14' : '2029-01-15')
                 ->atPath('endDate')
                 ->addViolation();

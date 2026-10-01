@@ -1,21 +1,21 @@
-{# The readings, newest first. Dates are stored in UTC and converted to `timeZone` (an IANA name) only here. #}
+{# The readings, newest first. Dates are stored in UTC and converted to `timeZone` (an IANA name) only here. Numbers and dates follow the active locale. #}
 {% if readings is empty %}
-    <p>No reading yet.</p>
+    <p>{{ 'table.empty'|trans(domain='reading') }}</p>
 {% else %}
     <table>
         <thead>
             <tr>
-                <th>Read at ({{ timeZone }})</th>
-                <th>Odometer (km)</th>
-                <th>Source</th>
+                <th>{{ 'table.read_at'|trans({'%timezone%': timeZone}, 'reading') }}</th>
+                <th>{{ 'table.odometer'|trans(domain='reading') }}</th>
+                <th>{{ 'table.source'|trans(domain='reading') }}</th>
             </tr>
         </thead>
         <tbody>
             {% for reading in readings %}
                 <tr>
-                    <td>{{ reading.readAt|format_datetime(pattern='yyyy-MM-dd HH:mm z', timezone=timeZone) }}</td>
+                    <td>{{ reading.readAt|localized_datetime(timeZone) }}</td>
                     <td>{{ reading.odometer.in(enum('Polaris\\Shared\\Domain\\DistanceUnit').Kilometre)|format_number({max_fraction_digit: 1}) }}</td>
-                    <td>{{ reading.source.value }}{% if reading.odometerRaw is not null %} ({{ reading.odometerRaw }} {{ reading.odometerRawUnit.value }}){% endif %}</td>
+                    <td>{{ ('source.' ~ reading.source.value)|trans(domain='reading') }}{% if reading.odometerRaw is not null %} ({{ (reading.odometerRaw * 1)|format_number({max_fraction_digit: 3}) }} {{ ('unit.' ~ reading.odometerRawUnit.value)|trans(domain='shared') }}){% endif %}</td>
                 </tr>
             {% endfor %}
         </tbody>

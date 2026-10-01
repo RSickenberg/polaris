@@ -62,7 +62,7 @@ final readonly class OdometerReadingService
             $neighbour = ReadingRejection::LowerThanPrevious === $rejection ? $previous : $next;
             \assert(null !== $neighbour);
 
-            throw new ReadingRejected($rejection, ['%limit%' => number_format($neighbour->getOdometer()->in($data->distanceUnit), 0, '.', ' '), '%unit%' => $data->distanceUnit->value, '%at%' => $neighbour->getReadAt()->toIso8601ZuluString('minute')]);
+            throw new ReadingRejected($rejection, ['limit' => $neighbour->getOdometer()->in($data->distanceUnit), 'unit' => $data->distanceUnit->value, 'at' => $neighbour->getReadAt()->getTimestamp()]);
         }
 
         try {

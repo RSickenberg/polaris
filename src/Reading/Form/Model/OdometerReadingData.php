@@ -39,7 +39,7 @@ final class OdometerReadingData
         }
 
         if ($this->odometer * $this->distanceUnit->metres() > self::MAX_METRES) {
-            $context->buildViolation('This odometer value is too large.')
+            $context->buildViolation('reading.odometer.too_large')
                 ->atPath('odometer')
                 ->addViolation();
         }

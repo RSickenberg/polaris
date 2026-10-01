@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="en" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="reading.odometer.too_large">
+        <source>reading.odometer.too_large</source>
+        <target>This odometer value is too large.</target>
+      </trans-unit>
+      <trans-unit id="lease.excess_cost.format">
+        <source>lease.excess_cost.format</source>
+        <target>Enter an amount such as 0.12, with at most two decimals.</target>
+      </trans-unit>
+      <trans-unit id="lease.term.whole_months">
+        <source>lease.term.whole_months</source>
+        <target>The lease must last a whole number of months, for example from 2026-01-15 to {{ end }}.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

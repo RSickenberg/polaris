@@ -1,6 +1,0 @@
-reading:
-    rejected:
-        lower_than_previous: 'The odometer cannot be lower than the previous reading (%limit% %unit% at %at% UTC).'
-        higher_than_next: 'The odometer cannot be higher than the next reading (%limit% %unit% at %at% UTC).'
-        duplicate_instant: 'A reading already exists at this date and time.'
-        in_future: 'The reading cannot be dated in the future.'

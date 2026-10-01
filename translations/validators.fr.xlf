@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="fr" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="reading.odometer.too_large">
+        <source>reading.odometer.too_large</source>
+        <target>Cette valeur de compteur est trop élevée.</target>
+      </trans-unit>
+      <trans-unit id="lease.excess_cost.format">
+        <source>lease.excess_cost.format</source>
+        <target>Saisissez un montant tel que 0.12, avec deux décimales au maximum.</target>
+      </trans-unit>
+      <trans-unit id="lease.term.whole_months">
+        <source>lease.term.whole_months</source>
+        <target>Le contrat doit durer un nombre entier de mois, par exemple du 2026-01-15 au {{ end }}.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

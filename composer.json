@@ -98,10 +98,16 @@
         "cs": "php-cs-fixer fix --dry-run --diff --no-interaction",
         "cs:fix": "php-cs-fixer fix --no-interaction",
         "deptrac": "deptrac analyse --no-progress --no-interaction --report-uncovered --fail-on-uncovered",
+        "translations": [
+            "@php bin/console lint:xliff translations --no-interaction",
+            "@php bin/console lint:translations --no-interaction",
+            "@php bin/console debug:translation fr --only-missing --no-interaction"
+        ],
         "ci": [
             "@cs",
             "@phpstan",
             "@deptrac",
+            "@translations",
             "@test"
         ]
     },
@@ -111,6 +117,7 @@
         "cs": "Check the coding standard (PHP-CS-Fixer dry run)",
         "cs:fix": "Fix the coding standard (PHP-CS-Fixer)",
         "deptrac": "Check the module boundaries of ADR 0001 (Deptrac)",
+        "translations": "Lint the XLIFF files and fail on a missing French key",
         "ci": "Run every check, as CI does"
     },
     "conflict": {
