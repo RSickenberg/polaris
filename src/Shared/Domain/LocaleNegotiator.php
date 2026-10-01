@@ -80,7 +80,10 @@ final readonly class LocaleNegotiator
      */
     private function match(string $tag): ?string
     {
-        $normalized = strtolower(str_replace('_', '-', trim($tag)));
+        $normalized = $tag
+                |> trim(...)
+                |> (static fn ($x) => str_replace('_', '-', $x))
+                |> strtolower(...);
         $language = explode('-', $normalized)[0];
 
         foreach ([$normalized, $language] as $candidate) {
