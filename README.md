@@ -10,6 +10,17 @@ Polaris tracks your Tesla's odometer against your lease allowance, projects the 
 - Compare the kilometres driven with the lease allowance and project the total at lease end.
 - Give a remaining budget per day, week and month, and alert when the projection crosses the limit.
 
+## Odometer readings
+
+Readings are stored in integer metres and UTC, whatever unit they were typed in. Add one by hand, in km or miles:
+
+```bash
+make sf ARGS="polaris:odometer:add 12345"                          # km, now, the only vehicle
+make sf ARGS="polaris:odometer:add 7600 --unit=mi --at=2026-10-01T08:00 --vehicle=<VIN or id>"
+```
+
+or on `/vehicles/{id}/readings`, which also lists the history, newest first. A value lower than the previous reading is rejected; a reading dated in the past (a backfill) must fit between the readings around it, and an equal value is accepted. Until the user's time zone exists, dates are entered and shown in UTC.
+
 ## How the projection works
 
 Every figure is taken at the latest odometer reading after the lease start (even past the lease end, if the car keeps driving), because nothing is known about the distance driven since:
@@ -133,7 +144,7 @@ CI (`.github/workflows/ci.yml`) runs on every pull request and on `main`, one jo
 
 ## Stack
 
-In place: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine ORM and Migrations, Carbon, ULID identifiers ([ADR 0002](docs/adr/0002-ulid-identifiers.md)). All dates are handled in UTC ([ADR 0003](docs/adr/0003-utc-dates.md)).
+In place: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine ORM and Migrations, Twig and Form, Carbon, ULID identifiers ([ADR 0002](docs/adr/0002-ulid-identifiers.md)). All dates are handled in UTC ([ADR 0003](docs/adr/0003-utc-dates.md)).
 
 Planned: Redis for Messenger queues, Lock and Cache; Tailwind CSS with the Symfony UX Toolkit Shadcn kit; Flowbite charts.
 
