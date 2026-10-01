@@ -33,8 +33,7 @@ class OdometerReading
     #[ORM\JoinColumn(nullable: false)]
     private Vehicle $vehicle;
 
-    // The Carbon type declares the column as TIMESTAMP(6); precision 0 here only keeps the schema comparison in sync with it.
-    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, precision: 0)]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private CarbonImmutable $readAt;
 
     /** The raw Tesla value in miles, only for {@see ReadingSource::Api}. */

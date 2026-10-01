@@ -13,6 +13,7 @@ use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Reading\Form\Model\OdometerReadingData;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Reading\Service\ReadingRejected;
+use Polaris\Shared\Domain\Distance;
 use Polaris\Shared\Domain\DistanceUnit;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
@@ -186,6 +187,25 @@ final class OdometerReadingServiceTest extends KernelTestCase
         self::assertSame('manual', $row['source']);
         self::assertIsString($row['read_at']);
         self::assertStringStartsWith('2026-10-01 08:00:00', $row['read_at']);
+    }
+
+    public function testInstantsKeepMicrosecondPrecision(): void
+    {
+        $readAt = CarbonImmutable::parse('2026-10-01 08:00:00.123456', 'UTC');
+        $entityManager = self::entityManager();
+        $reading = OdometerReading::manual($this->vehicle, $readAt, Distance::fromKilometres(1));
+        $entityManager->persist($reading);
+        $entityManager->flush();
+        $entityManager->clear();
+
+        $reloaded = $entityManager->find(OdometerReading::class, $reading->getId());
+
+        self::assertInstanceOf(OdometerReading::class, $reloaded);
+        self::assertSame('2026-10-01 08:00:00.123456', $reloaded->getReadAt()->format('Y-m-d H:i:s.u'));
+        self::assertSame(
+            6,
+            $entityManager->getConnection()->fetchOne("SELECT datetime_precision FROM information_schema.columns WHERE table_name = 'odometer_reading' AND column_name = 'read_at'"),
+        );
     }
 
     private static function data(string $readAtUtc, int $value, DistanceUnit $unit = DistanceUnit::Kilometre): OdometerReadingData

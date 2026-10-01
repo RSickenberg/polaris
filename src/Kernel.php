@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris;
 
+use Carbon\Doctrine\DateTimeDefaultPrecision;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 
@@ -18,6 +19,12 @@ class Kernel extends BaseKernel
      * and Messenger workers behave the same even if php.ini says otherwise.
      */
     public const string TIMEZONE = 'UTC';
+
+    /**
+     * Fractional-second digits of stored instants: microseconds, the finest PHP can produce.
+     * Set once here for every Carbon date-time column, instead of per column.
+     */
+    public const int DATETIME_PRECISION = 6;
 
     /**
      * Builds the kernel from the symfony/runtime context ($_SERVER merged with $_ENV).
@@ -42,6 +49,7 @@ class Kernel extends BaseKernel
     public function boot(): void
     {
         date_default_timezone_set(self::TIMEZONE);
+        DateTimeDefaultPrecision::set(self::DATETIME_PRECISION);
 
         parent::boot();
     }
