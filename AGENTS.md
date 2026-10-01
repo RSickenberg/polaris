@@ -196,6 +196,42 @@ are specific to Polaris and win when the two disagree.
 - Tesla can revoke API access at any time: manual odometer entry must always keep
   working.
 
+### Translations
+
+- Locales: `en` (default and fallback) and `fr`, set in `config/packages/translation.yaml`.
+  The locale of a request is decided by `Shared\EventListener\LocaleListener` through the
+  framework-free `Shared\Domain\LocaleNegotiator`: the user's preference
+  (`Shared\Service\PreferredLocaleProvider`, filled from `User.locale` by #21), then the
+  best `Accept-Language` match among the enabled locales, then `en`.
+- Never write user-facing text in a template, form, flash message, validator or email: use
+  a key. Exceptions: the console commands stay in English, and brand names (`Polaris`).
+- One XLIFF 1.2 domain per module: `translations/<domain>.<locale>.xlf` with `<domain>` the
+  module name in lowercase (`reading`, `lease`, ...), plus `shared` for text used by several
+  modules. The source is the key, the target is the text, the `id` repeats the key.
+  Constraint and callback messages must live in Symfony's `validators` domain; their keys
+  start with the module (`reading.odometer.too_large`).
+- Keys are lowercase `snake_case` segments joined by `.`, at most three levels, without the
+  module prefix (the domain is the prefix): `page.history.title`, `form.odometer.label`,
+  `form.submit`, `flash.reading_added`, `rejected.in_future`, `table.empty`.
+  Form labels and buttons are `form.<field>.label` and `form.submit`. Pass the domain
+  explicitly: `|trans(domain='reading')`, `$translator->trans($key, $params, 'reading')`,
+  or `translation_domain` on the form type.
+- A message that formats a number or a date goes in `<domain>+intl-icu.<locale>.xlf` (ICU
+  MessageFormat, `{limit, number}`, `{at, date, medium}`), and the code passes raw numbers
+  and timestamps. Never write an apostrophe in these files (ICU treats it as an escape).
+  Other messages use `%name%` parameters.
+- Numbers and dates: format them in Twig for the active locale (`format_number`,
+  `format_currency`, `localized_datetime(timeZone)`), never with `number_format()` or a fixed
+  date pattern. Dates stay stored and computed in UTC; the time zone only converts for display.
+- Add a key: add it to the `en` and the `fr` file of its domain in the same change.
+  Add a language: copy every `*.en.xlf` to `*.<locale>.xlf`, translate the targets, add the
+  locale to `enabled_locales` and to the `fr` checks below, and extend the tests.
+- CI runs `composer translations` (`make translations`): `lint:xliff translations` (syntax),
+  `lint:translations` (messages parse) and `debug:translation fr --only-missing` (a key used
+  in the code but absent from `fr` exits non-zero). That command cannot see keys built at run
+  time (enum values such as `source.manual`), so `TranslationFilesTest` also compares every
+  `en` file with its `fr` twin key by key and placeholder by placeholder.
+
 ### Secrets
 
 - Never commit a secret, not even a development `APP_SECRET`. GitGuardian scans

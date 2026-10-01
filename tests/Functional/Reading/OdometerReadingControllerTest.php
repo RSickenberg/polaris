@@ -58,12 +58,12 @@ final class OdometerReadingControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('[role=status]', 'The reading was added.');
-        $rows = $this->client->getCrawler()->filter('tbody tr')->each(static fn ($row): string => preg_replace('/\s+/', ' ', trim($row->text())) ?? '');
+        $rows = $this->client->getCrawler()->filter('tbody tr')->each(static fn ($row): string => preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', trim($row->text()))) ?? '');
         self::assertCount(2, $rows);
-        self::assertStringContainsString('2026-10-02 09:30 UTC', $rows[0]);
+        self::assertStringContainsString('Oct 2, 2026, 9:30 AM UTC', $rows[0]);
         self::assertStringContainsString('10,050', $rows[0]);
-        self::assertStringContainsString('2026-10-01 08:00 UTC', $rows[1]);
-        self::assertStringContainsString('manual', $rows[1]);
+        self::assertStringContainsString('Oct 1, 2026, 8:00 AM UTC', $rows[1]);
+        self::assertStringContainsString('Manual', $rows[1]);
     }
 
     public function testMilesAreConvertedForTheHistory(): void
@@ -80,7 +80,7 @@ final class OdometerReadingControllerTest extends WebTestCase
         $this->submit('2026-10-02T08:00', '9000', 'km');
 
         self::assertResponseStatusCodeSame(422);
-        self::assertSelectorTextContains('body', 'The odometer cannot be lower than the previous reading (10 000 km at 2026-10-01T08:00Z UTC).');
+        self::assertStringContainsString('The odometer cannot be lower than the previous reading (10,000 km on Oct 1, 2026 at 8:00 AM UTC).', preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', $this->client->getCrawler()->filter('body')->text())) ?? '');
         self::assertCount(1, $this->client->getCrawler()->filter('tbody tr'));
     }
 

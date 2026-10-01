@@ -12,7 +12,7 @@ SYMFONY  = $(PHP) bin/console
 # Misc
 .DEFAULT_GOAL = help
 ARGS          =
-.PHONY        : help build up start down logs sh install composer vendor sf cc migrate diff test-db test phpstan cs cs-fix deptrac ci release
+.PHONY        : help build up start down logs sh install composer vendor sf cc migrate diff test-db test phpstan cs cs-fix deptrac translations ci release
 
 ## —— 🧭 The Polaris Makefile 🧭 ——————————————————————————————————
 help: ## Outputs this help screen
@@ -81,7 +81,10 @@ cs-fix: ## Fix the coding standard (PHP-CS-Fixer)
 deptrac: ## Check the module boundaries of ADR 0001 (Deptrac), as CI does
 	@$(COMPOSER) deptrac
 
-ci: test-db ## Run every check CI runs: coding standard, PHPStan, Deptrac, tests
+translations: ## Lint the XLIFF files and fail on a missing French key, as CI does
+	@$(COMPOSER) translations
+
+ci: test-db ## Run every check CI runs: coding standard, PHPStan, Deptrac, translations, tests
 	@$(COMPOSER) ci
 
 ## —— Release 📦 ——————————————————————————————————————————————

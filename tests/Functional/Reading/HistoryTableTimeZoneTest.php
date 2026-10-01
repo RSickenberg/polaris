@@ -31,7 +31,7 @@ final class HistoryTableTimeZoneTest extends KernelTestCase
         $html = $this->render($readings, 'Europe/Zurich');
 
         // 22:30 UTC is 00:30 CEST (UTC+2) the next day; 00:30 UTC is 02:30 CEST; 01:30 UTC is 02:30 CET (UTC+1).
-        self::assertSame(['2026-10-25 02:30 GMT+1', '2026-10-25 02:30 GMT+2', '2026-10-25 00:30 GMT+2'], $this->dates($html));
+        self::assertSame(['Oct 25, 2026, 2:30 AM GMT+1', 'Oct 25, 2026, 2:30 AM GMT+2', 'Oct 25, 2026, 12:30 AM GMT+2'], $this->dates($html));
         // The two 02:30 rows are an hour apart in reality: the offset tells them apart, and the list keeps UTC order, newest first.
         self::assertSame([3.0, 2.0, 1.0], $this->kilometres($html));
     }
@@ -41,14 +41,14 @@ final class HistoryTableTimeZoneTest extends KernelTestCase
         // Europe/Zurich enters summer time on 2026-03-29 at 01:00 UTC: 01:59 CET jumps to 03:00 CEST.
         $html = $this->render([self::reading('2026-03-29 01:00', 2), self::reading('2026-03-29 00:59', 1)], 'Europe/Zurich');
 
-        self::assertSame(['2026-03-29 03:00 GMT+2', '2026-03-29 01:59 GMT+1'], $this->dates($html));
+        self::assertSame(['Mar 29, 2026, 3:00 AM GMT+2', 'Mar 29, 2026, 1:59 AM GMT+1'], $this->dates($html));
     }
 
     public function testUtcIsShownAsStored(): void
     {
         $html = $this->render([self::reading('2026-10-25 01:30', 1)], 'UTC');
 
-        self::assertSame(['2026-10-25 01:30 UTC'], $this->dates($html));
+        self::assertSame(['Oct 25, 2026, 1:30 AM UTC'], $this->dates($html));
         self::assertStringContainsString('Read at (UTC)', $html);
     }
 

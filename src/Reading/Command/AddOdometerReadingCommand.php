@@ -81,7 +81,7 @@ final readonly class AddOdometerReadingCommand
         try {
             $reading = $this->service->recordManual($vehicleEntity, $data);
         } catch (ReadingRejected $rejected) {
-            $io->error($this->translator->trans($rejected->reason->value, $rejected->parameters));
+            $io->error($this->translator->trans($rejected->reason->value, $rejected->parameters, 'reading'));
 
             return Command::FAILURE;
         }

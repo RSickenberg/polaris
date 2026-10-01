@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="en" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="rejected.lower_than_previous">
+        <source>rejected.lower_than_previous</source>
+        <target>The odometer cannot be lower than the previous reading ({limit, number, ::.#} {unit} on {at, date, medium} at {at, time, short} UTC).</target>
+      </trans-unit>
+      <trans-unit id="rejected.higher_than_next">
+        <source>rejected.higher_than_next</source>
+        <target>The odometer cannot be higher than the next reading ({limit, number, ::.#} {unit} on {at, date, medium} at {at, time, short} UTC).</target>
+      </trans-unit>
+      <trans-unit id="rejected.duplicate_instant">
+        <source>rejected.duplicate_instant</source>
+        <target>A reading already exists at this date and time.</target>
+      </trans-unit>
+      <trans-unit id="rejected.in_future">
+        <source>rejected.in_future</source>
+        <target>The reading cannot be dated in the future.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

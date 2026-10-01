@@ -92,8 +92,9 @@ final class OdometerReadingServiceTest extends KernelTestCase
             self::fail('A lower reading must be rejected.');
         } catch (ReadingRejected $rejected) {
             self::assertSame(ReadingRejection::LowerThanPrevious, $rejected->reason);
-            self::assertSame('10 000', $rejected->parameters['%limit%']);
-            self::assertSame('km', $rejected->parameters['%unit%']);
+            self::assertSame(10_000.0, $rejected->parameters['limit']);
+            self::assertSame('km', $rejected->parameters['unit']);
+            self::assertSame(CarbonImmutable::parse('2026-10-01 08:00', 'UTC')->getTimestamp(), $rejected->parameters['at']);
         }
 
         self::assertCount(1, self::service()->history($this->vehicle));

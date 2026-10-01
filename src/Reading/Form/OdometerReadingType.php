@@ -24,24 +24,25 @@ final class OdometerReadingType extends AbstractType
     {
         $builder
             ->add('readAt', DateTimeType::class, [
-                'label' => 'Read at (UTC)',
+                'label' => 'form.read_at.label',
                 'widget' => 'single_text',
                 'input' => 'datetime_immutable',
                 // The user's time zone arrives with #21; until then the date is entered in UTC.
                 'model_timezone' => TimeZone::UTC,
                 'view_timezone' => TimeZone::UTC,
             ])
-            ->add('odometer', IntegerType::class, ['label' => 'Odometer'])
+            ->add('odometer', IntegerType::class, ['label' => 'form.odometer.label'])
             ->add('distanceUnit', EnumType::class, [
-                'label' => 'Unit',
+                'label' => 'form.unit.label',
                 'class' => DistanceUnit::class,
-                'choice_label' => static fn (DistanceUnit $unit): string => $unit->value,
+                'choice_label' => static fn (DistanceUnit $unit): string => 'unit.'.$unit->value,
+                'choice_translation_domain' => 'shared',
             ])
-            ->add('save', SubmitType::class, ['label' => 'Add reading']);
+            ->add('save', SubmitType::class, ['label' => 'form.submit']);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['data_class' => OdometerReadingData::class]);
+        $resolver->setDefaults(['data_class' => OdometerReadingData::class, 'translation_domain' => 'reading']);
     }
 }

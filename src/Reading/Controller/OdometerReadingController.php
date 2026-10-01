@@ -42,12 +42,12 @@ final class OdometerReadingController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $this->readings->recordManual($vehicle, $data);
-                $this->addFlash('success', 'The reading was added.');
+                $this->addFlash('success', $this->translator->trans('flash.reading_added', domain: 'reading'));
 
                 return $this->redirectToRoute('reading_history', ['id' => $vehicle->getId()->toBase32()]);
             } catch (ReadingRejected $rejected) {
                 $field = \in_array($rejected->reason, [ReadingRejection::DuplicateInstant, ReadingRejection::InFuture], true) ? 'readAt' : 'odometer';
-                $form->get($field)->addError(new FormError($this->translator->trans($rejected->reason->value, $rejected->parameters)));
+                $form->get($field)->addError(new FormError($this->translator->trans($rejected->reason->value, $rejected->parameters, 'reading')));
             }
         }
 

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="fr" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="page.history.title">
+        <source>page.history.title</source>
+        <target>Historique du compteur, %vehicle%</target>
+      </trans-unit>
+      <trans-unit id="page.history.add">
+        <source>page.history.add</source>
+        <target>Ajouter un relevé</target>
+      </trans-unit>
+      <trans-unit id="page.history.readings">
+        <source>page.history.readings</source>
+        <target>Relevés</target>
+      </trans-unit>
+      <trans-unit id="table.empty">
+        <source>table.empty</source>
+        <target>Aucun relevé pour le moment.</target>
+      </trans-unit>
+      <trans-unit id="table.read_at">
+        <source>table.read_at</source>
+        <target>Relevé le (%timezone%)</target>
+      </trans-unit>
+      <trans-unit id="table.odometer">
+        <source>table.odometer</source>
+        <target>Compteur (km)</target>
+      </trans-unit>
+      <trans-unit id="table.source">
+        <source>table.source</source>
+        <target>Source</target>
+      </trans-unit>
+      <trans-unit id="source.manual">
+        <source>source.manual</source>
+        <target>Manuelle</target>
+      </trans-unit>
+      <trans-unit id="source.api">
+        <source>source.api</source>
+        <target>API Tesla</target>
+      </trans-unit>
+      <trans-unit id="form.read_at.label">
+        <source>form.read_at.label</source>
+        <target>Relevé le (UTC)</target>
+      </trans-unit>
+      <trans-unit id="form.odometer.label">
+        <source>form.odometer.label</source>
+        <target>Compteur</target>
+      </trans-unit>
+      <trans-unit id="form.unit.label">
+        <source>form.unit.label</source>
+        <target>Unité</target>
+      </trans-unit>
+      <trans-unit id="form.submit">
+        <source>form.submit</source>
+        <target>Ajouter le relevé</target>
+      </trans-unit>
+      <trans-unit id="flash.reading_added">
+        <source>flash.reading_added</source>
+        <target>Le relevé a été ajouté.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

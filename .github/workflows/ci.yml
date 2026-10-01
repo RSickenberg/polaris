@@ -27,6 +27,7 @@ jobs:
           - { name: PHPStan, script: phpstan }
           - { name: PHP-CS-Fixer, script: cs }
           - { name: Deptrac, script: deptrac }
+          - { name: Translations, script: translations }
     steps:
       - uses: actions/checkout@v7
         with:
