@@ -8,6 +8,11 @@ doctrine:
             carbon_date_immutable: Polaris\Shared\Doctrine\Type\CarbonDateImmutableType
             datetime_immutable: Polaris\Shared\Doctrine\Type\CarbonDateTimeImmutableType
 
+        # Introspection maps a PostgreSQL timestamp to the mutable datetime type, which differs from
+        # the Carbon type of the mapping: without this, every schema comparison reports a change.
+        mapping_types:
+            timestamp: datetime_immutable
+
         profiling_collect_backtrace: '%kernel.debug%'
     orm:
         validate_xml_mapping: true

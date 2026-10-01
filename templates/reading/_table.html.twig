@@ -1,0 +1,23 @@
+{# The readings, newest first. Dates are stored in UTC and converted to `timeZone` (an IANA name) only here. #}
+{% if readings is empty %}
+    <p>No reading yet.</p>
+{% else %}
+    <table>
+        <thead>
+            <tr>
+                <th>Read at ({{ timeZone }})</th>
+                <th>Odometer (km)</th>
+                <th>Source</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reading in readings %}
+                <tr>
+                    <td>{{ reading.readAt|format_datetime(pattern='yyyy-MM-dd HH:mm z', timezone=timeZone) }}</td>
+                    <td>{{ reading.odometer.in(enum('Polaris\\Shared\\Domain\\DistanceUnit').Kilometre)|format_number({max_fraction_digit: 1}) }}</td>
+                    <td>{{ reading.source.value }}{% if reading.odometerRaw is not null %} ({{ reading.odometerRaw }} {{ reading.odometerRawUnit.value }}){% endif %}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}

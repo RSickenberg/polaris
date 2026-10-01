@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Odometer history, {{ vehicle.name }}{% endblock %}
+
+{% block body %}
+    <h1>Odometer history, {{ vehicle.name }}</h1>
+
+    {% for message in app.flashes('success') %}
+        <p role="status">{{ message }}</p>
+    {% endfor %}
+
+    <h2>Add a reading</h2>
+    {{ form(form) }}
+
+    <h2>Readings</h2>
+    {{ include('reading/_table.html.twig') }}
+{% endblock %}
