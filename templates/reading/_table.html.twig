@@ -15,7 +15,7 @@
                 <tr>
                     <td>{{ reading.readAt|format_datetime(pattern='yyyy-MM-dd HH:mm z', timezone=timeZone) }}</td>
                     <td>{{ reading.odometer.in(enum('Polaris\\Shared\\Domain\\DistanceUnit').Kilometre)|format_number({max_fraction_digit: 1}) }}</td>
-                    <td>{{ reading.source.value }}{% if reading.odometerMiles is not null %} ({{ reading.odometerMiles }} mi){% endif %}</td>
+                    <td>{{ reading.source.value }}{% if reading.odometerRaw is not null %} ({{ reading.odometerRaw }} {{ reading.odometerRawUnit.value }}){% endif %}</td>
                 </tr>
             {% endfor %}
         </tbody>

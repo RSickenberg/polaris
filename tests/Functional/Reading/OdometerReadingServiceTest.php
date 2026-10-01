@@ -44,7 +44,7 @@ final class OdometerReadingServiceTest extends KernelTestCase
 
         self::assertSame(12_345_000, $reading->getOdometer()->metres());
         self::assertSame(ReadingSource::Manual, $reading->getSource());
-        self::assertNull($reading->getOdometerMiles());
+        self::assertNull($reading->getOdometerRaw());
         self::assertSame('2026-10-01T08:00:00+00:00', $reading->getReadAt()->toIso8601String());
     }
 
@@ -53,7 +53,7 @@ final class OdometerReadingServiceTest extends KernelTestCase
         $reading = self::service()->recordManual($this->vehicle, self::data('2026-10-01 08:00', 1_000, DistanceUnit::Mile));
 
         self::assertSame(1_609_344, $reading->getOdometer()->metres());
-        self::assertNull($reading->getOdometerMiles(), 'Raw miles are kept only for readings that come from Tesla.');
+        self::assertNull($reading->getOdometerRaw(), 'The raw value is kept only for readings that come from Tesla.');
     }
 
     public function testInputIsConvertedToUtc(): void
@@ -179,11 +179,12 @@ final class OdometerReadingServiceTest extends KernelTestCase
         self::service()->recordManual($this->vehicle, self::data('2026-10-01 08:00', 100, DistanceUnit::Mile));
         self::entityManager()->clear();
 
-        $row = self::entityManager()->getConnection()->fetchAssociative('SELECT odometer_m, odometer_miles, source, read_at FROM odometer_reading');
+        $row = self::entityManager()->getConnection()->fetchAssociative('SELECT odometer_m, odometer_raw, odometer_raw_unit, source, read_at FROM odometer_reading');
 
         self::assertIsArray($row);
         self::assertSame(160_934, $row['odometer_m']);
-        self::assertNull($row['odometer_miles']);
+        self::assertNull($row['odometer_raw']);
+        self::assertNull($row['odometer_raw_unit']);
         self::assertSame('manual', $row['source']);
         self::assertIsString($row['read_at']);
         self::assertStringStartsWith('2026-10-01 08:00:00', $row['read_at']);
