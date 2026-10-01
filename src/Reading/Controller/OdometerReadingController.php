@@ -10,6 +10,7 @@ use Polaris\Reading\Form\Model\OdometerReadingData;
 use Polaris\Reading\Form\OdometerReadingType;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Reading\Service\ReadingRejected;
+use Polaris\Shared\Domain\TimeZone;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -22,12 +23,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class OdometerReadingController extends AbstractController
 {
-    /**
-     * The IANA time zone dates are displayed in. Always UTC until the user's time zone
-     * exists (#21): then it is read from the user here, and nothing else changes.
-     */
-    private const string DISPLAY_TIME_ZONE = 'UTC';
-
     public function __construct(
         private readonly OdometerReadingService $readings,
         private readonly TranslatorInterface $translator,
@@ -60,7 +55,8 @@ final class OdometerReadingController extends AbstractController
             'vehicle' => $vehicle,
             'readings' => $this->readings->history($vehicle),
             'form' => $form,
-            'timeZone' => self::DISPLAY_TIME_ZONE,
+            // Always UTC until the user's time zone exists (#21): then it is read from the user here.
+            'timeZone' => TimeZone::UTC,
         ], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
     }
 }

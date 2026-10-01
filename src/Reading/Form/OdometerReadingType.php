@@ -6,6 +6,7 @@ namespace Polaris\Reading\Form;
 
 use Polaris\Reading\Form\Model\OdometerReadingData;
 use Polaris\Shared\Domain\DistanceUnit;
+use Polaris\Shared\Domain\TimeZone;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
@@ -27,8 +28,8 @@ final class OdometerReadingType extends AbstractType
                 'widget' => 'single_text',
                 'input' => 'datetime_immutable',
                 // The user's time zone arrives with #21; until then the date is entered in UTC.
-                'model_timezone' => 'UTC',
-                'view_timezone' => 'UTC',
+                'model_timezone' => TimeZone::UTC,
+                'view_timezone' => TimeZone::UTC,
             ])
             ->add('odometer', IntegerType::class, ['label' => 'Odometer'])
             ->add('distanceUnit', EnumType::class, [
