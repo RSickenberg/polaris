@@ -6,6 +6,7 @@ namespace Polaris\Reading\Form\Model;
 
 use Polaris\Shared\Domain\DistanceUnit;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * A manual odometer reading as the user enters it: the value in the unit they chose and
@@ -16,6 +17,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 final class OdometerReadingData
 {
+    /** 1,000,000 km: far beyond any real odometer, and well inside the 32-bit odometer_m column. */
+    public const int MAX_METRES = 1_000_000_000;
+
     /** The instant the odometer was read. */
     #[Assert\NotNull]
     public ?\DateTimeImmutable $readAt = null;
@@ -25,6 +29,19 @@ final class OdometerReadingData
     /** In {@see $distanceUnit}. */
     #[Assert\NotNull]
     #[Assert\PositiveOrZero]
-    #[Assert\LessThan(value: 100_000_000, message: 'This odometer value is too large.')]
     public ?int $odometer = null;
+
+    #[Assert\Callback]
+    public function validateOdometerRange(ExecutionContextInterface $context): void
+    {
+        if (null === $this->odometer || $this->odometer < 0) {
+            return;
+        }
+
+        if ($this->odometer * $this->distanceUnit->metres() > self::MAX_METRES) {
+            $context->buildViolation('This odometer value is too large.')
+                ->atPath('odometer')
+                ->addViolation();
+        }
+    }
 }
