@@ -18,7 +18,7 @@ class Kernel extends BaseKernel
      * The runtime time zone is forced at boot so that web requests, console commands
      * and Messenger workers behave the same even if php.ini says otherwise.
      */
-    public const string TIMEZONE = 'UTC';
+    private const string TIMEZONE = 'UTC';
 
     /**
      * Fractional-second digits of stored instants: microseconds, the finest PHP can produce.
