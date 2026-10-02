@@ -39,9 +39,11 @@ final class LeaseContractDataValidationTest extends KernelTestCase
         yield 'partial month' => [static function (LeaseContractData $data): void { $data->endDate = new \DateTimeImmutable('2029-01-20'); }, 'endDate'];
         yield 'inclusive end one day over' => [static function (LeaseContractData $data): void { $data->endDateConvention = EndDateConvention::Inclusive; }, 'endDate'];
         yield 'end before start' => [static function (LeaseContractData $data): void { $data->endDate = new \DateTimeImmutable('2025-01-15'); }, 'endDate'];
-        yield 'zero allowance' => [static function (LeaseContractData $data): void { $data->allowancePerYear = 0; }, 'allowancePerYear'];
-        yield 'negative allowance' => [static function (LeaseContractData $data): void { $data->allowancePerYear = -15_000; }, 'allowancePerYear'];
-        yield 'missing allowance' => [static function (LeaseContractData $data): void { $data->allowancePerYear = null; }, 'allowancePerYear'];
+        yield 'zero allowance' => [static function (LeaseContractData $data): void { $data->allowance = 0; }, 'allowance'];
+        yield 'negative allowance' => [static function (LeaseContractData $data): void { $data->allowance = -15_000; }, 'allowance'];
+        yield 'missing allowance' => [static function (LeaseContractData $data): void { $data->allowance = null; }, 'allowance'];
+        yield 'allowance above the maximum' => [static function (LeaseContractData $data): void { $data->allowance = LeaseContractData::MAX_ALLOWANCE + 1; }, 'allowance'];
+        yield 'start odometer above the maximum' => [static function (LeaseContractData $data): void { $data->startOdometer = LeaseContractData::MAX_ODOMETER + 1; }, 'startOdometer'];
         yield 'negative start odometer' => [static function (LeaseContractData $data): void { $data->startOdometer = -1; }, 'startOdometer'];
         yield 'sub-cent excess cost' => [static function (LeaseContractData $data): void { $data->excessCostPerKm = '0.085'; }, 'excessCostPerKm'];
         yield 'negative excess cost' => [static function (LeaseContractData $data): void { $data->excessCostPerKm = '-0.12'; }, 'excessCostPerKm'];
@@ -69,7 +71,7 @@ final class LeaseContractDataValidationTest extends KernelTestCase
         $data = new LeaseContractData();
         $data->startDate = new \DateTimeImmutable('2026-01-15');
         $data->endDate = new \DateTimeImmutable('2029-01-15');
-        $data->allowancePerYear = 15_000;
+        $data->allowance = 15_000;
         $data->startOdometer = 12;
         $data->excessCostPerKm = '0.12';
         $data->currency = Currency::CHF;
