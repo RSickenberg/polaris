@@ -6,9 +6,9 @@ use Polaris\Kernel;
 use Symfony\Component\Dotenv\Dotenv;
 
 // Loaded by phpstan/phpstan-doctrine (phpstan.dist.neon) to read the entity mappings.
-require dirname(__DIR__).'/vendor/autoload.php';
+require dirname(__DIR__) . '/vendor/autoload.php';
 
-new Dotenv()->bootEnv(dirname(__DIR__).'/.env');
+new Dotenv()->bootEnv(dirname(__DIR__) . '/.env');
 
 $kernel = new Kernel('test', false);
 $kernel->boot();

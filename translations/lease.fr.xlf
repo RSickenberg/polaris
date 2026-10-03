@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="fr" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="page.settings.title">
+        <source>page.settings.title</source>
+        <target>Conditions du leasing, %vehicle%</target>
+      </trans-unit>
+      <trans-unit id="page.settings.assessment">
+        <source>page.settings.assessment</source>
+        <target>Projection avec ces conditions</target>
+      </trans-unit>
+      <trans-unit id="form.start_date.label">
+        <source>form.start_date.label</source>
+        <target>Date de début</target>
+      </trans-unit>
+      <trans-unit id="form.end_date.label">
+        <source>form.end_date.label</source>
+        <target>Date de fin</target>
+      </trans-unit>
+      <trans-unit id="form.end_date_convention.label">
+        <source>form.end_date_convention.label</source>
+        <target>La date de fin est</target>
+      </trans-unit>
+      <trans-unit id="end_date_convention.exclusive">
+        <source>end_date_convention.exclusive</source>
+        <target>la date de restitution (le leasing court jusqu'à ce jour exclu)</target>
+      </trans-unit>
+      <trans-unit id="end_date_convention.inclusive">
+        <source>end_date_convention.inclusive</source>
+        <target>le dernier jour du leasing</target>
+      </trans-unit>
+      <trans-unit id="form.unit.label">
+        <source>form.unit.label</source>
+        <target>Unité de distance</target>
+      </trans-unit>
+      <trans-unit id="form.allowance_basis.label">
+        <source>form.allowance_basis.label</source>
+        <target>Le kilométrage autorisé est</target>
+      </trans-unit>
+      <trans-unit id="allowance_basis.per_year">
+        <source>allowance_basis.per_year</source>
+        <target>par an</target>
+      </trans-unit>
+      <trans-unit id="allowance_basis.total">
+        <source>allowance_basis.total</source>
+        <target>pour toute la durée</target>
+      </trans-unit>
+      <trans-unit id="form.allowance.label">
+        <source>form.allowance.label</source>
+        <target>Kilométrage autorisé</target>
+      </trans-unit>
+      <trans-unit id="form.start_odometer.label">
+        <source>form.start_odometer.label</source>
+        <target>Compteur au début du leasing</target>
+      </trans-unit>
+      <trans-unit id="form.excess_cost.label">
+        <source>form.excess_cost.label</source>
+        <target>Coût par km excédentaire</target>
+      </trans-unit>
+      <trans-unit id="form.currency.label">
+        <source>form.currency.label</source>
+        <target>Devise</target>
+      </trans-unit>
+      <trans-unit id="form.tolerance.label">
+        <source>form.tolerance.label</source>
+        <target>Tolérance (%)</target>
+      </trans-unit>
+      <trans-unit id="form.submit">
+        <source>form.submit</source>
+        <target>Enregistrer les conditions</target>
+      </trans-unit>
+      <trans-unit id="flash.lease_saved">
+        <source>flash.lease_saved</source>
+        <target>Les conditions du leasing ont été enregistrées.</target>
+      </trans-unit>
+      <trans-unit id="rejected.inconsistent_readings">
+        <source>rejected.inconsistent_readings</source>
+        <target>Ces conditions ne correspondent pas aux relevés enregistrés, par exemple un compteur de départ supérieur à un relevé.</target>
+      </trans-unit>
+      <trans-unit id="assessment.no_contract">
+        <source>assessment.no_contract</source>
+        <target>Enregistrez les conditions pour voir la projection.</target>
+      </trans-unit>
+      <trans-unit id="assessment.no_data">
+        <source>assessment.no_data</source>
+        <target>Aucun relevé après le début du leasing.</target>
+      </trans-unit>
+      <trans-unit id="assessment.risk">
+        <source>assessment.risk</source>
+        <target>Niveau de risque</target>
+      </trans-unit>
+      <trans-unit id="risk.ok">
+        <source>risk.ok</source>
+        <target>OK</target>
+      </trans-unit>
+      <trans-unit id="risk.watch">
+        <source>risk.watch</source>
+        <target>À surveiller</target>
+      </trans-unit>
+      <trans-unit id="risk.over">
+        <source>risk.over</source>
+        <target>Au-dessus du kilométrage</target>
+      </trans-unit>
+      <trans-unit id="assessment.allowed_to_date">
+        <source>assessment.allowed_to_date</source>
+        <target>Autorisé à ce jour (km)</target>
+      </trans-unit>
+      <trans-unit id="assessment.projected_end">
+        <source>assessment.projected_end</source>
+        <target>Projeté en fin de leasing (km)</target>
+      </trans-unit>
+      <trans-unit id="assessment.projected_excess">
+        <source>assessment.projected_excess</source>
+        <target>Excédent projeté (km)</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

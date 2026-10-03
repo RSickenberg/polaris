@@ -15,13 +15,13 @@ final class TranslationFilesTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->directory = sys_get_temp_dir().'/polaris-translations-'.bin2hex(random_bytes(4));
+        $this->directory = sys_get_temp_dir() . '/polaris-translations-' . bin2hex(random_bytes(4));
         mkdir($this->directory);
     }
 
     protected function tearDown(): void
     {
-        array_map(unlink(...), glob($this->directory.'/*') ?: []);
+        array_map(unlink(...), glob($this->directory . '/*') ?: []);
         rmdir($this->directory);
     }
 
@@ -30,7 +30,7 @@ final class TranslationFilesTest extends TestCase
      */
     public function testEveryEnglishKeyIsTranslatedToFrench(): void
     {
-        self::assertSame([], new TranslationFilesChecker(\dirname(__DIR__, 3).'/translations')->check('fr'));
+        self::assertSame([], new TranslationFilesChecker(\dirname(__DIR__, 3) . '/translations')->check('fr'));
     }
 
     public function testAMissingFrenchKeyIsReported(): void

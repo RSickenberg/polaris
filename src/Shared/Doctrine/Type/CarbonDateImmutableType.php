@@ -49,7 +49,7 @@ final class CarbonDateImmutableType extends DateImmutableType
         }
 
         try {
-            $date = CarbonImmutable::createFromFormat('!'.$platform->getDateFormatString(), $value, 'UTC');
+            $date = CarbonImmutable::createFromFormat('!' . $platform->getDateFormatString(), $value, 'UTC');
         } catch (\InvalidArgumentException $exception) {
             throw InvalidFormat::new($value, self::class, $platform->getDateFormatString(), $exception);
         }

@@ -6,6 +6,7 @@ namespace Polaris\Tests\Unit\Lease\Service;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Polaris\Lease\Domain\AllowanceBasis;
 use Polaris\Lease\Domain\EndDateConvention;
 use Polaris\Lease\Entity\LeaseContract;
 use Polaris\Lease\Form\Model\LeaseContractData;
@@ -38,11 +39,32 @@ final class LeaseContractFactoryTest extends TestCase
         self::assertSame(250, $contract->getTolerance()->basisPoints());
     }
 
+    public function testATotalAllowanceIsNotScaledByTheTerm(): void
+    {
+        $data = self::data();
+        $data->allowanceBasis = AllowanceBasis::Total;
+        $data->allowance = 100_000;
+
+        $terms = new LeaseContractFactory()->terms($data);
+
+        self::assertSame(100_000_000, $terms->allowance->total()->metres());
+    }
+
+    public function testIncompleteDataIsRefused(): void
+    {
+        $data = self::data();
+        $data->allowance = null;
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        new LeaseContractFactory()->terms($data);
+    }
+
     public function testConvertsMilesToMetres(): void
     {
         $data = self::data();
         $data->distanceUnit = DistanceUnit::Mile;
-        $data->allowancePerYear = 10_000;
+        $data->allowance = 10_000;
         $data->startOdometer = 7;
 
         $contract = new LeaseContractFactory()->create(new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3'), $data);
@@ -77,7 +99,7 @@ final class LeaseContractFactoryTest extends TestCase
         $data->startDate = new \DateTimeImmutable('2026-01-15');
         $data->endDate = new \DateTimeImmutable('2029-01-14');
         $data->endDateConvention = EndDateConvention::Inclusive;
-        $data->allowancePerYear = 15_000;
+        $data->allowance = 15_000;
         $data->startOdometer = 12;
         $data->excessCostPerKm = '0.12';
         $data->currency = Currency::CHF;

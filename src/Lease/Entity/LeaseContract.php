@@ -26,6 +26,7 @@ use Symfony\Component\Uid\Ulid;
  * take and return the Domain value objects, which validate every value.
  */
 #[ORM\Entity]
+#[ORM\UniqueConstraint(name: 'uniq_lease_contract_vehicle', columns: ['vehicle_id'])]
 class LeaseContract
 {
     #[ORM\Id]
@@ -68,12 +69,25 @@ class LeaseContract
         Money $excessCostPerKm,
         Tolerance $tolerance,
     ) {
+        $this->id = new Ulid();
+        $this->vehicle = $vehicle;
+        $this->updateTerms($term, $allowance, $startOdometer, $excessCostPerKm, $tolerance);
+    }
+
+    /**
+     * Replaces the terms in place: a vehicle has one contract, and an edit corrects it.
+     */
+    public function updateTerms(
+        LeaseTerm $term,
+        Allowance $allowance,
+        Distance $startOdometer,
+        Money $excessCostPerKm,
+        Tolerance $tolerance,
+    ): void {
         if ($excessCostPerKm->isNegative()) {
             throw new \InvalidArgumentException('The excess cost per km cannot be negative.');
         }
 
-        $this->id = new Ulid();
-        $this->vehicle = $vehicle;
         $this->startDate = $term->start();
         $this->endDate = $term->end();
         $this->endDateConvention = $term->endDateConvention();

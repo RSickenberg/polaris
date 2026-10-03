@@ -21,6 +21,10 @@ make sf ARGS="polaris:odometer:add 7600 --unit=mi --at=2026-10-01T08:00 --vehicl
 
 or on `/vehicles/{id}/readings`, which also lists the history, newest first. A value lower than the previous reading is rejected; a reading dated in the past (a backfill) must fit between the readings around it, and an equal value is accepted. Until the user's time zone exists, dates are entered and shown in UTC.
 
+## Lease terms
+
+Enter or edit the lease on `/vehicles/{id}/lease`: start and end dates (the end date is either the return day or the last day of the lease, and the lease must last a whole number of months), the allowance (per year or for the whole term, in km or miles), the odometer at the start, the excess cost per km with its currency (CHF, EUR, GBP or USD) and the tolerance (0 to 50 %). A vehicle has one contract, and an edit overwrites it. Distances are stored in metres and the cost in minor units. Saving recomputes the projection with the recorded readings, and terms that contradict a reading (a start odometer above it, for example) are refused whole. The user's time zone comes with the login (#21).
+
 ## How the projection works
 
 Every figure is taken at the latest odometer reading after the lease start (even past the lease end, if the car keeps driving), because nothing is known about the distance driven since:

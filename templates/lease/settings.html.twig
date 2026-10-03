@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'page.settings.title'|trans({'%vehicle%': vehicle.name}, 'lease') }}{% endblock %}
+
+{% block body %}
+    <h1>{{ 'page.settings.title'|trans({'%vehicle%': vehicle.name}, 'lease') }}</h1>
+
+    {% for message in app.flashes('success') %}
+        <p role="status">{{ message }}</p>
+    {% endfor %}
+
+    {{ form(form) }}
+
+    <h2>{{ 'page.settings.assessment'|trans(domain='lease') }}</h2>
+    {% if assessment is null %}
+        <p>{{ 'assessment.no_contract'|trans(domain='lease') }}</p>
+    {% elseif assessment.riskLevel is not defined %}
+        <p>{{ 'assessment.no_data'|trans(domain='lease') }}</p>
+    {% else %}
+        <dl id="assessment">
+            <dt>{{ 'assessment.risk'|trans(domain='lease') }}</dt>
+            <dd data-risk="{{ assessment.riskLevel.value }}">{{ ('risk.' ~ assessment.riskLevel.value)|trans(domain='lease') }}</dd>
+            <dt>{{ 'assessment.allowed_to_date'|trans(domain='lease') }}</dt>
+            <dd>{{ (assessment.projection.allowedToDate.metres / 1000)|format_number({fraction_digit: 1}) }}</dd>
+            <dt>{{ 'assessment.projected_end'|trans(domain='lease') }}</dt>
+            <dd>{{ (assessment.projection.projectedAtEnd.metres / 1000)|format_number({fraction_digit: 1}) }}</dd>
+            <dt>{{ 'assessment.projected_excess'|trans(domain='lease') }}</dt>
+            <dd>{{ (assessment.projectedExcess.metres / 1000)|format_number({fraction_digit: 1}) }}</dd>
+        </dl>
+    {% endif %}
+{% endblock %}
