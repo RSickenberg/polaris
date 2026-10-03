@@ -35,7 +35,7 @@ final class OdometerReadingType extends AbstractType
             ->add('distanceUnit', EnumType::class, [
                 'label' => 'form.unit.label',
                 'class' => DistanceUnit::class,
-                'choice_label' => static fn (DistanceUnit $unit): string => 'unit.'.$unit->value,
+                'choice_label' => static fn (DistanceUnit $unit): string => 'unit.' . $unit->value,
                 'choice_translation_domain' => 'shared',
             ])
             ->add('save', SubmitType::class, ['label' => 'form.submit']);

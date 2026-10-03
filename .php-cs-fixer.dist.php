@@ -21,6 +21,7 @@ return new PhpCsFixer\Config()
         '@Symfony:risky' => true,
         '@PHP8x5Migration' => true,
         '@PHP8x5Migration:risky' => true,
+        'concat_space' => ['spacing' => 'one'],
     ])
     ->setFinder($finder)
     ->setCacheFile(__DIR__.'/var/cache/php-cs-fixer/.php-cs-fixer.cache')

@@ -23,7 +23,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 final class LeaseContractData
 {
-    /** Far above any real lease, and low enough for the projection to stay within integer range. */
+    /** Far above any real lease, and low enough for the projection to stay within integer range in the unit of the user. */
     public const int MAX_ALLOWANCE = 500_000;
     public const int MAX_ODOMETER = 5_000_000;
 
@@ -39,13 +39,13 @@ final class LeaseContractData
 
     public AllowanceBasis $allowanceBasis = AllowanceBasis::PerYear;
 
-    /** In {@see $distanceUnit}, per year or in total as {@see $allowanceBasis} says. */
+    /** In {@see $distanceUnit} (km or mi, as the user chose), per year or in total as {@see $allowanceBasis} says. */
     #[Assert\NotNull]
     #[Assert\Positive]
     #[Assert\LessThanOrEqual(self::MAX_ALLOWANCE)]
     public int|float|null $allowance = null;
 
-    /** In {@see $distanceUnit}. */
+    /** In {@see $distanceUnit} (km or mi, as the user chose). */
     #[Assert\NotNull]
     #[Assert\PositiveOrZero]
     #[Assert\LessThanOrEqual(self::MAX_ODOMETER)]
@@ -92,6 +92,28 @@ final class LeaseContractData
         $data->tolerancePercent = $contract->getTolerance()->percent();
 
         return $data;
+    }
+
+    /**
+     * Whether every required field is filled, which validation guarantees.
+     *
+     * @phpstan-assert-if-true !null $this->startDate
+     * @phpstan-assert-if-true !null $this->endDate
+     * @phpstan-assert-if-true !null $this->allowance
+     * @phpstan-assert-if-true !null $this->startOdometer
+     * @phpstan-assert-if-true !null $this->excessCostPerKm
+     * @phpstan-assert-if-true !null $this->currency
+     * @phpstan-assert-if-true !null $this->tolerancePercent
+     */
+    public function isComplete(): bool
+    {
+        return null !== $this->startDate
+            && null !== $this->endDate
+            && null !== $this->allowance
+            && null !== $this->startOdometer
+            && null !== $this->excessCostPerKm
+            && null !== $this->currency
+            && null !== $this->tolerancePercent;
     }
 
     #[Assert\Callback]

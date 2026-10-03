@@ -29,7 +29,12 @@ final class LeaseSettingsController extends AbstractController
     public function settings(Request $request, #[MapEntity(id: 'id')] Vehicle $vehicle): Response
     {
         $contract = $this->leaseTerms->find($vehicle);
-        $form = $this->createForm(LeaseContractType::class, null !== $contract ? LeaseContractData::fromContract($contract) : new LeaseContractData());
+        $form = $this->createForm(
+            LeaseContractType::class,
+            null !== $contract ?
+                LeaseContractData::fromContract($contract) :
+                new LeaseContractData()
+        );
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -39,7 +44,9 @@ final class LeaseSettingsController extends AbstractController
 
                 return $this->redirectToRoute('lease_settings', ['id' => $vehicle->getId()->toBase32()]);
             } catch (LeaseTermsRejected $rejected) {
-                $form->get('startOdometer')->addError(new FormError($this->translator->trans($rejected->getMessage(), domain: 'lease')));
+                $form
+                    ->get('startOdometer')
+                    ->addError(new FormError($this->translator->trans($rejected->getMessage(), domain: 'lease')));
             }
         }
 

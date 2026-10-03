@@ -58,10 +58,23 @@ final readonly class LeaseTermsService
 
         $contract = $this->contracts->findForVehicle($vehicle);
         if (null === $contract) {
-            $contract = new LeaseContract($vehicle, $terms->term, $terms->allowance, $terms->startOdometer, $terms->excessCostPerKm, $terms->tolerance);
+            $contract = new LeaseContract(
+                $vehicle,
+                $terms->term,
+                $terms->allowance,
+                $terms->startOdometer,
+                $terms->excessCostPerKm,
+                $terms->tolerance
+            );
             $this->entityManager->persist($contract);
         } else {
-            $contract->updateTerms($terms->term, $terms->allowance, $terms->startOdometer, $terms->excessCostPerKm, $terms->tolerance);
+            $contract->updateTerms(
+                $terms->term,
+                $terms->allowance,
+                $terms->startOdometer,
+                $terms->excessCostPerKm,
+                $terms->tolerance
+            );
         }
 
         $this->entityManager->flush();
@@ -80,7 +93,16 @@ final readonly class LeaseTermsService
             return null;
         }
 
-        return $this->assessTerms(new LeaseTerms($contract->getTerm(), $contract->getAllowance(), $contract->getStartOdometer(), $contract->getExcessCostPerKm(), $contract->getTolerance()), $this->samples($vehicle));
+        return $this->assessTerms(
+            new LeaseTerms(
+                $contract->getTerm(),
+                $contract->getAllowance(),
+                $contract->getStartOdometer(),
+                $contract->getExcessCostPerKm(),
+                $contract->getTolerance()
+            ),
+            $this->samples($vehicle)
+        );
     }
 
     /**
@@ -89,7 +111,14 @@ final readonly class LeaseTermsService
     private function assessTerms(LeaseTerms $terms, array $samples): LeaseAssessment|NoData
     {
         try {
-            return $this->assessor->assess($terms->term, $terms->allowance, $terms->startOdometer, $terms->excessCostPerKm, $terms->tolerance, $samples);
+            return $this->assessor->assess(
+                $terms->term,
+                $terms->allowance,
+                $terms->startOdometer,
+                $terms->excessCostPerKm,
+                $terms->tolerance,
+                $samples
+            );
         } catch (\InvalidArgumentException $e) {
             throw new LeaseTermsRejected(previous: $e);
         }
@@ -100,6 +129,9 @@ final readonly class LeaseTermsService
      */
     private function samples(Vehicle $vehicle): array
     {
-        return array_map(static fn (OdometerReading $reading): OdometerSample => $reading->toSample(), $this->readings->history($vehicle));
+        return array_map(
+            static fn (OdometerReading $reading): OdometerSample => $reading->toSample(),
+            $this->readings->history($vehicle)
+        );
     }
 }

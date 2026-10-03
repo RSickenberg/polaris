@@ -28,7 +28,7 @@ final readonly class Money
     {
         $digits = $currency->minorUnits();
 
-        if (1 !== preg_match('/^(-?)(\d{1,15})(?:\.(\d{1,'.$digits.'}))?$/', $amount, $matches)) {
+        if (1 !== preg_match('/^(-?)(\d{1,15})(?:\.(\d{1,' . $digits . '}))?$/', $amount, $matches)) {
             throw new \InvalidArgumentException(\sprintf('"%s" is not a valid %s amount with at most %d decimals.', $amount, $currency->value, $digits));
         }
 
@@ -61,7 +61,7 @@ final readonly class Money
         $absolute = str_pad((string) abs($this->minorAmount), $digits + 1, '0', \STR_PAD_LEFT);
 
         return ($this->isNegative() ? '-' : '')
-            .substr($absolute, 0, -$digits).'.'.substr($absolute, -$digits);
+            . substr($absolute, 0, -$digits) . '.' . substr($absolute, -$digits);
     }
 
     public function multiply(int $factor): self

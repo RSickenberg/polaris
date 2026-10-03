@@ -35,10 +35,7 @@ final class LeaseContractFactory
      */
     public function terms(LeaseContractData $data): LeaseTerms
     {
-        if (null === $data->startDate || null === $data->endDate || null === $data->allowance
-            || null === $data->startOdometer || null === $data->excessCostPerKm || null === $data->currency
-            || null === $data->tolerancePercent
-        ) {
+        if (!$data->isComplete()) {
             throw new \InvalidArgumentException('The lease contract data is incomplete: validate it before creating the contract.');
         }
 

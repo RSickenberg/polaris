@@ -32,19 +32,19 @@ final class LeaseContractType extends AbstractType
             ->add('endDateConvention', EnumType::class, [
                 'label' => 'form.end_date_convention.label',
                 'class' => EndDateConvention::class,
-                'choice_label' => static fn (EndDateConvention $convention): string => 'end_date_convention.'.$convention->value,
+                'choice_label' => static fn (EndDateConvention $convention): string => 'end_date_convention.' . $convention->value,
                 'expanded' => true,
             ])
             ->add('distanceUnit', EnumType::class, [
                 'label' => 'form.unit.label',
                 'class' => DistanceUnit::class,
-                'choice_label' => static fn (DistanceUnit $unit): string => 'unit.'.$unit->value,
+                'choice_label' => static fn (DistanceUnit $unit): string => 'unit.' . $unit->value,
                 'choice_translation_domain' => 'shared',
             ])
             ->add('allowanceBasis', EnumType::class, [
                 'label' => 'form.allowance_basis.label',
                 'class' => AllowanceBasis::class,
-                'choice_label' => static fn (AllowanceBasis $basis): string => 'allowance_basis.'.$basis->value,
+                'choice_label' => static fn (AllowanceBasis $basis): string => 'allowance_basis.' . $basis->value,
             ])
             ->add('allowance', NumberType::class, ['label' => 'form.allowance.label', 'html5' => true, 'attr' => ['step' => 'any']])
             ->add('startOdometer', NumberType::class, ['label' => 'form.start_odometer.label', 'html5' => true, 'attr' => ['step' => 'any']])
