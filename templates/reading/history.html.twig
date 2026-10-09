@@ -2,7 +2,7 @@
 
 {% block title %}{{ 'page.history.title'|trans({'%vehicle%': vehicle.name}, 'reading') }}{% endblock %}
 
-{% block body %}
+{% block main %}
     <h1>{{ 'page.history.title'|trans({'%vehicle%': vehicle.name}, 'reading') }}</h1>
 
     {% for message in app.flashes('success') %}

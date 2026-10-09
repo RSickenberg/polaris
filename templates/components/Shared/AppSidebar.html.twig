@@ -1,0 +1,32 @@
+{%- props vehicle = null -%}
+{% set route = app.request.attributes.get('_route') %}
+<twig:Sidebar collapsible="offcanvas">
+    <twig:Sidebar:Header>
+        <div class="flex h-8 items-center gap-2 px-2 font-semibold">
+            <span class="flex size-6 items-center justify-center rounded-md bg-sidebar-primary text-xs text-sidebar-primary-foreground" aria-hidden="true">P</span>
+            <span>Polaris</span>
+        </div>
+    </twig:Sidebar:Header>
+    <twig:Sidebar:Content>
+        {% if vehicle is not null %}
+            <twig:Sidebar:Group>
+                <nav aria-label="{{ 'nav.label'|trans(domain='shared') }}">
+                    <twig:Sidebar:Menu>
+                        <twig:Sidebar:MenuItem>
+                            <twig:Sidebar:MenuButton as="a" href="{{ path('reading_history', {id: vehicle.id.toBase32()}) }}" :active="'reading_history' == route">
+                                <twig:ux:icon name="lucide:gauge" aria-hidden="true" />
+                                <span>{{ 'nav.readings'|trans(domain='shared') }}</span>
+                            </twig:Sidebar:MenuButton>
+                        </twig:Sidebar:MenuItem>
+                        <twig:Sidebar:MenuItem>
+                            <twig:Sidebar:MenuButton as="a" href="{{ path('lease_settings', {id: vehicle.id.toBase32()}) }}" :active="'lease_settings' == route">
+                                <twig:ux:icon name="lucide:file-text" aria-hidden="true" />
+                                <span>{{ 'nav.lease'|trans(domain='shared') }}</span>
+                            </twig:Sidebar:MenuButton>
+                        </twig:Sidebar:MenuItem>
+                    </twig:Sidebar:Menu>
+                </nav>
+            </twig:Sidebar:Group>
+        {% endif %}
+    </twig:Sidebar:Content>
+</twig:Sidebar>

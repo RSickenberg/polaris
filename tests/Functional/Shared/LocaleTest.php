@@ -46,7 +46,7 @@ final class LocaleTest extends WebTestCase
         self::assertResponseHeaderSame('Content-Language', 'fr');
         self::assertSelectorExists('html[lang="fr"]');
         self::assertSelectorTextContains('h1', 'Historique du compteur, Model 3');
-        self::assertSelectorTextContains('h2', 'Ajouter un relevé');
+        self::assertSelectorTextContains('main h2', 'Ajouter un relevé');
         self::assertSelectorExists('button:contains("Ajouter le relevé")');
         $cells = $this->client->getCrawler()->filter('tbody td')->each(static fn ($cell): string => self::text($cell->text()));
         self::assertSame(['1 oct. 2026, 08:00 UTC', '12 345', 'Manuelle'], $cells);

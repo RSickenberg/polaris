@@ -2,12 +2,27 @@
 <html lang="{{ app.locale }}">
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="color-scheme" content="light dark">
         <title>{% block title %}Polaris{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        {# Applies the saved theme before the first paint, so there is no flash of the wrong one. Keep in sync with assets/controllers/theme_controller.js. #}
+        <script>
+            (function () {
+                var theme = 'system';
+                try {
+                    theme = localStorage.getItem('polaris:theme') || 'system';
+                } catch (e) {}
+                var dark = 'dark' === theme || ('light' !== theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                document.documentElement.classList.toggle('dark', dark);
+            })();
+        </script>
         {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
         {% endblock %}
 
         {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
 
         {% set frankenphp_hot_reload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
@@ -18,6 +33,25 @@
         {% endif %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        {# A block cannot sit inside a <twig:...> tag, so the page content is rendered here and placed below. #}
+        {% set page %}{% block main %}{% endblock %}{% endset %}
+        <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm">{{ 'layout.skip'|trans(domain='shared') }}</a>
+        <twig:Sidebar:Provider>
+            <twig:Shared:AppSidebar :vehicle="vehicle is defined ? vehicle : null" />
+            <twig:Sidebar:Inset id="main-content">
+                <header class="flex h-12 shrink-0 items-center gap-2 border-b border-border px-4">
+                    <twig:Sidebar:Trigger>
+                        <twig:ux:icon name="lucide:panel-left" aria-hidden="true" />
+                    </twig:Sidebar:Trigger>
+                    <div class="ms-auto flex items-center gap-1">
+                        <twig:Shared:LocaleSwitcher />
+                        <twig:Shared:ThemeToggle />
+                    </div>
+                </header>
+                <div class="mx-auto w-full max-w-4xl p-4 md:p-6">
+                    {{ page }}
+                </div>
+            </twig:Sidebar:Inset>
+        </twig:Sidebar:Provider>
     </body>
 </html>
