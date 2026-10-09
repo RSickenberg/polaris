@@ -114,6 +114,7 @@ make test                       # PHPUnit, options via ARGS="--filter=..." (prep
 make ci                         # every CI check: PHP-CS-Fixer, PHPStan, Deptrac, PHPUnit
 make migrate                    # apply the pending Doctrine migrations
 make diff                       # generate a migration from the entity mapping
+make seed                       # reset the dev database and load sample vehicles, leases and readings
 make test-db                    # create and migrate the polaris_test database
 make cs-fix                     # apply the coding standard
 make sf ARGS="about"            # any bin/console command

@@ -22,6 +22,16 @@ services:
                 factory: ['Polaris\Lease\Domain\RecentPaceWeight', 'fromBasisPoints']
                 arguments: ['%polaris.lease.recent_pace_weight%']
 
+when@dev:
+    services:
+        # Development data (make seed). The fixtures bundle is not installed in production.
+        _defaults:
+            autowire: true
+            autoconfigure: true
+
+        Polaris\Fixtures\:
+            resource: '../fixtures/'
+
 when@test:
     services:
         # Nothing injects these yet, so the compiler would remove them before the functional
