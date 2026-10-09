@@ -99,12 +99,17 @@ make start
 
 `make start` runs `docker compose build --pull --no-cache` then `docker compose up --detach --wait`. The `Makefile` wraps the Docker workflow and runs every PHP command inside the `php` container, never with the host PHP; `make` alone lists all targets.
 
-Open https://localhost and accept the self-signed certificate: the Symfony welcome page answers. The first start runs `composer install` if `vendor/` is empty.
+Open https://localhost and accept the self-signed certificate. The first start runs `composer install` if `vendor/` is empty.
+
+The `tailwind` service rebuilds the stylesheet whenever a template or `assets/styles/app.css` changes, so there is no front-end build step to run by hand. The Tailwind binary and the built CSS live in the `tailwind` volume (`var/tailwind`); the first start downloads the binary. The pages show the stylesheet only once it is built, so run `make tailwind` before `make test` on a fresh checkout (the `test` and `ci` targets do it for you).
+
+The interface follows the browser language (English or French) until you pick one with the language switcher, which keeps the choice in a cookie. The light, dark or system theme is kept in the browser only.
 
 Everyday commands:
 
 ```
 make sh                         # shell in the php container
+make tailwind                   # build the CSS once (the tailwind service watches it in dev)
 make test                       # PHPUnit, options via ARGS="--filter=..." (prepares the test database first)
 make ci                         # every CI check: PHP-CS-Fixer, PHPStan, Deptrac, PHPUnit
 make migrate                    # apply the pending Doctrine migrations
@@ -148,9 +153,9 @@ CI (`.github/workflows/ci.yml`) runs on every pull request and on `main`, one jo
 
 ## Stack
 
-In place: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine ORM and Migrations, Twig and Form, Carbon, ULID identifiers ([ADR 0002](docs/adr/0002-ulid-identifiers.md)). All dates are handled in UTC ([ADR 0003](docs/adr/0003-utc-dates.md)).
+In place: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine ORM and Migrations, Twig and Form, Carbon, Tailwind CSS 4 ([TailwindBundle](https://symfony.com/bundles/TailwindBundle/current/index.html)) on AssetMapper with the Symfony UX Toolkit Shadcn kit (Twig components in `templates/components/`, Stimulus, Turbo, UX Icons with Lucide icons committed in `assets/icons/`), a responsive app shell with a dark mode, English and French, ULID identifiers ([ADR 0002](docs/adr/0002-ulid-identifiers.md)). All dates are handled in UTC ([ADR 0003](docs/adr/0003-utc-dates.md)).
 
-Planned: Redis for Messenger queues, Lock and Cache; Tailwind CSS with the Symfony UX Toolkit Shadcn kit; Flowbite charts.
+Planned: Redis for Messenger queues, Lock and Cache; Flowbite charts.
 
 ## Related repositories
 
