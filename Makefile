@@ -12,7 +12,7 @@ SYMFONY  = $(PHP) bin/console
 # Misc
 .DEFAULT_GOAL = help
 ARGS          =
-.PHONY        : help build up start down logs sh install composer vendor sf cc migrate diff test-db test phpstan cs cs-fix deptrac translations ci release
+.PHONY        : help build up start down logs sh install composer vendor sf cc tailwind migrate diff test-db test phpstan cs cs-fix deptrac translations ci release
 
 ## —— 🧭 The Polaris Makefile 🧭 ——————————————————————————————————
 help: ## Outputs this help screen
@@ -54,6 +54,9 @@ sf: ## Run bin/console, pass the command with ARGS, e.g. make sf ARGS="debug:rou
 cc: ## Clear the Symfony cache
 	@$(SYMFONY) cache:clear
 
+tailwind: ## Build the Tailwind CSS once (the tailwind service keeps it up to date in dev, tests need it)
+	@$(SYMFONY) tailwind:build
+
 ## —— Database 🐘 ——————————————————————————————————————————————
 migrate: ## Apply the pending Doctrine migrations
 	@$(SYMFONY) doctrine:migrations:migrate --no-interaction --all-or-nothing
@@ -66,7 +69,7 @@ test-db: ## Create the test database if needed and apply the migrations to it
 	@$(SYMFONY) doctrine:migrations:migrate --env=test --no-interaction --all-or-nothing
 
 ## —— Quality ✅ ——————————————————————————————————————————————
-test: test-db ## Run the test suite, pass PHPUnit options with ARGS, e.g. make test ARGS="--filter=Kernel"
+test: test-db tailwind ## Run the test suite, pass PHPUnit options with ARGS, e.g. make test ARGS="--filter=Kernel"
 	@$(PHP) bin/phpunit $(ARGS)
 
 phpstan: ## Run PHPStan (level max) after warming up the dev container, as CI does
@@ -84,7 +87,7 @@ deptrac: ## Check the module boundaries of ADR 0001 (Deptrac), as CI does
 translations: ## Lint the XLIFF files and fail on a missing French key, as CI does
 	@$(COMPOSER) translations
 
-ci: test-db ## Run every check CI runs: coding standard, PHPStan, Deptrac, translations, tests
+ci: test-db tailwind ## Run every check CI runs: coding standard, PHPStan, Deptrac, translations, tests
 	@$(COMPOSER) ci
 
 ## —— Release 📦 ——————————————————————————————————————————————

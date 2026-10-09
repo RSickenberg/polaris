@@ -104,6 +104,15 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
+      # The pages link the compiled stylesheet, which the tests need. The binary is cached.
+      - uses: actions/cache@v6
+        with:
+          path: var/tailwind
+          key: tailwind-${{ runner.os }}-${{ hashFiles('config/packages/symfonycasts_tailwind.yaml') }}
+
+      - name: Build the Tailwind CSS
+        run: php bin/console tailwind:build
+
       - name: Create the test database and apply the migrations
         run: |
           php bin/console doctrine:database:create --env=test --no-interaction
