@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 $finder = new PhpCsFixer\Finder()
     ->in(__DIR__)
-    ->exclude('var')
+    ->exclude([
+        'assets/vendor',
+        'var',
+    ])
     ->notPath([
         'config/bundles.php',
         'config/reference.php',
+        // Rewritten by the importmap commands.
+        'importmap.php',
     ])
     ->append([
         __DIR__.'/bin/console',
