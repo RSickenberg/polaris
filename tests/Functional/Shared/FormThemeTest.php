@@ -79,6 +79,16 @@ final class FormThemeTest extends WebTestCase
     }
 
     #[DataProvider('pages')]
+    public function testRequiredLabelsShowARedAsterisk(string $page, string $locale): void
+    {
+        $crawler = $this->get($page, $locale);
+
+        $labels = $crawler->filter('form label[for]');
+        self::assertCount($labels->count(), $crawler->filter('form label[for] span.text-destructive[aria-hidden=true]'));
+        self::assertSame('*', $crawler->filter('form label[for] span.text-destructive')->first()->text());
+    }
+
+    #[DataProvider('pages')]
     public function testFormKeepsItsTokenAndTranslatedSubmitButton(string $page, string $locale): void
     {
         $crawler = $this->get($page, $locale);
