@@ -33,7 +33,6 @@ final class LeaseContractType extends AbstractType
                 'label' => 'form.end_date_convention.label',
                 'class' => EndDateConvention::class,
                 'choice_label' => static fn (EndDateConvention $convention): string => 'end_date_convention.' . $convention->value,
-                'expanded' => true,
             ])
             ->add('distanceUnit', EnumType::class, [
                 'label' => 'form.unit.label',

@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 #[AsAlias(PreferredLocaleProvider::class)]
 final readonly class CookiePreferredLocaleProvider implements PreferredLocaleProvider
 {
-    public const COOKIE = 'polaris_locale';
+    public const string COOKIE = 'polaris_locale';
 
     public function __construct(private RequestStack $requestStack)
     {
