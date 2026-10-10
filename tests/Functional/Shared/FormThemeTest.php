@@ -68,6 +68,17 @@ final class FormThemeTest extends WebTestCase
     }
 
     #[DataProvider('pages')]
+    public function testRequiredFieldsKeepTheRequiredAttribute(string $page, string $locale): void
+    {
+        $crawler = $this->get($page, $locale);
+
+        // A select without placeholder is never marked required: Symfony's default theme drops it too, as an option is always chosen.
+        $controls = $crawler->filter('form input:not([type=hidden])');
+        self::assertGreaterThan(1, $controls->count());
+        self::assertCount($controls->count(), $crawler->filter('form input[required]:not([type=hidden])'));
+    }
+
+    #[DataProvider('pages')]
     public function testFormKeepsItsTokenAndTranslatedSubmitButton(string $page, string $locale): void
     {
         $crawler = $this->get($page, $locale);
