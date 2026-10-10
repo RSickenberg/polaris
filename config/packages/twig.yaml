@@ -1,5 +1,7 @@
 twig:
     file_name_pattern: '*.twig'
+    form_themes:
+        - 'shared/form_theme.html.twig'
     globals:
         # The language switcher lists them.
         enabled_locales: '%kernel.enabled_locales%'

@@ -1,0 +1,94 @@
+{# The global form theme, built on the kit components. Everything not overridden falls back to Symfony's div layout.
+   Symfony's form_row already computes `aria-describedby` (ids `<id>_help` and `<id>_error<n>`) and `aria-invalid` and hands them to the widget through `attr`: the blocks below only forward them. #}
+{% extends 'form_div_layout.html.twig' %}
+
+{% block form_widget_simple %}
+    {%- set type = type|default('text') -%}
+    {%- if type in ['hidden', 'file', 'range', 'color', 'checkbox', 'radio'] -%}
+        {{- parent() -}}
+    {%- else -%}
+        {%- set control = attr|merge({type: type, id: id, name: full_name, disabled: disabled, required: required}) -%}
+        {%- if value is not empty -%}
+            {%- set control = control|merge({value: value}) -%}
+        {%- endif -%}
+        {%- if translation_domain is not same as(false) -%}
+            {%- for key in ['placeholder', 'title'] -%}
+                {%- if control[key] is defined -%}
+                    {%- set control = control|merge({(key): control[key]|trans(attr_translation_parameters, translation_domain)}) -%}
+                {%- endif -%}
+            {%- endfor -%}
+        {%- endif -%}
+        <twig:Input {{ ...control }} />
+    {%- endif -%}
+{% endblock %}
+
+{% block form_widget_compound %}
+    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' flex flex-col gap-4')|trim}) -%}
+    {{- parent() -}}
+{% endblock %}
+
+{% block choice_widget_collapsed %}
+    {%- if required and placeholder is none and not placeholder_in_choices and not multiple and (attr.size is not defined or attr.size <= 1) -%}
+        {%- set required = false -%}
+    {%- endif -%}
+    {%- set control = attr|merge({id: id, name: full_name, disabled: disabled, required: required, multiple: multiple}) -%}
+    {%- set select_options -%}
+        {%- if placeholder is not none -%}
+            <option value=""{% if placeholder_attr|default({}) %}{% with {attr: placeholder_attr} %}{{ block('attributes') }}{% endwith %}{% endif %}{% if required and value is empty %} selected="selected"{% endif %}>{{ placeholder != '' ? (translation_domain is same as(false) ? placeholder : placeholder|trans({}, translation_domain)) }}</option>
+        {%- endif -%}
+        {%- if preferred_choices|length > 0 -%}
+            {%- set options = preferred_choices -%}
+            {%- set render_preferred_choices = true -%}
+            {{- block('choice_widget_options') -}}
+            {%- if choices|length > 0 and separator is not none -%}
+                {%- if separator_html is not defined or separator_html is same as(false) -%}
+                    <option disabled="disabled">{{ separator }}</option>
+                {%- else -%}
+                    {{ separator|raw }}
+                {%- endif -%}
+            {%- endif -%}
+        {%- endif -%}
+        {%- set options = choices -%}
+        {%- set render_preferred_choices = false -%}
+        {{- block('choice_widget_options') -}}
+    {%- endset -%}
+    {# The small size matches the height of the Input. #}
+    <twig:NativeSelect size="sm" {{ ...control }}>{{ select_options }}</twig:NativeSelect>
+{% endblock %}
+
+{% block button_widget %}
+    {%- set label_content -%}{{- block('form_label_content') -}}{%- endset -%}
+    <twig:Button {{ ...attr|merge({type: type|default('button'), id: id, name: full_name, disabled: disabled}) }}>{{ label_content }}</twig:Button>
+{% endblock %}
+
+{% block form_label %}
+    {%- if label is not same as(false) -%}
+        {%- if not compound -%}
+            {%- set label_attr = label_attr|merge({for: id}) -%}
+        {%- endif -%}
+        {%- set label_content -%}{{- block('form_label_content') -}}{%- endset -%}
+        <twig:Field:Label {{ ...label_attr }}>{{ label_content }}</twig:Field:Label>
+    {%- endif -%}
+{% endblock %}
+
+{% block form_help %}
+    {%- if help -%}
+        {%- set help_content -%}{{- block('form_help_content') -}}{%- endset -%}
+        <twig:Field:Description {{ ...help_attr|merge({id: id ~ '_help'}) }}>{{ help_content }}</twig:Field:Description>
+    {%- endif -%}
+{% endblock %}
+
+{% block form_errors %}
+    {%- for error in errors -%}
+        <twig:Field:Error id="{{ id ~ '_error' ~ loop.index }}">{{ error.message }}</twig:Field:Error>
+    {%- endfor -%}
+{% endblock %}
+
+{% block form_row_render %}
+    <twig:Field {{ ...row_attr|merge(errors|length > 0 ? {'data-invalid': 'true'} : {}) }}>
+        {{- form_label(form) -}}
+        {{- form_widget(form, widget_attr) -}}
+        {{- form_help(form) -}}
+        {{- form_errors(form) -}}
+    </twig:Field>
+{% endblock %}

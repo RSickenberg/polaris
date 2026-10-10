@@ -1,23 +1,27 @@
 {# The readings, newest first. Dates are stored in UTC and converted to `timeZone` (an IANA name) only here. Numbers and dates follow the active locale. #}
 {% if readings is empty %}
-    <p>{{ 'table.empty'|trans(domain='reading') }}</p>
+    <p class="text-sm text-muted-foreground">{{ 'table.empty'|trans(domain='reading') }}</p>
 {% else %}
-    <table>
-        <thead>
-            <tr>
-                <th>{{ 'table.read_at'|trans({'%timezone%': timeZone}, 'reading') }}</th>
-                <th>{{ 'table.odometer'|trans(domain='reading') }}</th>
-                <th>{{ 'table.source'|trans(domain='reading') }}</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for reading in readings %}
-                <tr>
-                    <td>{{ reading.readAt|localized_datetime(timeZone) }}</td>
-                    <td>{{ reading.odometer.in(enum('Polaris\\Shared\\Domain\\DistanceUnit').Kilometre)|format_number({max_fraction_digit: 1}) }}</td>
-                    <td>{{ ('source.' ~ reading.source.value)|trans(domain='reading') }}{% if reading.odometerRaw is not null %} ({{ (reading.odometerRaw * 1)|format_number({max_fraction_digit: 3}) }} {{ ('unit.' ~ reading.odometerRawUnit.value)|trans(domain='shared') }}){% endif %}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <twig:Card>
+        <twig:Card:Content>
+            <twig:Table>
+                <twig:Table:Header>
+                    <twig:Table:Row>
+                        <twig:Table:Head>{{ 'table.read_at'|trans({'%timezone%': timeZone}, 'reading') }}</twig:Table:Head>
+                        <twig:Table:Head>{{ 'table.odometer'|trans(domain='reading') }}</twig:Table:Head>
+                        <twig:Table:Head>{{ 'table.source'|trans(domain='reading') }}</twig:Table:Head>
+                    </twig:Table:Row>
+                </twig:Table:Header>
+                <twig:Table:Body>
+                    {% for reading in readings %}
+                        <twig:Table:Row>
+                            <twig:Table:Cell>{{ reading.readAt|localized_datetime(timeZone) }}</twig:Table:Cell>
+                            <twig:Table:Cell>{{ reading.odometer.in(enum('Polaris\\Shared\\Domain\\DistanceUnit').Kilometre)|format_number({max_fraction_digit: 1}) }}</twig:Table:Cell>
+                            <twig:Table:Cell>{{ ('source.' ~ reading.source.value)|trans(domain='reading') }}{% if reading.odometerRaw is not null %} ({{ (reading.odometerRaw * 1)|format_number({max_fraction_digit: 3}) }} {{ ('unit.' ~ reading.odometerRawUnit.value)|trans(domain='shared') }}){% endif %}</twig:Table:Cell>
+                        </twig:Table:Row>
+                    {% endfor %}
+                </twig:Table:Body>
+            </twig:Table>
+        </twig:Card:Content>
+    </twig:Card>
 {% endif %}

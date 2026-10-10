@@ -11,6 +11,7 @@ use Polaris\Shared\Domain\Distance;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\DomCrawler\Crawler;
 use Twig\Environment;
 
 /**
@@ -72,9 +73,9 @@ final class HistoryTableTimeZoneTest extends KernelTestCase
      */
     private function dates(string $html): array
     {
-        preg_match_all('#<tr>\s*<td>(.*?)</td>#s', $html, $matches);
+        $dates = new Crawler($html)->filter('tbody tr td:nth-child(1)')->each(static fn (Crawler $cell): string => $cell->text());
 
-        return array_map(static fn (string $date): string => preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', trim($date))) ?? '', $matches[1]);
+        return array_map(static fn (string $date): string => preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', trim($date))) ?? '', $dates);
     }
 
     /**
@@ -82,9 +83,9 @@ final class HistoryTableTimeZoneTest extends KernelTestCase
      */
     private function kilometres(string $html): array
     {
-        preg_match_all('#<td>[^<]*</td>\s*<td>([\d.,]+)</td>#', $html, $matches);
+        $values = new Crawler($html)->filter('tbody tr td:nth-child(2)')->each(static fn (Crawler $cell): string => $cell->text());
 
-        return array_map(static fn (string $value): float => (float) str_replace(',', '', $value), $matches[1]);
+        return array_map(static fn (string $value): float => (float) str_replace(',', '', $value), $values);
     }
 
     private static function reading(string $readAtUtc, int $km): OdometerReading

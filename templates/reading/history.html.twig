@@ -3,15 +3,15 @@
 {% block title %}{{ 'page.history.title'|trans({'%vehicle%': vehicle.name}, 'reading') }}{% endblock %}
 
 {% block main %}
-    <h1>{{ 'page.history.title'|trans({'%vehicle%': vehicle.name}, 'reading') }}</h1>
+    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.history.title'|trans({'%vehicle%': vehicle.name}, 'reading') }}</h1>
 
-    {% for message in app.flashes('success') %}
-        <p role="status">{{ message }}</p>
-    {% endfor %}
+    {{ include('shared/_flashes.html.twig') }}
 
-    <h2>{{ 'page.history.add'|trans(domain='reading') }}</h2>
-    {{ form(form) }}
+    <h2 class="mt-8 mb-3 text-lg font-semibold">{{ 'page.history.add'|trans(domain='reading') }}</h2>
+    <div class="max-w-lg">
+        {{ form(form) }}
+    </div>
 
-    <h2>{{ 'page.history.readings'|trans(domain='reading') }}</h2>
+    <h2 class="mt-8 mb-3 text-lg font-semibold">{{ 'page.history.readings'|trans(domain='reading') }}</h2>
     {{ include('reading/_table.html.twig') }}
 {% endblock %}

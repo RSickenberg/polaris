@@ -18,6 +18,10 @@
         <source>form.end_date.label</source>
         <target>End date</target>
       </trans-unit>
+      <trans-unit id="form.end_date.help">
+        <source>form.end_date.help</source>
+        <target>Whether this day counts depends on the choice below.</target>
+      </trans-unit>
       <trans-unit id="form.end_date_convention.label">
         <source>form.end_date_convention.label</source>
         <target>The end date is</target>
@@ -50,13 +54,25 @@
         <source>form.allowance.label</source>
         <target>Allowance</target>
       </trans-unit>
+      <trans-unit id="form.allowance.help">
+        <source>form.allowance.help</source>
+        <target>Counted per year or for the whole term, as chosen above.</target>
+      </trans-unit>
       <trans-unit id="form.start_odometer.label">
         <source>form.start_odometer.label</source>
         <target>Odometer at lease start</target>
       </trans-unit>
+      <trans-unit id="form.start_odometer.help">
+        <source>form.start_odometer.help</source>
+        <target>Odometer reading on the day the lease started, in the unit above.</target>
+      </trans-unit>
       <trans-unit id="form.excess_cost.label">
         <source>form.excess_cost.label</source>
         <target>Excess cost per km</target>
+      </trans-unit>
+      <trans-unit id="form.excess_cost.help">
+        <source>form.excess_cost.help</source>
+        <target>Price charged for each kilometre over the allowance.</target>
       </trans-unit>
       <trans-unit id="form.currency.label">
         <source>form.currency.label</source>
@@ -65,6 +81,10 @@
       <trans-unit id="form.tolerance.label">
         <source>form.tolerance.label</source>
         <target>Tolerance (%)</target>
+      </trans-unit>
+      <trans-unit id="form.tolerance.help">
+        <source>form.tolerance.help</source>
+        <target>Safety margin below the allowance, from 0 to 50. Once the projected distance enters this margin, the risk level turns to Watch. 0 means no margin.</target>
       </trans-unit>
       <trans-unit id="form.submit">
         <source>form.submit</source>

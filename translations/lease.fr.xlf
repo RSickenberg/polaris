@@ -18,6 +18,10 @@
         <source>form.end_date.label</source>
         <target>Date de fin</target>
       </trans-unit>
+      <trans-unit id="form.end_date.help">
+        <source>form.end_date.help</source>
+        <target>Le décompte de ce jour dépend du choix ci-dessous.</target>
+      </trans-unit>
       <trans-unit id="form.end_date_convention.label">
         <source>form.end_date_convention.label</source>
         <target>La date de fin est</target>
@@ -50,13 +54,25 @@
         <source>form.allowance.label</source>
         <target>Kilométrage autorisé</target>
       </trans-unit>
+      <trans-unit id="form.allowance.help">
+        <source>form.allowance.help</source>
+        <target>Comptée par an ou sur toute la durée, selon le choix ci-dessus.</target>
+      </trans-unit>
       <trans-unit id="form.start_odometer.label">
         <source>form.start_odometer.label</source>
         <target>Compteur au début du leasing</target>
       </trans-unit>
+      <trans-unit id="form.start_odometer.help">
+        <source>form.start_odometer.help</source>
+        <target>Relevé du compteur le jour du début du bail, dans l’unité ci-dessus.</target>
+      </trans-unit>
       <trans-unit id="form.excess_cost.label">
         <source>form.excess_cost.label</source>
         <target>Coût par km excédentaire</target>
+      </trans-unit>
+      <trans-unit id="form.excess_cost.help">
+        <source>form.excess_cost.help</source>
+        <target>Prix facturé pour chaque kilomètre au-delà du forfait.</target>
       </trans-unit>
       <trans-unit id="form.currency.label">
         <source>form.currency.label</source>
@@ -65,6 +81,10 @@
       <trans-unit id="form.tolerance.label">
         <source>form.tolerance.label</source>
         <target>Tolérance (%)</target>
+      </trans-unit>
+      <trans-unit id="form.tolerance.help">
+        <source>form.tolerance.help</source>
+        <target>Marge de sécurité sous le forfait, de 0 à 50. Dès que la distance projetée entre dans cette marge, le niveau de risque passe à « À surveiller ». 0 signifie aucune marge.</target>
       </trans-unit>
       <trans-unit id="form.submit">
         <source>form.submit</source>
