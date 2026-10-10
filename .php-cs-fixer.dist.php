@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 $finder = new PhpCsFixer\Finder()
     ->in(__DIR__)
-    ->exclude('var')
+    ->exclude([
+        'assets/vendor',
+        'var',
+    ])
     ->notPath([
         'config/bundles.php',
         'config/reference.php',
+        // Rewritten by the importmap commands.
+        'importmap.php',
     ])
     ->append([
-        __DIR__.'/bin/console',
+        __DIR__ . '/bin/console',
     ])
 ;
 
@@ -22,7 +27,9 @@ return new PhpCsFixer\Config()
         '@PHP8x5Migration' => true,
         '@PHP8x5Migration:risky' => true,
         'concat_space' => ['spacing' => 'one'],
+        'no_redundant_readonly_property' => true,
+        'declare_strict_types' => ['strategy' => 'enforce'],
     ])
     ->setFinder($finder)
-    ->setCacheFile(__DIR__.'/var/cache/php-cs-fixer/.php-cs-fixer.cache')
+    ->setCacheFile(__DIR__ . '/var/cache/php-cs-fixer/.php-cs-fixer.cache')
 ;

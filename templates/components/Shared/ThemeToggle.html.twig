@@ -1,0 +1,20 @@
+{# Light / dark / system switch. The theme itself lives in the browser (assets/controllers/theme_controller.js). #}
+<twig:DropdownMenu id="theme" align="end" data-controller="dropdown-menu theme">
+    <twig:DropdownMenu:Trigger>
+        <twig:Button variant="ghost" size="icon" aria-label="{{ 'theme.label'|trans(domain='shared') }}" {{ ...dropdown_menu_trigger_attrs }}>
+            <twig:ux:icon name="lucide:sun" class="size-4 dark:hidden" aria-hidden="true" />
+            <twig:ux:icon name="lucide:moon" class="hidden size-4 dark:block" aria-hidden="true" />
+        </twig:Button>
+    </twig:DropdownMenu:Trigger>
+    <twig:DropdownMenu:Content class="w-40">
+        <twig:DropdownMenu:Label>{{ 'theme.label'|trans(domain='shared') }}</twig:DropdownMenu:Label>
+        <twig:DropdownMenu:Separator />
+        <twig:DropdownMenu:RadioGroup value="system">
+            {% for theme in ['light', 'dark', 'system'] %}
+                <twig:DropdownMenu:RadioItem value="{{ theme }}" data-action="click->dropdown-menu#selectRadio click->theme#select" closeOnSelect>
+                    {{ ('theme.' ~ theme)|trans(domain='shared') }}
+                </twig:DropdownMenu:RadioItem>
+            {% endfor %}
+        </twig:DropdownMenu:RadioGroup>
+    </twig:DropdownMenu:Content>
+</twig:DropdownMenu>

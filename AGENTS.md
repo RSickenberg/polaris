@@ -122,10 +122,28 @@ are specific to Polaris and win when the two disagree.
   only through `src/Extension/`. Never add hosted-only code here (billing, plans,
   sign-up policy, APNs keys).
 - Stack in place: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine ORM and
-  Migrations, Carbon, PHPUnit. Planned, not installed yet: Redis (Messenger,
-  Lock, Cache), Tailwind with the Symfony UX Toolkit Shadcn kit, Flowbite charts
-  (ApexCharts) behind one reusable Stimulus controller. Check `composer.json`
-  before assuming a package is there.
+  Migrations, Carbon, PHPUnit, Tailwind CSS 4 through symfonycasts/tailwind-bundle on
+  AssetMapper (no npm for application assets), Stimulus, Turbo, TwigComponent, UX Icons
+  and the Symfony UX Toolkit Shadcn kit. Planned, not installed yet: Redis (Messenger,
+  Lock, Cache), Flowbite charts (ApexCharts) behind one reusable Stimulus controller.
+  Check `composer.json` before assuming a package is there.
+- UI: kit components are installed with `bin/console ux:install <name> --kit shadcn` into
+  `templates/components/` (Stimulus controllers into `assets/controllers/`) and are then ours
+  to edit, but keep edits minimal so a later `ux:install` diff stays readable; the only
+  edits so far replace hardcoded English text with translation keys. `symfony/ux-toolkit`
+  is a dev dependency: the installed files are committed. Polaris's own components go in
+  `templates/components/<Module>/` (the shell is `Shared`). Icons are Lucide, imported with
+  `bin/console ux:icons:import lucide:<name>` into `assets/icons/` and committed, so there is
+  no runtime call to Iconify. Dark mode is the `dark` class on `<html>`, set before the first
+  paint by the inline script of `base.html.twig` and kept by `theme_controller.js`. Pages
+  extend `base.html.twig` and fill the `main` block.
+- The `tailwind` compose service watches and builds the CSS in dev (binary and output in
+  `var/tailwind`, a volume shared with `php`); `make tailwind` builds once, and `make test`
+  and `make ci` do it first because the pages link the built stylesheet. The prod image runs
+  `tailwind:build --minify` before `asset-map:compile`; CI builds it before PHPUnit.
+- `twig-tailwind-extra`, which the kit templates need, ships a recipe in recipes-contrib.
+  `extra.symfony.allow-contrib` is `false`, so Flex skips it: its bundle is registered by hand
+  in `config/bundles.php`.
 - Run everything through Docker and the `Makefile` (see README): `make start`,
   `make test`, `make ci`, `make sf ARGS="..."`. This replaces the generic
   `symfony serve` and `php bin/phpunit` advice above.
@@ -203,6 +221,10 @@ are specific to Polaris and win when the two disagree.
   framework-free `Shared\Domain\LocaleNegotiator`: the user's preference
   (`Shared\Service\PreferredLocaleProvider`, filled from `User.locale` by #21), then the
   best `Accept-Language` match among the enabled locales, then `en`.
+- The language switcher (`Shared\Controller\LocaleController`, `/locale/{locale}`) stores the
+  choice in the `polaris_locale` cookie, read by `Shared\Service\CookiePreferredLocaleProvider`.
+  #21 replaces that provider with one that reads `User.locale` (and writes it on switch).
+  A new language also needs its `locale.<code>` key in `shared`.
 - Never write user-facing text in a template, form, flash message, validator or email: use
   a key. Exceptions: the console commands stay in English, and brand names (`Polaris`).
 - One XLIFF 1.2 domain per module: `translations/<domain>.<locale>.xlf` with `<domain>` the

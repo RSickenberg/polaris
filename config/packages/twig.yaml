@@ -1,5 +1,8 @@
 twig:
     file_name_pattern: '*.twig'
+    globals:
+        # The language switcher lists them.
+        enabled_locales: '%kernel.enabled_locales%'
 
 when@test:
     twig:

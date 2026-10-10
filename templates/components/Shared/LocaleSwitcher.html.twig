@@ -1,0 +1,21 @@
+{# Language switcher: a link per enabled locale, which stores the choice in a cookie and comes back to this page. #}
+<twig:DropdownMenu id="locale" align="end">
+    <twig:DropdownMenu:Trigger>
+        <twig:Button variant="ghost" size="icon" aria-label="{{ 'locale.label'|trans(domain='shared') }}" {{ ...dropdown_menu_trigger_attrs }}>
+            <twig:ux:icon name="lucide:languages" class="size-4" aria-hidden="true" />
+        </twig:Button>
+    </twig:DropdownMenu:Trigger>
+    <twig:DropdownMenu:Content class="w-40">
+        <twig:DropdownMenu:Label>{{ 'locale.label'|trans(domain='shared') }}</twig:DropdownMenu:Label>
+        <twig:DropdownMenu:Separator />
+        {% for locale in enabled_locales %}
+            {# A full page load, so that <html lang> and every translation follow the new locale. #}
+            <twig:DropdownMenu:Item as="a" href="{{ path('shared_locale', {locale: locale, redirect: app.request.requestUri}) }}" lang="{{ locale }}" data-turbo="false" aria-current="{{ app.locale == locale ? 'true' : 'false' }}">
+                {{ ('locale.' ~ locale)|trans(domain='shared') }}
+                {% if app.locale == locale %}
+                    <twig:ux:icon name="lucide:check" class="ms-auto size-4" aria-hidden="true" />
+                {% endif %}
+            </twig:DropdownMenu:Item>
+        {% endfor %}
+    </twig:DropdownMenu:Content>
+</twig:DropdownMenu>

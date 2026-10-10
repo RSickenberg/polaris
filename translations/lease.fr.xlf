@@ -24,11 +24,11 @@
       </trans-unit>
       <trans-unit id="end_date_convention.exclusive">
         <source>end_date_convention.exclusive</source>
-        <target>la date de restitution (le leasing court jusqu'à ce jour exclu)</target>
+        <target>La date de restitution (-1 jour)</target>
       </trans-unit>
       <trans-unit id="end_date_convention.inclusive">
         <source>end_date_convention.inclusive</source>
-        <target>le dernier jour du leasing</target>
+        <target>Le dernier jour du leasing</target>
       </trans-unit>
       <trans-unit id="form.unit.label">
         <source>form.unit.label</source>

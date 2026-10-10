@@ -10,6 +10,66 @@
         <source>unit.mi</source>
         <target>mi</target>
       </trans-unit>
+      <trans-unit id="layout.skip">
+        <source>layout.skip</source>
+        <target>Skip to the main content</target>
+      </trans-unit>
+      <trans-unit id="nav.label">
+        <source>nav.label</source>
+        <target>Main navigation</target>
+      </trans-unit>
+      <trans-unit id="nav.readings">
+        <source>nav.readings</source>
+        <target>Odometer readings</target>
+      </trans-unit>
+      <trans-unit id="nav.lease">
+        <source>nav.lease</source>
+        <target>Lease terms</target>
+      </trans-unit>
+      <trans-unit id="sidebar.label">
+        <source>sidebar.label</source>
+        <target>Sidebar</target>
+      </trans-unit>
+      <trans-unit id="sidebar.toggle">
+        <source>sidebar.toggle</source>
+        <target>Toggle the sidebar</target>
+      </trans-unit>
+      <trans-unit id="sidebar.mobile">
+        <source>sidebar.mobile</source>
+        <target>Displays the mobile sidebar.</target>
+      </trans-unit>
+      <trans-unit id="ui.close">
+        <source>ui.close</source>
+        <target>Close</target>
+      </trans-unit>
+      <trans-unit id="theme.label">
+        <source>theme.label</source>
+        <target>Theme</target>
+      </trans-unit>
+      <trans-unit id="theme.light">
+        <source>theme.light</source>
+        <target>Light</target>
+      </trans-unit>
+      <trans-unit id="theme.dark">
+        <source>theme.dark</source>
+        <target>Dark</target>
+      </trans-unit>
+      <trans-unit id="theme.system">
+        <source>theme.system</source>
+        <target>System</target>
+      </trans-unit>
+      <trans-unit id="locale.label">
+        <source>locale.label</source>
+        <target>Language</target>
+      </trans-unit>
+      <trans-unit id="locale.en">
+        <source>locale.en</source>
+        <target>English</target>
+      </trans-unit>
+      <trans-unit id="locale.fr">
+        <source>locale.fr</source>
+        <target>Français</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

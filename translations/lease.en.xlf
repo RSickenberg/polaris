@@ -24,11 +24,11 @@
       </trans-unit>
       <trans-unit id="end_date_convention.exclusive">
         <source>end_date_convention.exclusive</source>
-        <target>the return date (the lease runs up to, not including, that day)</target>
+        <target>The return date (the lease runs up to, not including, that day)</target>
       </trans-unit>
       <trans-unit id="end_date_convention.inclusive">
         <source>end_date_convention.inclusive</source>
-        <target>the last day of the lease</target>
+        <target>The last day of the lease</target>
       </trans-unit>
       <trans-unit id="form.unit.label">
         <source>form.unit.label</source>
