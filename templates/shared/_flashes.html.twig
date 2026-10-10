@@ -1,0 +1,6 @@
+{# The success flash messages, once each. #}
+{% for message in app.flashes('success') %}
+    <twig:Alert class="my-4">
+        <twig:Alert:Title>{{ message }}</twig:Alert:Title>
+    </twig:Alert>
+{% endfor %}

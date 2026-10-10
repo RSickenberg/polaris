@@ -28,7 +28,7 @@ final class LeaseContractType extends AbstractType
     {
         $builder
             ->add('startDate', DateType::class, self::dateOptions('form.start_date.label'))
-            ->add('endDate', DateType::class, self::dateOptions('form.end_date.label'))
+            ->add('endDate', DateType::class, self::dateOptions('form.end_date.label') + ['help' => 'form.end_date.help'])
             ->add('endDateConvention', EnumType::class, [
                 'label' => 'form.end_date_convention.label',
                 'class' => EndDateConvention::class,
@@ -45,16 +45,16 @@ final class LeaseContractType extends AbstractType
                 'class' => AllowanceBasis::class,
                 'choice_label' => static fn (AllowanceBasis $basis): string => 'allowance_basis.' . $basis->value,
             ])
-            ->add('allowance', NumberType::class, ['label' => 'form.allowance.label', 'html5' => true, 'attr' => ['step' => 'any']])
-            ->add('startOdometer', NumberType::class, ['label' => 'form.start_odometer.label', 'html5' => true, 'attr' => ['step' => 'any']])
-            ->add('excessCostPerKm', TextType::class, ['label' => 'form.excess_cost.label', 'attr' => ['inputmode' => 'decimal']])
+            ->add('allowance', NumberType::class, ['label' => 'form.allowance.label', 'help' => 'form.allowance.help', 'html5' => true, 'attr' => ['step' => 'any']])
+            ->add('startOdometer', NumberType::class, ['label' => 'form.start_odometer.label', 'help' => 'form.start_odometer.help', 'html5' => true, 'attr' => ['step' => 'any']])
+            ->add('excessCostPerKm', TextType::class, ['label' => 'form.excess_cost.label', 'help' => 'form.excess_cost.help', 'attr' => ['inputmode' => 'decimal']])
             ->add('currency', EnumType::class, [
                 'label' => 'form.currency.label',
                 'class' => Currency::class,
                 'choice_label' => static fn (Currency $currency): string => $currency->value,
                 'choice_translation_domain' => false,
             ])
-            ->add('tolerancePercent', NumberType::class, ['label' => 'form.tolerance.label', 'html5' => true, 'attr' => ['step' => 'any']])
+            ->add('tolerancePercent', NumberType::class, ['label' => 'form.tolerance.label', 'help' => 'form.tolerance.help', 'html5' => true, 'attr' => ['step' => 'any']])
             ->add('save', SubmitType::class, ['label' => 'form.submit']);
     }
 

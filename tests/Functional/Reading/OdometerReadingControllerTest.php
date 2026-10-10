@@ -57,7 +57,7 @@ final class OdometerReadingControllerTest extends WebTestCase
         $this->client->followRedirect();
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('[role=status]', 'The reading was added.');
+        self::assertSelectorTextContains('[data-slot=alert]', 'The reading was added.');
         $rows = $this->client->getCrawler()->filter('tbody tr')->each(static fn ($row): string => preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', trim($row->text()))) ?? '');
         self::assertCount(2, $rows);
         self::assertStringContainsString('Oct 2, 2026, 9:30 AM UTC', $rows[0]);
@@ -98,7 +98,7 @@ final class OdometerReadingControllerTest extends WebTestCase
         $this->submit('2026-10-01T08:00', '-1', 'km');
 
         self::assertResponseStatusCodeSame(422);
-        self::assertSelectorExists('form .form-error-message, form ul li');
+        self::assertSelectorExists('form [data-slot=field-error]');
         self::assertSelectorTextContains('body', 'No reading yet.');
     }
 

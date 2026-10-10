@@ -137,6 +137,17 @@ are specific to Polaris and win when the two disagree.
   no runtime call to Iconify. Dark mode is the `dark` class on `<html>`, set before the first
   paint by the inline script of `base.html.twig` and kept by `theme_controller.js`. Pages
   extend `base.html.twig` and fill the `main` block.
+  Nothing styles bare elements: `app.css` holds only the theme variables, so titles,
+  paragraphs and lists carry their own utility classes. Forms render through the global form
+  theme `templates/shared/form_theme.html.twig` (registered in `twig.form_themes`), which extends
+  Symfony's `form_div_layout.html.twig` and overrides only the blocks it needs: each row is a kit
+  `Field` (`Field:Label`, the control, `Field:Description` for `help`, one `Field:Error` per error),
+  text-like widgets are `Input`, choice selects are `NativeSelect` (size `sm`, to match the Input
+  height) and buttons are `Button`. Symfony's `form_row` already hands `aria-describedby` and
+  `aria-invalid` to the widget through `attr`; the theme only forwards them. Checkbox, radio, file,
+  range and color widgets are not themed yet and fall back to the default layout. Tables use
+  `Table` inside a `Card`, success flashes use `Alert` through `shared/_flashes.html.twig`. The
+  installed kit files are unedited, apart from the translated text noted above.
 - The `tailwind` compose service watches and builds the CSS in dev (binary and output in
   `var/tailwind`, a volume shared with `php`); `make tailwind` builds once, and `make test`
   and `make ci` do it first because the pages link the built stylesheet. The prod image runs

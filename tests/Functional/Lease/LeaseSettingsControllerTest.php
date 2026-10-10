@@ -76,7 +76,7 @@ final class LeaseSettingsControllerTest extends WebTestCase
 
         self::assertResponseRedirects($this->url());
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[role=status]', 'The lease terms were saved.');
+        self::assertSelectorTextContains('[data-slot=alert]', 'The lease terms were saved.');
         self::assertSelectorTextContains('body', 'No reading after the lease start yet.');
 
         $contract = $this->contract();
