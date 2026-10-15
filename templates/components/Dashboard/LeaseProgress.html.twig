@@ -1,0 +1,26 @@
+{%- props
+    ## integer The share of the allowance driven, in percent; may be above 100.
+    used,
+    ## integer The share of the allowance earned so far, in percent, at most 100: where the tick sits.
+    earned,
+    ## string The accessible name of the bar, already translated.
+    label,
+    ## string The text read out for the value, already translated; the bar alone stops at 100.
+    valueText,
+    ## string The legend of the tick, already translated.
+    tickLabel
+-%}
+<div {{ attributes.defaults({class: 'flex flex-col gap-2'}) }}>
+    <div class="flex items-baseline justify-between gap-2 text-sm">
+        <span class="text-muted-foreground">{{ label }}</span>
+        <span class="font-semibold tabular-nums">{{ (used / 100)|format_number(style: 'percent') }}</span>
+    </div>
+    <div class="relative flex items-center">
+        <twig:Progress :value="min(used, 100)" class="h-2" aria-label="{{ label }}" aria-valuetext="{{ valueText }}" />
+        <span class="absolute h-4 w-0.5 -translate-x-1/2 rounded-full bg-foreground" style="left: {{ earned }}%" aria-hidden="true"></span>
+    </div>
+    <p class="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <span class="inline-block h-3 w-0.5 rounded-full bg-foreground" aria-hidden="true"></span>
+        {{ tickLabel }}
+    </p>
+</div>

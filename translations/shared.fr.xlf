@@ -18,6 +18,10 @@
         <source>nav.label</source>
         <target>Navigation principale</target>
       </trans-unit>
+      <trans-unit id="nav.dashboard">
+        <source>nav.dashboard</source>
+        <target>Tableau de bord</target>
+      </trans-unit>
       <trans-unit id="nav.readings">
         <source>nav.readings</source>
         <target>Relevés du compteur</target>

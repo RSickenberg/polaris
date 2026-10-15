@@ -1,0 +1,18 @@
+{%- props
+    ## 'ok'|'watch'|'over' The risk level of the lease.
+    level
+-%}
+{# The level is told by the icon and the title as well as by the color. The message is the content of the tag. #}
+{# A block cannot sit inside a <twig:...> tag, so the message is rendered here and placed below. #}
+{% set message %}{% block content %}{% endblock %}{% endset %}
+{% set icons = {ok: 'lucide:circle-check', watch: 'lucide:triangle-alert', over: 'lucide:circle-alert'} %}
+<twig:Alert
+    :variant="'over' == level ? 'destructive' : 'default'"
+    data-risk="{{ level }}"
+    class="{{ 'watch' == level ? 'border-amber-500/60 bg-amber-50 text-amber-900 dark:border-amber-400/40 dark:bg-amber-950/40 dark:text-amber-200' : '' }}"
+    {{ ...attributes }}
+>
+    <twig:ux:icon :name="icons[level]" aria-hidden="true" />
+    <twig:Alert:Title>{{ ('risk.' ~ level)|trans(domain='lease') }}</twig:Alert:Title>
+    <twig:Alert:Description>{{ message }}</twig:Alert:Description>
+</twig:Alert>

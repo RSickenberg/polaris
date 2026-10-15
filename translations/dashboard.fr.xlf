@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="fr" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="page.title">
+        <source>page.title</source>
+        <target>Tableau de bord, %vehicle%</target>
+      </trans-unit>
+      <trans-unit id="progress.label">
+        <source>progress.label</source>
+        <target>Part du kilométrage parcourue</target>
+      </trans-unit>
+      <trans-unit id="progress.tick">
+        <source>progress.tick</source>
+        <target>Autorisé à ce jour : la part du kilométrage acquise jusqu’ici</target>
+      </trans-unit>
+      <trans-unit id="kpi.driven">
+        <source>kpi.driven</source>
+        <target>Parcouru</target>
+      </trans-unit>
+      <trans-unit id="kpi.allowed">
+        <source>kpi.allowed</source>
+        <target>Autorisé à ce jour</target>
+      </trans-unit>
+      <trans-unit id="kpi.projected">
+        <source>kpi.projected</source>
+        <target>Projeté en fin de leasing</target>
+      </trans-unit>
+      <trans-unit id="kpi.last_reading.label">
+        <source>kpi.last_reading.label</source>
+        <target>Dernier relevé</target>
+      </trans-unit>
+      <trans-unit id="kpi.last_reading.hint">
+        <source>kpi.last_reading.hint</source>
+        <target>Fuseau horaire : %timezone%</target>
+      </trans-unit>
+      <trans-unit id="budget.title">
+        <source>budget.title</source>
+        <target>Ce que vous pouvez encore parcourir</target>
+      </trans-unit>
+      <trans-unit id="budget.none">
+        <source>budget.none</source>
+        <target>Plus de budget : le kilométrage autorisé est épuisé.</target>
+      </trans-unit>
+      <trans-unit id="empty.no_lease.text">
+        <source>empty.no_lease.text</source>
+        <target>Ajoutez les conditions du leasing de ce véhicule pour voir où vous en êtes.</target>
+      </trans-unit>
+      <trans-unit id="empty.no_lease.cta">
+        <source>empty.no_lease.cta</source>
+        <target>Saisir les conditions du leasing</target>
+      </trans-unit>
+      <trans-unit id="empty.no_reading.text">
+        <source>empty.no_reading.text</source>
+        <target>Aucun relevé du compteur après le début du leasing. Ajoutez-en un pour voir où vous en êtes.</target>
+      </trans-unit>
+      <trans-unit id="empty.no_reading.cta">
+        <source>empty.no_reading.cta</source>
+        <target>Ajouter un relevé</target>
+      </trans-unit>
+      <trans-unit id="empty.draft.text">
+        <source>empty.draft.text</source>
+        <target>Ce leasing n’a pas encore commencé. Les chiffres apparaîtront dès son début.</target>
+      </trans-unit>
+      <trans-unit id="empty.draft.cta">
+        <source>empty.draft.cta</source>
+        <target>Revoir les conditions du leasing</target>
+      </trans-unit>
+      <trans-unit id="ended.text">
+        <source>ended.text</source>
+        <target>Le leasing est terminé : il n’y a plus de budget à répartir. Les chiffres ci-dessous sont les chiffres finaux à ce jour.</target>
+      </trans-unit>
+      <trans-unit id="ended.cta">
+        <source>ended.cta</source>
+        <target>Revoir les conditions du leasing</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

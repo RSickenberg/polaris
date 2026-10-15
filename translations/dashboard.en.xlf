@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="en" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="page.title">
+        <source>page.title</source>
+        <target>Dashboard, %vehicle%</target>
+      </trans-unit>
+      <trans-unit id="progress.label">
+        <source>progress.label</source>
+        <target>Share of the allowance driven</target>
+      </trans-unit>
+      <trans-unit id="progress.tick">
+        <source>progress.tick</source>
+        <target>Allowed to date: the share of the allowance earned so far</target>
+      </trans-unit>
+      <trans-unit id="kpi.driven">
+        <source>kpi.driven</source>
+        <target>Driven</target>
+      </trans-unit>
+      <trans-unit id="kpi.allowed">
+        <source>kpi.allowed</source>
+        <target>Allowed to date</target>
+      </trans-unit>
+      <trans-unit id="kpi.projected">
+        <source>kpi.projected</source>
+        <target>Projected at lease end</target>
+      </trans-unit>
+      <trans-unit id="kpi.last_reading.label">
+        <source>kpi.last_reading.label</source>
+        <target>Last reading</target>
+      </trans-unit>
+      <trans-unit id="kpi.last_reading.hint">
+        <source>kpi.last_reading.hint</source>
+        <target>Time zone: %timezone%</target>
+      </trans-unit>
+      <trans-unit id="budget.title">
+        <source>budget.title</source>
+        <target>What you can drive from now on</target>
+      </trans-unit>
+      <trans-unit id="budget.none">
+        <source>budget.none</source>
+        <target>No budget left: the allowance is used up.</target>
+      </trans-unit>
+      <trans-unit id="empty.no_lease.text">
+        <source>empty.no_lease.text</source>
+        <target>Add the lease terms of this vehicle to see where you stand.</target>
+      </trans-unit>
+      <trans-unit id="empty.no_lease.cta">
+        <source>empty.no_lease.cta</source>
+        <target>Set the lease terms</target>
+      </trans-unit>
+      <trans-unit id="empty.no_reading.text">
+        <source>empty.no_reading.text</source>
+        <target>No odometer reading after the lease start yet. Add one to see where you stand.</target>
+      </trans-unit>
+      <trans-unit id="empty.no_reading.cta">
+        <source>empty.no_reading.cta</source>
+        <target>Add a reading</target>
+      </trans-unit>
+      <trans-unit id="empty.draft.text">
+        <source>empty.draft.text</source>
+        <target>This lease has not started yet. The figures appear once it does.</target>
+      </trans-unit>
+      <trans-unit id="empty.draft.cta">
+        <source>empty.draft.cta</source>
+        <target>Review the lease terms</target>
+      </trans-unit>
+      <trans-unit id="ended.text">
+        <source>ended.text</source>
+        <target>The lease has ended, so there is no budget left to spread. The figures below are the final ones so far.</target>
+      </trans-unit>
+      <trans-unit id="ended.cta">
+        <source>ended.cta</source>
+        <target>Review the lease terms</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
