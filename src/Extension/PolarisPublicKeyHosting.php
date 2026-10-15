@@ -17,4 +17,9 @@ final readonly class PolarisPublicKeyHosting implements PublicKeyHosting
     {
         return true;
     }
+
+    public function publicKeyUrl(): ?string
+    {
+        return null;
+    }
 }

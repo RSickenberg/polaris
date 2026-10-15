@@ -22,6 +22,22 @@
         <source>account.password.mismatch</source>
         <target>Les deux mots de passe ne correspondent pas.</target>
       </trans-unit>
+      <trans-unit id="tesla.domain.invalid">
+        <source>tesla.domain.invalid</source>
+        <target>Saisissez uniquement le domaine, par exemple polaris.example.com, sans https:// ni chemin.</target>
+      </trans-unit>
+      <trans-unit id="tesla.region.not_supported">
+        <source>tesla.region.not_supported</source>
+        <target>Cette région n’est pas prise en charge.</target>
+      </trans-unit>
+      <trans-unit id="tesla.client_secret.required">
+        <source>tesla.client_secret.required</source>
+        <target>Saisissez le secret client.</target>
+      </trans-unit>
+      <trans-unit id="tesla.regions.required">
+        <source>tesla.regions.required</source>
+        <target>Activez au moins une région.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

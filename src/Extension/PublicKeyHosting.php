@@ -25,4 +25,10 @@ interface PublicKeyHosting
      * Whether Polaris answers the well-known URL itself.
      */
     public function servesPublicKey(): bool;
+
+    /**
+     * Where the public key is published when it is not at the well-known path of the app domain
+     * (a static site that Polaris does not write to), or null to use the app domain.
+     */
+    public function publicKeyUrl(): ?string;
 }

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="fr" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="page.title">
+        <source>page.title</source>
+        <target>Application Tesla</target>
+      </trans-unit>
+      <trans-unit id="page.no_key.title">
+        <source>page.no_key.title</source>
+        <target>Pas encore de paire de clés</target>
+      </trans-unit>
+      <trans-unit id="page.no_key.description">
+        <source>page.no_key.description</source>
+        <target>Générez d’abord la paire de clés avec la commande polaris:tesla:keygen, puis revenez saisir les identifiants de votre application Tesla.</target>
+      </trans-unit>
+      <trans-unit id="page.credentials.title">
+        <source>page.credentials.title</source>
+        <target>Identifiants</target>
+      </trans-unit>
+      <trans-unit id="page.credentials.description">
+        <source>page.credentials.description</source>
+        <target>L’identifiant client et le secret de votre application développeur Tesla, le domaine qui sert votre clé publique et les régions où l’enregistrer.</target>
+      </trans-unit>
+      <trans-unit id="page.status.title">
+        <source>page.status.title</source>
+        <target>Enregistrement</target>
+      </trans-unit>
+      <trans-unit id="page.status.description">
+        <source>page.status.description</source>
+        <target>L’enregistrement de l’application auprès de Tesla se fait depuis la console.</target>
+      </trans-unit>
+      <trans-unit id="page.status.next_steps">
+        <source>page.status.next_steps</source>
+        <target>Vérifiez la clé publique avec polaris:tesla:key:check, puis enregistrez l’application avec polaris:tesla:register.</target>
+      </trans-unit>
+      <trans-unit id="status.key_generated">
+        <source>status.key_generated</source>
+        <target>Paire de clés générée</target>
+      </trans-unit>
+      <trans-unit id="status.key_url">
+        <source>status.key_url</source>
+        <target>URL de la clé publique</target>
+      </trans-unit>
+      <trans-unit id="status.regions">
+        <source>status.regions</source>
+        <target>Régions activées</target>
+      </trans-unit>
+      <trans-unit id="status.not_set">
+        <source>status.not_set</source>
+        <target>Non défini</target>
+      </trans-unit>
+      <trans-unit id="form.client_id.label">
+        <source>form.client_id.label</source>
+        <target>Identifiant client</target>
+      </trans-unit>
+      <trans-unit id="form.client_secret.label">
+        <source>form.client_secret.label</source>
+        <target>Secret client</target>
+      </trans-unit>
+      <trans-unit id="form.client_secret.help_stored">
+        <source>form.client_secret.help_stored</source>
+        <target>Un secret est enregistré et n’est jamais affiché. Laissez vide pour le garder, ou saisissez-en un nouveau pour le remplacer.</target>
+      </trans-unit>
+      <trans-unit id="form.client_secret.help_new">
+        <source>form.client_secret.help_new</source>
+        <target>Enregistré chiffré et jamais affiché ensuite.</target>
+      </trans-unit>
+      <trans-unit id="form.domain.label">
+        <source>form.domain.label</source>
+        <target>Domaine</target>
+      </trans-unit>
+      <trans-unit id="form.domain.help">
+        <source>form.domain.help</source>
+        <target>Le domaine qui sert votre clé publique, par exemple polaris.example.com, sans https://.</target>
+      </trans-unit>
+      <trans-unit id="form.regions.label">
+        <source>form.regions.label</source>
+        <target>Régions</target>
+      </trans-unit>
+      <trans-unit id="form.regions.help">
+        <source>form.regions.help</source>
+        <target>L’application est enregistrée une fois dans chaque région activée. La Chine demande une application Tesla distincte et n’est pas encore disponible.</target>
+      </trans-unit>
+      <trans-unit id="region.na">
+        <source>region.na</source>
+        <target>Amérique du Nord et Asie-Pacifique</target>
+      </trans-unit>
+      <trans-unit id="region.eu">
+        <source>region.eu</source>
+        <target>Europe, Moyen-Orient et Afrique</target>
+      </trans-unit>
+      <trans-unit id="region.cn">
+        <source>region.cn</source>
+        <target>Chine (non disponible)</target>
+      </trans-unit>
+      <trans-unit id="form.submit">
+        <source>form.submit</source>
+        <target>Enregistrer l’application Tesla</target>
+      </trans-unit>
+      <trans-unit id="flash.saved">
+        <source>flash.saved</source>
+        <target>Les paramètres de l’application Tesla sont enregistrés.</target>
+      </trans-unit>
+      <trans-unit id="error.rejected">
+        <source>error.rejected</source>
+        <target>Les paramètres n’ont pas pu être enregistrés. Vérifiez les valeurs et réessayez.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

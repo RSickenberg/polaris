@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Polaris\Tesla\Command;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Polaris\Account\Entity\User;
 use Polaris\Extension\PublicKeyHosting;
 use Polaris\Tesla\Service\KeyAlreadyExists;
 use Polaris\Tesla\Service\TeslaKeyService;
+use Polaris\Tesla\Service\TeslaOwnerFinder;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
@@ -24,7 +24,7 @@ final readonly class KeygenCommand
     public function __construct(
         private TeslaKeyService $keys,
         private PublicKeyHosting $hosting,
-        private EntityManagerInterface $entityManager,
+        private TeslaOwnerFinder $owners,
     ) {
     }
 
@@ -35,7 +35,7 @@ final readonly class KeygenCommand
         #[Option(description: 'The email of the owner. Optional when there is a single user')]
         ?string $email = null,
     ): int {
-        $owner = $this->findOwner($email);
+        $owner = $this->owners->find($email);
 
         if (!$owner instanceof User) {
             $io->error('No user found. Create one with polaris:user:create, or pass --email.');
@@ -60,22 +60,12 @@ final readonly class KeygenCommand
         $io->note(
             $this->hosting->servesPublicKey()
                 ? 'Polaris serves the public key at /.well-known/appspecific/com.tesla.3p.public-key.pem on your domain.'
-                : 'The public key was written to the static site directory. Commit and push it yourself.',
+                : \sprintf(
+                    'The public key is written to POLARIS_KEY_HOSTING_DIR when it is set. Publish it yourself (commit and push) so that it is served at %s.',
+                    $this->hosting->publicKeyUrl() ?? '/.well-known/appspecific/com.tesla.3p.public-key.pem on your domain',
+                ),
         );
 
         return Command::SUCCESS;
-    }
-
-    private function findOwner(?string $email): ?User
-    {
-        $users = $this->entityManager->getRepository(User::class);
-
-        if (null !== $email) {
-            return $users->findOneBy(['email' => User::normalizeEmail($email)]);
-        }
-
-        $all = $users->findBy([], null, 2);
-
-        return 1 === \count($all) ? $all[0] : null;
     }
 }

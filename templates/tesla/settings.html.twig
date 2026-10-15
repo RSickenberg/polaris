@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'page.title'|trans(domain='tesla') }}{% endblock %}
+
+{% block main %}
+    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.title'|trans(domain='tesla') }}</h1>
+
+    {{ include('shared/_flashes.html.twig') }}
+
+    <div class="mt-6 flex max-w-lg flex-col gap-6">
+        {% if teslaApp is null %}
+            <twig:Alert id="no-key-pair">
+                <twig:Alert:Title>{{ 'page.no_key.title'|trans(domain='tesla') }}</twig:Alert:Title>
+                <twig:Alert:Description>{{ 'page.no_key.description'|trans(domain='tesla') }}</twig:Alert:Description>
+            </twig:Alert>
+        {% else %}
+            <twig:Card>
+                <twig:Card:Header>
+                    <twig:Card:Title><h2>{{ 'page.credentials.title'|trans(domain='tesla') }}</h2></twig:Card:Title>
+                    <twig:Card:Description>{{ 'page.credentials.description'|trans(domain='tesla') }}</twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    {{ form(form) }}
+                </twig:Card:Content>
+            </twig:Card>
+
+            <twig:Card id="status">
+                <twig:Card:Header>
+                    <twig:Card:Title><h2>{{ 'page.status.title'|trans(domain='tesla') }}</h2></twig:Card:Title>
+                    <twig:Card:Description>{{ 'page.status.description'|trans(domain='tesla') }}</twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    <dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
+                        <dt class="text-muted-foreground">{{ 'status.key_generated'|trans(domain='tesla') }}</dt>
+                        <dd class="text-end font-medium">{{ teslaApp.keyGeneratedAt|localized_datetime(timeZone) }}</dd>
+                        <dt class="text-muted-foreground">{{ 'status.key_url'|trans(domain='tesla') }}</dt>
+                        <dd class="text-end font-medium break-all">
+                            {% if teslaApp.domain is not null %}{{ teslaApp.domain.publicKeyUrl }}{% else %}{{ 'status.not_set'|trans(domain='tesla') }}{% endif %}
+                        </dd>
+                        <dt class="text-muted-foreground">{{ 'status.regions'|trans(domain='tesla') }}</dt>
+                        <dd class="text-end font-medium">
+                            {% for region in teslaApp.enabledRegions %}{{ ('region.' ~ region.value)|trans(domain='tesla') }}{% if not loop.last %}, {% endif %}{% else %}{{ 'status.not_set'|trans(domain='tesla') }}{% endfor %}
+                        </dd>
+                    </dl>
+                    <p class="mt-4 text-sm text-muted-foreground">{{ 'page.status.next_steps'|trans(domain='tesla') }}</p>
+                </twig:Card:Content>
+            </twig:Card>
+        {% endif %}
+    </div>
+{% endblock %}

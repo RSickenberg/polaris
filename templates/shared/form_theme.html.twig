@@ -56,6 +56,22 @@
     <twig:NativeSelect size="sm" {{ ...control }}>{{ select_options }}</twig:NativeSelect>
 {% endblock %}
 
+{% block checkbox_widget %}
+    <twig:Checkbox {{ ...attr|merge({id: id, name: full_name, value: value, checked: checked, disabled: disabled or attr.disabled|default(false), required: required and not (form.parent is not null and form.parent.vars.multiple|default(false))}) }} />
+{% endblock %}
+
+{# Expanded choices (checkboxes or radios): one line per choice, the control then its label. The radio control itself is not themed yet. #}
+{% block choice_widget_expanded %}
+    <div {{ block('widget_container_attributes') }} class="flex flex-col gap-2">
+        {%- for child in form -%}
+            <div class="flex items-center gap-2">
+                {{- form_widget(child) -}}
+                {{- form_label(child) -}}
+            </div>
+        {%- endfor -%}
+    </div>
+{% endblock %}
+
 {% block button_widget %}
     {%- set label_content -%}{{- block('form_label_content') -}}{%- endset -%}
     <twig:Button {{ ...attr|merge({type: type|default('button'), id: id, name: full_name, disabled: disabled}) }}>{{ label_content }}</twig:Button>
@@ -67,8 +83,8 @@
             {%- set label_attr = label_attr|merge({for: id}) -%}
         {%- endif -%}
         {%- set label_content -%}{{- block('form_label_content') -}}{%- endset -%}
-        {# The control carries `required`, so assistive technology already announces it: the asterisk is decorative. #}
-        <twig:Field:Label {{ ...label_attr }}>{{ label_content }}{% if required %}<span class="text-destructive" aria-hidden="true">*</span>{% endif %}</twig:Field:Label>
+        {# The control carries `required`, so assistive technology already announces it: the asterisk is decorative. The choices of an expanded choice are not each required. #}
+        <twig:Field:Label {{ ...label_attr }}>{{ label_content }}{% if required and 'checkbox' not in block_prefixes and 'radio' not in block_prefixes %}<span class="text-destructive" aria-hidden="true">*</span>{% endif %}</twig:Field:Label>
     {%- endif -%}
 {% endblock %}
 

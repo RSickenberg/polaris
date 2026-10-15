@@ -37,6 +37,10 @@ final readonly class SecretEncrypter
         $this->key = $key;
     }
 
+    /**
+     * @throws \Random\RandomException
+     * @throws \SodiumException
+     */
     public function encrypt(#[\SensitiveParameter] string $plaintext): string
     {
         $nonce = random_bytes(\SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
@@ -46,7 +50,7 @@ final readonly class SecretEncrypter
     }
 
     /**
-     * @throws DecryptionFailed
+     * @throws DecryptionFailed|\SodiumException
      */
     public function decrypt(string $ciphertext): string
     {

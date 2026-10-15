@@ -7,6 +7,8 @@ namespace Polaris\Tests\Unit\Tesla\Entity;
 use Carbon\CarbonImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Polaris\Tesla\Domain\AppDomain;
+use Polaris\Tesla\Domain\FleetRegion;
 use Polaris\Tesla\Entity\TeslaApp;
 use Polaris\Tests\Support\Owner;
 
@@ -32,5 +34,50 @@ final class TeslaAppTest extends TestCase
         self::assertSame('new', $app->getPublicKey());
         self::assertSame('v1:new', $app->getEncryptedPrivateKey());
         self::assertSame('2026-10-21 10:00:00', $app->getKeyGeneratedAt()->format('Y-m-d H:i:s'));
+    }
+
+    public function testSerializationNeverIncludesTheClientSecret(): void
+    {
+        $app = $this->app();
+        $app->configure('client-id', 'v1:secret-ciphertext', AppDomain::fromString('polaris.example.com'), [FleetRegion::EuropeMiddleEastAfrica]);
+
+        $serialized = serialize($app);
+
+        self::assertStringContainsString('client-id', $serialized);
+        self::assertStringNotContainsString('v1:secret-ciphertext', $serialized);
+    }
+
+    public function testAFreshAppIsNotConfigured(): void
+    {
+        $app = $this->app();
+
+        self::assertFalse($app->isConfigured());
+        self::assertNull($app->getClientId());
+        self::assertNull($app->getDomain());
+        self::assertSame([], $app->getEnabledRegions());
+    }
+
+    public function testConfiguringKeepsEachRegionOnce(): void
+    {
+        $app = $this->app();
+
+        $app->configure(
+            'client-id',
+            'v1:secret',
+            AppDomain::fromString('polaris.example.com'),
+            [FleetRegion::EuropeMiddleEastAfrica, FleetRegion::NorthAmericaAsiaPacific, FleetRegion::EuropeMiddleEastAfrica],
+        );
+
+        self::assertTrue($app->isConfigured());
+        self::assertSame('polaris.example.com', $app->getDomain()?->toString());
+        self::assertSame(
+            [FleetRegion::EuropeMiddleEastAfrica, FleetRegion::NorthAmericaAsiaPacific],
+            $app->getEnabledRegions(),
+        );
+    }
+
+    private function app(): TeslaApp
+    {
+        return new TeslaApp(Owner::user(), 'the public key', 'v1:ciphertext', CarbonImmutable::parse('2026-10-20 12:00:00 UTC'));
     }
 }

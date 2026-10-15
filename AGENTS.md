@@ -146,8 +146,9 @@ are specific to Polaris and win when the two disagree.
   `Field` (`Field:Label`, the control, `Field:Description` for `help`, one `Field:Error` per error),
   text-like widgets are `Input`, choice selects are `NativeSelect` (size `sm`, to match the Input
   height) and buttons are `Button`. Symfony's `form_row` already hands `aria-describedby` and
-  `aria-invalid` to the widget through `attr`; the theme only forwards them. Checkbox, radio, file,
-  range and color widgets are not themed yet and fall back to the default layout. Tables use
+  `aria-invalid` to the widget through `attr`; the theme only forwards them. Checkbox widgets (alone, or as an expanded
+  choice: one line per choice, label without asterisk) are the kit `Checkbox`; radio, file, range and color
+  widgets are not themed yet and fall back to the default layout. Tables use
   `Table` inside a `Card`, success flashes use `Alert` through `shared/_flashes.html.twig`. The
   installed kit files are unedited, apart from the translated text noted above.
 - The `tailwind` compose service watches and builds the CSS in dev (binary and output in
@@ -229,9 +230,43 @@ are specific to Polaris and win when the two disagree.
 - `Extension\PublicKeyHosting` decides where Tesla finds the public key. The default `ConfiguredPublicKeyHosting`
   follows `POLARIS_KEY_HOSTING`: `polaris` (`PolarisPublicKeyHosting`, `Tesla\Controller\PublicKeyController`
   serves the only app's key whatever the Host, stateless, public) or `external` (`ExternalPublicKeyHosting`
-  writes the PEM into `POLARIS_KEY_HOSTING_DIR`; the route then answers 404). The hosted layer replaces the alias.
+  writes the PEM into `POLARIS_KEY_HOSTING_DIR` when set, and `POLARIS_KEY_HOSTING_URL`, the https URL of the PEM,
+  makes `publicKeyUrl()` non-null so `PublicKeyChecker` reads that URL and notes the well-known URL Tesla reads;
+  either one is enough; the route then answers 404). The hosted layer replaces the alias and must implement
+  `publicKeyUrl()` (null to keep using the app domain).
 - The well-known route is public: its `access_control` entry precedes the catch-all and `tesla_public_key` is in
   `PUBLIC_ROUTES` of `AccessControlTest`.
+
+### Tesla app credentials and registration (Tesla module)
+
+- `TeslaApp` also holds `clientId`, `encryptedClientSecret` (SecretEncrypter, kept out of `__serialize`), `domain`
+  (the host that serves the public key, `Tesla\Domain\AppDomain`; not derived from `DEFAULT_URI`, since external
+  hosting uses another domain) and `enabledRegions` (`Tesla\Domain\FleetRegion` codes). The row is created by
+  keygen, so `Tesla\Service\TeslaAppSettings::save()` and `polaris:tesla:configure` need the key pair first.
+  `TeslaOwnerFinder` resolves the user for every Tesla command.
+- `FleetRegion` is `na`, `eu` and `cn`. China is a separate Tesla account and developer app: the case exists only
+  to be refused (`isSupported()` is false, `tokenUrl()` throws, settings and `register` reject it). The token host
+  for NA and EMEA is the global `fleet-auth.prd.vn.cloud.tesla.com`.
+- `polaris:tesla:key:import` (`KeyPairImporter`, `TeslaKeyService::import()`) keeps an existing prime256v1 private key
+  (PKCS8 or SEC1 PEM, no passphrase) read from the standard input or `--file`, never an argument: the public key is
+  derived from it, the private key is re-exported as PKCS8 and stored encrypted like a generated one, and `--force`
+  rules are those of keygen. It never prints the private key.
+- `polaris:tesla:key:check` (`PublicKeyChecker`) fetches the well-known URL without following redirects and compares
+  it to the stored key. `polaris:tesla:register` (`PartnerRegistrationService`) runs it first and sends nothing to
+  Tesla on failure; per enabled region it calls `FleetApiClient` for a partner token, `POST /api/1/partner_accounts`
+  and `GET /api/1/partner_accounts/public_key?domain=`, and one region failing does not stop the others.
+- Unverified (Tesla does not document them): that the partner token needs no scope, the register body
+  (`{"domain": ...}`), the shape of Tesla error bodies (`FleetApiError` reads `error`, `error_description`,
+  `error_message`, `message`, else a truncated body) and of the public key response (`response.public_key`, PEM or
+  hex of the uncompressed point, see `PublicKeyFormat`). The first real run confirms them.
+- The settings page (`Tesla\Controller\TeslaSettingsController`, `/settings/tesla`, linked from the account menu) edits
+  the same settings through `TeslaAppSettings`, with the form model `Tesla\Form\Model\TeslaAppSettingsFormData`.
+  The app is looked up by owner (no id in the URL), the client secret field is write-only (never rendered, empty
+  keeps the stored one), China is listed but disabled and rejected server-side. Without a key pair it shows how to
+  run keygen. It does not register: `key:check` and `register` stay on the console. Pass the app to the template as
+  `teslaApp`: `app` is the Twig global.
+- Tests never reach the network: they use `MockHttpClient`, and functional tests swap it in with
+  `getContainer()->set('http_client', $client)` (public alias `test.polaris.http_client` in `when@test`).
 
 ### Code organization (ADR 0001)
 

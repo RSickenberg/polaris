@@ -90,6 +90,10 @@
         <source>account.settings</source>
         <target>Paramètres</target>
       </trans-unit>
+      <trans-unit id="account.tesla">
+        <source>account.tesla</source>
+        <target>Application Tesla</target>
+      </trans-unit>
       <trans-unit id="nav.vehicles">
         <source>nav.vehicles</source>
         <target>Mes véhicules</target>

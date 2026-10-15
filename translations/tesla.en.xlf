@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="en" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="page.title">
+        <source>page.title</source>
+        <target>Tesla app</target>
+      </trans-unit>
+      <trans-unit id="page.no_key.title">
+        <source>page.no_key.title</source>
+        <target>No key pair yet</target>
+      </trans-unit>
+      <trans-unit id="page.no_key.description">
+        <source>page.no_key.description</source>
+        <target>Generate the key pair first with the command polaris:tesla:keygen, then come back to enter the credentials of your Tesla app.</target>
+      </trans-unit>
+      <trans-unit id="page.credentials.title">
+        <source>page.credentials.title</source>
+        <target>Credentials</target>
+      </trans-unit>
+      <trans-unit id="page.credentials.description">
+        <source>page.credentials.description</source>
+        <target>The client ID and secret of your Tesla developer app, the domain that serves your public key and the regions to register in.</target>
+      </trans-unit>
+      <trans-unit id="page.status.title">
+        <source>page.status.title</source>
+        <target>Registration</target>
+      </trans-unit>
+      <trans-unit id="page.status.description">
+        <source>page.status.description</source>
+        <target>Registering the app with Tesla is done from the console.</target>
+      </trans-unit>
+      <trans-unit id="page.status.next_steps">
+        <source>page.status.next_steps</source>
+        <target>Check the public key with polaris:tesla:key:check, then register the app with polaris:tesla:register.</target>
+      </trans-unit>
+      <trans-unit id="status.key_generated">
+        <source>status.key_generated</source>
+        <target>Key pair generated</target>
+      </trans-unit>
+      <trans-unit id="status.key_url">
+        <source>status.key_url</source>
+        <target>Public key URL</target>
+      </trans-unit>
+      <trans-unit id="status.regions">
+        <source>status.regions</source>
+        <target>Enabled regions</target>
+      </trans-unit>
+      <trans-unit id="status.not_set">
+        <source>status.not_set</source>
+        <target>Not set</target>
+      </trans-unit>
+      <trans-unit id="form.client_id.label">
+        <source>form.client_id.label</source>
+        <target>Client ID</target>
+      </trans-unit>
+      <trans-unit id="form.client_secret.label">
+        <source>form.client_secret.label</source>
+        <target>Client secret</target>
+      </trans-unit>
+      <trans-unit id="form.client_secret.help_stored">
+        <source>form.client_secret.help_stored</source>
+        <target>A secret is stored and never shown. Leave empty to keep it, or type a new one to replace it.</target>
+      </trans-unit>
+      <trans-unit id="form.client_secret.help_new">
+        <source>form.client_secret.help_new</source>
+        <target>Stored encrypted and never shown again.</target>
+      </trans-unit>
+      <trans-unit id="form.domain.label">
+        <source>form.domain.label</source>
+        <target>Domain</target>
+      </trans-unit>
+      <trans-unit id="form.domain.help">
+        <source>form.domain.help</source>
+        <target>The domain that serves your public key, for example polaris.example.com, without https://.</target>
+      </trans-unit>
+      <trans-unit id="form.regions.label">
+        <source>form.regions.label</source>
+        <target>Regions</target>
+      </trans-unit>
+      <trans-unit id="form.regions.help">
+        <source>form.regions.help</source>
+        <target>The app is registered once in each enabled region. China needs a separate Tesla app and is not available yet.</target>
+      </trans-unit>
+      <trans-unit id="region.na">
+        <source>region.na</source>
+        <target>North America and Asia-Pacific</target>
+      </trans-unit>
+      <trans-unit id="region.eu">
+        <source>region.eu</source>
+        <target>Europe, Middle East and Africa</target>
+      </trans-unit>
+      <trans-unit id="region.cn">
+        <source>region.cn</source>
+        <target>China (not available)</target>
+      </trans-unit>
+      <trans-unit id="form.submit">
+        <source>form.submit</source>
+        <target>Save the Tesla app</target>
+      </trans-unit>
+      <trans-unit id="flash.saved">
+        <source>flash.saved</source>
+        <target>The Tesla app settings are saved.</target>
+      </trans-unit>
+      <trans-unit id="error.rejected">
+        <source>error.rejected</source>
+        <target>The settings could not be saved. Check the values and try again.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

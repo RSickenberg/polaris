@@ -57,3 +57,7 @@ when@test:
         test.polaris.lease.assessment_service:
             alias: Polaris\Lease\Service\LeaseAssessmentService
             public: true
+        # Tesla tests replace the HTTP client with a MockHttpClient: no test reaches the network.
+        test.polaris.http_client:
+            alias: http_client
+            public: true
