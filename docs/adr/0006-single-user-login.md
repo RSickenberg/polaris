@@ -21,9 +21,16 @@ A self-hosted Polaris holds one person's odometer data and, later, their Tesla t
 ## Consequences
 
 - A new page is protected without any change; a public page needs an explicit, tested entry.
-- A forgotten password can only be replaced in the database until a password reset story exists.
+- A forgotten password is reset by email: a single-use link valid for an hour, with only a hash of its secret stored, an answer that does not tell whether the email has an account, and a link built from the configured public address. The app therefore needs a working mailer.
 - Throttling counters are per container: several containers behind a load balancer need a shared pool (Redis, planned).
 - A vehicle is reachable only by its owner (`VehicleVoter`, answering 404 for anyone else), so a second user, for example in the hosted layer, never sees another's data.
+
+## Password reset
+
+- `/forgot-password` emails a link to `/reset-password/{token}`. The token is a 20-character selector plus a 43-character verifier; the database holds the selector and the sha256 of the verifier, so a leak gives no usable link. It is valid for one hour and deleted once used, or when the password changes by any route.
+- The answer is the same for an unknown email. At most 5 links are asked for per client address and hour, and an account gets no new link within 2 minutes of the previous one.
+- The link is built from `DEFAULT_URI`, not from the Host header, which an attacker controls.
+- Built from Symfony components (Mailer, Rate Limiter) rather than a third-party reset bundle.
 
 ## Alternatives considered
 

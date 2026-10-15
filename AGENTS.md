@@ -196,6 +196,13 @@ are specific to Polaris and win when the two disagree.
   password change must revoke them in `UserSettings::changePassword()`. The sidebar user menu is in
   `templates/components/Shared/AppSidebar.html.twig`, the avatar letters come from
   `Account\Domain\Initials`.
+- Password reset (`Account\Controller\PasswordResetController`, `Account\Service\PasswordResetService`):
+  `PasswordResetRequest` stores a selector and the sha256 of a verifier (`Account\Domain\ResetToken`),
+  never the link. Asking never reveals whether the email exists, is limited by the `password_reset`
+  rate limiter (per client address) and sends at most one link every 2 minutes per account. The
+  link is built from `DEFAULT_URI`, not the request host. `UserSettings::changePassword()` removes
+  the pending requests, so both the reset and the settings page cancel old links. Emails are in the
+  language of the user (`account` domain); the mailer needs `MAILER_DSN`, `MAILER_FROM` and `DEFAULT_URI`.
 - The firewall form login and logout use the stateless CSRF token ids `authenticate` and
   `logout`; `login_throttling` allows 5 attempts per 15 minutes. The `dev` firewall that leaves
   the profiler, the toolbar and the AssetMapper routes open is driven by the parameter

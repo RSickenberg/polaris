@@ -6,13 +6,14 @@ namespace Polaris\Account\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Polaris\Account\Entity\User;
+use Polaris\Account\Repository\PasswordResetRequestRepository;
 use Polaris\Account\Repository\UserRepository;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * Changes the settings of the user: email, language, time zone and password. The caller signs
- * the user in again afterwards, as the session of a changed email or password is no longer valid.
+ * the user in again afterward, as the session of a changed email or password is no longer valid.
  */
 final readonly class UserSettings
 {
@@ -22,6 +23,7 @@ final readonly class UserSettings
     public function __construct(
         private EntityManagerInterface $entityManager,
         private UserRepository $users,
+        private PasswordResetRequestRepository $resetRequests,
         private UserPasswordHasherInterface $hasher,
         #[Autowire('%kernel.enabled_locales%')]
         private array $enabledLocales,
@@ -70,6 +72,8 @@ final readonly class UserSettings
         }
 
         $user->changePassword($this->hasher->hashPassword($user, $plainPassword));
+        // A reset link is worth nothing once the password is changed, by whoever did it.
+        $this->resetRequests->removeFor($user);
         $this->entityManager->flush();
     }
 

@@ -86,6 +86,82 @@
         <source>flash.password_saved</source>
         <target>Your password was changed.</target>
       </trans-unit>
+      <trans-unit id="link.forgot">
+        <source>link.forgot</source>
+        <target>Forgot your password?</target>
+      </trans-unit>
+      <trans-unit id="link.back_to_login">
+        <source>link.back_to_login</source>
+        <target>Back to the sign in</target>
+      </trans-unit>
+      <trans-unit id="link.ask_again">
+        <source>link.ask_again</source>
+        <target>Ask for a new link</target>
+      </trans-unit>
+      <trans-unit id="page.forgot.title">
+        <source>page.forgot.title</source>
+        <target>Forgot your password?</target>
+      </trans-unit>
+      <trans-unit id="page.forgot.description">
+        <source>page.forgot.description</source>
+        <target>Enter your email and we send you a link to choose a new password.</target>
+      </trans-unit>
+      <trans-unit id="form.send_link">
+        <source>form.send_link</source>
+        <target>Send the link</target>
+      </trans-unit>
+      <trans-unit id="error.too_many_requests">
+        <source>error.too_many_requests</source>
+        <target>Too many requests. Try again later.</target>
+      </trans-unit>
+      <trans-unit id="page.forgot_sent.title">
+        <source>page.forgot_sent.title</source>
+        <target>Check your inbox</target>
+      </trans-unit>
+      <trans-unit id="page.forgot_sent.description">
+        <source>page.forgot_sent.description</source>
+        <target>If this email belongs to an account, a link to reset the password is on its way. It works once and expires in one hour.</target>
+      </trans-unit>
+      <trans-unit id="page.reset.title">
+        <source>page.reset.title</source>
+        <target>Choose a new password</target>
+      </trans-unit>
+      <trans-unit id="page.reset.description">
+        <source>page.reset.description</source>
+        <target>Type the new password twice. Every device is signed out.</target>
+      </trans-unit>
+      <trans-unit id="page.reset_invalid.title">
+        <source>page.reset_invalid.title</source>
+        <target>This link does not work</target>
+      </trans-unit>
+      <trans-unit id="page.reset_invalid.description">
+        <source>page.reset_invalid.description</source>
+        <target>It has expired, it was already used, or it is incomplete. Ask for a new one.</target>
+      </trans-unit>
+      <trans-unit id="flash.password_reset">
+        <source>flash.password_reset</source>
+        <target>Your password was changed. Sign in with the new one.</target>
+      </trans-unit>
+      <trans-unit id="email.reset.subject">
+        <source>email.reset.subject</source>
+        <target>Reset your Polaris password</target>
+      </trans-unit>
+      <trans-unit id="email.reset.intro">
+        <source>email.reset.intro</source>
+        <target>Someone asked to reset the password of your Polaris account.</target>
+      </trans-unit>
+      <trans-unit id="email.reset.cta">
+        <source>email.reset.cta</source>
+        <target>Choose a new password</target>
+      </trans-unit>
+      <trans-unit id="email.reset.expires">
+        <source>email.reset.expires</source>
+        <target>This link works once and expires in %hours% hour.</target>
+      </trans-unit>
+      <trans-unit id="email.reset.ignore">
+        <source>email.reset.ignore</source>
+        <target>If it was not you, ignore this email: your password stays the same.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
