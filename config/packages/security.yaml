@@ -45,6 +45,8 @@ security:
         - { path: ^/locale/, roles: PUBLIC_ACCESS }
         - { path: ^/forgot-password, roles: PUBLIC_ACCESS }
         - { path: ^/reset-password/, roles: PUBLIC_ACCESS }
+        # Tesla fetches the public key anonymously; it is the only thing this route answers.
+        - { path: ^/\.well-known/appspecific/com\.tesla\.3p\.public-key\.pem$, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: ROLE_USER }
 
 when@test:

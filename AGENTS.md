@@ -117,8 +117,8 @@ are specific to Polaris and win when the two disagree.
 - Polaris tracks a Tesla's odometer against the lease allowance, projects the
   mileage at lease end and warns before the limit. Decisions are recorded in
   `docs/adr/`; read them before changing structure.
-- This repository is public (AGPL-3.0-or-later) and is the self-hostable
-  application. A private hosted layer builds on its Docker image and plugs in
+- This repository is public under the PolyForm Noncommercial License 1.0.0 (ADR 0008) and is the
+  self-hostable application, for personal use only. A private hosted layer builds on its Docker image and plugs in
   only through `src/Extension/`. Never add hosted-only code here (billing, plans,
   sign-up policy, APNs keys).
 - Stack in place: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine ORM and
@@ -217,6 +217,21 @@ are specific to Polaris and win when the two disagree.
   `VehicleOwnershipTest`.
 - In functional tests, sign in with `Polaris\Tests\Support\SignsIn`; do not post the login
   form unless the test is about the login.
+
+### Tesla key pair (Tesla module)
+
+- `Tesla\Entity\TeslaApp` (owned by a `User`) holds the prime256v1 public key in clear (PKIX PEM) and the
+  private key as the `Shared\Service\SecretEncrypter` ciphertext (ADR 0007: libsodium secretbox, `v1:` prefix,
+  key in `POLARIS_ENCRYPTION_KEY`). The private key PEM is PKCS8; vehicle-command's loaders read both
+  PKCS8 and SEC1 (checked in its source, not run). Never log, dump or echo it: `Tesla\Domain\KeyPair` and
+  `TeslaApp::__serialize()` leave it out.
+- `polaris:tesla:keygen` (`Tesla\Service\TeslaKeyService`) refuses to replace a key without `--force`.
+- `Extension\PublicKeyHosting` decides where Tesla finds the public key. The default `ConfiguredPublicKeyHosting`
+  follows `POLARIS_KEY_HOSTING`: `polaris` (`PolarisPublicKeyHosting`, `Tesla\Controller\PublicKeyController`
+  serves the only app's key whatever the Host, stateless, public) or `external` (`ExternalPublicKeyHosting`
+  writes the PEM into `POLARIS_KEY_HOSTING_DIR`; the route then answers 404). The hosted layer replaces the alias.
+- The well-known route is public: its `access_control` entry precedes the catch-all and `tesla_public_key` is in
+  `PUBLIC_ROUTES` of `AccessControlTest`.
 
 ### Code organization (ADR 0001)
 

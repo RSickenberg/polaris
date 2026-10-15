@@ -19,7 +19,7 @@ final class AccessControlTest extends WebTestCase
      * The routes that are public on purpose: the login page, and the language switcher, which the
      * login page uses.
      */
-    private const array PUBLIC_ROUTES = ['account_login', 'shared_locale', 'account_forgot_password', 'account_forgot_password_sent', 'account_reset_password'];
+    private const array PUBLIC_ROUTES = ['account_login', 'shared_locale', 'account_forgot_password', 'account_forgot_password_sent', 'account_reset_password', 'tesla_public_key'];
 
     /**
      * Development tooling: open in the dev and test environments only (parameter
