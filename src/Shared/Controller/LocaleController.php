@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Shared\Controller;
 
+use Polaris\Shared\Event\LocaleSwitched;
 use Polaris\Shared\Service\CookiePreferredLocaleProvider;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,10 +14,12 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
- * The language switcher: remembers the chosen locale in a cookie, then goes back to the page.
- * Only the cookie changes, so a plain link is enough (no CSRF token, no state to protect).
+ * The language switcher: remembers the chosen locale in a cookie, tells the Account module
+ * (which keeps it for the signed-in user), then goes back to the page. Only a preference
+ * changes, so a plain link is enough (no CSRF token, no state to protect).
  */
 final class LocaleController extends AbstractController
 {
@@ -25,6 +28,7 @@ final class LocaleController extends AbstractController
      */
     public function __construct(
         private readonly ClockInterface $clock,
+        private readonly EventDispatcherInterface $dispatcher,
         #[Autowire('%kernel.enabled_locales%')]
         private readonly array $enabledLocales,
     ) {
@@ -36,6 +40,8 @@ final class LocaleController extends AbstractController
         if (!\in_array($locale, $this->enabledLocales, true)) {
             throw new NotFoundHttpException();
         }
+
+        $this->dispatcher->dispatch(new LocaleSwitched($locale));
 
         $response = new RedirectResponse($this->localPath($request->query->getString('redirect')));
         $response->headers->setCookie(Cookie::create(

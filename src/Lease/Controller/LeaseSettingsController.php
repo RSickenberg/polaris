@@ -9,12 +9,14 @@ use Polaris\Lease\Form\Model\LeaseContractData;
 use Polaris\Lease\Service\LeaseTermsRejected;
 use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Vehicle\Entity\Vehicle;
+use Polaris\Vehicle\Service\VehiclePermission;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class LeaseSettingsController extends AbstractController
@@ -25,6 +27,8 @@ final class LeaseSettingsController extends AbstractController
     ) {
     }
 
+    // Not found rather than forbidden: another user's vehicle must not even be known to exist.
+    #[IsGranted(VehiclePermission::Manage->value, 'vehicle', statusCode: Response::HTTP_NOT_FOUND)]
     #[Route('/vehicles/{id}/lease', name: 'lease_settings', methods: ['GET', 'POST'])]
     public function settings(Request $request, #[MapEntity(id: 'id')] Vehicle $vehicle): Response
     {

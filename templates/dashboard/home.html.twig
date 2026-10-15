@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'page.home.title'|trans(domain='dashboard') }}{% endblock %}
+
+{% block main %}
+    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.home.title'|trans(domain='dashboard') }}</h1>
+
+    <div class="mt-6 flex flex-col gap-4">
+        {% for vehicle in vehicles %}
+            <twig:Card>
+                <twig:Card:Header>
+                    <twig:Card:Title><h2>{{ vehicle.name }}</h2></twig:Card:Title>
+                    <twig:Card:Description>{{ vehicle.vin.value }}</twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content class="flex flex-wrap gap-2">
+                    <twig:Button as="a" href="{{ path('dashboard_show', {id: vehicle.id.toBase32()}) }}">{{ 'home.dashboard'|trans(domain='dashboard') }}</twig:Button>
+                    <twig:Button as="a" variant="outline" href="{{ path('reading_history', {id: vehicle.id.toBase32()}) }}">{{ 'home.readings'|trans(domain='dashboard') }}</twig:Button>
+                    <twig:Button as="a" variant="outline" href="{{ path('lease_settings', {id: vehicle.id.toBase32()}) }}">{{ 'home.lease'|trans(domain='dashboard') }}</twig:Button>
+                </twig:Card:Content>
+            </twig:Card>
+        {% else %}
+            <twig:Card>
+                <twig:Card:Content>
+                    <p class="text-sm text-muted-foreground">{{ 'page.home.empty'|trans(domain='dashboard') }}</p>
+                </twig:Card:Content>
+            </twig:Card>
+        {% endfor %}
+    </div>
+{% endblock %}

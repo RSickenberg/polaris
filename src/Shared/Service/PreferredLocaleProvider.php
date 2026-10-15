@@ -6,7 +6,7 @@ namespace Polaris\Shared\Service;
 
 /**
  * The locale the current user chose, if any. It wins over the browser's Accept-Language.
- * The Account module implements it once users exist (#21).
+ * The Account module decorates the cookie implementation with the language of the signed-in user.
  */
 interface PreferredLocaleProvider
 {

@@ -6,6 +6,7 @@ namespace Polaris\Tests\Unit\Vehicle\Entity;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Polaris\Tests\Support\Owner;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Component\Uid\Ulid;
@@ -15,8 +16,8 @@ final class VehicleTest extends TestCase
 {
     public function testGetsAUlidBeforeBeingPersisted(): void
     {
-        $first = new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3');
-        $second = new Vehicle(new Vin('5YJ3E7EB2NF000002'), 'Model Y');
+        $first = new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', Owner::user());
+        $second = new Vehicle(new Vin('5YJ3E7EB2NF000002'), 'Model Y', Owner::user());
 
         self::assertTrue(Ulid::isValid((string) $first->getId()));
         self::assertFalse($first->getId()->equals($second->getId()));
@@ -24,22 +25,29 @@ final class VehicleTest extends TestCase
         self::assertLessThan(0, $first->getId()->compare($second->getId()));
     }
 
+    public function testKeepsItsOwner(): void
+    {
+        $owner = Owner::user();
+
+        self::assertSame($owner, new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', $owner)->getOwner());
+    }
+
     public function testNameIsTrimmed(): void
     {
-        self::assertSame('Model 3', new Vehicle(new Vin('5YJ3E7EB2NF000001'), '  Model 3 ')->getName());
+        self::assertSame('Model 3', new Vehicle(new Vin('5YJ3E7EB2NF000001'), '  Model 3 ', Owner::user())->getName());
     }
 
     public function testBlankNameIsRejected(): void
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        new Vehicle(new Vin('5YJ3E7EB2NF000001'), '   ');
+        new Vehicle(new Vin('5YJ3E7EB2NF000001'), '   ', Owner::user());
     }
 
     public function testTooLongNameIsRejected(): void
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        new Vehicle(new Vin('5YJ3E7EB2NF000001'), str_repeat('a', Vehicle::NAME_MAX_LENGTH + 1));
+        new Vehicle(new Vin('5YJ3E7EB2NF000001'), str_repeat('a', Vehicle::NAME_MAX_LENGTH + 1), Owner::user());
     }
 }

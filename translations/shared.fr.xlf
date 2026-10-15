@@ -74,6 +74,30 @@
         <source>locale.fr</source>
         <target>Français</target>
       </trans-unit>
+      <trans-unit id="account.signed_in_as">
+        <source>account.signed_in_as</source>
+        <target>Connecté en tant que</target>
+      </trans-unit>
+      <trans-unit id="account.logout">
+        <source>account.logout</source>
+        <target>Se déconnecter</target>
+      </trans-unit>
+      <trans-unit id="account.menu">
+        <source>account.menu</source>
+        <target>Menu du compte</target>
+      </trans-unit>
+      <trans-unit id="account.settings">
+        <source>account.settings</source>
+        <target>Paramètres</target>
+      </trans-unit>
+      <trans-unit id="nav.vehicles">
+        <source>nav.vehicles</source>
+        <target>Mes véhicules</target>
+      </trans-unit>
+      <trans-unit id="nav.home_label">
+        <source>nav.home_label</source>
+        <target>Navigation de l’accueil</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Distance;
+use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -20,6 +21,8 @@ use Twig\Environment;
 #[CoversNothing]
 final class HistoryTableTimeZoneTest extends KernelTestCase
 {
+    use SignsIn;
+
     public function testDatesAcrossTheEndOfDaylightSavingTime(): void
     {
         // Europe/Zurich leaves summer time on 2026-10-25 at 01:00 UTC: 02:59 CEST is followed by 02:00 CET.
@@ -90,6 +93,6 @@ final class HistoryTableTimeZoneTest extends KernelTestCase
 
     private static function reading(string $readAtUtc, int $km): OdometerReading
     {
-        return OdometerReading::manual(new Vehicle(new Vin('5YJ3E7EB2NF000040'), 'Model 3'), CarbonImmutable::parse($readAtUtc, 'UTC'), Distance::fromKilometres($km));
+        return OdometerReading::manual(new Vehicle(new Vin('5YJ3E7EB2NF000040'), 'Model 3', self::createUser()), CarbonImmutable::parse($readAtUtc, 'UTC'), Distance::fromKilometres($km));
     }
 }

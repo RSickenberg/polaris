@@ -1,0 +1,59 @@
+security:
+    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+    providers:
+        # The email is the identifier; UserRepository::loadUserByIdentifier() compares it trimmed and lower-cased.
+        app_user_provider:
+            entity:
+                class: Polaris\Account\Entity\User
+
+    firewalls:
+        # Tooling that needs no login: see the parameter polaris.security.open_paths, which matches nothing in production.
+        dev:
+            pattern: '%polaris.security.open_paths%'
+            security: false
+        main:
+            lazy: true
+            provider: app_user_provider
+
+            form_login:
+                login_path: account_login
+                check_path: account_login
+                enable_csrf: true
+                csrf_token_id: authenticate
+                default_target_path: dashboard_home
+
+            logout:
+                path: account_logout
+                target: account_login
+                enable_csrf: true
+                csrf_token_id: logout
+
+            # 5 failed attempts per email and IP address, then locked for the interval. The same
+            # limiter also stops an address that tries many emails (5 times the attempts, in total).
+            login_throttling:
+                max_attempts: 5
+                interval: '15 minutes'
+
+    # Deny by default: every page needs a signed-in user. Only the first matching rule applies,
+    # so a public page is listed here before the catch-all. A test walks the router and fails
+    # on a route that is reachable without signing in and is not listed in its own allow-list.
+    access_control:
+        - { path: ^/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/locale/, roles: PUBLIC_ACCESS }
+        - { path: ^/forgot-password, roles: PUBLIC_ACCESS }
+        - { path: ^/reset-password/, roles: PUBLIC_ACCESS }
+        - { path: ^/, roles: ROLE_USER }
+
+when@test:
+    security:
+        password_hashers:
+            # Password hashers are resource-intensive by design to ensure security.
+            # In tests, it's safe to reduce their cost to improve performance.
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+                algorithm: auto
+                cost: 4 # Lowest possible value for bcrypt
+                time_cost: 3 # Lowest possible value for argon
+                memory_cost: 10 # Lowest possible value for argon

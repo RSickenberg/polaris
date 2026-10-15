@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="fr" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="page.login.title">
+        <source>page.login.title</source>
+        <target>Connexion</target>
+      </trans-unit>
+      <trans-unit id="page.login.description">
+        <source>page.login.description</source>
+        <target>Saisissez votre e-mail et votre mot de passe pour ouvrir votre tableau de bord.</target>
+      </trans-unit>
+      <trans-unit id="form.email.label">
+        <source>form.email.label</source>
+        <target>E-mail</target>
+      </trans-unit>
+      <trans-unit id="form.password.label">
+        <source>form.password.label</source>
+        <target>Mot de passe</target>
+      </trans-unit>
+      <trans-unit id="form.submit">
+        <source>form.submit</source>
+        <target>Se connecter</target>
+      </trans-unit>
+      <trans-unit id="page.settings.title">
+        <source>page.settings.title</source>
+        <target>Paramètres</target>
+      </trans-unit>
+      <trans-unit id="page.settings.profile">
+        <source>page.settings.profile</source>
+        <target>Profil</target>
+      </trans-unit>
+      <trans-unit id="page.settings.profile_description">
+        <source>page.settings.profile_description</source>
+        <target>Votre e-mail, votre langue et le fuseau horaire dans lequel les dates sont affichées.</target>
+      </trans-unit>
+      <trans-unit id="page.settings.password">
+        <source>page.settings.password</source>
+        <target>Mot de passe</target>
+      </trans-unit>
+      <trans-unit id="page.settings.password_description">
+        <source>page.settings.password_description</source>
+        <target>Choisissez un nouveau mot de passe. Vous restez connecté sur cet appareil.</target>
+      </trans-unit>
+      <trans-unit id="form.locale.label">
+        <source>form.locale.label</source>
+        <target>Langue</target>
+      </trans-unit>
+      <trans-unit id="form.time_zone.label">
+        <source>form.time_zone.label</source>
+        <target>Fuseau horaire</target>
+      </trans-unit>
+      <trans-unit id="form.time_zone.help">
+        <source>form.time_zone.help</source>
+        <target>Les dates sont stockées en UTC, puis affichées et saisies dans ce fuseau horaire.</target>
+      </trans-unit>
+      <trans-unit id="form.current_password.label">
+        <source>form.current_password.label</source>
+        <target>Mot de passe actuel</target>
+      </trans-unit>
+      <trans-unit id="form.new_password.label">
+        <source>form.new_password.label</source>
+        <target>Nouveau mot de passe</target>
+      </trans-unit>
+      <trans-unit id="form.new_password.help">
+        <source>form.new_password.help</source>
+        <target>Au moins %min% caractères.</target>
+      </trans-unit>
+      <trans-unit id="form.new_password_confirm.label">
+        <source>form.new_password_confirm.label</source>
+        <target>Répétez le nouveau mot de passe</target>
+      </trans-unit>
+      <trans-unit id="form.save">
+        <source>form.save</source>
+        <target>Enregistrer le profil</target>
+      </trans-unit>
+      <trans-unit id="form.password_save">
+        <source>form.password_save</source>
+        <target>Changer le mot de passe</target>
+      </trans-unit>
+      <trans-unit id="flash.profile_saved">
+        <source>flash.profile_saved</source>
+        <target>Votre profil a été enregistré.</target>
+      </trans-unit>
+      <trans-unit id="flash.password_saved">
+        <source>flash.password_saved</source>
+        <target>Votre mot de passe a été modifié.</target>
+      </trans-unit>
+      <trans-unit id="link.forgot">
+        <source>link.forgot</source>
+        <target>Mot de passe oublié ?</target>
+      </trans-unit>
+      <trans-unit id="link.back_to_login">
+        <source>link.back_to_login</source>
+        <target>Retour à la connexion</target>
+      </trans-unit>
+      <trans-unit id="link.ask_again">
+        <source>link.ask_again</source>
+        <target>Demander un nouveau lien</target>
+      </trans-unit>
+      <trans-unit id="page.forgot.title">
+        <source>page.forgot.title</source>
+        <target>Mot de passe oublié ?</target>
+      </trans-unit>
+      <trans-unit id="page.forgot.description">
+        <source>page.forgot.description</source>
+        <target>Saisissez votre e-mail : nous vous envoyons un lien pour choisir un nouveau mot de passe.</target>
+      </trans-unit>
+      <trans-unit id="form.send_link">
+        <source>form.send_link</source>
+        <target>Envoyer le lien</target>
+      </trans-unit>
+      <trans-unit id="error.too_many_requests">
+        <source>error.too_many_requests</source>
+        <target>Trop de demandes. Réessayez plus tard.</target>
+      </trans-unit>
+      <trans-unit id="page.forgot_sent.title">
+        <source>page.forgot_sent.title</source>
+        <target>Consultez votre boîte mail</target>
+      </trans-unit>
+      <trans-unit id="page.forgot_sent.description">
+        <source>page.forgot_sent.description</source>
+        <target>Si cet e-mail correspond à un compte, un lien de réinitialisation est en route. Il ne fonctionne qu'une fois et expire dans une heure.</target>
+      </trans-unit>
+      <trans-unit id="page.reset.title">
+        <source>page.reset.title</source>
+        <target>Choisissez un nouveau mot de passe</target>
+      </trans-unit>
+      <trans-unit id="page.reset.description">
+        <source>page.reset.description</source>
+        <target>Saisissez deux fois le nouveau mot de passe. Tous les appareils sont déconnectés.</target>
+      </trans-unit>
+      <trans-unit id="page.reset_invalid.title">
+        <source>page.reset_invalid.title</source>
+        <target>Ce lien ne fonctionne pas</target>
+      </trans-unit>
+      <trans-unit id="page.reset_invalid.description">
+        <source>page.reset_invalid.description</source>
+        <target>Il a expiré, il a déjà servi ou il est incomplet. Demandez-en un nouveau.</target>
+      </trans-unit>
+      <trans-unit id="flash.password_reset">
+        <source>flash.password_reset</source>
+        <target>Votre mot de passe a été modifié. Connectez-vous avec le nouveau.</target>
+      </trans-unit>
+      <trans-unit id="email.reset.subject">
+        <source>email.reset.subject</source>
+        <target>Réinitialisez votre mot de passe Polaris</target>
+      </trans-unit>
+      <trans-unit id="email.reset.intro">
+        <source>email.reset.intro</source>
+        <target>Quelqu'un a demandé la réinitialisation du mot de passe de votre compte Polaris.</target>
+      </trans-unit>
+      <trans-unit id="email.reset.cta">
+        <source>email.reset.cta</source>
+        <target>Choisir un nouveau mot de passe</target>
+      </trans-unit>
+      <trans-unit id="email.reset.expires">
+        <source>email.reset.expires</source>
+        <target>Ce lien ne fonctionne qu'une fois et expire dans %hours% heure.</target>
+      </trans-unit>
+      <trans-unit id="email.reset.ignore">
+        <source>email.reset.ignore</source>
+        <target>Si ce n'était pas vous, ignorez cet e-mail : votre mot de passe reste inchangé.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

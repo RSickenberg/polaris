@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'page.settings.title'|trans(domain='account') }}{% endblock %}
+
+{% block main %}
+    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.settings.title'|trans(domain='account') }}</h1>
+
+    {{ include('shared/_flashes.html.twig') }}
+
+    <div class="mt-6 flex max-w-lg flex-col gap-6">
+        <twig:Card>
+            <twig:Card:Header>
+                <twig:Card:Title><h2>{{ 'page.settings.profile'|trans(domain='account') }}</h2></twig:Card:Title>
+                <twig:Card:Description>{{ 'page.settings.profile_description'|trans(domain='account') }}</twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content>
+                {{ form(profileForm) }}
+            </twig:Card:Content>
+        </twig:Card>
+
+        <twig:Card>
+            <twig:Card:Header>
+                <twig:Card:Title><h2>{{ 'page.settings.password'|trans(domain='account') }}</h2></twig:Card:Title>
+                <twig:Card:Description>{{ 'page.settings.password_description'|trans(domain='account') }}</twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content>
+                {{ form(passwordForm) }}
+            </twig:Card:Content>
+        </twig:Card>
+    </div>
+{% endblock %}

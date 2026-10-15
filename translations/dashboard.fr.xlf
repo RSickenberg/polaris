@@ -74,6 +74,26 @@
         <source>ended.cta</source>
         <target>Revoir les conditions du leasing</target>
       </trans-unit>
+      <trans-unit id="page.home.title">
+        <source>page.home.title</source>
+        <target>Vos véhicules</target>
+      </trans-unit>
+      <trans-unit id="page.home.empty">
+        <source>page.home.empty</source>
+        <target>Il n'y a pas encore de véhicule. Dès qu'un véhicule est ajouté, il est listé ici.</target>
+      </trans-unit>
+      <trans-unit id="home.dashboard">
+        <source>home.dashboard</source>
+        <target>Tableau de bord</target>
+      </trans-unit>
+      <trans-unit id="home.readings">
+        <source>home.readings</source>
+        <target>Relevés du compteur</target>
+      </trans-unit>
+      <trans-unit id="home.lease">
+        <source>home.lease</source>
+        <target>Conditions du leasing</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

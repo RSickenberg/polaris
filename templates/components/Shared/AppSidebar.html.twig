@@ -8,7 +8,20 @@
         </div>
     </twig:Sidebar:Header>
     <twig:Sidebar:Content>
+        <twig:Sidebar:Group>
+            <nav aria-label="{{ 'nav.home_label'|trans(domain='shared') }}">
+                <twig:Sidebar:Menu>
+                    <twig:Sidebar:MenuItem>
+                        <twig:Sidebar:MenuButton as="a" href="{{ path('dashboard_home') }}" :active="'dashboard_home' == route">
+                            <twig:ux:icon name="lucide:car" aria-hidden="true" />
+                            <span>{{ 'nav.vehicles'|trans(domain='shared') }}</span>
+                        </twig:Sidebar:MenuButton>
+                    </twig:Sidebar:MenuItem>
+                </twig:Sidebar:Menu>
+            </nav>
+        </twig:Sidebar:Group>
         {% if vehicle is not null %}
+            <twig:Sidebar:Separator />
             <twig:Sidebar:Group>
                 <nav aria-label="{{ 'nav.label'|trans(domain='shared') }}">
                     <twig:Sidebar:Menu>
@@ -35,4 +48,34 @@
             </twig:Sidebar:Group>
         {% endif %}
     </twig:Sidebar:Content>
+    {% if app.user %}
+        <twig:Sidebar:Footer>
+            <twig:DropdownMenu id="account" side="top" align="start" class="w-full">
+                <twig:DropdownMenu:Trigger>
+                    <twig:Sidebar:MenuButton size="lg" aria-label="{{ 'account.menu'|trans(domain='shared') }}" {{ ...dropdown_menu_trigger_attrs }}>
+                        <twig:Avatar>
+                            <twig:Avatar:Fallback aria-hidden="true">{{ app.user.initials }}</twig:Avatar:Fallback>
+                        </twig:Avatar>
+                        <span class="flex min-w-0 flex-col text-start leading-tight">
+                            <span class="sr-only">{{ 'account.signed_in_as'|trans(domain='shared') }}</span>
+                            <span class="truncate text-sm font-medium" title="{{ app.user.userIdentifier }}">{{ app.user.userIdentifier }}</span>
+                        </span>
+                        <twig:ux:icon name="lucide:chevrons-up-down" class="ms-auto size-4" aria-hidden="true" />
+                    </twig:Sidebar:MenuButton>
+                </twig:DropdownMenu:Trigger>
+                <twig:DropdownMenu:Content class="w-56">
+                    <twig:DropdownMenu:Item as="a" href="{{ path('account_settings') }}">
+                        <twig:ux:icon name="lucide:settings" aria-hidden="true" />
+                        {{ 'account.settings'|trans(domain='shared') }}
+                    </twig:DropdownMenu:Item>
+                    <twig:DropdownMenu:Separator />
+                    {# A full page load, so that the session ends and the next page is the login. #}
+                    <twig:DropdownMenu:Item as="a" href="{{ logout_path() }}" data-turbo="false">
+                        <twig:ux:icon name="lucide:log-out" aria-hidden="true" />
+                        {{ 'account.logout'|trans(domain='shared') }}
+                    </twig:DropdownMenu:Item>
+                </twig:DropdownMenu:Content>
+            </twig:DropdownMenu>
+        </twig:Sidebar:Footer>
+    {% endif %}
 </twig:Sidebar>

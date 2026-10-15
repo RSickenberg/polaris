@@ -15,6 +15,7 @@ use Polaris\Lease\Entity\LeaseContract;
 use Polaris\Shared\Domain\Currency;
 use Polaris\Shared\Domain\Distance;
 use Polaris\Shared\Domain\Money;
+use Polaris\Tests\Support\Owner;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 
@@ -57,7 +58,7 @@ final class LeaseContractTest extends TestCase
     private static function contract(): LeaseContract
     {
         return new LeaseContract(
-            new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3'),
+            new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', Owner::user()),
             new LeaseTerm(CarbonImmutable::parse('2026-01-15', 'UTC'), CarbonImmutable::parse('2029-01-15', 'UTC'), EndDateConvention::Exclusive),
             Allowance::ofTotal(Distance::fromKilometres(45_000)),
             Distance::fromKilometres(12),

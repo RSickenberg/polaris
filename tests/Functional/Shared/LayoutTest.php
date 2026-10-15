@@ -7,6 +7,7 @@ namespace Polaris\Tests\Functional\Shared;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -20,13 +21,16 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 #[CoversNothing]
 final class LayoutTest extends WebTestCase
 {
+    use SignsIn;
+
     private KernelBrowser $client;
     private string $id;
 
     protected function setUp(): void
     {
         $this->client = self::createClient();
-        $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000051'), 'Model 3');
+        self::signIn($this->client);
+        $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000051'), 'Model 3', self::createUser());
         self::getContainer()->get(EntityManagerInterface::class)->persist($vehicle);
         self::getContainer()->get(EntityManagerInterface::class)->flush();
         $this->id = $vehicle->getId()->toBase32();
@@ -60,6 +64,8 @@ final class LayoutTest extends WebTestCase
     {
         $crawler = $this->client->request('GET', \sprintf('/vehicles/%s/lease', $this->id));
 
+        // A bar separates the vehicle list link from the links of this vehicle.
+        self::assertSelectorExists('[data-slot=sidebar-content] > [data-slot=sidebar-separator]');
         $links = $crawler->filter('nav[aria-label="Main navigation"] a');
         self::assertCount(3, $links);
         self::assertSame(\sprintf('/vehicles/%s', $this->id), $links->eq(0)->attr('href'));

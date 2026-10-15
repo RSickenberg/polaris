@@ -17,6 +17,7 @@ use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Currency;
 use Polaris\Shared\Domain\Distance;
+use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -27,6 +28,8 @@ use Symfony\Component\Clock\Test\ClockSensitiveTrait;
 final class LeaseTermsServiceTest extends KernelTestCase
 {
     use ClockSensitiveTrait;
+
+    use SignsIn;
 
     private LeaseTermsService $service;
     private EntityManagerInterface $entityManager;
@@ -39,7 +42,7 @@ final class LeaseTermsServiceTest extends KernelTestCase
         $this->service = self::getContainer()->get(LeaseTermsService::class);
         $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
 
-        $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000040'), 'Model 3');
+        $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000040'), 'Model 3', self::createUser());
         $this->entityManager->persist($this->vehicle);
         // 10,000 km after 182 days of a one-year lease: about 20,000 km projected at the end.
         $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'), Distance::fromKilometres(10_000)));

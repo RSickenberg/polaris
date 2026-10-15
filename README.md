@@ -10,6 +10,24 @@ Polaris tracks your Tesla's odometer against your lease allowance, projects the 
 - Compare the kilometres driven with the lease allowance and project the total at lease end.
 - Give a remaining budget per day, week and month, and alert when the projection crosses the limit.
 
+## Signing in
+
+Every page sits behind a login; the only public ones are `/login` and the language switcher. A self-hosted Polaris has a single user, created on the command line (there is no sign-up page):
+
+```bash
+make sf ARGS="polaris:user:create you@example.com"                                   # asks for the password twice, hidden
+make sf ARGS="polaris:user:create you@example.com --locale=fr --time-zone=Europe/Zurich"
+printf '%s\n' "$PASSWORD" | docker compose exec -T php bin/console polaris:user:create you@example.com   # not interactive: reads the password from the standard input
+```
+
+The password is never an argument or an option, so it stays out of the shell history and the process list. It needs at least 12 characters and is stored only as a hash. The command refuses to create a second user. Then open `/login`.
+
+After 5 failed attempts for the same email and IP address within 15 minutes, further attempts from them are refused, even with the right password, until the window passes; an address that tries many emails is also limited. The counters live in the cache (`cache.rate_limiter`), so they are shared by every worker of the same container. A forgotten password is reset from the login page ("Forgot your password?"): `/forgot-password` emails a link that works once and expires after an hour, and the page behind it asks for the new password twice. The answer is the same whether or not the email has an account, at most 5 links are asked for per client address and hour, and a new link replaces the previous one. Resetting or changing the password cancels every pending link and signs every device out. It needs a working mailer: set `MAILER_DSN` and `MAILER_FROM`, and `DEFAULT_URI` to the public address of the app (the link is built from it, never from the request's Host header), in `.env.local`. In development the containers send to Mailpit (http://localhost:8025).
+
+The sidebar shows the user as an avatar with their initials and a menu with the settings and sign out. `/settings` changes the email, the language, the time zone (`User.timeZone`, UTC by default, the one dates are shown and entered in) and the password (the current one is asked, the new one is typed twice and needs 12 characters); the user stays signed in after a change. The language switcher is kept in `User.locale` too.
+
+`make seed` loads the sample vehicles for `dev@example.test`, with a random password printed once at the end of the seed output.
+
 ## Odometer readings
 
 Readings are stored in integer metres and UTC, whatever unit they were typed in. Add one by hand, in km or miles:
@@ -19,15 +37,15 @@ make sf ARGS="polaris:odometer:add 12345"                          # km, now, th
 make sf ARGS="polaris:odometer:add 7600 --unit=mi --at=2026-10-01T08:00 --vehicle=<VIN or id>"
 ```
 
-or on `/vehicles/{id}/readings`, which also lists the history, newest first. A value lower than the previous reading is rejected; a reading dated in the past (a backfill) must fit between the readings around it, and an equal value is accepted. Until the user's time zone exists, dates are entered and shown in UTC.
+or on `/vehicles/{id}/readings`, which also lists the history, newest first. A value lower than the previous reading is rejected; a reading dated in the past (a backfill) must fit between the readings around it, and an equal value is accepted. Dates are entered and shown in the time zone of the signed-in user (UTC by default), and stored in UTC.
 
 ## Lease terms
 
-Enter or edit the lease on `/vehicles/{id}/lease`: start and end dates (the end date is either the return day or the last day of the lease, and the lease must last a whole number of months), the allowance (per year or for the whole term, in km or miles), the odometer at the start, the excess cost per km with its currency (CHF, EUR, GBP or USD) and the tolerance (0 to 50 %). A vehicle has one contract, and an edit overwrites it. Distances are stored in metres and the cost in minor units. Saving recomputes the projection with the recorded readings, and terms that contradict a reading (a start odometer above it, for example) are refused whole. The user's time zone comes with the login (#21).
+Enter or edit the lease on `/vehicles/{id}/lease`: start and end dates (the end date is either the return day or the last day of the lease, and the lease must last a whole number of months), the allowance (per year or for the whole term, in km or miles), the odometer at the start, the excess cost per km with its currency (CHF, EUR, GBP or USD) and the tolerance (0 to 50 %). A vehicle has one contract, and an edit overwrites it. Distances are stored in metres and the cost in minor units. Saving recomputes the projection with the recorded readings, and terms that contradict a reading (a start odometer above it, for example) are refused whole.
 
 ## Dashboard
 
-`/vehicles/{id}` shows where a vehicle stands in one page: the risk level with a message (the projected excess, its cost and the weekly cut when it is `Watch` or `Over`), the share of the allowance driven (the tick marks the allowance earned to date), the distance driven, the allowance to date, the projection at the lease end, the date of the last reading after the lease start, and the budget per day, week and month. Without a contract, without a reading after the lease start, or once the lease has ended it says so and links to the page that fixes it; an ended lease shows the figures so far and no budget. Distances are in km and dates in UTC until the user's preferences exist (#21).
+`/vehicles/{id}` shows where a vehicle stands in one page: the risk level with a message (the projected excess, its cost and the weekly cut when it is `Watch` or `Over`), the share of the allowance driven (the tick marks the allowance earned to date), the distance driven, the allowance to date, the projection at the lease end, the date of the last reading after the lease start, and the budget per day, week and month. Without a contract, without a reading after the lease start, or once the lease has ended it says so and links to the page that fixes it; an ended lease shows the figures so far and no budget. Distances are in km and dates are shown in the time zone of the signed-in user.
 
 ## How the projection works
 
@@ -73,7 +91,7 @@ polaris/
   translations/
 ```
 
-`src/` is organized by feature module (`Shared`, `Lease`, `Vehicle`, and more as they arrive), see [ADR 0001](docs/adr/0001-feature-modules.md). Decisions are recorded in [`docs/adr/`](docs/adr/).
+`src/` is organized by feature module (`Shared`, `Account`, `Lease`, `Vehicle`, and more as they arrive), see [ADR 0001](docs/adr/0001-feature-modules.md). Decisions are recorded in [`docs/adr/`](docs/adr/).
 
 The private hosted platform is built on top of this application's Docker image and adds its own bundle; nothing hosted-only lives here.
 
@@ -107,7 +125,7 @@ Open https://localhost and accept the self-signed certificate. The first start r
 
 The `tailwind` service rebuilds the stylesheet whenever a template or `assets/styles/app.css` changes, so there is no front-end build step to run by hand. The Tailwind binary and the built CSS live in the `tailwind` volume (`var/tailwind`); the first start downloads the binary. The pages show the stylesheet only once it is built, so run `make tailwind` before `make test` on a fresh checkout (the `test` and `ci` targets do it for you).
 
-The interface follows the browser language (English or French) until you pick one with the language switcher, which keeps the choice in a cookie. The light, dark or system theme is kept in the browser only.
+The interface follows the browser language (English or French) until you pick one with the language switcher, which keeps the choice in a cookie and, once you are signed in, in your account. The light, dark or system theme is kept in the browser only.
 
 Everyday commands:
 
@@ -118,7 +136,7 @@ make test                       # PHPUnit, options via ARGS="--filter=..." (prep
 make ci                         # every CI check: PHP-CS-Fixer, PHPStan, Deptrac, PHPUnit
 make migrate                    # apply the pending Doctrine migrations
 make diff                       # generate a migration from the entity mapping
-make seed                       # reset the dev database and load sample vehicles, leases and readings
+make seed                       # reset the dev database, load sample vehicles, leases and readings and create the dev user
 make test-db                    # create and migrate the polaris_test database
 make cs-fix                     # apply the coding standard
 make sf ARGS="about"            # any bin/console command
@@ -158,7 +176,7 @@ CI (`.github/workflows/ci.yml`) runs on every pull request and on `main`, one jo
 
 ## Stack
 
-In place: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine ORM and Migrations, Twig and Form, Carbon, Tailwind CSS 4 ([TailwindBundle](https://symfony.com/bundles/TailwindBundle/current/index.html)) on AssetMapper with the Symfony UX Toolkit Shadcn kit (Twig components in `templates/components/`, Stimulus, Turbo, UX Icons with Lucide icons committed in `assets/icons/`), a responsive app shell with a dark mode, English and French, ULID identifiers ([ADR 0002](docs/adr/0002-ulid-identifiers.md)). All dates are handled in UTC ([ADR 0003](docs/adr/0003-utc-dates.md)).
+In place: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine ORM and Migrations, Twig and Form, Carbon, Tailwind CSS 4 ([TailwindBundle](https://symfony.com/bundles/TailwindBundle/current/index.html)) on AssetMapper with the Symfony UX Toolkit Shadcn kit (Twig components in `templates/components/`, Stimulus, Turbo, UX Icons with Lucide icons committed in `assets/icons/`), a responsive app shell with a dark mode, a single-user login (Symfony Security, login throttling), English and French, ULID identifiers ([ADR 0002](docs/adr/0002-ulid-identifiers.md)). All dates are handled in UTC ([ADR 0003](docs/adr/0003-utc-dates.md)).
 
 Planned: Redis for Messenger queues, Lock and Cache; Flowbite charts.
 

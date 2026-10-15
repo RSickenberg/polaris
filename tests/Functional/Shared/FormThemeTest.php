@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Distance;
+use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -24,6 +25,7 @@ use Symfony\Component\DomCrawler\Crawler;
 final class FormThemeTest extends WebTestCase
 {
     use ClockSensitiveTrait;
+    use SignsIn;
 
     private const string FRENCH = 'fr-CH, fr;q=0.9, en;q=0.8';
 
@@ -34,7 +36,8 @@ final class FormThemeTest extends WebTestCase
     {
         self::mockTime('2026-10-20 12:00:00 UTC');
         $this->client = self::createClient();
-        $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000060'), 'Model 3');
+        self::signIn($this->client);
+        $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000060'), 'Model 3', self::createUser());
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->persist($this->vehicle);
         $entityManager->persist(OdometerReading::manual($this->vehicle, new \Carbon\CarbonImmutable('2026-10-01 08:00', 'UTC'), Distance::fromKilometres(10_000)));

@@ -7,6 +7,7 @@ namespace Polaris\Tests\Functional\Reading;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Polaris\Reading\Controller\OdometerReadingController;
+use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -17,6 +18,7 @@ use Symfony\Component\Clock\Test\ClockSensitiveTrait;
 final class OdometerReadingControllerTest extends WebTestCase
 {
     use ClockSensitiveTrait;
+    use SignsIn;
 
     private KernelBrowser $client;
     private Vehicle $vehicle;
@@ -25,7 +27,8 @@ final class OdometerReadingControllerTest extends WebTestCase
     {
         self::mockTime('2026-10-20 12:00:00 UTC');
         $this->client = self::createClient();
-        $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000030'), 'Model 3');
+        self::signIn($this->client);
+        $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000030'), 'Model 3', self::createUser());
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->persist($this->vehicle);
         $entityManager->flush();

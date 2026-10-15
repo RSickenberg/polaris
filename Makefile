@@ -68,8 +68,9 @@ test-db: ## Create the test database if needed and apply the migrations to it
 	@$(SYMFONY) doctrine:database:create --env=test --if-not-exists
 	@$(SYMFONY) doctrine:migrations:migrate --env=test --no-interaction --all-or-nothing
 
-seed: ## Reset the development database and load the sample vehicles, leases and readings and print their URLs (deletes its data)
+seed: ## Reset the development database, load the sample data, create the dev user (random password, shown once) and print the URLs (deletes its data)
 	@$(SYMFONY) doctrine:fixtures:load --no-interaction
+	@$(SYMFONY) polaris:dev:user
 	@$(SYMFONY) polaris:dev:urls
 
 ## —— Quality ✅ ——————————————————————————————————————————————

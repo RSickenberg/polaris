@@ -33,6 +33,7 @@
         {% endif %}
     </head>
     <body>
+        {% block body %}
         {# A block cannot sit inside a <twig:...> tag, so the page content is rendered here and placed below. #}
         {% set page %}{% block main %}{% endblock %}{% endset %}
         <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm">{{ 'layout.skip'|trans(domain='shared') }}</a>
@@ -53,5 +54,6 @@
                 </div>
             </twig:Sidebar:Inset>
         </twig:Sidebar:Provider>
+        {% endblock %}
     </body>
 </html>

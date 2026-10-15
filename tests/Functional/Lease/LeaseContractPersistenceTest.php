@@ -16,6 +16,7 @@ use Polaris\Shared\Doctrine\Type\CarbonDateImmutableType;
 use Polaris\Shared\Domain\Currency;
 use Polaris\Shared\Domain\Distance;
 use Polaris\Shared\Domain\Money;
+use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bridge\Doctrine\Types\UlidType;
@@ -26,6 +27,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 #[CoversClass(CarbonDateImmutableType::class)]
 final class LeaseContractPersistenceTest extends KernelTestCase
 {
+    use SignsIn;
+
     protected function tearDown(): void
     {
         parent::tearDown();
@@ -36,7 +39,7 @@ final class LeaseContractPersistenceTest extends KernelTestCase
     {
         $entityManager = self::entityManager();
 
-        $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3');
+        $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', self::createUser());
         $term = new LeaseTerm(CarbonImmutable::parse('2028-02-29', 'UTC'), CarbonImmutable::parse('2031-02-27', 'UTC'), EndDateConvention::Inclusive);
         $contract = new LeaseContract(
             $vehicle,
@@ -84,7 +87,7 @@ final class LeaseContractPersistenceTest extends KernelTestCase
     {
         $entityManager = self::entityManager();
 
-        $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000002'), 'Model Y');
+        $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000002'), 'Model Y', self::createUser());
         $term = new LeaseTerm(CarbonImmutable::parse('2026-01-15', 'UTC'), CarbonImmutable::parse('2029-01-15', 'UTC'), EndDateConvention::Exclusive);
         $entityManager->persist($vehicle);
         $contract = new LeaseContract($vehicle, $term, Allowance::fromYearly(Distance::fromKilometres(10_000), $term), Distance::fromMetres(0), Money::ofMinor(0, Currency::EUR), Tolerance::fromBasisPoints(0));
@@ -105,8 +108,8 @@ final class LeaseContractPersistenceTest extends KernelTestCase
     public function testVinIsUnique(): void
     {
         $entityManager = self::entityManager();
-        $entityManager->persist(new Vehicle(new Vin('5YJ3E7EB2NF000003'), 'First'));
-        $entityManager->persist(new Vehicle(new Vin('5YJ3E7EB2NF000003'), 'Second'));
+        $entityManager->persist(new Vehicle(new Vin('5YJ3E7EB2NF000003'), 'First', self::createUser()));
+        $entityManager->persist(new Vehicle(new Vin('5YJ3E7EB2NF000003'), 'Second', self::createUser()));
 
         $this->expectException(\Doctrine\DBAL\Exception\UniqueConstraintViolationException::class);
 

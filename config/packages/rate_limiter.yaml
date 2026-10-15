@@ -1,0 +1,7 @@
+framework:
+    rate_limiter:
+        # Asking for a password reset link: 5 requests per client address and hour, whatever the email.
+        password_reset:
+            policy: fixed_window
+            limit: 5
+            interval: '1 hour'
