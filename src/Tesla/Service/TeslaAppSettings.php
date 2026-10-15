@@ -29,6 +29,8 @@ final readonly class TeslaAppSettings
     }
 
     /**
+     * @throws \Random\RandomException
+     * @throws \SodiumException
      * @throws TeslaSettingsRejected
      */
     public function save(User $owner, TeslaAppSettingsData $data): TeslaApp
