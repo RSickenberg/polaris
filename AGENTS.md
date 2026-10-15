@@ -252,6 +252,12 @@ are specific to Polaris and win when the two disagree.
   (`{"domain": ...}`), the shape of Tesla error bodies (`FleetApiError` reads `error`, `error_description`,
   `error_message`, `message`, else a truncated body) and of the public key response (`response.public_key`, PEM or
   hex of the uncompressed point, see `PublicKeyFormat`). The first real run confirms them.
+- The settings page (`Tesla\Controller\TeslaSettingsController`, `/settings/tesla`, linked from the account menu) edits
+  the same settings through `TeslaAppSettings`, with the form model `Tesla\Form\Model\TeslaAppSettingsFormData`.
+  The app is looked up by owner (no id in the URL), the client secret field is write-only (never rendered, empty
+  keeps the stored one), China is listed but disabled and rejected server-side. Without a key pair it shows how to
+  run keygen. It does not register: `key:check` and `register` stay on the console. Pass the app to the template as
+  `teslaApp`: `app` is the Twig global.
 - Tests never reach the network: they use `MockHttpClient`, and functional tests swap it in with
   `getContainer()->set('http_client', $client)` (public alias `test.polaris.http_client` in `when@test`).
 

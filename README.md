@@ -50,6 +50,8 @@ make sf ARGS="polaris:tesla:configure --client-id=<client ID> --domain=polaris.e
 
 The client secret is asked with a hidden prompt (or read from the standard input when the command is not interactive), never taken from an argument, and stored encrypted. `--region` can be repeated: `na` is North America and Asia-Pacific, `eu` is Europe, the Middle East and Africa. China is not supported: it needs a separate Tesla account and developer app. Options you leave out keep their stored value.
 
+The same settings can be edited in the web app, under Tesla app in the account menu (`/settings/tesla`). The client secret is write-only there: it is never shown, and leaving it empty keeps the stored one. Registering with Tesla stays on the console.
+
 ```
 make sf ARGS="polaris:tesla:key:check"
 make sf ARGS="polaris:tesla:register"
