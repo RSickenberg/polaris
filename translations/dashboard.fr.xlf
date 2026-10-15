@@ -92,7 +92,7 @@
       </trans-unit>
       <trans-unit id="home.lease">
         <source>home.lease</source>
-        <target>Conditions du bail</target>
+        <target>Conditions du leasing</target>
       </trans-unit>
     </body>
   </file>

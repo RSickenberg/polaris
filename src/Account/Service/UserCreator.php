@@ -15,22 +15,22 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * The only place that creates the user, so that the command, and any other front end, apply the
- * same rules: a valid email and password, and a single user per self-hosted install.
+ * same rules: a valid email and password, and a single user per self-hosted installation.
  * The hosted layer can decorate it to apply its own sign-up policy.
  */
-class UserCreator
+readonly class UserCreator
 {
     /**
      * @param list<string> $enabledLocales
      */
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly UserRepository $users,
-        private readonly UserPasswordHasherInterface $hasher,
-        private readonly ValidatorInterface $validator,
-        private readonly ClockInterface $clock,
+        private EntityManagerInterface $entityManager,
+        private UserRepository $users,
+        private UserPasswordHasherInterface $hasher,
+        private ValidatorInterface $validator,
+        private ClockInterface $clock,
         #[Autowire('%kernel.enabled_locales%')]
-        private readonly array $enabledLocales,
+        private array $enabledLocales,
     ) {
     }
 
@@ -51,7 +51,7 @@ class UserCreator
             throw new \InvalidArgumentException(\sprintf('locale: "%s" is not an enabled locale (%s).', $newUser->locale, implode(', ', $this->enabledLocales)));
         }
 
-        if ($this->users->count([]) > 0) {
+        if ($this->users->count() > 0) {
             throw UserCreationRejected::alreadyExists();
         }
 
