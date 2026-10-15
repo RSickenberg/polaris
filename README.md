@@ -40,6 +40,23 @@ The private key is stored encrypted ([ADR 0007](docs/adr/0007-secrets-encrypted-
 
 `POLARIS_KEY_HOSTING` chooses who serves the key. `polaris` (default): this app answers the URL above, without a login. `external`: set `POLARIS_KEY_HOSTING_DIR` to a local clone of a static site (for example on GitHub Pages) and `keygen` writes the public key to `.well-known/appspecific/com.tesla.3p.public-key.pem` inside it. Commit and push it yourself. Only the public key is ever written there.
 
+## Tesla app credentials and registration
+
+Create a Fleet API app on developer.tesla.com, with the domain that hosts your public key as an allowed origin. Then store its credentials (the key pair must exist first):
+
+```
+make sf ARGS="polaris:tesla:configure --client-id=<client ID> --domain=polaris.example.com --region=eu"
+```
+
+The client secret is asked with a hidden prompt (or read from the standard input when the command is not interactive), never taken from an argument, and stored encrypted. `--region` can be repeated: `na` is North America and Asia-Pacific, `eu` is Europe, the Middle East and Africa. China is not supported: it needs a separate Tesla account and developer app. Options you leave out keep their stored value.
+
+```
+make sf ARGS="polaris:tesla:key:check"
+make sf ARGS="polaris:tesla:register"
+```
+
+`key:check` fetches the public key from your domain without following redirects and compares it with the stored one. `register` runs the same check first and sends nothing to Tesla if it fails. It then registers the domain once per enabled region (a partner token, then `POST /api/1/partner_accounts`) and reads the key back to confirm it. Tesla's error messages are shown with a hint. The partner token is requested without a scope, and the register and read-back response shapes are not documented by Tesla, so the first real run is the check (not verified).
+
 ## Odometer readings
 
 Readings are stored in integer metres and UTC, whatever unit they were typed in. Add one by hand, in km or miles:

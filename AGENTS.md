@@ -233,6 +233,27 @@ are specific to Polaris and win when the two disagree.
 - The well-known route is public: its `access_control` entry precedes the catch-all and `tesla_public_key` is in
   `PUBLIC_ROUTES` of `AccessControlTest`.
 
+### Tesla app credentials and registration (Tesla module)
+
+- `TeslaApp` also holds `clientId`, `encryptedClientSecret` (SecretEncrypter, kept out of `__serialize`), `domain`
+  (the host that serves the public key, `Tesla\Domain\AppDomain`; not derived from `DEFAULT_URI`, since external
+  hosting uses another domain) and `enabledRegions` (`Tesla\Domain\FleetRegion` codes). The row is created by
+  keygen, so `Tesla\Service\TeslaAppSettings::save()` and `polaris:tesla:configure` need the key pair first.
+  `TeslaOwnerFinder` resolves the user for every Tesla command.
+- `FleetRegion` is `na`, `eu` and `cn`. China is a separate Tesla account and developer app: the case exists only
+  to be refused (`isSupported()` is false, `tokenUrl()` throws, settings and `register` reject it). The token host
+  for NA and EMEA is the global `fleet-auth.prd.vn.cloud.tesla.com`.
+- `polaris:tesla:key:check` (`PublicKeyChecker`) fetches the well-known URL without following redirects and compares
+  it to the stored key. `polaris:tesla:register` (`PartnerRegistrationService`) runs it first and sends nothing to
+  Tesla on failure; per enabled region it calls `FleetApiClient` for a partner token, `POST /api/1/partner_accounts`
+  and `GET /api/1/partner_accounts/public_key?domain=`, and one region failing does not stop the others.
+- Unverified (Tesla does not document them): that the partner token needs no scope, the register body
+  (`{"domain": ...}`), the shape of Tesla error bodies (`FleetApiError` reads `error`, `error_description`,
+  `error_message`, `message`, else a truncated body) and of the public key response (`response.public_key`, PEM or
+  hex of the uncompressed point, see `PublicKeyFormat`). The first real run confirms them.
+- Tests never reach the network: they use `MockHttpClient`, and functional tests swap it in with
+  `getContainer()->set('http_client', $client)` (public alias `test.polaris.http_client` in `when@test`).
+
 ### Code organization (ADR 0001)
 
 - `src/` is organized by feature module, as namespaces (no bundles): `Shared`,
