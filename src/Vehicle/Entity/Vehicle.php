@@ -25,15 +25,11 @@ class Vehicle
     #[ORM\Column(length: self::NAME_MAX_LENGTH)]
     private string $name;
 
-    /**
-     * Null only for a vehicle recorded before accounts existed: the user is handed those when
-     * they are created.
-     */
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?User $owner;
+    #[ORM\JoinColumn(nullable: false)]
+    private User $owner;
 
-    public function __construct(Vin $vin, string $name, ?User $owner = null)
+    public function __construct(Vin $vin, string $name, User $owner)
     {
         $this->id = new Ulid();
         $this->owner = $owner;
@@ -51,7 +47,7 @@ class Vehicle
         return new Vin($this->vin);
     }
 
-    public function getOwner(): ?User
+    public function getOwner(): User
     {
         return $this->owner;
     }

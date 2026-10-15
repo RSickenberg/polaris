@@ -8,7 +8,6 @@ use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Polaris\Account\Entity\User;
 use Polaris\Account\Repository\UserRepository;
-use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -36,8 +35,7 @@ class UserCreator
     }
 
     /**
-     * Creates the user, and hands them the vehicles that exist without an owner (those that
-     * were recorded before accounts existed).
+     * Creates the user.
      *
      * @throws UserCreationRejected      when a user already exists
      * @throws \InvalidArgumentException when the email or the password is not valid
@@ -64,13 +62,8 @@ class UserCreator
         }
         $user->changeTimeZone($newUser->timeZone);
 
-        $this->entityManager->wrapInTransaction(function () use ($user): void {
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
-            $this->entityManager->createQuery(\sprintf('UPDATE %s v SET v.owner = :owner WHERE v.owner IS NULL', Vehicle::class))
-                ->setParameter('owner', $user->getId(), 'ulid')
-                ->execute();
-        });
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
 
         return $user;
     }

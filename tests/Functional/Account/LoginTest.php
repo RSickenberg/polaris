@@ -57,7 +57,7 @@ final class LoginTest extends WebTestCase
 
     public function testValidCredentialsReachTheLandingPage(): void
     {
-        $this->createUser('login-ok@example.test');
+        $this->createAccount('login-ok@example.test');
 
         $this->login('login-ok@example.test', self::PASSWORD);
 
@@ -69,7 +69,7 @@ final class LoginTest extends WebTestCase
 
     public function testTheEmailIsMatchedWithoutCaseOrSpaces(): void
     {
-        $this->createUser('case@example.test');
+        $this->createAccount('case@example.test');
 
         $this->login('  CASE@Example.test ', self::PASSWORD);
 
@@ -78,7 +78,7 @@ final class LoginTest extends WebTestCase
 
     public function testAWrongPasswordShowsATranslatedErrorAndKeepsTheEmail(): void
     {
-        $this->createUser('wrong@example.test');
+        $this->createAccount('wrong@example.test');
 
         $this->login('wrong@example.test', 'not the password');
 
@@ -91,7 +91,7 @@ final class LoginTest extends WebTestCase
 
     public function testAnUnknownEmailGetsTheSameError(): void
     {
-        $this->createUser('known@example.test');
+        $this->createAccount('known@example.test');
 
         $this->login('unknown@example.test', self::PASSWORD);
         $this->client->followRedirect();
@@ -101,7 +101,7 @@ final class LoginTest extends WebTestCase
 
     public function testTheErrorIsTranslatedInFrench(): void
     {
-        $this->createUser('fr-error@example.test');
+        $this->createAccount('fr-error@example.test');
 
         $this->login('fr-error@example.test', 'not the password', ['HTTP_ACCEPT_LANGUAGE' => 'fr']);
         $this->client->followRedirect();
@@ -113,7 +113,7 @@ final class LoginTest extends WebTestCase
 
     public function testALoginWithoutAValidCsrfTokenIsRefused(): void
     {
-        $this->createUser('csrf@example.test');
+        $this->createAccount('csrf@example.test');
 
         $this->client->request('GET', '/login');
         $this->client->submitForm('Sign in', ['_username' => 'csrf@example.test', '_password' => self::PASSWORD], serverParameters: ['HTTP_ORIGIN' => 'https://evil.example', 'HTTP_REFERER' => 'https://evil.example/']);
@@ -125,7 +125,7 @@ final class LoginTest extends WebTestCase
 
     public function testTheSixthFailedAttemptIsThrottledEvenWithTheRightPassword(): void
     {
-        $this->createUser('throttle@example.test');
+        $this->createAccount('throttle@example.test');
 
         for ($attempt = 1; $attempt <= 5; ++$attempt) {
             $this->login('throttle@example.test', 'not the password');
@@ -142,7 +142,7 @@ final class LoginTest extends WebTestCase
 
     public function testThrottlingIsPerEmail(): void
     {
-        $this->createUser('other@example.test');
+        $this->createAccount('other@example.test');
 
         for ($attempt = 1; $attempt <= 5; ++$attempt) {
             $this->login('someone-else@example.test', 'not the password');
@@ -154,8 +154,8 @@ final class LoginTest extends WebTestCase
 
     public function testAnonymousVisitorsGoToTheLoginThenToTheirPage(): void
     {
-        $this->createUser('target@example.test');
-        $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000070'), 'Model 3');
+        $owner = $this->createAccount('target@example.test');
+        $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000070'), 'Model 3', $owner);
         self::getContainer()->get(EntityManagerInterface::class)->persist($vehicle);
         self::getContainer()->get(EntityManagerInterface::class)->flush();
         $path = \sprintf('/vehicles/%s/readings', $vehicle->getId()->toBase32());
@@ -171,7 +171,7 @@ final class LoginTest extends WebTestCase
 
     public function testASignedInUserDoesNotSeeTheLoginPage(): void
     {
-        $this->createUser('again@example.test');
+        $this->createAccount('again@example.test');
         $this->login('again@example.test', self::PASSWORD);
 
         $this->client->request('GET', '/login');
@@ -181,7 +181,7 @@ final class LoginTest extends WebTestCase
 
     public function testLogoutEndsTheSession(): void
     {
-        $this->createUser('logout@example.test');
+        $this->createAccount('logout@example.test');
         $this->login('logout@example.test', self::PASSWORD);
         $this->client->followRedirect();
         $logout = $this->client->getCrawler()->filter('a[href^="/logout"]');
@@ -197,7 +197,7 @@ final class LoginTest extends WebTestCase
 
     public function testLogoutWithoutTheCsrfTokenKeepsTheSession(): void
     {
-        $this->createUser('keep@example.test');
+        $this->createAccount('keep@example.test');
         $this->login('keep@example.test', self::PASSWORD);
 
         $this->client->request('GET', '/logout', server: ['HTTP_ORIGIN' => 'https://evil.example', 'HTTP_REFERER' => 'https://evil.example/']);
@@ -209,7 +209,7 @@ final class LoginTest extends WebTestCase
 
     public function testTheUsersLocaleWinsAfterTheLoginAndTheSwitcherSavesIt(): void
     {
-        $user = $this->createUser('locale@example.test');
+        $user = $this->createAccount('locale@example.test');
         $user->changeLocale('fr');
         self::getContainer()->get(EntityManagerInterface::class)->flush();
 
@@ -247,7 +247,7 @@ final class LoginTest extends WebTestCase
         self::getContainer()->get('cache.rate_limiter')->clear();
     }
 
-    private function createUser(string $email): User
+    private function createAccount(string $email): User
     {
         return self::getContainer()->get(UserCreator::class)->create(new NewUser($email, self::PASSWORD));
     }

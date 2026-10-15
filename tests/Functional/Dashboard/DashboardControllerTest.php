@@ -45,7 +45,7 @@ final class DashboardControllerTest extends WebTestCase
         $this->client = self::createClient();
         self::signIn($this->client);
         $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000061'), 'Model 3');
+        $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000061'), 'Model 3', self::createUser());
         $this->entityManager->persist($this->vehicle);
         $this->entityManager->flush();
     }

@@ -38,8 +38,8 @@ final class HomeControllerTest extends WebTestCase
     public function testItRedirectsToTheDashboardOfTheFirstVehicleByName(): void
     {
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        $second = new Vehicle(new Vin('5YJ3E7EB2NF000081'), 'Model Y');
-        $first = new Vehicle(new Vin('5YJ3E7EB2NF000082'), 'Cybertruck');
+        $second = new Vehicle(new Vin('5YJ3E7EB2NF000081'), 'Model Y', self::createUser());
+        $first = new Vehicle(new Vin('5YJ3E7EB2NF000082'), 'Cybertruck', self::createUser());
         $entityManager->persist($second);
         $entityManager->persist($first);
         $entityManager->flush();

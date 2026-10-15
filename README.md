@@ -20,13 +20,13 @@ make sf ARGS="polaris:user:create you@example.com --locale=fr --time-zone=Europe
 printf '%s\n' "$PASSWORD" | docker compose exec -T php bin/console polaris:user:create you@example.com   # not interactive: reads the password from the standard input
 ```
 
-The password is never an argument or an option, so it stays out of the shell history and the process list. It needs at least 12 characters and is stored only as a hash. The command refuses to create a second user, and vehicles that were recorded before accounts existed are handed to the new user. Then open `/login`.
+The password is never an argument or an option, so it stays out of the shell history and the process list. It needs at least 12 characters and is stored only as a hash. The command refuses to create a second user. Then open `/login`.
 
 After 5 failed attempts for the same email and IP address within 15 minutes, further attempts from them are refused, even with the right password, until the window passes; an address that tries many emails is also limited. The counters live in the cache (`cache.rate_limiter`), so they are shared by every worker of the same container. There is no password reset yet: until it exists, a forgotten password can only be replaced in the database.
 
 The language switcher is kept for the signed-in user (`User.locale`), and the user's time zone (`User.timeZone`, set with `--time-zone`, UTC by default) is the one dates are shown and entered in.
 
-`make seed` also creates `dev@example.test` with a random password, printed once at the end of the seed output.
+`make seed` loads the sample vehicles for `dev@example.test`, with a random password printed once at the end of the seed output.
 
 ## Odometer readings
 

@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Polaris\Reading\Command\AddOdometerReadingCommand;
 use Polaris\Reading\Repository\OdometerReadingRepository;
+use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -21,13 +22,15 @@ final class AddOdometerReadingCommandTest extends KernelTestCase
 {
     use ClockSensitiveTrait;
 
+    use SignsIn;
+
     private Vehicle $vehicle;
 
     protected function setUp(): void
     {
         self::bootKernel();
         self::mockTime('2026-10-20 12:00:00 UTC');
-        $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000020'), 'Model 3');
+        $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000020'), 'Model 3', self::createUser());
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->persist($this->vehicle);
         $entityManager->flush();
@@ -108,7 +111,7 @@ final class AddOdometerReadingCommandTest extends KernelTestCase
     public function testSeveralVehiclesRequireTheOption(): void
     {
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        $entityManager->persist(new Vehicle(new Vin('5YJ3E7EB2NF000021'), 'Model Y'));
+        $entityManager->persist(new Vehicle(new Vin('5YJ3E7EB2NF000021'), 'Model Y', self::createUser()));
         $entityManager->flush();
 
         self::assertSame(Command::INVALID, $this->tester()->execute(['odometer' => '5']));

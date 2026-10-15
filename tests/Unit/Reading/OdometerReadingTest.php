@@ -12,6 +12,7 @@ use Polaris\Reading\Domain\ReadingSource;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Distance;
 use Polaris\Shared\Domain\DistanceUnit;
+use Polaris\Tests\Support\Owner;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 
@@ -88,6 +89,6 @@ final class OdometerReadingTest extends TestCase
 
     private static function vehicle(): Vehicle
     {
-        return new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3');
+        return new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', Owner::user());
     }
 }

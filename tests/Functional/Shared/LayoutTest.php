@@ -30,7 +30,7 @@ final class LayoutTest extends WebTestCase
     {
         $this->client = self::createClient();
         self::signIn($this->client);
-        $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000051'), 'Model 3');
+        $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000051'), 'Model 3', self::createUser());
         self::getContainer()->get(EntityManagerInterface::class)->persist($vehicle);
         self::getContainer()->get(EntityManagerInterface::class)->flush();
         $this->id = $vehicle->getId()->toBase32();

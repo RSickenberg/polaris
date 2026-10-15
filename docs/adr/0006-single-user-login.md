@@ -16,7 +16,7 @@ A self-hosted Polaris holds one person's odometer data and, later, their Tesla t
 - Access is denied by default: the last `access_control` rule requires `ROLE_USER` for `^/`. The public exceptions are `/login` and `/locale/`, listed before it. `AccessControlTest` walks the router and fails on any route an anonymous visitor can open that is not on its allow-list.
 - The firewall that leaves the profiler, the toolbar and the AssetMapper routes open is driven by the parameter `polaris.security.open_paths`, which matches nothing in production.
 - `LocaleListener` runs before the firewall, so the token is not available when the locale is negotiated. The user's locale is copied into the session on login and on a language switch, and read from there by a provider that decorates the cookie one.
-- The table is `app_user`, as `user` is reserved in PostgreSQL. `Vehicle` has a nullable owner: vehicles recorded before accounts existed are handed to the first user.
+- The table is `app_user`, as `user` is reserved in PostgreSQL. Every `Vehicle` has a required owner.
 
 ## Consequences
 

@@ -28,7 +28,7 @@ final class OdometerReadingControllerTest extends WebTestCase
         self::mockTime('2026-10-20 12:00:00 UTC');
         $this->client = self::createClient();
         self::signIn($this->client);
-        $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000030'), 'Model 3');
+        $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000030'), 'Model 3', self::createUser());
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->persist($this->vehicle);
         $entityManager->flush();

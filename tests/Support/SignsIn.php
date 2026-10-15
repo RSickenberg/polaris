@@ -10,15 +10,20 @@ use Polaris\Account\Entity\User;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 /**
- * Creates the user and signs the test client in, without going through the login form.
+ * Creates the user (once per email) and signs the test client in, without going through the login form.
  * The email and the hash are fake: the password is never checked on this path.
  */
 trait SignsIn
 {
     private static function createUser(string $email = 'driver@example.test'): User
     {
-        $user = new User($email, 'not-a-real-hash', CarbonImmutable::parse('2026-01-01 00:00:00', 'UTC'));
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $existing = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+        if ($existing instanceof User) {
+            return $existing;
+        }
+
+        $user = new User($email, 'not-a-real-hash', CarbonImmutable::parse('2026-01-01 00:00:00', 'UTC'));
         $entityManager->persist($user);
         $entityManager->flush();
 

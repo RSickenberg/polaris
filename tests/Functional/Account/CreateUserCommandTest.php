@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Polaris\Tests\Functional\Account;
 
-use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Polaris\Account\Command\CreateUserCommand;
 use Polaris\Account\Entity\User;
 use Polaris\Account\Repository\UserRepository;
-use Polaris\Vehicle\Domain\Vin;
-use Polaris\Vehicle\Entity\Vehicle;
+use Polaris\Tests\Support\SignsIn;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Clock\Test\ClockSensitiveTrait;
@@ -22,6 +20,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 final class CreateUserCommandTest extends KernelTestCase
 {
     use ClockSensitiveTrait;
+
+    use SignsIn;
 
     private const string PASSWORD = 'correct horse battery';
 
@@ -147,21 +147,6 @@ final class CreateUserCommandTest extends KernelTestCase
         self::assertSame(Command::INVALID, $tester->execute(['email' => 'driver@example.test', '--locale' => 'de']));
         self::assertSame(Command::INVALID, $tester->execute(['email' => 'driver@example.test', '--time-zone' => 'Mars/Olympus']));
         self::assertCount(0, $this->users()->findAll());
-    }
-
-    public function testVehiclesWithoutOwnerBelongToTheNewUser(): void
-    {
-        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000090'), 'Model 3');
-        $entityManager->persist($vehicle);
-        $entityManager->flush();
-        $tester = $this->tester();
-        $tester->setInputs([self::PASSWORD, self::PASSWORD]);
-
-        $tester->execute(['email' => 'driver@example.test']);
-
-        $reloaded = self::getContainer()->get(EntityManagerInterface::class)->find(Vehicle::class, $vehicle->getId());
-        self::assertSame('driver@example.test', $reloaded?->getOwner()?->getEmail());
     }
 
     private function users(): UserRepository

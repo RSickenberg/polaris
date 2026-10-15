@@ -15,6 +15,7 @@ use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Reading\Service\ReadingRejected;
 use Polaris\Shared\Domain\Distance;
 use Polaris\Shared\Domain\DistanceUnit;
+use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -26,6 +27,8 @@ final class OdometerReadingServiceTest extends KernelTestCase
 {
     use ClockSensitiveTrait;
 
+    use SignsIn;
+
     private Vehicle $vehicle;
 
     protected function setUp(): void
@@ -33,7 +36,7 @@ final class OdometerReadingServiceTest extends KernelTestCase
         self::bootKernel();
         self::mockTime('2026-10-20 12:00:00 UTC');
         $entityManager = self::entityManager();
-        $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000010'), 'Model 3');
+        $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000010'), 'Model 3', self::createUser());
         $entityManager->persist($this->vehicle);
         $entityManager->flush();
     }
@@ -154,7 +157,7 @@ final class OdometerReadingServiceTest extends KernelTestCase
 
     public function testHistoryIsNewestFirstAndPerVehicle(): void
     {
-        $other = new Vehicle(new Vin('5YJ3E7EB2NF000011'), 'Model Y');
+        $other = new Vehicle(new Vin('5YJ3E7EB2NF000011'), 'Model Y', self::createUser());
         self::entityManager()->persist($other);
         self::entityManager()->flush();
 

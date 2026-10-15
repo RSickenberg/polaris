@@ -13,6 +13,7 @@ use Polaris\Lease\Form\Model\LeaseContractData;
 use Polaris\Lease\Service\LeaseContractFactory;
 use Polaris\Shared\Domain\Currency;
 use Polaris\Shared\Domain\DistanceUnit;
+use Polaris\Tests\Support\Owner;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 
@@ -22,7 +23,7 @@ final class LeaseContractFactoryTest extends TestCase
 {
     public function testCreatesTheContractFromTheEnteredTerms(): void
     {
-        $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3');
+        $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', Owner::user());
 
         $contract = new LeaseContractFactory()->create($vehicle, self::data());
 
@@ -67,7 +68,7 @@ final class LeaseContractFactoryTest extends TestCase
         $data->allowance = 10_000;
         $data->startOdometer = 7;
 
-        $contract = new LeaseContractFactory()->create(new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3'), $data);
+        $contract = new LeaseContractFactory()->create(new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', Owner::user()), $data);
 
         self::assertSame(48_280_320, $contract->getAllowance()->total()->metres());
         self::assertSame(11_265, $contract->getStartOdometer()->metres());
@@ -80,7 +81,7 @@ final class LeaseContractFactoryTest extends TestCase
 
         $this->expectException(\InvalidArgumentException::class);
 
-        new LeaseContractFactory()->create(new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3'), $data);
+        new LeaseContractFactory()->create(new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', Owner::user()), $data);
     }
 
     public function testRefusesANegativeExcessCost(): void
@@ -90,7 +91,7 @@ final class LeaseContractFactoryTest extends TestCase
 
         $this->expectException(\InvalidArgumentException::class);
 
-        new LeaseContractFactory()->create(new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3'), $data);
+        new LeaseContractFactory()->create(new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', Owner::user()), $data);
     }
 
     private static function data(): LeaseContractData

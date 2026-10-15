@@ -7,6 +7,7 @@ namespace Polaris\Fixtures;
 use Carbon\CarbonImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Polaris\Account\Entity\User;
 use Polaris\Lease\Domain\Allowance;
 use Polaris\Lease\Domain\EndDateConvention;
 use Polaris\Lease\Domain\LeaseTerm;
@@ -20,9 +21,10 @@ use Polaris\Shared\Domain\Money;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
- * Development data to try the app by hand (`make seed`). Dates are relative to now, so the
+ * Development data to try the app by hand (`make seed`), owned by the development user. Dates are relative to now, so the
  * projections stay meaningful whenever it is loaded. The VINs are fake.
  *
  * - Model 3: 36-month lease, 15 000 km a year, driven faster than the allowance (a warning).
@@ -34,15 +36,23 @@ use Psr\Clock\ClockInterface;
  */
 final class DevSeed extends Fixture
 {
-    public function __construct(private readonly ClockInterface $clock)
-    {
+    public function __construct(
+        private readonly ClockInterface $clock,
+        private readonly UserPasswordHasherInterface $hasher,
+    ) {
     }
 
     public function load(ObjectManager $manager): void
     {
-        $today = CarbonImmutable::instance($this->clock->now())->startOfDay();
+        $now = CarbonImmutable::instance($this->clock->now());
+        $today = $now->startOfDay();
 
-        $modelThree = new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3');
+        // Its password is random and unknown: `make seed` sets the one it prints (polaris:dev:user).
+        $owner = new User(SeedUserCommand::EMAIL, '', $now);
+        $owner->changePassword($this->hasher->hashPassword($owner, bin2hex(random_bytes(12))));
+        $manager->persist($owner);
+
+        $modelThree = new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', $owner);
         $manager->persist($modelThree);
         $manager->persist($this->lease($modelThree, $today->subMonths(14), 36, Allowance::ofTotal(Distance::fromKilometres(45_000)), 12, 5));
         for ($month = 0; $month <= 14; ++$month) {
@@ -53,7 +63,7 @@ final class DevSeed extends Fixture
             ));
         }
 
-        $modelY = new Vehicle(new Vin('7SAYGDEE9NF000002'), 'Model Y');
+        $modelY = new Vehicle(new Vin('7SAYGDEE9NF000002'), 'Model Y', $owner);
         $manager->persist($modelY);
         $manager->persist($this->lease($modelY, $today->subMonths(6), 24, Allowance::ofTotal(Distance::fromMiles(20_000)), 5, 0));
         for ($month = 0; $month <= 6; ++$month) {
@@ -65,11 +75,11 @@ final class DevSeed extends Fixture
             ));
         }
 
-        $cybertruck = new Vehicle(new Vin('7G2CEHED0RA000003'), 'Cybertruck');
+        $cybertruck = new Vehicle(new Vin('7G2CEHED0RA000003'), 'Cybertruck', $owner);
         $manager->persist($cybertruck);
         $manager->persist($this->lease($cybertruck, $today->subMonths(1), 36, Allowance::ofTotal(Distance::fromKilometres(60_000)), 0, 5));
 
-        $modelS = new Vehicle(new Vin('5YJSA1E26NF000004'), 'Model S');
+        $modelS = new Vehicle(new Vin('5YJSA1E26NF000004'), 'Model S', $owner);
         $manager->persist($modelS);
         foreach ([0, 1, 2] as $step) {
             $manager->persist(OdometerReading::manual(
@@ -79,7 +89,7 @@ final class DevSeed extends Fixture
             ));
         }
 
-        $modelX = new Vehicle(new Vin('7SAXCBE69PF000005'), 'Model X');
+        $modelX = new Vehicle(new Vin('7SAXCBE69PF000005'), 'Model X', $owner);
         $manager->persist($modelX);
         $manager->persist($this->lease($modelX, $today->subMonths(12), 24, Allowance::ofTotal(Distance::fromKilometres(30_000)), 8, 10));
         for ($month = 0; $month <= 12; ++$month) {
@@ -90,7 +100,7 @@ final class DevSeed extends Fixture
             ));
         }
 
-        $roadster = new Vehicle(new Vin('5YJRE1A31A0000006'), 'Roadster');
+        $roadster = new Vehicle(new Vin('5YJRE1A31A0000006'), 'Roadster', $owner);
         $manager->persist($roadster);
         $manager->persist($this->lease($roadster, $today->subMonths(13), 12, Allowance::ofTotal(Distance::fromKilometres(15_000)), 8, 0));
         for ($month = 0; $month <= 12; ++$month) {

@@ -33,7 +33,7 @@ final class LocaleTest extends WebTestCase
         self::mockTime('2026-10-20 12:00:00 UTC');
         $this->client = self::createClient();
         self::signIn($this->client);
-        $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000050'), 'Model 3');
+        $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000050'), 'Model 3', self::createUser());
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->persist($vehicle);
         $entityManager->persist(OdometerReading::manual($vehicle, new \Carbon\CarbonImmutable('2026-10-01 08:00', 'UTC'), Distance::fromKilometres(12_345)));

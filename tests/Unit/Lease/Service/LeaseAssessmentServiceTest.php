@@ -23,6 +23,7 @@ use Polaris\Shared\Domain\Currency;
 use Polaris\Shared\Domain\Distance;
 use Polaris\Shared\Domain\Money;
 use Polaris\Shared\Domain\OdometerSample;
+use Polaris\Tests\Support\Owner;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Component\Clock\MockClock;
@@ -34,7 +35,7 @@ final class LeaseAssessmentServiceTest extends TestCase
     {
         $service = self::service();
         $contract = new LeaseContract(
-            new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3'),
+            new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', Owner::user()),
             new LeaseTerm(new CarbonImmutable('2026-01-01', 'UTC'), new CarbonImmutable('2027-01-01', 'UTC'), EndDateConvention::Exclusive),
             Allowance::ofTotal(Distance::fromKilometres(36_500)),
             Distance::fromKilometres(10_000),
