@@ -146,8 +146,9 @@ are specific to Polaris and win when the two disagree.
   `Field` (`Field:Label`, the control, `Field:Description` for `help`, one `Field:Error` per error),
   text-like widgets are `Input`, choice selects are `NativeSelect` (size `sm`, to match the Input
   height) and buttons are `Button`. Symfony's `form_row` already hands `aria-describedby` and
-  `aria-invalid` to the widget through `attr`; the theme only forwards them. Checkbox, radio, file,
-  range and color widgets are not themed yet and fall back to the default layout. Tables use
+  `aria-invalid` to the widget through `attr`; the theme only forwards them. Checkbox widgets (alone, or as an expanded
+  choice: one line per choice, label without asterisk) are the kit `Checkbox`; radio, file, range and color
+  widgets are not themed yet and fall back to the default layout. Tables use
   `Table` inside a `Card`, success flashes use `Alert` through `shared/_flashes.html.twig`. The
   installed kit files are unedited, apart from the translated text noted above.
 - The `tailwind` compose service watches and builds the CSS in dev (binary and output in
