@@ -1,3 +1,9 @@
 framework:
     mailer:
         dsn: '%env(MAILER_DSN)%'
+
+when@test:
+    framework:
+        mailer:
+            # The container's MAILER_DSN points to Mailpit: tests must not send anything.
+            dsn: 'null://null'
