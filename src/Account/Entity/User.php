@@ -51,7 +51,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private CarbonImmutable $createdAt;
 
-    public function __construct(string $email, string $passwordHash, CarbonImmutable $createdAt)
+    public function __construct(string $email, #[\SensitiveParameter] string $passwordHash, CarbonImmutable $createdAt)
     {
         $this->id = new Ulid();
         $this->email = self::normalizeEmail($email);
@@ -116,7 +116,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function changePassword(string $passwordHash): void
+    public function changePassword(#[\SensitiveParameter] string $passwordHash): void
     {
         $this->password = $passwordHash;
     }
