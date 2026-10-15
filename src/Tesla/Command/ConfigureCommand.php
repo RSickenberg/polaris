@@ -39,7 +39,7 @@ final readonly class ConfigureCommand
     public function __invoke(
         SymfonyStyle $io,
         InputInterface $input,
-        #[Option(name: 'client-id', description: 'The client ID of the Tesla developer app')]
+        #[Option(description: 'The client ID of the Tesla developer app', name: 'client-id')]
         ?string $clientId = null,
         #[Option(description: 'The domain that hosts the public key, for example polaris.example.com')]
         ?string $domain = null,
@@ -66,7 +66,10 @@ final readonly class ConfigureCommand
 
         $regions = [];
         foreach ($region as $code) {
-            $parsed = FleetRegion::tryFrom(strtolower(trim($code)));
+            $parsed = $code
+                    |> trim(...)
+                    |> strtolower(...)
+                    |> FleetRegion::tryFrom(...);
 
             if (null === $parsed) {
                 $io->error(\sprintf('Unknown region "%s". Use na or eu.', $code));

@@ -29,7 +29,12 @@ final readonly class TeslaAppSettings
     }
 
     /**
-     * @throws TeslaSettingsRejected
+     * @param  \Polaris\Account\Entity\User  $owner
+     * @param  \Polaris\Tesla\Service\TeslaAppSettingsData  $data
+     *
+     * @return \Polaris\Tesla\Entity\TeslaApp
+     * @throws \Random\RandomException
+     * @throws \SodiumException
      */
     public function save(User $owner, TeslaAppSettingsData $data): TeslaApp
     {
