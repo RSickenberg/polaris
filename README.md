@@ -57,6 +57,14 @@ Run the steps in order. Every command runs in the container through `make sf`.
    docker compose exec -T php bin/console polaris:tesla:key:import < private-key.pem
    ```
 
+   Use `docker compose exec -T` here, not `make sf`: `make sf` has no `-T`, so a piped file fails with "cannot attach stdin to a TTY-enabled container". Without piping, copy the file into the container, import it with `--file`, then delete it (not inside the repository folder, where it could be committed):
+
+   ```bash
+   docker compose cp private-key.pem php:/tmp/private-key.pem
+   make sf ARGS="polaris:tesla:key:import --file=/tmp/private-key.pem"
+   docker compose exec php rm /tmp/private-key.pem
+   ```
+
    Then `key:check` (step 5) confirms it is the key served on your domain. Add `--force` to replace a key already stored.
 
 3. **Serve the public key** at `https://<your domain>/.well-known/appspecific/com.tesla.3p.public-key.pem`. Set `POLARIS_KEY_HOSTING` in `.env.local`:
