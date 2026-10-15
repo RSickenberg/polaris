@@ -179,8 +179,9 @@ are specific to Polaris and win when the two disagree.
   reserved in PostgreSQL) holds the email (unique, trimmed, lower-cased), the password hash
   (property `password`), `locale` and `timeZone` (an IANA name, `UTC` by default). The only way
   to create it is `Account\Service\UserCreator`, which the console command
-  `polaris:user:create` calls; the single-user rule lives there so the hosted layer can
-  decorate it. The command takes the password from a hidden prompt or the standard input, never
+  `polaris:user:create` calls. Whether a user may be created is decided by
+  `Extension\SignUpPolicy`: the self-hosted default `SingleUserSignUpPolicy` allows one user,
+  and the hosted layer replaces the policy. The command takes the password from a hidden prompt or the standard input, never
   from an argument or option, and never prints it.
 - Access is denied by default: `access_control` in `config/packages/security.yaml` ends with
   `^/` requires `ROLE_USER`, and the public exceptions (`/login`, `/locale/`) are listed above

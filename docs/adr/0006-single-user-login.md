@@ -10,7 +10,7 @@ A self-hosted Polaris holds one person's odometer data and, later, their Tesla t
 ## Decision
 
 - One web firewall with Symfony `form_login` and `logout`, both with stateless CSRF (token ids `authenticate` and `logout`). The API firewall of [ADR 0005](0005-api-opaque-tokens.md) comes separately.
-- A self-hosted install has a single user. `Account\Service\UserCreator` is the only place that creates it and refuses a second one; `polaris:user:create` is the only front end. There is no sign-up page. The hosted layer decorates `UserCreator` to apply its own policy.
+- A self-hosted install has a single user. `Account\Service\UserCreator` is the only place that creates it and asks `Extension\SignUpPolicy` whether it may; the self-hosted default, `Extension\SingleUserSignUpPolicy`, refuses a second one. `polaris:user:create` is the only front end. There is no sign-up page. The hosted layer replaces the policy (decoration or a new alias of `SignUpPolicy`) to apply its own.
 - The password is at least 12 characters, with no composition rules, and is stored only as a hash. The command reads it from a hidden prompt or the standard input, never from an argument or option. `NotCompromisedPassword` is not used: it calls an external API and self-hosters may be offline.
 - Login throttling: 5 failed attempts per email and IP address per 15 minutes, plus Symfony's global per-IP limit (5 times that). The state lives in `cache.rate_limiter`, which is shared by the workers of one container.
 - Access is denied by default: the last `access_control` rule requires `ROLE_USER` for `^/`. The public exceptions are `/login` and `/locale/`, listed before it. `AccessControlTest` walks the router and fails on any route an anonymous visitor can open that is not on its allow-list.

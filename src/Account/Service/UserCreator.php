@@ -7,7 +7,7 @@ namespace Polaris\Account\Service;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Polaris\Account\Entity\User;
-use Polaris\Account\Repository\UserRepository;
+use Polaris\Extension\SignUpPolicy;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -15,8 +15,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * The only place that creates the user, so that the command, and any other front end, apply the
- * same rules: a valid email and password, and a single user per self-hosted installation.
- * The hosted layer can decorate it to apply its own sign-up policy.
+ * same rules: a valid email and password, and the sign-up policy (a single user per self-hosted
+ * installation). The hosted layer replaces the `SignUpPolicy` to apply its own.
  */
 readonly class UserCreator
 {
@@ -25,7 +25,7 @@ readonly class UserCreator
      */
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private UserRepository $users,
+        private SignUpPolicy $signUpPolicy,
         private UserPasswordHasherInterface $hasher,
         private ValidatorInterface $validator,
         private ClockInterface $clock,
@@ -37,7 +37,7 @@ readonly class UserCreator
     /**
      * Creates the user.
      *
-     * @throws UserCreationRejected      when a user already exists
+     * @throws UserCreationRejected      when the sign-up policy refuses the user
      * @throws \InvalidArgumentException when the email or the password is not valid
      */
     public function create(NewUser $newUser): User
@@ -51,9 +51,7 @@ readonly class UserCreator
             throw new \InvalidArgumentException(\sprintf('locale: "%s" is not an enabled locale (%s).', $newUser->locale, implode(', ', $this->enabledLocales)));
         }
 
-        if ($this->users->count() > 0) {
-            throw UserCreationRejected::alreadyExists();
-        }
+        $this->signUpPolicy->assertCanSignUp($newUser);
 
         $user = new User($newUser->email, '', CarbonImmutable::instance($this->clock->now()));
         $user->changePassword($this->hasher->hashPassword($user, $newUser->plainPassword));
