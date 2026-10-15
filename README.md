@@ -28,6 +28,18 @@ The sidebar shows the user as an avatar with their initials and a menu with the 
 
 `make seed` loads the sample vehicles for `dev@example.test`, with a random password printed once at the end of the seed output.
 
+## Tesla key pair
+
+Tesla verifies your app by fetching a public key at `https://<your domain>/.well-known/appspecific/com.tesla.3p.public-key.pem`. Set `POLARIS_ENCRYPTION_KEY` in `.env.local` (`openssl rand -base64 32`, and back it up), then generate the key pair (prime256v1) after creating the user:
+
+```
+make sf ARGS="polaris:tesla:keygen"
+```
+
+The private key is stored encrypted ([ADR 0007](docs/adr/0007-secrets-encrypted-at-rest.md)) and never shown; the command prints the public key. It refuses to replace an existing key unless you pass `--force`, which most likely means registering the app with Tesla again (not verified).
+
+`POLARIS_KEY_HOSTING` chooses who serves the key. `polaris` (default): this app answers the URL above, without a login. `external`: set `POLARIS_KEY_HOSTING_DIR` to a local clone of a static site (for example on GitHub Pages) and `keygen` writes the public key to `.well-known/appspecific/com.tesla.3p.public-key.pem` inside it. Commit and push it yourself. Only the public key is ever written there.
+
 ## Odometer readings
 
 Readings are stored in integer metres and UTC, whatever unit they were typed in. Add one by hand, in km or miles:
