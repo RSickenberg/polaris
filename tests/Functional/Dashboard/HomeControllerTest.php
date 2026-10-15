@@ -42,6 +42,8 @@ final class HomeControllerTest extends WebTestCase
 
         $this->client->request('GET', '/settings');
         self::assertSelectorTextContains('[data-slot=sidebar] a[href="/"][data-active=false]', 'My vehicles');
+        // No vehicle page, no other links, so nothing to separate.
+        self::assertSelectorNotExists('[data-slot=sidebar] [data-slot=sidebar-separator]');
     }
 
     public function testItListsTheVehiclesByNameWithTheirLinks(): void

@@ -64,6 +64,8 @@ final class LayoutTest extends WebTestCase
     {
         $crawler = $this->client->request('GET', \sprintf('/vehicles/%s/lease', $this->id));
 
+        // A bar separates the vehicle list link from the links of this vehicle.
+        self::assertSelectorExists('[data-slot=sidebar-content] > [data-slot=sidebar-separator]');
         $links = $crawler->filter('nav[aria-label="Main navigation"] a');
         self::assertCount(3, $links);
         self::assertSame(\sprintf('/vehicles/%s', $this->id), $links->eq(0)->attr('href'));
