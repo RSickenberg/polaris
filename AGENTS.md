@@ -122,7 +122,7 @@ are specific to Polaris and win when the two disagree.
   only through `src/Extension/`. Never add hosted-only code here (billing, plans,
   sign-up policy, APNs keys).
 - Stack in place: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine ORM and
-  Migrations, Carbon, PHPUnit, Tailwind CSS 4 through symfonycasts/tailwind-bundle on
+  Migrations, Security (form login, login throttling with the Rate Limiter), Carbon, PHPUnit, Tailwind CSS 4 through symfonycasts/tailwind-bundle on
   AssetMapper (no npm for application assets), Stimulus, Turbo, TwigComponent, UX Icons
   and the Symfony UX Toolkit Shadcn kit. Planned, not installed yet: Redis (Messenger,
   Lock, Cache), Flowbite charts (ApexCharts) behind one reusable Stimulus controller.
@@ -172,6 +172,33 @@ are specific to Polaris and win when the two disagree.
 - Do not use the em dash character in prose, comments, strings or docs.
 - If something cannot be verified (a Tesla API behaviour, a package version),
   say so instead of guessing. Check `vendor/` sources and official docs first.
+
+### Accounts and access (Account module)
+
+- The self-hosted app has a single user. `Account\Entity\User` (table `app_user`, as `user` is
+  reserved in PostgreSQL) holds the email (unique, trimmed, lower-cased), the password hash
+  (property `password`), `locale` and `timeZone` (an IANA name, `UTC` by default). The only way
+  to create it is `Account\Service\UserCreator`, which the console command
+  `polaris:user:create` calls; the single-user rule lives there so the hosted layer can
+  decorate it. The command takes the password from a hidden prompt or the standard input, never
+  from an argument or option, and never prints it.
+- Access is denied by default: `access_control` in `config/packages/security.yaml` ends with
+  `^/` requires `ROLE_USER`, and the public exceptions (`/login`, `/locale/`) are listed above
+  it. A new page needs nothing; a new public page needs an entry there and in
+  `PUBLIC_ROUTES` of `AccessControlTest`, which walks the router and fails on any route an
+  anonymous visitor can open. The login page is `Account\Controller\LoginController`
+  (`account_login`, `templates/account/login.html.twig`, the bare layout through the `body`
+  block of `base.html.twig`); the logout control is in the sidebar footer.
+- The firewall form login and logout use the stateless CSRF token ids `authenticate` and
+  `logout`; `login_throttling` allows 5 attempts per 15 minutes. The `dev` firewall that leaves
+  the profiler, the toolbar and the AssetMapper routes open is driven by the parameter
+  `polaris.security.open_paths`, which matches nothing in production.
+- Pages that show or take a date read the time zone from the signed-in user
+  (`#[CurrentUser] User $user`); `Vehicle::$owner` links a vehicle to its user (null only for
+  vehicles recorded before accounts existed, which the first user adopts). No page filters by
+  owner yet.
+- In functional tests, sign in with `Polaris\Tests\Support\SignsIn`; do not post the login
+  form unless the test is about the login.
 
 ### Code organization (ADR 0001)
 
@@ -232,12 +259,15 @@ are specific to Polaris and win when the two disagree.
 - Locales: `en` (default and fallback) and `fr`, set in `config/packages/translation.yaml`.
   The locale of a request is decided by `Shared\EventListener\LocaleListener` through the
   framework-free `Shared\Domain\LocaleNegotiator`: the user's preference
-  (`Shared\Service\PreferredLocaleProvider`, filled from `User.locale` by #21), then the
-  best `Accept-Language` match among the enabled locales, then `en`.
+  (`Shared\Service\PreferredLocaleProvider`), then the best `Accept-Language` match among
+  the enabled locales, then `en`.
 - The language switcher (`Shared\Controller\LocaleController`, `/locale/{locale}`) stores the
-  choice in the `polaris_locale` cookie, read by `Shared\Service\CookiePreferredLocaleProvider`.
-  #21 replaces that provider with one that reads `User.locale` (and writes it on switch).
-  A new language also needs its `locale.<code>` key in `shared`.
+  choice in the `polaris_locale` cookie, read by `Shared\Service\CookiePreferredLocaleProvider`,
+  and dispatches `Shared\Event\LocaleSwitched`. `Account\Service\UserPreferredLocaleProvider`
+  decorates the cookie provider and reads the signed-in user's locale from the session, where
+  `Account\EventListener\RememberLocaleOnLogin` and `SaveSwitchedLocale` put it (and the latter
+  also writes `User.locale`). It cannot read the token: `LocaleListener` runs at priority 20,
+  before the firewall (8). A new language also needs its `locale.<code>` key in `shared`.
 - Never write user-facing text in a template, form, flash message, validator or email: use
   a key. Exceptions: the console commands stay in English, and brand names (`Polaris`).
 - One XLIFF 1.2 domain per module: `translations/<domain>.<locale>.xlf` with `<domain>` the
