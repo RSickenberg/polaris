@@ -194,8 +194,12 @@ are specific to Polaris and win when the two disagree.
   the profiler, the toolbar and the AssetMapper routes open is driven by the parameter
   `polaris.security.open_paths`, which matches nothing in production.
 - Pages that show or take a date read the time zone from the signed-in user
-  (`#[CurrentUser] User $user`); `Vehicle::$owner` links every vehicle to its user (required). No page
-  filters by owner yet.
+  (`#[CurrentUser] User $user`); `Vehicle::$owner` links every vehicle to its user (required). A user
+  reaches only their own vehicles: every action that takes a vehicle carries
+  `#[IsGranted(VehiclePermission::Manage->value, 'vehicle', statusCode: Response::HTTP_NOT_FOUND)]`,
+  decided by `Vehicle\Security\VehicleVoter` (another user's vehicle is a 404), and a query that
+  lists vehicles filters on `owner`. A new page about a vehicle needs the attribute, and a test in
+  `VehicleOwnershipTest`.
 - In functional tests, sign in with `Polaris\Tests\Support\SignsIn`; do not post the login
   form unless the test is about the login.
 

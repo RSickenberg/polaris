@@ -23,7 +23,7 @@ A self-hosted Polaris holds one person's odometer data and, later, their Tesla t
 - A new page is protected without any change; a public page needs an explicit, tested entry.
 - A forgotten password can only be replaced in the database until a password reset story exists.
 - Throttling counters are per container: several containers behind a load balancer need a shared pool (Redis, planned).
-- No page filters by owner yet; that comes with ownership checks.
+- A vehicle is reachable only by its owner (`VehicleVoter`, answering 404 for anyone else), so a second user, for example in the hosted layer, never sees another's data.
 
 ## Alternatives considered
 

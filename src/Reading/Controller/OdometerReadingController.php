@@ -12,6 +12,7 @@ use Polaris\Reading\Form\OdometerReadingType;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Reading\Service\ReadingRejected;
 use Polaris\Vehicle\Entity\Vehicle;
+use Polaris\Vehicle\Service\VehiclePermission;
 use Psr\Clock\ClockInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,6 +21,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class OdometerReadingController extends AbstractController
@@ -31,6 +33,8 @@ final class OdometerReadingController extends AbstractController
     ) {
     }
 
+    // Not found rather than forbidden: another user's vehicle must not even be known to exist.
+    #[IsGranted(VehiclePermission::Manage->value, 'vehicle', statusCode: Response::HTTP_NOT_FOUND)]
     #[Route('/vehicles/{id}/readings', name: 'reading_history', methods: ['GET', 'POST'])]
     public function history(Request $request, #[MapEntity(id: 'id')] Vehicle $vehicle, #[CurrentUser] User $user): Response
     {
