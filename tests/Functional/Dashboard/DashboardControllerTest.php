@@ -151,7 +151,7 @@ final class DashboardControllerTest extends WebTestCase
         self::assertSame('Share of the allowance driven', $bar->attr('aria-label'));
         self::assertSame('67% of the allowance driven', $bar->attr('aria-valuetext'));
         self::assertSelectorTextContains('main', '67%');
-        self::assertSelectorExists('main span[style="left: 50%"][aria-hidden=true]');
+        self::assertSelectorExists('main span.bg-red-600[style="left: 50%"][aria-hidden=true]');
     }
 
     public function testOnceTheAllowanceIsUsedUpTheBarStopsAt100AndThereIsNoBudget(): void

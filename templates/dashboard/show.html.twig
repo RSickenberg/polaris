@@ -55,6 +55,7 @@
                     <twig:Dashboard:LeaseProgress
                         :used="progress.usedPercent"
                         :earned="progress.earnedPercent"
+                        :level="assessment.riskLevel.value"
                         label="{{ 'progress.label'|trans(domain='dashboard') }}"
                         valueText="{{ 'progress.value_text'|trans({share: progress.usedPercent / 100}, 'dashboard') }}"
                         tickLabel="{{ 'progress.tick'|trans(domain='dashboard') }}"

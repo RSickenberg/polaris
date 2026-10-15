@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="progress.tick">
         <source>progress.tick</source>
-        <target>Autorisé à ce jour : la part du kilométrage acquise jusqu’ici</target>
+        <target>Autorisé à ce jour</target>
       </trans-unit>
       <trans-unit id="kpi.driven">
         <source>kpi.driven</source>
