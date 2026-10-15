@@ -12,6 +12,8 @@
     ## 'ok'|'watch'|'over' The risk level of the lease: it colors the tick.
     level
 -%}
+{# The kit Progress paints its fill bg-primary; a child selector on the bar recolors it without editing the kit. #}
+{% set barColor = {ok: '[&>[data-slot=progress-indicator]]:bg-green-600/50 dark:[&>[data-slot=progress-indicator]]:bg-green-400/50', watch: '[&>[data-slot=progress-indicator]]:bg-amber-500/50 dark:[&>[data-slot=progress-indicator]]:bg-amber-400/50', over: '[&>[data-slot=progress-indicator]]:bg-red-600/50 dark:[&>[data-slot=progress-indicator]]:bg-red-400/50'}[level] %}
 {% set tickColor = {ok: 'bg-green-600 dark:bg-green-400', watch: 'bg-amber-500 dark:bg-amber-400', over: 'bg-red-600 dark:bg-red-400'}[level] %}
 <div {{ attributes.defaults({class: 'flex flex-col gap-2'}) }}>
     <div class="flex items-baseline justify-between gap-2 text-sm">
@@ -19,11 +21,11 @@
         <span class="font-semibold tabular-nums">{{ (used / 100)|format_number(style: 'percent') }}</span>
     </div>
     <div class="relative flex items-center">
-        <twig:Progress :value="min(used, 100)" class="h-2" aria-label="{{ label }}" aria-valuetext="{{ valueText }}" />
-        <span class="absolute h-4 w-0.5 -translate-x-1/2 rounded-full {{ tickColor }}" style="left: {{ earned }}%" aria-hidden="true"></span>
+        <twig:Progress :value="min(used, 100)" class="h-2 {{ barColor }}" aria-label="{{ label }}" aria-valuetext="{{ valueText }}" />
+        <span class="absolute h-5 w-1 -translate-x-1/2 rounded-full ring-2 ring-background {{ tickColor }}" style="left: {{ earned }}%" aria-hidden="true"></span>
     </div>
     <p class="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <span class="inline-block h-3 w-0.5 rounded-full {{ tickColor }}" aria-hidden="true"></span>
+        <span class="inline-block h-3 w-1 rounded-full {{ tickColor }}" aria-hidden="true"></span>
         {{ tickLabel }}
     </p>
 </div>
