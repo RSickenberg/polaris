@@ -19,6 +19,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 final class TeslaAppSettingsType extends AbstractType
 {
+    private const string STORED_SECRET_PLACEHOLDER = '••••••••';
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $secretStored = $options['secret_stored'];
@@ -32,7 +34,8 @@ final class TeslaAppSettingsType extends AbstractType
                 'label' => 'form.client_secret.label',
                 'help' => $secretStored ? 'form.client_secret.help_stored' : 'form.client_secret.help_new',
                 'required' => !$secretStored,
-                'attr' => ['autocomplete' => 'new-password'],
+                // The stored secret is never sent back to the page: dots in the empty field show that one exists.
+                'attr' => ['autocomplete' => 'new-password'] + ($secretStored ? ['placeholder' => self::STORED_SECRET_PLACEHOLDER] : []),
             ])
             ->add('domain', TextType::class, [
                 'label' => 'form.domain.label',

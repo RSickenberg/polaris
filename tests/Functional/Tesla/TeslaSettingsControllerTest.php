@@ -68,6 +68,7 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertInputValueSame(self::FORM . '[domain]', 'polaris.example.com');
         self::assertInputValueSame(self::FORM . '[clientSecret]', '');
         self::assertSelectorExists('input[type=password][name="' . self::FORM . '[clientSecret]"]:not([required])');
+        self::assertSelectorExists('input[name="' . self::FORM . '[clientSecret]"][placeholder="••••••••"]');
         self::assertSelectorExists('input[name="' . self::FORM . '[regions][]"][value=eu][checked]');
         self::assertSelectorNotExists('input[name="' . self::FORM . '[regions][]"][value=na][checked]');
         self::assertSelectorExists('#status');
@@ -77,6 +78,16 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertStringNotContainsString(self::SECRET, $html);
         self::assertStringNotContainsString((string) $app->getEncryptedClientSecret(), $html);
         self::assertStringNotContainsString('v1:', $html);
+    }
+
+    public function testWithoutAStoredSecretThereAreNoDots(): void
+    {
+        $this->createApp(self::signIn($this->client));
+
+        $this->client->request('GET', '/settings/tesla');
+
+        self::assertSelectorExists('input[name="' . self::FORM . '[clientSecret]"][required]');
+        self::assertSelectorNotExists('input[name="' . self::FORM . '[clientSecret]"][placeholder]');
     }
 
     public function testChinaIsListedButCannotBeTicked(): void
