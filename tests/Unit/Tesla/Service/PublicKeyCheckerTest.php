@@ -7,6 +7,9 @@ namespace Polaris\Tests\Unit\Tesla\Service;
 use Carbon\CarbonImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Polaris\Extension\ExternalPublicKeyHosting;
+use Polaris\Extension\PolarisPublicKeyHosting;
+use Polaris\Extension\PublicKeyHosting;
 use Polaris\Tesla\Domain\AppDomain;
 use Polaris\Tesla\Domain\FleetRegion;
 use Polaris\Tesla\Domain\PemComparer;
@@ -15,6 +18,7 @@ use Polaris\Tesla\Service\PublicKeyChecker;
 use Polaris\Tesla\Service\PublicKeyCheckResult;
 use Polaris\Tesla\Service\PublicKeyCheckStatus;
 use Polaris\Tests\Support\Owner;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
@@ -119,9 +123,49 @@ final class PublicKeyCheckerTest extends TestCase
         self::assertSame(0, $client->getRequestsCount());
     }
 
-    private function checker(MockHttpClient $client): PublicKeyChecker
+    public function testAConfiguredKeyUrlIsFetchedInsteadAndTheNoticeNamesTheUrlTeslaReads(): void
     {
-        return new PublicKeyChecker($client, new PemComparer());
+        $requests = [];
+        $client = new MockHttpClient(static function (string $method, string $url) use (&$requests): MockResponse {
+            $requests[] = $url;
+
+            return new MockResponse(self::KEY);
+        });
+        $hosting = new ExternalPublicKeyHosting(new Filesystem(), '', 'https://keys.example.org/pem/key.pem');
+
+        $result = $this->checker($client, $hosting)->check($this->app());
+
+        self::assertTrue($result->isMatch());
+        self::assertSame(['https://keys.example.org/pem/key.pem'], $requests);
+        self::assertStringContainsString('https://keys.example.org/pem/key.pem serves the public key', $result->message);
+        self::assertStringContainsString('Tesla itself reads ' . self::URL, $result->message);
+    }
+
+    public function testNoNoticeWhenTheConfiguredUrlIsTheOneTeslaReads(): void
+    {
+        $client = new MockHttpClient(new MockResponse(self::KEY));
+        $hosting = new ExternalPublicKeyHosting(new Filesystem(), '', self::URL);
+
+        $result = $this->checker($client, $hosting)->check($this->app());
+
+        self::assertTrue($result->isMatch());
+        self::assertStringNotContainsString('Tesla itself reads', $result->message);
+    }
+
+    public function testAFailureNamesTheConfiguredUrl(): void
+    {
+        $client = new MockHttpClient(new MockResponse('', ['http_code' => 404]));
+        $hosting = new ExternalPublicKeyHosting(new Filesystem(), '', 'https://keys.example.org/pem/key.pem');
+
+        $result = $this->checker($client, $hosting)->check($this->app());
+
+        self::assertSame(PublicKeyCheckStatus::NotFound, $result->status);
+        self::assertStringContainsString('https://keys.example.org/pem/key.pem answered HTTP 404', $result->message);
+    }
+
+    private function checker(MockHttpClient $client, ?PublicKeyHosting $hosting = null): PublicKeyChecker
+    {
+        return new PublicKeyChecker($client, new PemComparer(), $hosting ?? new PolarisPublicKeyHosting());
     }
 
     private function app(): TeslaApp

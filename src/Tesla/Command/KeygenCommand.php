@@ -60,7 +60,10 @@ final readonly class KeygenCommand
         $io->note(
             $this->hosting->servesPublicKey()
                 ? 'Polaris serves the public key at /.well-known/appspecific/com.tesla.3p.public-key.pem on your domain.'
-                : 'The public key was written to the static site directory. Commit and push it yourself.',
+                : \sprintf(
+                    'The public key is written to POLARIS_KEY_HOSTING_DIR when it is set. Publish it yourself (commit and push) so that it is served at %s.',
+                    $this->hosting->publicKeyUrl() ?? '/.well-known/appspecific/com.tesla.3p.public-key.pem on your domain',
+                ),
         );
 
         return Command::SUCCESS;

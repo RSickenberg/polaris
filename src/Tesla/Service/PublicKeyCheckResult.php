@@ -15,9 +15,15 @@ final readonly class PublicKeyCheckResult
     ) {
     }
 
-    public static function matches(string $url): self
+    public static function matches(string $url, ?string $teslaUrl = null): self
     {
-        return new self(PublicKeyCheckStatus::Match, \sprintf('%s serves the public key stored in Polaris.', $url));
+        $message = \sprintf('%s serves the public key stored in Polaris.', $url);
+
+        if (null !== $teslaUrl && $teslaUrl !== $url) {
+            $message .= \sprintf(' Tesla itself reads %s: make sure that URL serves the same key.', $teslaUrl);
+        }
+
+        return new self(PublicKeyCheckStatus::Match, $message);
     }
 
     public static function mismatch(string $url): self

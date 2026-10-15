@@ -10,7 +10,8 @@ use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * The self-hosted default: POLARIS_KEY_HOSTING picks "polaris" (default) or "external", which also
- * needs POLARIS_KEY_HOSTING_DIR.
+ * needs POLARIS_KEY_HOSTING_DIR (Polaris writes the file) or POLARIS_KEY_HOSTING_URL (the URL of the
+ * PEM file, published by hand), or both.
  */
 #[AsAlias(PublicKeyHosting::class)]
 final readonly class ConfiguredPublicKeyHosting implements PublicKeyHosting
@@ -23,10 +24,12 @@ final readonly class ConfiguredPublicKeyHosting implements PublicKeyHosting
         PublicKeyHostingMode $mode,
         #[Autowire(env: 'POLARIS_KEY_HOSTING_DIR')]
         string $directory,
+        #[Autowire(env: 'POLARIS_KEY_HOSTING_URL')]
+        string $url = '',
     ) {
         $this->inner = match ($mode) {
             PublicKeyHostingMode::Polaris => new PolarisPublicKeyHosting(),
-            PublicKeyHostingMode::External => new ExternalPublicKeyHosting($filesystem, $directory),
+            PublicKeyHostingMode::External => new ExternalPublicKeyHosting($filesystem, $directory, $url),
         };
     }
 
@@ -38,5 +41,10 @@ final readonly class ConfiguredPublicKeyHosting implements PublicKeyHosting
     public function servesPublicKey(): bool
     {
         return $this->inner->servesPublicKey();
+    }
+
+    public function publicKeyUrl(): ?string
+    {
+        return $this->inner->publicKeyUrl();
     }
 }

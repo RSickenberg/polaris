@@ -230,7 +230,10 @@ are specific to Polaris and win when the two disagree.
 - `Extension\PublicKeyHosting` decides where Tesla finds the public key. The default `ConfiguredPublicKeyHosting`
   follows `POLARIS_KEY_HOSTING`: `polaris` (`PolarisPublicKeyHosting`, `Tesla\Controller\PublicKeyController`
   serves the only app's key whatever the Host, stateless, public) or `external` (`ExternalPublicKeyHosting`
-  writes the PEM into `POLARIS_KEY_HOSTING_DIR`; the route then answers 404). The hosted layer replaces the alias.
+  writes the PEM into `POLARIS_KEY_HOSTING_DIR` when set, and `POLARIS_KEY_HOSTING_URL`, the https URL of the PEM,
+  makes `publicKeyUrl()` non-null so `PublicKeyChecker` reads that URL and notes the well-known URL Tesla reads;
+  either one is enough; the route then answers 404). The hosted layer replaces the alias and must implement
+  `publicKeyUrl()` (null to keep using the app domain).
 - The well-known route is public: its `access_control` entry precedes the catch-all and `tesla_public_key` is in
   `PUBLIC_ROUTES` of `AccessControlTest`.
 

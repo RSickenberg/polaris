@@ -7,6 +7,7 @@ namespace Polaris\Tests\Unit\Tesla\Service;
 use Carbon\CarbonImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Polaris\Extension\PolarisPublicKeyHosting;
 use Polaris\Shared\Service\SecretEncrypter;
 use Polaris\Tesla\Domain\AppDomain;
 use Polaris\Tesla\Domain\FleetRegion;
@@ -192,7 +193,7 @@ final class PartnerRegistrationServiceTest extends TestCase
         });
 
         return new PartnerRegistrationService(
-            new PublicKeyChecker($client, new PemComparer()),
+            new PublicKeyChecker($client, new PemComparer(), new PolarisPublicKeyHosting()),
             new FleetApiClient($client),
             $this->encrypter,
             new PublicKeyFormat(new PemComparer()),

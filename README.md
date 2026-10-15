@@ -53,7 +53,9 @@ Run the steps in order. Every command runs in the container through `make sf`.
 
 3. **Serve the public key** at `https://<your domain>/.well-known/appspecific/com.tesla.3p.public-key.pem`. Set `POLARIS_KEY_HOSTING` in `.env.local`:
    - `polaris` (default): this app answers that URL, without a login. Nothing else to do.
-   - `external`: set `POLARIS_KEY_HOSTING_DIR` to a local clone of a static site (for example GitHub Pages). `keygen` writes the public key inside it; commit and push it yourself.
+   - `external`: the key lives on a static site (for example GitHub Pages). Say where it is with either (or both):
+     - `POLARIS_KEY_HOSTING_DIR`, a local clone of the site: `keygen` writes the public key inside it; commit and push it yourself.
+     - `POLARIS_KEY_HOSTING_URL`, the https URL of the PEM file: Polaris writes nothing, you publish the key you got from `keygen` yourself, and `key:check` reads that URL. Tesla always reads `https://<your domain>/.well-known/...`, so use the URL of that file (or one serving the same key); the check tells you when the URL differs.
 
 4. **Store the credentials.** The client secret is asked with a hidden prompt (or read from the standard input), never from an argument. Options you leave out keep their stored value.
 

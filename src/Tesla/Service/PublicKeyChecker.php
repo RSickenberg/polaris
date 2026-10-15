@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Tesla\Service;
 
+use Polaris\Extension\PublicKeyHosting;
 use Polaris\Tesla\Domain\PemComparer;
 use Polaris\Tesla\Entity\TeslaApp;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
@@ -11,8 +12,10 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * Fetches https://<domain>/.well-known/appspecific/com.tesla.3p.public-key.pem, the URL Tesla
- * reads, and compares it with the stored public key. Redirects are not followed: whether Tesla
- * follows them is not documented, so the check stays strict.
+ * reads, and compares it with the stored public key. When the key hosting names another URL
+ * (POLARIS_KEY_HOSTING_URL) that one is fetched instead, and the result says that Tesla still reads
+ * the well-known URL of the domain. Redirects are not followed: whether Tesla follows them is not
+ * documented, so the check stays strict.
  */
 final readonly class PublicKeyChecker
 {
@@ -22,6 +25,7 @@ final readonly class PublicKeyChecker
     public function __construct(
         private HttpClientInterface $client,
         private PemComparer $comparer,
+        private PublicKeyHosting $hosting,
     ) {
     }
 
@@ -33,7 +37,8 @@ final readonly class PublicKeyChecker
             return PublicKeyCheckResult::notConfigured();
         }
 
-        $url = $domain->publicKeyUrl();
+        $teslaUrl = $domain->publicKeyUrl();
+        $url = $this->hosting->publicKeyUrl() ?? $teslaUrl;
 
         try {
             $response = $this->client->request('GET', $url, [
@@ -56,7 +61,7 @@ final readonly class PublicKeyChecker
         }
 
         return \strlen($served) <= self::MAX_KEY_BYTES && $this->comparer->same($served, $app->getPublicKey())
-            ? PublicKeyCheckResult::matches($url)
+            ? PublicKeyCheckResult::matches($url, $teslaUrl)
             : PublicKeyCheckResult::mismatch($url);
     }
 }
