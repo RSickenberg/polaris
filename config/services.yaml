@@ -34,6 +34,10 @@ when@dev:
 
 when@test:
     services:
+        # Without Monolog the framework logger writes to stderr, so every expected 404 or 4xx
+        # of a functional test would print an "[error]" line in the PHPUnit output.
+        logger:
+            class: Psr\Log\NullLogger
         # Nothing injects these yet, so the compiler would remove them before the functional
         # tests can fetch them. Drop the aliases once a controller or command depends on them.
         test.polaris.lease.projection_calculator:

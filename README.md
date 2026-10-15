@@ -25,6 +25,10 @@ or on `/vehicles/{id}/readings`, which also lists the history, newest first. A v
 
 Enter or edit the lease on `/vehicles/{id}/lease`: start and end dates (the end date is either the return day or the last day of the lease, and the lease must last a whole number of months), the allowance (per year or for the whole term, in km or miles), the odometer at the start, the excess cost per km with its currency (CHF, EUR, GBP or USD) and the tolerance (0 to 50 %). A vehicle has one contract, and an edit overwrites it. Distances are stored in metres and the cost in minor units. Saving recomputes the projection with the recorded readings, and terms that contradict a reading (a start odometer above it, for example) are refused whole. The user's time zone comes with the login (#21).
 
+## Dashboard
+
+`/vehicles/{id}` shows where a vehicle stands in one page: the risk level with a message (the projected excess, its cost and the weekly cut when it is `Watch` or `Over`), the share of the allowance driven (the tick marks the allowance earned to date), the distance driven, the allowance to date, the projection at the lease end, the date of the last reading after the lease start, and the budget per day, week and month. Without a contract, without a reading after the lease start, or once the lease has ended it says so and links to the page that fixes it; an ended lease shows the figures so far and no budget. Distances are in km and dates in UTC until the user's preferences exist (#21).
+
 ## How the projection works
 
 Every figure is taken at the latest odometer reading after the lease start (even past the lease end, if the car keeps driving), because nothing is known about the distance driven since:

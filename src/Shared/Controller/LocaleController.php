@@ -43,8 +43,6 @@ final class LocaleController extends AbstractController
             value: $locale,
             expire: $this->clock->now()->modify('+1 year'),
             secure: $request->isSecure(),
-            httpOnly: true,
-            sameSite: Cookie::SAMESITE_LAX,
         ));
 
         return $response;

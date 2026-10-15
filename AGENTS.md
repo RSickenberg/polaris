@@ -132,7 +132,9 @@ are specific to Polaris and win when the two disagree.
   to edit, but keep edits minimal so a later `ux:install` diff stays readable; the only
   edits so far replace hardcoded English text with translation keys. `symfony/ux-toolkit`
   is a dev dependency: the installed files are committed. Polaris's own components go in
-  `templates/components/<Module>/` (the shell is `Shared`). Icons are Lucide, imported with
+  `templates/components/<Module>/` (the shell is `Shared`; the dashboard building blocks `KpiCard`,
+  `LeaseProgress`, `BudgetBadge` and `RiskAlert` are `Dashboard`, anonymous components built on the
+  kit Card, Progress, Badge and Alert). Icons are Lucide, imported with
   `bin/console ux:icons:import lucide:<name>` into `assets/icons/` and committed, so there is
   no runtime call to Iconify. Dark mode is the `dark` class on `<html>`, set before the first
   paint by the inline script of `base.html.twig` and kept by `theme_controller.js`. Pages

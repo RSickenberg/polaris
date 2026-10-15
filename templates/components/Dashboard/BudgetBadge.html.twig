@@ -1,0 +1,12 @@
+{%- props
+    ## \Polaris\Shared\Domain\Distance The distance to drive in the period.
+    distance,
+    ## 'day'|'week'|'month' The period the distance is spread over.
+    period
+-%}
+{# Renders nothing without a budget: a distance of zero means there is nothing left to spread. #}
+{% if distance.metres > 0 %}
+    <twig:Badge variant="secondary" class="h-6 px-2.5 text-sm tabular-nums" {{ ...attributes }}>
+        {{- ('budget.per_' ~ period)|trans({distance: distance.metres / 1000, unit: 'unit.km'|trans(domain='shared')}, 'dashboard') -}}
+    </twig:Badge>
+{% endif %}

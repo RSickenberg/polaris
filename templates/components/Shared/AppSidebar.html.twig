@@ -13,6 +13,12 @@
                 <nav aria-label="{{ 'nav.label'|trans(domain='shared') }}">
                     <twig:Sidebar:Menu>
                         <twig:Sidebar:MenuItem>
+                            <twig:Sidebar:MenuButton as="a" href="{{ path('dashboard_show', {id: vehicle.id.toBase32()}) }}" :active="'dashboard_show' == route">
+                                <twig:ux:icon name="lucide:layout-dashboard" aria-hidden="true" />
+                                <span>{{ 'nav.dashboard'|trans(domain='shared') }}</span>
+                            </twig:Sidebar:MenuButton>
+                        </twig:Sidebar:MenuItem>
+                        <twig:Sidebar:MenuItem>
                             <twig:Sidebar:MenuButton as="a" href="{{ path('reading_history', {id: vehicle.id.toBase32()}) }}" :active="'reading_history' == route">
                                 <twig:ux:icon name="lucide:gauge" aria-hidden="true" />
                                 <span>{{ 'nav.readings'|trans(domain='shared') }}</span>

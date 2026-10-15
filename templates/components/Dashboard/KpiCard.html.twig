@@ -1,0 +1,19 @@
+{%- props
+    ## string The name of the figure, already translated.
+    label,
+    ## string The figure itself, already formatted for the active locale.
+    value,
+    ## string|null A short complement under the figure, already translated.
+    hint = null
+-%}
+<twig:Card size="sm" {{ ...attributes }}>
+    <twig:Card:Content>
+        <dl class="flex flex-col gap-1">
+            <dt class="text-sm text-muted-foreground">{{ label }}</dt>
+            <dd class="text-2xl font-semibold tracking-tight tabular-nums">{{ value }}</dd>
+            {% if hint is not null %}
+                <dd class="text-xs text-muted-foreground">{{ hint }}</dd>
+            {% endif %}
+        </dl>
+    </twig:Card:Content>
+</twig:Card>

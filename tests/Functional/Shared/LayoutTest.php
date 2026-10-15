@@ -37,6 +37,7 @@ final class LayoutTest extends WebTestCase
      */
     public static function pages(): iterable
     {
+        yield 'dashboard' => ['dashboard_show', '/vehicles/%s'];
         yield 'readings' => ['reading_history', '/vehicles/%s/readings'];
         yield 'lease terms' => ['lease_settings', '/vehicles/%s/lease'];
     }
@@ -60,13 +61,23 @@ final class LayoutTest extends WebTestCase
         $crawler = $this->client->request('GET', \sprintf('/vehicles/%s/lease', $this->id));
 
         $links = $crawler->filter('nav[aria-label="Main navigation"] a');
-        self::assertCount(2, $links);
-        self::assertSame(\sprintf('/vehicles/%s/readings', $this->id), $links->eq(0)->attr('href'));
-        self::assertSame('Odometer readings', trim($links->eq(0)->text()));
+        self::assertCount(3, $links);
+        self::assertSame(\sprintf('/vehicles/%s', $this->id), $links->eq(0)->attr('href'));
+        self::assertSame('Dashboard', trim($links->eq(0)->text()));
         self::assertSame('false', $links->eq(0)->attr('data-active'));
-        self::assertSame(\sprintf('/vehicles/%s/lease', $this->id), $links->eq(1)->attr('href'));
-        self::assertSame('Lease terms', trim($links->eq(1)->text()));
-        self::assertSame('page', $links->eq(1)->attr('aria-current'));
+        self::assertSame(\sprintf('/vehicles/%s/readings', $this->id), $links->eq(1)->attr('href'));
+        self::assertSame('Odometer readings', trim($links->eq(1)->text()));
+        self::assertSame('false', $links->eq(1)->attr('data-active'));
+        self::assertSame(\sprintf('/vehicles/%s/lease', $this->id), $links->eq(2)->attr('href'));
+        self::assertSame('Lease terms', trim($links->eq(2)->text()));
+        self::assertSame('page', $links->eq(2)->attr('aria-current'));
+    }
+
+    public function testNavigationMarksTheDashboardWhenOnIt(): void
+    {
+        $crawler = $this->client->request('GET', \sprintf('/vehicles/%s', $this->id));
+
+        self::assertSame('page', $crawler->filter('nav[aria-label="Main navigation"] a')->eq(0)->attr('aria-current'));
     }
 
     public function testShellIsTranslatedToFrench(): void
@@ -76,6 +87,7 @@ final class LayoutTest extends WebTestCase
         self::assertSelectorExists('html[lang="fr"]');
         self::assertSelectorExists('aside[aria-label="Barre latérale"]');
         self::assertSelectorExists('nav[aria-label="Navigation principale"]');
+        self::assertSelectorExists('nav a:contains("Tableau de bord")');
         self::assertSelectorExists('nav a:contains("Relevés du compteur")');
         self::assertSelectorExists('nav a:contains("Conditions du leasing")');
         self::assertSelectorExists('button[aria-label="Afficher ou masquer la barre latérale"]');

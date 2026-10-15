@@ -29,6 +29,8 @@ use Psr\Clock\ClockInterface;
  * - Model Y: 24-month lease in miles, driven below the allowance, Tesla readings in miles.
  * - Cybertruck: a lease and no reading yet.
  * - Model S: readings and no lease.
+ * - Model X: 24-month lease with a 10 % tolerance, projected just under the allowance (watch).
+ * - Roadster: 12-month lease that ended a month ago, 1 200 km over its allowance (ended).
  */
 final class DevSeed extends Fixture
 {
@@ -74,6 +76,28 @@ final class DevSeed extends Fixture
                 $modelS,
                 $today->subMonths(2 - $step)->setTime(18, 0),
                 Distance::fromKilometres(30_000 + $step * 900),
+            ));
+        }
+
+        $modelX = new Vehicle(new Vin('7SAXCBE69PF000005'), 'Model X');
+        $manager->persist($modelX);
+        $manager->persist($this->lease($modelX, $today->subMonths(12), 24, Allowance::ofTotal(Distance::fromKilometres(30_000)), 8, 10));
+        for ($month = 0; $month <= 12; ++$month) {
+            $manager->persist(OdometerReading::manual(
+                $modelX,
+                $today->subMonths(12 - $month)->setTime(6, 0),
+                Distance::fromKilometres(8 + $month * 1_160),
+            ));
+        }
+
+        $roadster = new Vehicle(new Vin('5YJRE1A31A0000006'), 'Roadster');
+        $manager->persist($roadster);
+        $manager->persist($this->lease($roadster, $today->subMonths(13), 12, Allowance::ofTotal(Distance::fromKilometres(15_000)), 8, 0));
+        for ($month = 0; $month <= 12; ++$month) {
+            $manager->persist(OdometerReading::manual(
+                $roadster,
+                $today->subMonths(13 - $month)->setTime(10, 0),
+                Distance::fromKilometres(8 + $month * 1_350),
             ));
         }
 

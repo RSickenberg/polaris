@@ -1,0 +1,7 @@
+{# A message with a call to action. Needs `text` and `cta` (translated), and `href`. #}
+<twig:Card>
+    <twig:Card:Content class="flex flex-col items-start gap-4">
+        <p class="text-sm text-muted-foreground">{{ text }}</p>
+        <twig:Button as="a" href="{{ href }}">{{ cta }}</twig:Button>
+    </twig:Card:Content>
+</twig:Card>
