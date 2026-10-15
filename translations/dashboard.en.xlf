@@ -74,6 +74,14 @@
         <source>ended.cta</source>
         <target>Review the lease terms</target>
       </trans-unit>
+      <trans-unit id="page.home.title">
+        <source>page.home.title</source>
+        <target>Welcome to Polaris</target>
+      </trans-unit>
+      <trans-unit id="page.home.empty">
+        <source>page.home.empty</source>
+        <target>There is no vehicle yet. Once a vehicle is added, its dashboard opens here.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -27,9 +27,9 @@ final class OdometerReadingType extends AbstractType
                 'label' => 'form.read_at.label',
                 'widget' => 'single_text',
                 'input' => 'datetime_immutable',
-                // The user's time zone arrives with #21; until then the date is entered in UTC.
+                // Stored in UTC, entered and shown in the time zone of the user (ADR 0003).
                 'model_timezone' => TimeZone::UTC,
-                'view_timezone' => TimeZone::UTC,
+                'view_timezone' => $options['time_zone'],
             ])
             ->add('odometer', IntegerType::class, ['label' => 'form.odometer.label'])
             ->add('distanceUnit', EnumType::class, [
@@ -43,6 +43,12 @@ final class OdometerReadingType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['data_class' => OdometerReadingData::class, 'translation_domain' => 'reading']);
+        $resolver->setDefaults([
+            'data_class' => OdometerReadingData::class,
+            'translation_domain' => 'reading',
+            // The IANA time zone the date is entered in.
+            'time_zone' => TimeZone::UTC,
+        ]);
+        $resolver->setAllowedTypes('time_zone', 'string');
     }
 }

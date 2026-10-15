@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'page.login.title'|trans(domain='account') }} · Polaris{% endblock %}
+
+{# The bare layout: no sidebar and no vehicle links, as nobody is signed in. The head is the shared one. #}
+{% block body %}
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm">{{ 'layout.skip'|trans(domain='shared') }}</a>
+    <div class="flex min-h-svh flex-col">
+        <header class="flex h-12 shrink-0 items-center justify-end gap-1 px-4">
+            <twig:Shared:LocaleSwitcher />
+            <twig:Shared:ThemeToggle />
+        </header>
+        <main id="main-content" class="flex flex-1 items-center justify-center p-4">
+            <twig:Card class="w-full max-w-sm">
+                <twig:Card:Header>
+                    <twig:Card:Title><h1>{{ 'page.login.title'|trans(domain='account') }}</h1></twig:Card:Title>
+                    <twig:Card:Description>{{ 'page.login.description'|trans(domain='account') }}</twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    <form method="post" action="{{ path('account_login') }}" class="flex flex-col gap-4">
+                        {% if error %}
+                            <twig:Alert variant="destructive">
+                                <twig:Alert:Title>{{ error.messageKey|trans(error.messageData, 'security') }}</twig:Alert:Title>
+                            </twig:Alert>
+                        {% endif %}
+                        <twig:Field>
+                            <twig:Field:Label for="login-email">{{ 'form.email.label'|trans(domain='account') }}</twig:Field:Label>
+                            <twig:Input id="login-email" type="email" name="_username" value="{{ lastEmail }}" autocomplete="username" autofocus required />
+                        </twig:Field>
+                        <twig:Field>
+                            <twig:Field:Label for="login-password">{{ 'form.password.label'|trans(domain='account') }}</twig:Field:Label>
+                            <twig:Input id="login-password" type="password" name="_password" autocomplete="current-password" required />
+                        </twig:Field>
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                        <twig:Button type="submit">{{ 'form.submit'|trans(domain='account') }}</twig:Button>
+                    </form>
+                </twig:Card:Content>
+            </twig:Card>
+        </main>
+    </div>
+{% endblock %}

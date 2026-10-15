@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polaris\Vehicle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Polaris\Account\Entity\User;
 use Polaris\Vehicle\Domain\Vin;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\Ulid;
@@ -24,9 +25,18 @@ class Vehicle
     #[ORM\Column(length: self::NAME_MAX_LENGTH)]
     private string $name;
 
-    public function __construct(Vin $vin, string $name)
+    /**
+     * Null only for a vehicle recorded before accounts existed: the user is handed those when
+     * they are created.
+     */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $owner;
+
+    public function __construct(Vin $vin, string $name, ?User $owner = null)
     {
         $this->id = new Ulid();
+        $this->owner = $owner;
         $this->vin = $vin->value();
         $this->rename($name);
     }
@@ -39,6 +49,11 @@ class Vehicle
     public function getVin(): Vin
     {
         return new Vin($this->vin);
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
     }
 
     public function getName(): string

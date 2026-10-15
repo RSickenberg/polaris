@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'page.home.title'|trans(domain='dashboard') }}{% endblock %}
+
+{% block main %}
+    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.home.title'|trans(domain='dashboard') }}</h1>
+
+    <div class="mt-6">
+        <twig:Card>
+            <twig:Card:Content>
+                <p class="text-sm text-muted-foreground">{{ 'page.home.empty'|trans(domain='dashboard') }}</p>
+            </twig:Card:Content>
+        </twig:Card>
+    </div>
+{% endblock %}

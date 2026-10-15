@@ -35,4 +35,21 @@
             </twig:Sidebar:Group>
         {% endif %}
     </twig:Sidebar:Content>
+    {% if app.user %}
+        <twig:Sidebar:Footer>
+            <p class="truncate px-2 text-xs text-muted-foreground" title="{{ app.user.userIdentifier }}">
+                <span class="sr-only">{{ 'account.signed_in_as'|trans(domain='shared') }}</span>
+                {{ app.user.userIdentifier }}
+            </p>
+            <twig:Sidebar:Menu>
+                <twig:Sidebar:MenuItem>
+                    {# A full page load, so that the session ends and the next page is the login. #}
+                    <twig:Sidebar:MenuButton as="a" href="{{ logout_path() }}" data-turbo="false">
+                        <twig:ux:icon name="lucide:log-out" aria-hidden="true" />
+                        <span>{{ 'account.logout'|trans(domain='shared') }}</span>
+                    </twig:Sidebar:MenuButton>
+                </twig:Sidebar:MenuItem>
+            </twig:Sidebar:Menu>
+        </twig:Sidebar:Footer>
+    {% endif %}
 </twig:Sidebar>

@@ -7,6 +7,7 @@ namespace Polaris\Tests\Functional\Shared;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -20,12 +21,15 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 #[CoversNothing]
 final class LayoutTest extends WebTestCase
 {
+    use SignsIn;
+
     private KernelBrowser $client;
     private string $id;
 
     protected function setUp(): void
     {
         $this->client = self::createClient();
+        self::signIn($this->client);
         $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000051'), 'Model 3');
         self::getContainer()->get(EntityManagerInterface::class)->persist($vehicle);
         self::getContainer()->get(EntityManagerInterface::class)->flush();

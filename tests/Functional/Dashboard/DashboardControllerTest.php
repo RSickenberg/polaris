@@ -21,6 +21,7 @@ use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Currency;
 use Polaris\Shared\Domain\Distance;
 use Polaris\Shared\Domain\Money;
+use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -32,6 +33,7 @@ use Symfony\Component\Clock\Test\ClockSensitiveTrait;
 final class DashboardControllerTest extends WebTestCase
 {
     use ClockSensitiveTrait;
+    use SignsIn;
 
     private KernelBrowser $client;
     private EntityManagerInterface $entityManager;
@@ -41,6 +43,7 @@ final class DashboardControllerTest extends WebTestCase
     {
         self::mockTime('2026-07-02 12:00:00 UTC');
         $this->client = self::createClient();
+        self::signIn($this->client);
         $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000061'), 'Model 3');
         $this->entityManager->persist($this->vehicle);

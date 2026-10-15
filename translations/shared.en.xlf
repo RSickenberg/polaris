@@ -74,6 +74,14 @@
         <source>locale.fr</source>
         <target>Français</target>
       </trans-unit>
+      <trans-unit id="account.signed_in_as">
+        <source>account.signed_in_as</source>
+        <target>Signed in as</target>
+      </trans-unit>
+      <trans-unit id="account.logout">
+        <source>account.logout</source>
+        <target>Sign out</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

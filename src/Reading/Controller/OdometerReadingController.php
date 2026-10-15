@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Polaris\Reading\Controller;
 
 use Carbon\CarbonImmutable;
+use Polaris\Account\Entity\User;
 use Polaris\Reading\Domain\ReadingRejection;
 use Polaris\Reading\Form\Model\OdometerReadingData;
 use Polaris\Reading\Form\OdometerReadingType;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Reading\Service\ReadingRejected;
-use Polaris\Shared\Domain\TimeZone;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -19,6 +19,7 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class OdometerReadingController extends AbstractController
@@ -31,12 +32,12 @@ final class OdometerReadingController extends AbstractController
     }
 
     #[Route('/vehicles/{id}/readings', name: 'reading_history', methods: ['GET', 'POST'])]
-    public function history(Request $request, #[MapEntity(id: 'id')] Vehicle $vehicle): Response
+    public function history(Request $request, #[MapEntity(id: 'id')] Vehicle $vehicle, #[CurrentUser] User $user): Response
     {
         $data = new OdometerReadingData();
         $data->readAt = CarbonImmutable::instance($this->clock->now())->startOfMinute();
 
-        $form = $this->createForm(OdometerReadingType::class, $data);
+        $form = $this->createForm(OdometerReadingType::class, $data, ['time_zone' => $user->getTimeZone()]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -55,8 +56,7 @@ final class OdometerReadingController extends AbstractController
             'vehicle' => $vehicle,
             'readings' => $this->readings->history($vehicle),
             'form' => $form,
-            // Always UTC until the user's time zone exists (#21): then it is read from the user here.
-            'timeZone' => TimeZone::UTC,
+            'timeZone' => $user->getTimeZone(),
         ], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
     }
 }

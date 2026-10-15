@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="en" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="page.login.title">
+        <source>page.login.title</source>
+        <target>Sign in</target>
+      </trans-unit>
+      <trans-unit id="page.login.description">
+        <source>page.login.description</source>
+        <target>Enter your email and password to open your dashboard.</target>
+      </trans-unit>
+      <trans-unit id="form.email.label">
+        <source>form.email.label</source>
+        <target>Email</target>
+      </trans-unit>
+      <trans-unit id="form.password.label">
+        <source>form.password.label</source>
+        <target>Password</target>
+      </trans-unit>
+      <trans-unit id="form.submit">
+        <source>form.submit</source>
+        <target>Sign in</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

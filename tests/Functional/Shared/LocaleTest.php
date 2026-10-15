@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Distance;
+use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -22,6 +23,7 @@ use Symfony\Component\Clock\Test\ClockSensitiveTrait;
 final class LocaleTest extends WebTestCase
 {
     use ClockSensitiveTrait;
+    use SignsIn;
 
     private KernelBrowser $client;
     private string $url;
@@ -30,6 +32,7 @@ final class LocaleTest extends WebTestCase
     {
         self::mockTime('2026-10-20 12:00:00 UTC');
         $this->client = self::createClient();
+        self::signIn($this->client);
         $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000050'), 'Model 3');
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->persist($vehicle);

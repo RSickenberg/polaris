@@ -8,9 +8,9 @@ use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * The locale picked with the language switcher, kept in a cookie until users have a stored
- * preference. The Account module replaces this alias with a provider that reads User.locale
- * (#21). The value is not trusted here: the locale negotiation ignores an unsupported one.
+ * The locale picked with the language switcher, kept in a cookie. It serves visitors who are
+ * not signed in; the Account module decorates it with the stored preference of the signed-in
+ * user. The value is not trusted here: the locale negotiation ignores an unsupported one.
  */
 #[AsAlias(PreferredLocaleProvider::class)]
 final readonly class CookiePreferredLocaleProvider implements PreferredLocaleProvider

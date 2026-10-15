@@ -74,6 +74,14 @@
         <source>ended.cta</source>
         <target>Revoir les conditions du leasing</target>
       </trans-unit>
+      <trans-unit id="page.home.title">
+        <source>page.home.title</source>
+        <target>Bienvenue sur Polaris</target>
+      </trans-unit>
+      <trans-unit id="page.home.empty">
+        <source>page.home.empty</source>
+        <target>Il n'y a pas encore de véhicule. Dès qu'un véhicule est ajouté, son tableau de bord s'ouvre ici.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

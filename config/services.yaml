@@ -3,6 +3,11 @@ parameters:
     # basis points (6000 = 0.6); the overall pace takes the rest.
     polaris.lease.recent_pace_weight: 6000
 
+    # Paths the firewall leaves alone. A pattern that matches nothing in production, where the
+    # profiler does not exist and assets are served as files; dev and test open the web debug
+    # toolbar, the profiler and the assets that AssetMapper serves through a route.
+    polaris.security.open_paths: '^(?!)'
+
 services:
     _defaults:
         autowire: true
@@ -23,6 +28,9 @@ services:
                 arguments: ['%polaris.lease.recent_pace_weight%']
 
 when@dev:
+    parameters:
+        polaris.security.open_paths: '^/(_profiler|_wdt|assets)/'
+
     services:
         # Development data (make seed). The fixtures bundle is not installed in production.
         _defaults:
@@ -33,6 +41,9 @@ when@dev:
             resource: '../fixtures/'
 
 when@test:
+    parameters:
+        polaris.security.open_paths: '^/(_profiler|_wdt|assets)/'
+
     services:
         # Without Monolog the framework logger writes to stderr, so every expected 404 or 4xx
         # of a functional test would print an "[error]" line in the PHPUnit output.
