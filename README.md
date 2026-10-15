@@ -41,7 +41,7 @@ Forgotten password: use "Forgot your password?" on the login page. It needs a ma
 
 Run the steps in order. Every command runs in the container through `make sf`.
 
-1. **Create the app.** On developer.tesla.com, create a Fleet API app and note its client ID and client secret. Its allowed origin must be the domain that will serve your public key (for example `polaris.example.com`).
+1. **Create the app.** On developer.tesla.com, create a Fleet API app. Its details page shows the **client ID** (a public identifier) and the **client secret** (keep it private); you need both in step 4. Its allowed origin must be the domain that will serve your public key (for example `polaris.example.com`).
 
 2. **Generate the key pair.** The private key is stored encrypted and never shown; the command prints the public key.
 
@@ -59,6 +59,12 @@ Run the steps in order. Every command runs in the container through `make sf`.
 
    ```bash
    make sf ARGS="polaris:tesla:configure --client-id=<client ID> --domain=polaris.example.com --region=eu"
+   ```
+
+   You are then asked for the client secret (hidden). With several regions and a given owner:
+
+   ```bash
+   make sf ARGS="polaris:tesla:configure --client-id=1a2b3c4d-0000-0000-0000-abcdef123456 --domain=keys.example.org --region=na --region=eu --email=you@example.com"
    ```
 
    Regions: `na` (North America and Asia-Pacific) and `eu` (Europe, Middle East and Africa); repeat `--region` for both. China is not supported: it needs a separate Tesla account and developer app.
