@@ -78,12 +78,14 @@ final class VehicleOwnershipTest extends WebTestCase
         self::assertResponseIsSuccessful();
     }
 
-    public function testTheLandingPageNeverPicksAnotherUsersVehicle(): void
+    public function testTheLandingPageListsOnlyMyVehicles(): void
     {
-        // "Aardvark theirs" sorts first by name, but it is not mine.
         $this->client->request('GET', '/');
 
-        self::assertResponseRedirects('/vehicles/' . $this->mine->getId()->toBase32());
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('main', 'Mine');
+        self::assertSelectorTextNotContains('main', 'Aardvark theirs');
+        self::assertSelectorNotExists(\sprintf('main a[href^="/vehicles/%s"]', $this->theirs->getId()->toBase32()));
     }
 
     public function testTheLandingPageIsEmptyWhenTheUserOwnsNothing(): void

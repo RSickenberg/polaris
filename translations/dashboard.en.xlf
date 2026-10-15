@@ -76,11 +76,23 @@
       </trans-unit>
       <trans-unit id="page.home.title">
         <source>page.home.title</source>
-        <target>Welcome to Polaris</target>
+        <target>Your vehicles</target>
       </trans-unit>
       <trans-unit id="page.home.empty">
         <source>page.home.empty</source>
-        <target>There is no vehicle yet. Once a vehicle is added, its dashboard opens here.</target>
+        <target>There is no vehicle yet. Once a vehicle is added, it is listed here.</target>
+      </trans-unit>
+      <trans-unit id="home.dashboard">
+        <source>home.dashboard</source>
+        <target>Dashboard</target>
+      </trans-unit>
+      <trans-unit id="home.readings">
+        <source>home.readings</source>
+        <target>Odometer readings</target>
+      </trans-unit>
+      <trans-unit id="home.lease">
+        <source>home.lease</source>
+        <target>Lease terms</target>
       </trans-unit>
     </body>
   </file>

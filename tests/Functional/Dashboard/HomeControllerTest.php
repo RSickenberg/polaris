@@ -31,11 +31,11 @@ final class HomeControllerTest extends WebTestCase
         $this->client->request('GET', '/');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('main h1', 'Welcome to Polaris');
+        self::assertSelectorTextContains('main h1', 'Your vehicles');
         self::assertSelectorTextContains('main', 'There is no vehicle yet.');
     }
 
-    public function testItRedirectsToTheDashboardOfTheFirstVehicleByName(): void
+    public function testItListsTheVehiclesByNameWithTheirLinks(): void
     {
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $second = new Vehicle(new Vin('5YJ3E7EB2NF000081'), 'Model Y', self::createUser());
@@ -46,6 +46,12 @@ final class HomeControllerTest extends WebTestCase
 
         $this->client->request('GET', '/');
 
-        self::assertResponseRedirects('/vehicles/' . $first->getId()->toBase32());
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('main h1', 'Your vehicles');
+        $names = $this->client->getCrawler()->filter('main h2')->each(static fn ($heading): string => $heading->text());
+        self::assertSame(['Cybertruck', 'Model Y'], $names);
+        self::assertSelectorExists(\sprintf('main a[href="/vehicles/%s"]', $first->getId()->toBase32()));
+        self::assertSelectorExists(\sprintf('main a[href="/vehicles/%s/readings"]', $first->getId()->toBase32()));
+        self::assertSelectorExists(\sprintf('main a[href="/vehicles/%s/lease"]', $first->getId()->toBase32()));
     }
 }

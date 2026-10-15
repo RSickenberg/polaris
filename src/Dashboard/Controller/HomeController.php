@@ -13,7 +13,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 /**
- * Where the login lands: the dashboard of the first vehicle of the user by name, or a note when there is none.
+ * Where the login lands: the vehicles of the user by name, each linking to its dashboard,
+ * or a note when there is none.
  */
 final class HomeController extends AbstractController
 {
@@ -24,12 +25,8 @@ final class HomeController extends AbstractController
     #[Route('/', name: 'dashboard_home', methods: ['GET'])]
     public function home(#[CurrentUser] User $user): Response
     {
-        $vehicle = $this->entityManager->getRepository(Vehicle::class)->findOneBy(['owner' => $user], ['name' => 'ASC']);
-
-        if (null === $vehicle) {
-            return $this->render('dashboard/home_empty.html.twig');
-        }
-
-        return $this->redirectToRoute('dashboard_show', ['id' => $vehicle->getId()->toBase32()]);
+        return $this->render('dashboard/home.html.twig', [
+            'vehicles' => $this->entityManager->getRepository(Vehicle::class)->findBy(['owner' => $user], ['name' => 'ASC']),
+        ]);
     }
 }
