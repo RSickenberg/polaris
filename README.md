@@ -51,6 +51,14 @@ Run the steps in order. Every command runs in the container through `make sf`.
 
    It refuses to replace an existing key unless you pass `--force` (you would then register the app again).
 
+   **Already have a key pair** (its public key is published and maybe registered)? Import the private key instead of generating a new one. Polaris derives the public key from it, checks that it is a prime256v1 key (PKCS8 or SEC1 PEM, no passphrase) and stores it encrypted. The file is piped on the standard input, so it never appears in a command argument:
+
+   ```bash
+   docker compose exec -T php bin/console polaris:tesla:key:import < private-key.pem
+   ```
+
+   Then `key:check` (step 5) confirms it is the key served on your domain. Add `--force` to replace a key already stored.
+
 3. **Serve the public key** at `https://<your domain>/.well-known/appspecific/com.tesla.3p.public-key.pem`. Set `POLARIS_KEY_HOSTING` in `.env.local`:
    - `polaris` (default): this app answers that URL, without a login. Nothing else to do.
    - `external`: the key lives on a static site (for example GitHub Pages). Say where it is with either (or both):

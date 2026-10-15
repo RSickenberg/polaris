@@ -247,6 +247,10 @@ are specific to Polaris and win when the two disagree.
 - `FleetRegion` is `na`, `eu` and `cn`. China is a separate Tesla account and developer app: the case exists only
   to be refused (`isSupported()` is false, `tokenUrl()` throws, settings and `register` reject it). The token host
   for NA and EMEA is the global `fleet-auth.prd.vn.cloud.tesla.com`.
+- `polaris:tesla:key:import` (`KeyPairImporter`, `TeslaKeyService::import()`) keeps an existing prime256v1 private key
+  (PKCS8 or SEC1 PEM, no passphrase) read from the standard input or `--file`, never an argument: the public key is
+  derived from it, the private key is re-exported as PKCS8 and stored encrypted like a generated one, and `--force`
+  rules are those of keygen. It never prints the private key.
 - `polaris:tesla:key:check` (`PublicKeyChecker`) fetches the well-known URL without following redirects and compares
   it to the stored key. `polaris:tesla:register` (`PartnerRegistrationService`) runs it first and sends nothing to
   Tesla on failure; per enabled region it calls `FleetApiClient` for a partner token, `POST /api/1/partner_accounts`
