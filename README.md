@@ -198,7 +198,7 @@ Planned: Redis for Messenger queues, Lock and Cache; Flowbite charts.
 
 ## License
 
-[AGPL-3.0-or-later](LICENSE). A commercial license is available for uses that cannot comply with the AGPL, see [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md).
+[PolyForm Noncommercial 1.0.0](LICENSE). You may run Polaris for yourself, for example on a NAS, in Home Assistant or in your own Docker, but not for commercial purposes and not as a service for others. Versions published before this change remain available under the AGPL-3.0-or-later. A commercial license is available, see [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md).
 
 ## Contributing
 

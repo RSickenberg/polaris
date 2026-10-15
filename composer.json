@@ -2,7 +2,7 @@
     "name": "rsickenberg/polaris",
     "description": "Track a Tesla's odometer against the lease allowance and project the mileage at lease end. Self-hostable Symfony application.",
     "type": "project",
-    "license": "AGPL-3.0-or-later",
+    "license": "PolyForm-Noncommercial-1.0.0",
     "authors": [
         {
             "name": "Romain Sickenberg",

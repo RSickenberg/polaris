@@ -117,8 +117,8 @@ are specific to Polaris and win when the two disagree.
 - Polaris tracks a Tesla's odometer against the lease allowance, projects the
   mileage at lease end and warns before the limit. Decisions are recorded in
   `docs/adr/`; read them before changing structure.
-- This repository is public (AGPL-3.0-or-later) and is the self-hostable
-  application. A private hosted layer builds on its Docker image and plugs in
+- This repository is public under the PolyForm Noncommercial License 1.0.0 (ADR 0008) and is the
+  self-hostable application, for personal use only. A private hosted layer builds on its Docker image and plugs in
   only through `src/Extension/`. Never add hosted-only code here (billing, plans,
   sign-up policy, APNs keys).
 - Stack in place: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine ORM and
