@@ -14,6 +14,14 @@
         <source>lease.term.whole_months</source>
         <target>Le contrat doit durer un nombre entier de mois, par exemple du 2026-01-15 au {{ end }}.</target>
       </trans-unit>
+      <trans-unit id="account.settings.email_taken">
+        <source>account.settings.email_taken</source>
+        <target>Cet e-mail est déjà utilisé.</target>
+      </trans-unit>
+      <trans-unit id="account.password.mismatch">
+        <source>account.password.mismatch</source>
+        <target>Les deux mots de passe ne correspondent pas.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

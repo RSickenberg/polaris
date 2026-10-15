@@ -189,6 +189,13 @@ are specific to Polaris and win when the two disagree.
   anonymous visitor can open. The login page is `Account\Controller\LoginController`
   (`account_login`, `templates/account/login.html.twig`, the bare layout through the `body`
   block of `base.html.twig`); the logout control is in the sidebar footer.
+- The settings page (`Account\Controller\SettingsController`, `/settings`) has two forms, `profile`
+  (email, locale, time zone) and `password` (current password, new one twice), both going through
+  `Account\Service\UserSettings`. A changed email or password makes the session stale, so the
+  controller signs the user in again with `Security::login()`. When API tokens exist (ADR 0005), a
+  password change must revoke them in `UserSettings::changePassword()`. The sidebar user menu is in
+  `templates/components/Shared/AppSidebar.html.twig`, the avatar letters come from
+  `Account\Domain\Initials`.
 - The firewall form login and logout use the stateless CSRF token ids `authenticate` and
   `logout`; `login_throttling` allows 5 attempts per 15 minutes. The `dev` firewall that leaves
   the profiler, the toolbar and the AssetMapper routes open is driven by the parameter

@@ -82,6 +82,14 @@
         <source>account.logout</source>
         <target>Se déconnecter</target>
       </trans-unit>
+      <trans-unit id="account.menu">
+        <source>account.menu</source>
+        <target>Menu du compte</target>
+      </trans-unit>
+      <trans-unit id="account.settings">
+        <source>account.settings</source>
+        <target>Paramètres</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

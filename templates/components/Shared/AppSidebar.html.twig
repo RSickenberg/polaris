@@ -37,19 +37,32 @@
     </twig:Sidebar:Content>
     {% if app.user %}
         <twig:Sidebar:Footer>
-            <p class="truncate px-2 text-xs text-muted-foreground" title="{{ app.user.userIdentifier }}">
-                <span class="sr-only">{{ 'account.signed_in_as'|trans(domain='shared') }}</span>
-                {{ app.user.userIdentifier }}
-            </p>
-            <twig:Sidebar:Menu>
-                <twig:Sidebar:MenuItem>
-                    {# A full page load, so that the session ends and the next page is the login. #}
-                    <twig:Sidebar:MenuButton as="a" href="{{ logout_path() }}" data-turbo="false">
-                        <twig:ux:icon name="lucide:log-out" aria-hidden="true" />
-                        <span>{{ 'account.logout'|trans(domain='shared') }}</span>
+            <twig:DropdownMenu id="account" side="top" align="start" class="w-full">
+                <twig:DropdownMenu:Trigger>
+                    <twig:Sidebar:MenuButton size="lg" aria-label="{{ 'account.menu'|trans(domain='shared') }}" {{ ...dropdown_menu_trigger_attrs }}>
+                        <twig:Avatar>
+                            <twig:Avatar:Fallback aria-hidden="true">{{ app.user.initials }}</twig:Avatar:Fallback>
+                        </twig:Avatar>
+                        <span class="flex min-w-0 flex-col text-start leading-tight">
+                            <span class="sr-only">{{ 'account.signed_in_as'|trans(domain='shared') }}</span>
+                            <span class="truncate text-sm font-medium" title="{{ app.user.userIdentifier }}">{{ app.user.userIdentifier }}</span>
+                        </span>
+                        <twig:ux:icon name="lucide:chevrons-up-down" class="ms-auto size-4" aria-hidden="true" />
                     </twig:Sidebar:MenuButton>
-                </twig:Sidebar:MenuItem>
-            </twig:Sidebar:Menu>
+                </twig:DropdownMenu:Trigger>
+                <twig:DropdownMenu:Content class="w-56">
+                    <twig:DropdownMenu:Item as="a" href="{{ path('account_settings') }}">
+                        <twig:ux:icon name="lucide:settings" aria-hidden="true" />
+                        {{ 'account.settings'|trans(domain='shared') }}
+                    </twig:DropdownMenu:Item>
+                    <twig:DropdownMenu:Separator />
+                    {# A full page load, so that the session ends and the next page is the login. #}
+                    <twig:DropdownMenu:Item as="a" href="{{ logout_path() }}" data-turbo="false">
+                        <twig:ux:icon name="lucide:log-out" aria-hidden="true" />
+                        {{ 'account.logout'|trans(domain='shared') }}
+                    </twig:DropdownMenu:Item>
+                </twig:DropdownMenu:Content>
+            </twig:DropdownMenu>
         </twig:Sidebar:Footer>
     {% endif %}
 </twig:Sidebar>

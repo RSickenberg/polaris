@@ -22,6 +22,70 @@
         <source>form.submit</source>
         <target>Se connecter</target>
       </trans-unit>
+      <trans-unit id="page.settings.title">
+        <source>page.settings.title</source>
+        <target>Paramètres</target>
+      </trans-unit>
+      <trans-unit id="page.settings.profile">
+        <source>page.settings.profile</source>
+        <target>Profil</target>
+      </trans-unit>
+      <trans-unit id="page.settings.profile_description">
+        <source>page.settings.profile_description</source>
+        <target>Votre e-mail, votre langue et le fuseau horaire dans lequel les dates sont affichées.</target>
+      </trans-unit>
+      <trans-unit id="page.settings.password">
+        <source>page.settings.password</source>
+        <target>Mot de passe</target>
+      </trans-unit>
+      <trans-unit id="page.settings.password_description">
+        <source>page.settings.password_description</source>
+        <target>Choisissez un nouveau mot de passe. Vous restez connecté sur cet appareil.</target>
+      </trans-unit>
+      <trans-unit id="form.locale.label">
+        <source>form.locale.label</source>
+        <target>Langue</target>
+      </trans-unit>
+      <trans-unit id="form.time_zone.label">
+        <source>form.time_zone.label</source>
+        <target>Fuseau horaire</target>
+      </trans-unit>
+      <trans-unit id="form.time_zone.help">
+        <source>form.time_zone.help</source>
+        <target>Les dates sont stockées en UTC, puis affichées et saisies dans ce fuseau horaire.</target>
+      </trans-unit>
+      <trans-unit id="form.current_password.label">
+        <source>form.current_password.label</source>
+        <target>Mot de passe actuel</target>
+      </trans-unit>
+      <trans-unit id="form.new_password.label">
+        <source>form.new_password.label</source>
+        <target>Nouveau mot de passe</target>
+      </trans-unit>
+      <trans-unit id="form.new_password.help">
+        <source>form.new_password.help</source>
+        <target>Au moins %min% caractères.</target>
+      </trans-unit>
+      <trans-unit id="form.new_password_confirm.label">
+        <source>form.new_password_confirm.label</source>
+        <target>Répétez le nouveau mot de passe</target>
+      </trans-unit>
+      <trans-unit id="form.save">
+        <source>form.save</source>
+        <target>Enregistrer le profil</target>
+      </trans-unit>
+      <trans-unit id="form.password_save">
+        <source>form.password_save</source>
+        <target>Changer le mot de passe</target>
+      </trans-unit>
+      <trans-unit id="flash.profile_saved">
+        <source>flash.profile_saved</source>
+        <target>Votre profil a été enregistré.</target>
+      </trans-unit>
+      <trans-unit id="flash.password_saved">
+        <source>flash.password_saved</source>
+        <target>Votre mot de passe a été modifié.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

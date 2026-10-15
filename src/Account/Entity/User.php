@@ -7,6 +7,7 @@ namespace Polaris\Account\Entity;
 use Carbon\CarbonImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Polaris\Account\Domain\Initials;
 use Polaris\Account\Repository\UserRepository;
 use Polaris\Shared\Domain\TimeZone;
 use Symfony\Bridge\Doctrine\Types\UlidType;
@@ -82,6 +83,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getEmail(): string
     {
         return $this->email;
+    }
+
+    public function changeEmail(string $email): void
+    {
+        $this->email = self::normalizeEmail($email);
+    }
+
+    /**
+     * The letters of the avatar.
+     */
+    public function getInitials(): string
+    {
+        return Initials::fromEmail($this->email);
     }
 
     public function getUserIdentifier(): string

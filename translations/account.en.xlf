@@ -22,6 +22,70 @@
         <source>form.submit</source>
         <target>Sign in</target>
       </trans-unit>
+      <trans-unit id="page.settings.title">
+        <source>page.settings.title</source>
+        <target>Settings</target>
+      </trans-unit>
+      <trans-unit id="page.settings.profile">
+        <source>page.settings.profile</source>
+        <target>Profile</target>
+      </trans-unit>
+      <trans-unit id="page.settings.profile_description">
+        <source>page.settings.profile_description</source>
+        <target>Your email, your language and the time zone dates are shown in.</target>
+      </trans-unit>
+      <trans-unit id="page.settings.password">
+        <source>page.settings.password</source>
+        <target>Password</target>
+      </trans-unit>
+      <trans-unit id="page.settings.password_description">
+        <source>page.settings.password_description</source>
+        <target>Choose a new password. You stay signed in on this device.</target>
+      </trans-unit>
+      <trans-unit id="form.locale.label">
+        <source>form.locale.label</source>
+        <target>Language</target>
+      </trans-unit>
+      <trans-unit id="form.time_zone.label">
+        <source>form.time_zone.label</source>
+        <target>Time zone</target>
+      </trans-unit>
+      <trans-unit id="form.time_zone.help">
+        <source>form.time_zone.help</source>
+        <target>Dates are stored in UTC and shown, and entered, in this time zone.</target>
+      </trans-unit>
+      <trans-unit id="form.current_password.label">
+        <source>form.current_password.label</source>
+        <target>Current password</target>
+      </trans-unit>
+      <trans-unit id="form.new_password.label">
+        <source>form.new_password.label</source>
+        <target>New password</target>
+      </trans-unit>
+      <trans-unit id="form.new_password.help">
+        <source>form.new_password.help</source>
+        <target>At least %min% characters.</target>
+      </trans-unit>
+      <trans-unit id="form.new_password_confirm.label">
+        <source>form.new_password_confirm.label</source>
+        <target>Repeat the new password</target>
+      </trans-unit>
+      <trans-unit id="form.save">
+        <source>form.save</source>
+        <target>Save the profile</target>
+      </trans-unit>
+      <trans-unit id="form.password_save">
+        <source>form.password_save</source>
+        <target>Change the password</target>
+      </trans-unit>
+      <trans-unit id="flash.profile_saved">
+        <source>flash.profile_saved</source>
+        <target>Your profile was saved.</target>
+      </trans-unit>
+      <trans-unit id="flash.password_saved">
+        <source>flash.password_saved</source>
+        <target>Your password was changed.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

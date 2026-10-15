@@ -82,6 +82,14 @@
         <source>account.logout</source>
         <target>Sign out</target>
       </trans-unit>
+      <trans-unit id="account.menu">
+        <source>account.menu</source>
+        <target>Account menu</target>
+      </trans-unit>
+      <trans-unit id="account.settings">
+        <source>account.settings</source>
+        <target>Settings</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Polaris\Account\EventListener;
 
 use Polaris\Account\Entity\User;
-use Polaris\Account\Service\UserPreferences;
 use Polaris\Account\Service\UserPreferredLocaleProvider;
+use Polaris\Account\Service\UserSettings;
 use Polaris\Shared\Event\LocaleSwitched;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -20,7 +20,7 @@ final readonly class SaveSwitchedLocale
 {
     public function __construct(
         private Security $security,
-        private UserPreferences $preferences,
+        private UserSettings $preferences,
         private RequestStack $requestStack,
     ) {
     }

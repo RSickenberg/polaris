@@ -24,7 +24,7 @@ The password is never an argument or an option, so it stays out of the shell his
 
 After 5 failed attempts for the same email and IP address within 15 minutes, further attempts from them are refused, even with the right password, until the window passes; an address that tries many emails is also limited. The counters live in the cache (`cache.rate_limiter`), so they are shared by every worker of the same container. There is no password reset yet: until it exists, a forgotten password can only be replaced in the database.
 
-The language switcher is kept for the signed-in user (`User.locale`), and the user's time zone (`User.timeZone`, set with `--time-zone`, UTC by default) is the one dates are shown and entered in.
+The sidebar shows the user as an avatar with their initials and a menu with the settings and sign out. `/settings` changes the email, the language, the time zone (`User.timeZone`, UTC by default, the one dates are shown and entered in) and the password (the current one is asked, the new one is typed twice and needs 12 characters); the user stays signed in after a change. The language switcher is kept in `User.locale` too.
 
 `make seed` loads the sample vehicles for `dev@example.test`, with a random password printed once at the end of the seed output.
 
