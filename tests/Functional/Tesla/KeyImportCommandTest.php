@@ -76,6 +76,17 @@ final class KeyImportCommandTest extends KernelTestCase
         self::assertStringNotContainsString($app->getEncryptedPrivateKey(), $display);
     }
 
+    public function testAPipedKeyIsReadEvenWhenTheCommandIsNotMarkedNonInteractive(): void
+    {
+        self::createUser();
+        $tester = $this->tester();
+        $tester->setInputs([$this->pair->privateKeyPem()]);
+
+        // No "interactive" option: like docker compose exec -T, only the input tells it is a pipe.
+        self::assertSame(Command::SUCCESS, $tester->execute([]));
+        self::assertSame($this->pair->publicKeyPem, $this->app()->getPublicKey());
+    }
+
     public function testImportsThePrivateKeyFromAFile(): void
     {
         self::createUser();

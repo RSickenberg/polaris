@@ -107,9 +107,12 @@ final readonly class ConfigureCommand
 
     private function readSecret(SymfonyStyle $io, InputInterface $input, bool $hasStoredSecret): ?string
     {
-        if (!$input->isInteractive()) {
-            $stream = $input instanceof StreamableInputInterface ? $input->getStream() : null;
-            $line = fgets($stream ?? \STDIN);
+        // Symfony 8 does not turn interactivity off for a pipe: a secret piped on the standard input is
+        // read from it, a terminal gets the hidden prompt.
+        $stream = ($input instanceof StreamableInputInterface ? $input->getStream() : null) ?? \STDIN;
+
+        if (!$input->isInteractive() || !stream_isatty($stream)) {
+            $line = fgets($stream);
 
             return false === $line || '' === rtrim($line, "\r\n") ? null : rtrim($line, "\r\n");
         }

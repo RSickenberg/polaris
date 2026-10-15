@@ -94,12 +94,15 @@ final readonly class KeyImportCommand
             return false === $content || '' === trim($content) ? null : $content;
         }
 
-        if ($input->isInteractive()) {
+        // Symfony 8 does not turn interactivity off for a pipe: look at the input itself. A terminal has
+        // nothing to read, a redirected file or a pipe does.
+        $stream = ($input instanceof StreamableInputInterface ? $input->getStream() : null) ?? \STDIN;
+
+        if (stream_isatty($stream)) {
             return null;
         }
 
-        $stream = $input instanceof StreamableInputInterface ? $input->getStream() : null;
-        $content = stream_get_contents($stream ?? \STDIN);
+        $content = stream_get_contents($stream);
 
         return false === $content || '' === trim($content) ? null : $content;
     }

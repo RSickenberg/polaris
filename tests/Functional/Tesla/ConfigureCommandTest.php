@@ -76,6 +76,19 @@ final class ConfigureCommandTest extends KernelTestCase
         self::assertStringNotContainsString((string) $app->getEncryptedClientSecret(), $display);
     }
 
+    public function testAPipedSecretIsReadEvenWhenTheCommandIsNotMarkedNonInteractive(): void
+    {
+        $this->createApp();
+        $tester = $this->tester();
+        $tester->setInputs([self::SECRET]);
+
+        // No "interactive" option: like docker compose exec -T, only the input tells it is a pipe.
+        $status = $tester->execute(['--client-id' => 'client-id', '--domain' => 'polaris.example.com', '--region' => ['eu']]);
+
+        self::assertSame(Command::SUCCESS, $status);
+        self::assertTrue($this->app()->isConfigured());
+    }
+
     public function testRefusesChina(): void
     {
         $this->createApp();
