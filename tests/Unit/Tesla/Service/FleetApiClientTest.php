@@ -45,6 +45,7 @@ final class FleetApiClientTest extends TestCase
                 'grant_type' => 'client_credentials',
                 'client_id' => 'client-id',
                 'client_secret' => self::SECRET,
+                'scope' => 'openid vehicle_device_data',
                 'audience' => 'https://fleet-api.prd.eu.vn.cloud.tesla.com',
             ],
             $fields,

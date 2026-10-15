@@ -14,14 +14,15 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
  * The partner calls of the Fleet API that registering an app needs: a partner token
  * (client_credentials), POST /api/1/partner_accounts and GET /api/1/partner_accounts/public_key.
  *
- * The partner token is asked without a scope: the scope parameter is optional, and the docs do not
- * name a scope that register needs. The shape of the register and public key responses is not
- * documented either, so the client trusts the status code and reads only access_token and
- * response.public_key.
+ * The partner token is asked with the minimal scopes Polaris needs (PARTNER_SCOPE): a first real run
+ * showed that the public key read-back answers 403 "missing scopes" to a token without any. The shape
+ * of the register and public key responses is not documented, so the client trusts the status code
+ * and reads only access_token and response.public_key.
  */
 final readonly class FleetApiClient
 {
     private const int TIMEOUT_SECONDS = 15;
+    private const string PARTNER_SCOPE = 'openid vehicle_device_data';
 
     public function __construct(private HttpClientInterface $client)
     {
@@ -46,6 +47,7 @@ final readonly class FleetApiClient
                     'grant_type' => 'client_credentials',
                     'client_id' => $clientId,
                     'client_secret' => $clientSecret,
+                    'scope' => self::PARTNER_SCOPE,
                     'audience' => $region->baseUrl(),
                 ],
             ],

@@ -96,7 +96,7 @@ Run the steps in order. Every command runs in the container through `make sf`.
    make sf ARGS="polaris:tesla:register"    # runs the check first, then registers each enabled region
    ```
 
-   `register` sends nothing to Tesla if the check fails, and shows Tesla's error messages with a hint. The partner token is requested without a scope, and Tesla does not document the register response, so the first real run is the check (not verified).
+   `register` sends nothing to Tesla if the check fails, and shows Tesla's error messages with a hint. The partner token is requested with the scopes `openid vehicle_device_data` (checked on a real run in `eu`); Tesla does not document the register response.
 
 ## Use it
 

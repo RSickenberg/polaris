@@ -255,10 +255,10 @@ are specific to Polaris and win when the two disagree.
   it to the stored key. `polaris:tesla:register` (`PartnerRegistrationService`) runs it first and sends nothing to
   Tesla on failure; per enabled region it calls `FleetApiClient` for a partner token, `POST /api/1/partner_accounts`
   and `GET /api/1/partner_accounts/public_key?domain=`, and one region failing does not stop the others.
-- Unverified (Tesla does not document them): that the partner token needs no scope, the register body
+- Unverified (Tesla does not document them): the register body
   (`{"domain": ...}`), the shape of Tesla error bodies (`FleetApiError` reads `error`, `error_description`,
   `error_message`, `message`, else a truncated body) and of the public key response (`response.public_key`, PEM or
-  hex of the uncompressed point, see `PublicKeyFormat`). The first real run confirms them.
+  hex of the uncompressed point, see `PublicKeyFormat`). The first real run confirmed that the partner token needs a scope (`openid vehicle_device_data`; without one the key read-back answered 403 "missing scopes") and that register works for `eu`.
 - The settings page (`Tesla\Controller\TeslaSettingsController`, `/settings/tesla`, linked from the account menu) edits
   the same settings through `TeslaAppSettings`, with the form model `Tesla\Form\Model\TeslaAppSettingsFormData`.
   The app is looked up by owner (no id in the URL), the client secret field is write-only (never rendered, empty
