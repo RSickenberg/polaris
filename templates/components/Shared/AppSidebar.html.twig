@@ -8,6 +8,18 @@
         </div>
     </twig:Sidebar:Header>
     <twig:Sidebar:Content>
+        <twig:Sidebar:Group>
+            <nav aria-label="{{ 'nav.home_label'|trans(domain='shared') }}">
+                <twig:Sidebar:Menu>
+                    <twig:Sidebar:MenuItem>
+                        <twig:Sidebar:MenuButton as="a" href="{{ path('dashboard_home') }}" :active="'dashboard_home' == route">
+                            <twig:ux:icon name="lucide:car" aria-hidden="true" />
+                            <span>{{ 'nav.vehicles'|trans(domain='shared') }}</span>
+                        </twig:Sidebar:MenuButton>
+                    </twig:Sidebar:MenuItem>
+                </twig:Sidebar:Menu>
+            </nav>
+        </twig:Sidebar:Group>
         {% if vehicle is not null %}
             <twig:Sidebar:Group>
                 <nav aria-label="{{ 'nav.label'|trans(domain='shared') }}">

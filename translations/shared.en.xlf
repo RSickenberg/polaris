@@ -90,6 +90,14 @@
         <source>account.settings</source>
         <target>Settings</target>
       </trans-unit>
+      <trans-unit id="nav.vehicles">
+        <source>nav.vehicles</source>
+        <target>My vehicles</target>
+      </trans-unit>
+      <trans-unit id="nav.home_label">
+        <source>nav.home_label</source>
+        <target>Home navigation</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -35,6 +35,15 @@ final class HomeControllerTest extends WebTestCase
         self::assertSelectorTextContains('main', 'There is no vehicle yet.');
     }
 
+    public function testTheSidebarAlwaysLinksToTheVehicleList(): void
+    {
+        $this->client->request('GET', '/');
+        self::assertSelectorTextContains('[data-slot=sidebar] a[href="/"][data-active=true]', 'My vehicles');
+
+        $this->client->request('GET', '/settings');
+        self::assertSelectorTextContains('[data-slot=sidebar] a[href="/"][data-active=false]', 'My vehicles');
+    }
+
     public function testItListsTheVehiclesByNameWithTheirLinks(): void
     {
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
