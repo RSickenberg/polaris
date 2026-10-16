@@ -150,6 +150,11 @@ final readonly class FleetApiClient
      * @param list<string> $secrets
      *
      * @return array<mixed>
+     *
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     private function decode(FleetApiOperation $operation, FleetRegion $region, ResponseInterface $response, array $secrets): array
     {
