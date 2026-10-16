@@ -235,7 +235,7 @@ export default class extends Controller {
             const title = formatDate(null, w.globals.seriesX[rows[0][0]][dataPointIndex]);
             const items = rows.map(
                 ([index, value]) => `<div class="apexcharts-tooltip-series-group apexcharts-active" style="order: ${index + 1}; display: flex;">` +
-                    `<span class="apexcharts-tooltip-marker" style="background-color: ${escape(w.globals.colors[index])};"></span>` +
+                    `<span class="apexcharts-tooltip-marker" style="background-color: ${escape(w.globals.colors[index])}; border-radius: 50%;"></span>` +
                     '<div class="apexcharts-tooltip-text"><div class="apexcharts-tooltip-y-group">' +
                     `<span class="apexcharts-tooltip-text-y-label">${escape(w.globals.seriesNames[index])}: </span>` +
                     `<span class="apexcharts-tooltip-text-y-value">${formatNumber(value)}</span>` +
