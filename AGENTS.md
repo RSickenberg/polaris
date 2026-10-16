@@ -304,6 +304,13 @@ are specific to Polaris and win when the two disagree.
 - Deptrac enforces these boundaries in CI (`make deptrac`). Fix the code, not
   the Deptrac rules, unless an ADR changes them.
 
+### Assertions
+
+- `\assert()` is only for narrowing a type or stating an invariant that cannot fail (for example after a
+  Carbon call PHPStan types as `static|string`). Never use it to validate input, to guard a state that can
+  happen, or for anything with a side effect: production runs with `zend.assertions = -1` (set in
+  `frankenphp/conf.d/20-app.prod.ini`), which compiles it out, while dev and tests keep it on.
+
 ### Data types
 
 - Use DTOs (readonly classes) instead of associative arrays for
