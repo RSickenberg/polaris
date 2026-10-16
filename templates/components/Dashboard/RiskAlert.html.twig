@@ -9,7 +9,7 @@
 <twig:Alert
     :variant="'over' == level ? 'destructive' : 'default'"
     data-risk="{{ level }}"
-    class="{{ {watch: 'border-amber-500/60 bg-amber-50 text-amber-900 dark:border-amber-400/40 dark:bg-amber-950/40 dark:text-amber-200', over: 'border-red-500/60 bg-red-50 text-red-900 dark:border-red-400/40 dark:bg-red-950/40 dark:text-red-200 *:data-[slot=alert-description]:text-red-900/90 dark:*:data-[slot=alert-description]:text-red-200/90'}[level] ?? '' }}"
+    class="{{ {ok: 'border-green-600/50 bg-green-50 text-green-900 dark:border-green-400/40 dark:bg-green-950/40 dark:text-green-200', watch: 'border-amber-500/60 bg-amber-50 text-amber-900 dark:border-amber-400/40 dark:bg-amber-950/40 dark:text-amber-200', over: 'border-red-500/60 bg-red-50 text-red-900 dark:border-red-400/40 dark:bg-red-950/40 dark:text-red-200 *:data-[slot=alert-description]:text-red-900/90 dark:*:data-[slot=alert-description]:text-red-200/90'}[level] ?? '' }}"
     {{ ...attributes }}
 >
     <twig:ux:icon :name="icons[level]" aria-hidden="true" />

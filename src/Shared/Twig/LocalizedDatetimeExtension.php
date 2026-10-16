@@ -14,7 +14,7 @@ use Twig\TwigFilter;
  */
 final class LocalizedDatetimeExtension extends AbstractExtension
 {
-    private const string SKELETON = 'yMMMdjmz';
+    private const string SKELETON = 'yMMMdjm';
 
     public function getFilters(): array
     {
@@ -23,11 +23,12 @@ final class LocalizedDatetimeExtension extends AbstractExtension
 
     /**
      * @param string $timeZone an IANA time zone name
+     * @param bool   $withZone false leaves the zone out, where the page already states it
      */
-    public function format(\DateTimeInterface $date, string $timeZone, ?string $locale = null): string
+    public function format(\DateTimeInterface $date, string $timeZone, ?string $locale = null, bool $withZone = true): string
     {
         $locale ??= \Locale::getDefault();
-        $pattern = new \IntlDatePatternGenerator($locale)->getBestPattern(self::SKELETON);
+        $pattern = new \IntlDatePatternGenerator($locale)->getBestPattern(self::SKELETON . ($withZone ? 'z' : ''));
         $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, $timeZone, \IntlDateFormatter::GREGORIAN, false === $pattern ? null : $pattern);
 
         return (string) $formatter->format($date->getTimestamp());

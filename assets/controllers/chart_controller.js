@@ -155,7 +155,7 @@ export default class extends Controller {
             yaxis: { labels: { formatter: number(0) } },
             tooltip: {
                 x: { formatter: date({ dateStyle: 'medium' }) },
-                y: { formatter: number(1) },
+                y: { formatter: number(0) },
             },
         };
     }

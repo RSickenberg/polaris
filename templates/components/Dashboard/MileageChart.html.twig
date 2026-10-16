@@ -38,6 +38,7 @@
         timeZone: timeZone,
         series: curves|map(curve => {name: curve.name, data: curve.data}),
         options: {
+            chart: {height: 320},
             colors: curves|map(curve => curve.color),
             stroke: {curve: 'straight', width: curves|map(curve => curve.width), dashArray: curves|map(curve => curve.dash)},
             markers: {size: curves|map(curve => curve.marker), strokeWidth: 0},
@@ -63,5 +64,5 @@
             >{{ rangeLabels[range.key.value] }}</twig:Button>
         {% endfor %}
     </div>
-    <div class="h-72 w-full" role="img" aria-label="{{ label }}" data-chart-target="canvas"></div>
+    <div class="w-full" role="img" aria-label="{{ label }}" data-chart-target="canvas"></div>
 </div>

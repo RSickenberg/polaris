@@ -105,6 +105,8 @@ final class DashboardControllerTest extends WebTestCase
         $alert = '[data-slot=alert][data-risk=' . $level . ']';
         self::assertSelectorExists($alert);
         self::assertSelectorExists($alert . ' svg[aria-hidden=true]');
+        $color = ['ok' => 'green', 'watch' => 'amber', 'over' => 'red'][$level];
+        self::assertSelectorExists($alert . '.bg-' . $color . '-50');
         self::assertSelectorTextContains($alert . ' [data-slot=alert-title]', ['ok' => 'OK', 'watch' => 'Watch', 'over' => 'Over the allowance'][$level]);
         self::assertSelectorTextContains($alert . ' [data-slot=alert-description]', 'Projected');
     }
@@ -128,8 +130,8 @@ final class DashboardControllerTest extends WebTestCase
         self::assertStringContainsString($km($assessment->budget->perWeek->metres()) . ' per week', $text);
         self::assertStringContainsString($km($assessment->budget->perMonth->metres()) . ' per month', $text);
         // The reading is dated 11:00 UTC on 2 July 2026.
-        self::assertStringContainsString('Jul 2, 2026, 11:00 AM UTC', $text);
-        self::assertStringContainsString('Time zone: UTC', $text);
+        // The zone is stated once, in the hint, not repeated in the value.
+        self::assertStringContainsString('Last reading Jul 2, 2026, 11:00 AM Time zone: UTC', $text);
         // Projected excess and its cost, in the lease currency (0.12 CHF per km).
         $excess = $assessment->projectedExcess->metres() / 1000;
         self::assertGreaterThan(0, $excess);
@@ -221,7 +223,7 @@ final class DashboardControllerTest extends WebTestCase
     private static function kilometres(int $metres): string
     {
         $formatter = new \NumberFormatter('en', \NumberFormatter::DECIMAL);
-        $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 1);
+        $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 0);
 
         return $formatter->format($metres / 1000) . ' km';
     }

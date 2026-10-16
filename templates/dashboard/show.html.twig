@@ -103,7 +103,7 @@
                 {% endif %}
                 <twig:Dashboard:KpiCard
                     label="{{ 'kpi.last_reading.label'|trans(domain='dashboard') }}"
-                    value="{{ projection.asOf|localized_datetime(timeZone) }}"
+                    value="{{ projection.asOf|localized_datetime(timeZone, withZone: false) }}"
                     hint="{{ 'kpi.last_reading.hint'|trans({'%timezone%': timeZone}, 'dashboard') }}"
                 />
             </div>
