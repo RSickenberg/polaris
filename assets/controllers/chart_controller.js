@@ -2,6 +2,8 @@ import { Controller } from '@hotwired/stimulus';
 import ApexCharts from 'apexcharts';
 
 const TOKEN = /^var\((--[\w-]+)\)$/;
+// What the tooltip shows for a series that has no value at the hovered x (a projection before its start, say).
+const NO_VALUE = '***';
 
 /**
  * Renders one ApexCharts chart from Stimulus values. It knows nothing about what the chart
@@ -194,10 +196,10 @@ export default class extends Controller {
     }
 
     _formatters() {
-        const number = (fraction) => {
+        const number = (fraction, empty) => {
             const format = new Intl.NumberFormat(this.localeValue, { maximumFractionDigits: fraction });
 
-            return (value) => (null === value || undefined === value ? '' : format.format(value));
+            return (value) => (Number.isFinite(value) ? format.format(value) : empty);
         };
         const date = (options) => {
             const format = new Intl.DateTimeFormat(this.localeValue, { timeZone: this.timeZoneValue, ...options });
@@ -212,10 +214,12 @@ export default class extends Controller {
 
         return {
             xaxis: { labels: { formatter: date({ month: 'short', year: 'numeric' }) } },
-            yaxis: { labels: { formatter: number(0) } },
+            yaxis: { labels: { formatter: number(0, '') } },
             tooltip: {
+                // A series without a value at the hovered x stays in the tooltip, as NO_VALUE.
+                hideEmptySeries: false,
                 x: { formatter: date({ dateStyle: 'medium' }) },
-                y: { formatter: number(0) },
+                y: { formatter: number(0, NO_VALUE) },
             },
         };
     }
