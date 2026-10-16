@@ -60,6 +60,6 @@ final class LocalizedDatetimeExtension extends AbstractExtension
         \assert($at instanceof CarbonImmutable);
 
         // Carbon reads what the callback returns as a format: the brackets keep the text as it is.
-        return (string) $at->calendar($now, ['sameElse' => fn (): string => '[' . $this->format($date, $timeZone, $locale, false) . ']']);
+        return $at->calendar($now, ['sameElse' => fn (): string => '[' . $this->format($date, $timeZone, $locale, false) . ']']);
     }
 }
