@@ -15,6 +15,8 @@
     projectionLabel,
     ## string The title of the distance axis, already translated.
     distanceLabel,
+    ## 'ok'|'watch'|'over' The risk level of the lease: it colors the driven and projected curves, like the alert.
+    level,
     ## list<Polaris\Dashboard\Domain\MileageRange> The zoom presets, the whole lease last.
     ranges,
     ## array<string, string> The name of each zoom preset by key, already translated.
@@ -23,12 +25,13 @@
     rangesLabel
 -%}
 {# Points are [Unix milliseconds, kilometres]: the chart_controller formats them in the browser. #}
+{% set risk = 'var(--risk-' ~ level ~ ')' %}
 {% set curves = [
-    {name: actualLabel, data: series.actual|map(point => [point.at.getTimestamp() * 1000, point.distance.metres / 1000]), color: 'var(--foreground)', width: 2.5, dash: 0, marker: 3},
+    {name: actualLabel, data: series.actual|map(point => [point.at.getTimestamp() * 1000, point.distance.metres / 1000]), color: risk, width: 2.5, dash: 0, marker: 3},
     {name: allowedLabel, data: series.allowed|map(point => [point.at.getTimestamp() * 1000, point.distance.metres / 1000]), color: 'var(--muted-foreground)', width: 2, dash: 6, marker: 0},
 ] %}
 {% if series.hasProjection %}
-    {% set curves = curves|merge([{name: projectionLabel, data: series.projection|map(point => [point.at.getTimestamp() * 1000, point.distance.metres / 1000]), color: 'var(--foreground)', width: 2, dash: 2, marker: 0}]) %}
+    {% set curves = curves|merge([{name: projectionLabel, data: series.projection|map(point => [point.at.getTimestamp() * 1000, point.distance.metres / 1000]), color: risk, width: 2, dash: 2, marker: 0}]) %}
 {% endif %}
 <div
     {{ attributes.defaults({class: 'flex flex-col gap-3'}) }}

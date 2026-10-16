@@ -130,8 +130,8 @@ final class DashboardControllerTest extends WebTestCase
         self::assertStringContainsString($km($assessment->budget->perWeek->metres()) . ' per week', $text);
         self::assertStringContainsString($km($assessment->budget->perMonth->metres()) . ' per month', $text);
         // The reading is dated 11:00 UTC on 2 July 2026.
-        // The zone is stated once, in the hint, not repeated in the value.
-        self::assertStringContainsString('Last reading Jul 2, 2026, 11:00 AM Time zone: UTC', $text);
+        // The clock is at 12:00 UTC: the day is said in words, and the zone only in the hint.
+        self::assertStringContainsString('Last reading Today at 11:00 AM Time zone: UTC', $text);
         // Projected excess and its cost, in the lease currency (0.12 CHF per km).
         $excess = $assessment->projectedExcess->metres() / 1000;
         self::assertGreaterThan(0, $excess);

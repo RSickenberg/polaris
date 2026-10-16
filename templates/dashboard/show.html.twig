@@ -70,6 +70,7 @@
                 <twig:Card:Content>
                     <twig:Dashboard:MileageChart
                         :series="dashboard.mileage"
+                        :level="assessment.riskLevel.value"
                         locale="{{ app.request.locale }}"
                         timeZone="{{ timeZone }}"
                         label="{{ 'chart.label'|trans(domain='dashboard') }}"
@@ -103,7 +104,7 @@
                 {% endif %}
                 <twig:Dashboard:KpiCard
                     label="{{ 'kpi.last_reading.label'|trans(domain='dashboard') }}"
-                    value="{{ projection.asOf|localized_datetime(timeZone, withZone: false) }}"
+                    value="{{ projection.asOf|humanized_datetime(timeZone) }}"
                     hint="{{ 'kpi.last_reading.hint'|trans({'%timezone%': timeZone}, 'dashboard') }}"
                 />
             </div>

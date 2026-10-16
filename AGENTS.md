@@ -142,7 +142,11 @@ are specific to Polaris and win when the two disagree.
   resolved from the theme tokens, it redraws when the `dark` class of `<html>` changes, formats axes
   and tooltips with Intl, and destroys the chart on disconnect and before the Turbo cache. The mileage
   curves are built by `Dashboard\Domain\MileageSeriesBuilder` (readonly DTOs, no Lease domain types)
-  from the assessment the dashboard already computed. The zoom presets (7 days, 30 days, 1 year, to the lease end,
+  from the assessment the dashboard already computed. The driven and projected curves take the risk color of the
+  alert through the `--risk-ok`, `--risk-watch` and `--risk-over` tokens of `app.css` (the Tailwind green, amber and red
+  of `LeaseProgress`, lighter in dark mode). The last reading is shown with the `humanized_datetime` Twig filter
+  ("Today at ...", "Yesterday at ...", older dates in full), whose days are those of the user's time zone and whose
+  "now" comes from the clock. The zoom presets (7 days, 30 days, 1 year, to the lease end,
   whole lease) are `Dashboard\Domain\MileageRangeBuilder`: look-back windows end now and start no earlier than the
   lease start, the forecast window only exists with a projection, and the buttons drive the controller's `zoom` action. Icons are Lucide, imported with
   `bin/console ux:icons:import lucide:<name>` into `assets/icons/` and committed, so there is
