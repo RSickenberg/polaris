@@ -94,6 +94,54 @@
         <source>home.lease</source>
         <target>Conditions du leasing</target>
       </trans-unit>
+      <trans-unit id="chart.title">
+        <source>chart.title</source>
+        <target>Kilométrage sur la durée du bail</target>
+      </trans-unit>
+      <trans-unit id="chart.label">
+        <source>chart.label</source>
+        <target>Courbe de la distance parcourue depuis le début du bail, comparée au forfait linéaire et à la projection jusqu’à la fin du bail</target>
+      </trans-unit>
+      <trans-unit id="chart.series.actual">
+        <source>chart.series.actual</source>
+        <target>Parcouru</target>
+      </trans-unit>
+      <trans-unit id="chart.series.allowed">
+        <source>chart.series.allowed</source>
+        <target>Autorisé</target>
+      </trans-unit>
+      <trans-unit id="chart.series.projection">
+        <source>chart.series.projection</source>
+        <target>Projection</target>
+      </trans-unit>
+      <trans-unit id="chart.axis.distance">
+        <source>chart.axis.distance</source>
+        <target>Distance (%unit%)</target>
+      </trans-unit>
+      <trans-unit id="chart.range.label">
+        <source>chart.range.label</source>
+        <target>Période affichée</target>
+      </trans-unit>
+      <trans-unit id="chart.range.week">
+        <source>chart.range.week</source>
+        <target>7 jours</target>
+      </trans-unit>
+      <trans-unit id="chart.range.month">
+        <source>chart.range.month</source>
+        <target>30 jours</target>
+      </trans-unit>
+      <trans-unit id="chart.range.year">
+        <source>chart.range.year</source>
+        <target>1 an</target>
+      </trans-unit>
+      <trans-unit id="chart.range.forecast">
+        <source>chart.range.forecast</source>
+        <target>Jusqu’à la fin</target>
+      </trans-unit>
+      <trans-unit id="chart.range.all">
+        <source>chart.range.all</source>
+        <target>Tout le bail</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

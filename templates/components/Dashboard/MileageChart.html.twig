@@ -1,0 +1,73 @@
+{%- props
+    ## Polaris\Dashboard\Domain\MileageSeries The curves to draw.
+    series,
+    ## string The locale of the request, for number and date formats in the browser.
+    locale,
+    ## string The IANA time zone of the user, for dates in the browser.
+    timeZone,
+    ## string The accessible name of the chart, already translated.
+    label,
+    ## string The name of the actual curve, already translated.
+    actualLabel,
+    ## string The name of the allowance line, already translated.
+    allowedLabel,
+    ## string The name of the projection line, already translated.
+    projectionLabel,
+    ## string The title of the distance axis, already translated.
+    distanceLabel,
+    ## 'ok'|'watch'|'over' The risk level of the lease: it colors the driven and projected curves, like the alert.
+    level,
+    ## list<Polaris\Dashboard\Domain\MileageRange> The zoom presets, the whole lease last.
+    ranges,
+    ## array<string, string> The name of each zoom preset by key, already translated.
+    rangeLabels,
+    ## string The accessible name of the group of zoom buttons, already translated.
+    rangesLabel
+-%}
+{# Points are [Unix milliseconds, kilometres]: the chart_controller formats them in the browser. #}
+{% set risk = 'var(--risk-' ~ level ~ ')' %}
+{# The allowance comes last, so the tooltip reads "driven, allowed" before the projection starts and "projected, allowed" after. #}
+{% set curves = [
+    {name: actualLabel, data: series.actual|map(point => [point.at.getTimestamp() * 1000, point.distance.metres / 1000]), color: risk, width: 2.5, dash: 0, marker: 3},
+] %}
+{% if series.hasProjection %}
+    {% set curves = curves|merge([{name: projectionLabel, data: series.projection|map(point => [point.at.getTimestamp() * 1000, point.distance.metres / 1000]), color: risk, width: 2, dash: 2, marker: 0}]) %}
+{% endif %}
+{% set curves = curves|merge([{name: allowedLabel, data: series.allowed|map(point => [point.at.getTimestamp() * 1000, point.distance.metres / 1000]), color: 'var(--muted-foreground)', width: 2, dash: 6, marker: 0}]) %}
+<div
+    {{ attributes.defaults({class: 'flex flex-col gap-3'}) }}
+    {{ stimulus_controller('chart', {
+        type: 'line',
+        locale: locale,
+        timeZone: timeZone,
+        align: 60,
+        series: curves|map(curve => {name: curve.name, data: curve.data}),
+        options: {
+            chart: {height: 320},
+            colors: curves|map(curve => curve.color),
+            stroke: {curve: 'straight', width: curves|map(curve => curve.width), dashArray: curves|map(curve => curve.dash)},
+            markers: {size: curves|map(curve => curve.marker), strokeWidth: 0},
+            xaxis: {type: 'datetime', tooltip: {enabled: false}},
+            yaxis: {min: 0, forceNiceScale: true, title: {text: distanceLabel}},
+            legend: {position: 'top', horizontalAlign: 'left'},
+            tooltip: {shared: true, intersect: false},
+        },
+    }) }}
+>
+    <div role="group" aria-label="{{ rangesLabel }}" class="flex flex-wrap gap-1.5">
+        {% for range in ranges %}
+            <twig:Button
+                variant="outline"
+                size="sm"
+                class="aria-pressed:border-foreground aria-pressed:bg-muted"
+                aria-pressed="{{ loop.last ? 'true' : 'false' }}"
+                data-chart-target="range"
+                data-action="chart#zoom"
+                data-chart-min-param="{{ range.from.getTimestamp() * 1000 }}"
+                data-chart-max-param="{{ range.to.getTimestamp() * 1000 }}"
+                data-range="{{ range.key.value }}"
+            >{{ rangeLabels[range.key.value] }}</twig:Button>
+        {% endfor %}
+    </div>
+    <div class="w-full" role="img" aria-label="{{ label }}" data-chart-target="canvas"></div>
+</div>

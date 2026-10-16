@@ -29,4 +29,6 @@ return [
     '@hotwired/turbo' => ['version' => '8.0.23'],
     'shadcn/dist/tailwind.css' => ['version' => '4.21.4', 'type' => 'css'],
     'tw-animate-css/dist/tw-animate.css' => ['version' => '1.4.0', 'type' => 'css'],
+    'apexcharts' => ['version' => '8.3.1'],
+    'apexcharts/core' => ['version' => '8.3.1'],
 ];

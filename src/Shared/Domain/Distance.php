@@ -37,7 +37,7 @@ final readonly class Distance
 
     public static function from(int|float $value, DistanceUnit $unit): self
     {
-        if (!is_finite((float) $value)) {
+        if (!is_finite($value)) {
             throw new \InvalidArgumentException('A distance must be a finite number.');
         }
 

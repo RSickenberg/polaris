@@ -94,6 +94,54 @@
         <source>home.lease</source>
         <target>Lease terms</target>
       </trans-unit>
+      <trans-unit id="chart.title">
+        <source>chart.title</source>
+        <target>Mileage over the lease</target>
+      </trans-unit>
+      <trans-unit id="chart.label">
+        <source>chart.label</source>
+        <target>Line chart of the distance driven since the lease start, against the linear allowance and the projection to the lease end</target>
+      </trans-unit>
+      <trans-unit id="chart.series.actual">
+        <source>chart.series.actual</source>
+        <target>Driven</target>
+      </trans-unit>
+      <trans-unit id="chart.series.allowed">
+        <source>chart.series.allowed</source>
+        <target>Allowed</target>
+      </trans-unit>
+      <trans-unit id="chart.series.projection">
+        <source>chart.series.projection</source>
+        <target>Projection</target>
+      </trans-unit>
+      <trans-unit id="chart.axis.distance">
+        <source>chart.axis.distance</source>
+        <target>Distance (%unit%)</target>
+      </trans-unit>
+      <trans-unit id="chart.range.label">
+        <source>chart.range.label</source>
+        <target>Period shown</target>
+      </trans-unit>
+      <trans-unit id="chart.range.week">
+        <source>chart.range.week</source>
+        <target>7 days</target>
+      </trans-unit>
+      <trans-unit id="chart.range.month">
+        <source>chart.range.month</source>
+        <target>30 days</target>
+      </trans-unit>
+      <trans-unit id="chart.range.year">
+        <source>chart.range.year</source>
+        <target>1 year</target>
+      </trans-unit>
+      <trans-unit id="chart.range.forecast">
+        <source>chart.range.forecast</source>
+        <target>To lease end</target>
+      </trans-unit>
+      <trans-unit id="chart.range.all">
+        <source>chart.range.all</source>
+        <target>Whole lease</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

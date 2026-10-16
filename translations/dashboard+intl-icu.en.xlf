@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="value.distance">
         <source>value.distance</source>
-        <target>{distance, number, ::.#} {unit}</target>
+        <target>{distance, number, ::precision-integer} {unit}</target>
       </trans-unit>
       <trans-unit id="progress.value_text">
         <source>progress.value_text</source>
@@ -12,47 +12,47 @@
       </trans-unit>
       <trans-unit id="kpi.allowed.hint">
         <source>kpi.allowed.hint</source>
-        <target>{sign, select, negative {{margin, number, ::.#} {unit} over} other {{margin, number, ::.#} {unit} to spare}}</target>
+        <target>{sign, select, negative {{margin, number, ::precision-integer} {unit} over} other {{margin, number, ::precision-integer} {unit} to spare}}</target>
       </trans-unit>
       <trans-unit id="kpi.projected.hint">
         <source>kpi.projected.hint</source>
-        <target>Allowance: {allowance, number, ::.#} {unit}</target>
+        <target>Allowance: {allowance, number, ::precision-integer} {unit}</target>
       </trans-unit>
       <trans-unit id="budget.per_day">
         <source>budget.per_day</source>
-        <target>{distance, number, ::.#} {unit} per day</target>
+        <target>{distance, number, ::precision-integer} {unit} per day</target>
       </trans-unit>
       <trans-unit id="budget.per_week">
         <source>budget.per_week</source>
-        <target>{distance, number, ::.#} {unit} per week</target>
+        <target>{distance, number, ::precision-integer} {unit} per week</target>
       </trans-unit>
       <trans-unit id="budget.per_month">
         <source>budget.per_month</source>
-        <target>{distance, number, ::.#} {unit} per month</target>
+        <target>{distance, number, ::precision-integer} {unit} per month</target>
       </trans-unit>
       <trans-unit id="risk.message.ok">
         <source>risk.message.ok</source>
-        <target>Projected {projected, number, ::.#} {unit} at the end of the lease, within the allowance of {allowance, number, ::.#} {unit}.</target>
+        <target>Projected {projected, number, ::precision-integer} {unit} at the end of the lease, within the allowance of {allowance, number, ::precision-integer} {unit}.</target>
       </trans-unit>
       <trans-unit id="risk.message.watch">
         <source>risk.message.watch</source>
-        <target>Projected {projected, number, ::.#} {unit} at the end of the lease, close to the allowance of {allowance, number, ::.#} {unit}.</target>
+        <target>Projected {projected, number, ::precision-integer} {unit} at the end of the lease, close to the allowance of {allowance, number, ::precision-integer} {unit}.</target>
       </trans-unit>
       <trans-unit id="risk.message.over">
         <source>risk.message.over</source>
-        <target>Projected excess of {excess, number, ::.#} {unit} at the end of the lease, about {cost}. Cut {cut, number, ::.#} {unit} per week to land on the allowance.</target>
+        <target>Projected excess of {excess, number, ::precision-integer} {unit} at the end of the lease, about {cost}. Cut {cut, number, ::precision-integer} {unit} per week to land on the allowance.</target>
       </trans-unit>
       <trans-unit id="risk.message.over_no_cut">
         <source>risk.message.over_no_cut</source>
-        <target>Projected excess of {excess, number, ::.#} {unit} at the end of the lease, about {cost}.</target>
+        <target>Projected excess of {excess, number, ::precision-integer} {unit} at the end of the lease, about {cost}.</target>
       </trans-unit>
       <trans-unit id="risk.message.ended_ok">
         <source>risk.message.ended_ok</source>
-        <target>The lease ended within the allowance of {allowance, number, ::.#} {unit}.</target>
+        <target>The lease ended within the allowance of {allowance, number, ::precision-integer} {unit}.</target>
       </trans-unit>
       <trans-unit id="risk.message.ended_over">
         <source>risk.message.ended_over</source>
-        <target>The lease ended {excess, number, ::.#} {unit} over the allowance, which costs {cost} so far.</target>
+        <target>The lease ended {excess, number, ::precision-integer} {unit} over the allowance, which costs {cost} so far.</target>
       </trans-unit>
     </body>
   </file>
