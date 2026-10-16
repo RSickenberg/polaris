@@ -63,6 +63,8 @@ final class MileageChartTest extends WebTestCase
         self::assertSame('line', $chart->attr('data-chart-type-value'));
         self::assertSame('en', $chart->attr('data-chart-locale-value'));
         self::assertSame('UTC', $chart->attr('data-chart-time-zone-value'));
+        // The curves share one x grid, so the tooltip also shows the sparse allowance and projection lines.
+        self::assertSame('60', $chart->attr('data-chart-align-value'));
 
         $series = $this->series($chart->attr('data-chart-series-value'));
         self::assertSame(['Driven', 'Allowed', 'Projection'], array_column($series, 'name'));

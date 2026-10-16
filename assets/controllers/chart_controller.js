@@ -29,6 +29,11 @@ const TOKEN = /^var\((--[\w-]+)\)$/;
  * @value type     ApexCharts chart type (`line`, `area`, ...).
  * @value series   ApexCharts series.
  * @value options  ApexCharts options, merged over the theme defaults of this controller.
+ * @value align    When above 0, every series is sampled on one shared x grid (all the x of all the series plus
+ *                 this many evenly spaced steps), interpolating linearly inside the x range of each series and
+ *                 leaving gaps outside it. ApexCharts' shared tooltip needs the same x in every series: without
+ *                 it a series with few points (a projection, a target line) is missing while hovering between them.
+ *                 The original points keep their markers, the others only show one under the cursor.
  * @value locale   BCP 47 locale for number and date formats.
  * @value timeZone IANA time zone for date formats.
  */
@@ -39,6 +44,7 @@ export default class extends Controller {
         type: { type: String, default: 'line' },
         series: { type: Array, default: [] },
         options: { type: Object, default: {} },
+        align: { type: Number, default: 0 },
         locale: { type: String, default: 'en' },
         timeZone: { type: String, default: 'UTC' },
     };
@@ -129,8 +135,62 @@ export default class extends Controller {
         };
 
         const range = this._range ? { xaxis: this._range } : {};
+        const config = this._merge(base, this._resolve(this.optionsValue, token), this._formatters(), range);
 
-        return this._merge(base, this._resolve(this.optionsValue, token), this._formatters(), range);
+        return this.alignValue > 0 ? this._aligned(config) : config;
+    }
+
+    /** Puts the series of a config on one shared x grid, see the `align` value. */
+    _aligned(config) {
+        const original = config.series;
+        const xs = new Set(original.flatMap((serie) => serie.data.map((point) => point[0])));
+        const min = Math.min(...xs);
+        const max = Math.max(...xs);
+        for (let step = 0; step <= this.alignValue; ++step) {
+            xs.add(Math.round(min + ((max - min) * step) / this.alignValue));
+        }
+
+        const grid = [...xs].sort((a, b) => a - b);
+        const index = new Map(grid.map((x, position) => [x, position]));
+        const sizes = [].concat(config.markers?.size ?? 0);
+        const discrete = [];
+
+        const series = original.map((serie, seriesIndex) => {
+            const size = sizes[seriesIndex] ?? sizes[0] ?? 0;
+            if (size > 0) {
+                const color = [].concat(config.colors ?? [])[seriesIndex];
+                for (const [x] of serie.data) {
+                    discrete.push({ seriesIndex, dataPointIndex: index.get(x), size, fillColor: color, strokeColor: color });
+                }
+            }
+
+            return { ...serie, data: grid.map((x) => [x, this._interpolate(serie.data, x)]) };
+        });
+
+        return {
+            ...config,
+            series,
+            markers: { ...config.markers, size: 0, discrete, hover: { size: 5 } },
+        };
+    }
+
+    /** The y of sorted [x, y] points at x, linear between two points, null outside their x range. */
+    _interpolate(points, x) {
+        const first = points[0];
+        const last = points[points.length - 1];
+        if (!first || x < first[0] || x > last[0]) {
+            return null;
+        }
+
+        const after = points.findIndex((point) => point[0] >= x);
+        const [x1, y1] = points[after];
+        if (x1 === x || 0 === after) {
+            return y1;
+        }
+
+        const [x0, y0] = points[after - 1];
+
+        return y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
     }
 
     _formatters() {
