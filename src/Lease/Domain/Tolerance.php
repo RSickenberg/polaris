@@ -30,7 +30,7 @@ final readonly class Tolerance
      */
     public static function fromPercent(int|float $percent): self
     {
-        if (!is_finite((float) $percent)) {
+        if (!is_finite($percent)) {
             throw new \InvalidArgumentException('A tolerance must be a finite number.');
         }
 
