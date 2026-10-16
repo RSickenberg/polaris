@@ -94,6 +94,30 @@
         <source>home.lease</source>
         <target>Lease terms</target>
       </trans-unit>
+      <trans-unit id="chart.title">
+        <source>chart.title</source>
+        <target>Mileage over the lease</target>
+      </trans-unit>
+      <trans-unit id="chart.label">
+        <source>chart.label</source>
+        <target>Line chart of the distance driven since the lease start, against the linear allowance and the projection to the lease end</target>
+      </trans-unit>
+      <trans-unit id="chart.series.actual">
+        <source>chart.series.actual</source>
+        <target>Driven</target>
+      </trans-unit>
+      <trans-unit id="chart.series.allowed">
+        <source>chart.series.allowed</source>
+        <target>Allowed</target>
+      </trans-unit>
+      <trans-unit id="chart.series.projection">
+        <source>chart.series.projection</source>
+        <target>Projection</target>
+      </trans-unit>
+      <trans-unit id="chart.axis.distance">
+        <source>chart.axis.distance</source>
+        <target>Distance (%unit%)</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

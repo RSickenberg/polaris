@@ -94,6 +94,30 @@
         <source>home.lease</source>
         <target>Conditions du leasing</target>
       </trans-unit>
+      <trans-unit id="chart.title">
+        <source>chart.title</source>
+        <target>Kilométrage sur la durée du bail</target>
+      </trans-unit>
+      <trans-unit id="chart.label">
+        <source>chart.label</source>
+        <target>Courbe de la distance parcourue depuis le début du bail, comparée au forfait linéaire et à la projection jusqu’à la fin du bail</target>
+      </trans-unit>
+      <trans-unit id="chart.series.actual">
+        <source>chart.series.actual</source>
+        <target>Parcouru</target>
+      </trans-unit>
+      <trans-unit id="chart.series.allowed">
+        <source>chart.series.allowed</source>
+        <target>Autorisé</target>
+      </trans-unit>
+      <trans-unit id="chart.series.projection">
+        <source>chart.series.projection</source>
+        <target>Projection</target>
+      </trans-unit>
+      <trans-unit id="chart.axis.distance">
+        <source>chart.axis.distance</source>
+        <target>Distance (%unit%)</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

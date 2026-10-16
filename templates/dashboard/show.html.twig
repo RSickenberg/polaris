@@ -63,6 +63,24 @@
                 </twig:Card:Content>
             </twig:Card>
 
+            <twig:Card>
+                <twig:Card:Header>
+                    <twig:Card:Title>{{ 'chart.title'|trans(domain='dashboard') }}</twig:Card:Title>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    <twig:Dashboard:MileageChart
+                        :series="dashboard.mileage"
+                        locale="{{ app.request.locale }}"
+                        timeZone="{{ timeZone }}"
+                        label="{{ 'chart.label'|trans(domain='dashboard') }}"
+                        actualLabel="{{ 'chart.series.actual'|trans(domain='dashboard') }}"
+                        allowedLabel="{{ 'chart.series.allowed'|trans(domain='dashboard') }}"
+                        projectionLabel="{{ 'chart.series.projection'|trans(domain='dashboard') }}"
+                        distanceLabel="{{ 'chart.axis.distance'|trans({'%unit%': unit}, 'dashboard') }}"
+                    />
+                </twig:Card:Content>
+            </twig:Card>
+
             <div class="grid gap-4 sm:grid-cols-2">
                 <twig:Dashboard:KpiCard
                     label="{{ 'kpi.driven'|trans(domain='dashboard') }}"

@@ -124,17 +124,25 @@ are specific to Polaris and win when the two disagree.
 - Stack in place: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine ORM and
   Migrations, Security (form login, login throttling with the Rate Limiter), Carbon, PHPUnit, Tailwind CSS 4 through symfonycasts/tailwind-bundle on
   AssetMapper (no npm for application assets), Stimulus, Turbo, TwigComponent, UX Icons
-  and the Symfony UX Toolkit Shadcn kit. Planned, not installed yet: Redis (Messenger,
-  Lock, Cache), Flowbite charts (ApexCharts) behind one reusable Stimulus controller.
-  Check `composer.json` before assuming a package is there.
+  the Symfony UX Toolkit Shadcn kit and ApexCharts 8.3.1 (importmap, pinned; Community License,
+  which does not cover embedding it in a product used by other people, so the hosted layer needs
+  an OEM license; its ESM build injects its own CSS and imports `apexcharts/core`) behind one
+  reusable Stimulus controller. Planned, not installed yet: Redis (Messenger,
+  Lock, Cache). Check `composer.json` before assuming a package is there.
 - UI: kit components are installed with `bin/console ux:install <name> --kit shadcn` into
   `templates/components/` (Stimulus controllers into `assets/controllers/`) and are then ours
   to edit, but keep edits minimal so a later `ux:install` diff stays readable; the only
   edits so far replace hardcoded English text with translation keys. `symfony/ux-toolkit`
   is a dev dependency: the installed files are committed. Polaris's own components go in
   `templates/components/<Module>/` (the shell is `Shared`; the dashboard building blocks `KpiCard`,
-  `LeaseProgress`, `BudgetBadge` and `RiskAlert` are `Dashboard`, anonymous components built on the
-  kit Card, Progress, Badge and Alert). Icons are Lucide, imported with
+  `LeaseProgress`, `BudgetBadge`, `RiskAlert` and `MileageChart` are `Dashboard`, anonymous components built on the
+  kit Card, Progress, Badge and Alert; `MileageChart` only feeds `chart_controller.js`).
+  `assets/controllers/chart_controller.js` is the one generic chart controller: chart type, series,
+  options, `locale` and `timeZone` are Stimulus values, options strings written `var(--token)` are
+  resolved from the theme tokens, it redraws when the `dark` class of `<html>` changes, formats axes
+  and tooltips with Intl, and destroys the chart on disconnect and before the Turbo cache. The mileage
+  curves are built by `Dashboard\Domain\MileageSeriesBuilder` (readonly DTOs, no Lease domain types)
+  from the assessment the dashboard already computed. Icons are Lucide, imported with
   `bin/console ux:icons:import lucide:<name>` into `assets/icons/` and committed, so there is
   no runtime call to Iconify. Dark mode is the `dark` class on `<html>`, set before the first
   paint by the inline script of `base.html.twig` and kept by `theme_controller.js`. Pages
