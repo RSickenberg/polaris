@@ -2,8 +2,6 @@ import { Controller } from '@hotwired/stimulus';
 import ApexCharts from 'apexcharts';
 
 const TOKEN = /^var\((--[\w-]+)\)$/;
-// What the tooltip shows for a series that has no value at the hovered x (a projection before its start, say).
-const NO_VALUE = '***';
 
 /**
  * Renders one ApexCharts chart from Stimulus values. It knows nothing about what the chart
@@ -196,10 +194,10 @@ export default class extends Controller {
     }
 
     _formatters() {
-        const number = (fraction, empty) => {
+        const number = (fraction) => {
             const format = new Intl.NumberFormat(this.localeValue, { maximumFractionDigits: fraction });
 
-            return (value) => (Number.isFinite(value) ? format.format(value) : empty);
+            return (value) => (Number.isFinite(value) ? format.format(value) : '');
         };
         const date = (options) => {
             const format = new Intl.DateTimeFormat(this.localeValue, { timeZone: this.timeZoneValue, ...options });
@@ -214,13 +212,37 @@ export default class extends Controller {
 
         return {
             xaxis: { labels: { formatter: date({ month: 'short', year: 'numeric' }) } },
-            yaxis: { labels: { formatter: number(0, '') } },
-            tooltip: {
-                // A series without a value at the hovered x stays in the tooltip, as NO_VALUE.
-                hideEmptySeries: false,
-                x: { formatter: date({ dateStyle: 'medium' }) },
-                y: { formatter: number(0, NO_VALUE) },
-            },
+            yaxis: { labels: { formatter: number(0) } },
+            tooltip: { custom: this._tooltip(date({ dateStyle: 'medium' }), number(0)) },
+        };
+    }
+
+    /**
+     * The shared tooltip, in the markup and classes of ApexCharts so that its theme styles apply, with a row only for the
+     * series that have a value at the hovered x (ApexCharts keeps a row, label included, for a series with a gap there).
+     */
+    _tooltip(formatDate, formatNumber) {
+        const escape = (text) => String(text).replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
+
+        return ({ series, dataPointIndex, w }) => {
+            const rows = series
+                .map((values, index) => [index, values[dataPointIndex]])
+                .filter(([, value]) => Number.isFinite(value));
+            if (0 === rows.length) {
+                return '';
+            }
+
+            const title = formatDate(null, w.globals.seriesX[rows[0][0]][dataPointIndex]);
+            const items = rows.map(
+                ([index, value]) => `<div class="apexcharts-tooltip-series-group apexcharts-active" style="order: ${index + 1}; display: flex;">` +
+                    `<span class="apexcharts-tooltip-marker" style="background-color: ${escape(w.globals.colors[index])};"></span>` +
+                    '<div class="apexcharts-tooltip-text"><div class="apexcharts-tooltip-y-group">' +
+                    `<span class="apexcharts-tooltip-text-y-label">${escape(w.globals.seriesNames[index])}: </span>` +
+                    `<span class="apexcharts-tooltip-text-y-value">${formatNumber(value)}</span>` +
+                    '</div></div></div>',
+            );
+
+            return `<div class="apexcharts-tooltip-title">${escape(title)}</div>${items.join('')}`;
         };
     }
 
