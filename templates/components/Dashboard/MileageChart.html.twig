@@ -26,13 +26,14 @@
 -%}
 {# Points are [Unix milliseconds, kilometres]: the chart_controller formats them in the browser. #}
 {% set risk = 'var(--risk-' ~ level ~ ')' %}
+{# The allowance comes last, so the tooltip reads "driven, allowed" before the projection starts and "projected, allowed" after. #}
 {% set curves = [
     {name: actualLabel, data: series.actual|map(point => [point.at.getTimestamp() * 1000, point.distance.metres / 1000]), color: risk, width: 2.5, dash: 0, marker: 3},
-    {name: allowedLabel, data: series.allowed|map(point => [point.at.getTimestamp() * 1000, point.distance.metres / 1000]), color: 'var(--muted-foreground)', width: 2, dash: 6, marker: 0},
 ] %}
 {% if series.hasProjection %}
     {% set curves = curves|merge([{name: projectionLabel, data: series.projection|map(point => [point.at.getTimestamp() * 1000, point.distance.metres / 1000]), color: risk, width: 2, dash: 2, marker: 0}]) %}
 {% endif %}
+{% set curves = curves|merge([{name: allowedLabel, data: series.allowed|map(point => [point.at.getTimestamp() * 1000, point.distance.metres / 1000]), color: 'var(--muted-foreground)', width: 2, dash: 6, marker: 0}]) %}
 <div
     {{ attributes.defaults({class: 'flex flex-col gap-3'}) }}
     {{ stimulus_controller('chart', {
