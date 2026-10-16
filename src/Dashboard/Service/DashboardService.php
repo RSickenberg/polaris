@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Polaris\Dashboard\Service;
 
+use Carbon\CarbonImmutable;
 use Polaris\Dashboard\Domain\AllowanceProgress;
 use Polaris\Dashboard\Domain\MileageForecast;
+use Polaris\Dashboard\Domain\MileageRangeBuilder;
 use Polaris\Dashboard\Domain\MileageSeriesBuilder;
 use Polaris\Lease\Domain\LeaseStatus;
 use Polaris\Lease\Domain\NoData;
@@ -13,6 +15,7 @@ use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Vehicle\Entity\Vehicle;
+use Psr\Clock\ClockInterface;
 
 /**
  * Builds the dashboard of a vehicle from its lease assessment, without recomputing it.
@@ -23,6 +26,8 @@ final readonly class DashboardService
         private LeaseTermsService $leaseTerms,
         private OdometerReadingService $readings,
         private MileageSeriesBuilder $mileageBuilder,
+        private MileageRangeBuilder $rangeBuilder,
+        private ClockInterface $clock,
     ) {
     }
 
@@ -65,6 +70,14 @@ final readonly class DashboardService
                     DashboardState::Active === $state
                         ? new MileageForecast($projection->asOf, $projection->driven, $projection->projectedAtEnd)
                         : null,
+                ),
+            DashboardState::Draft === $state
+                ? []
+                : $this->rangeBuilder->build(
+                    $contract->getTerm()->start(),
+                    $contract->getTerm()->exclusiveEnd(),
+                    CarbonImmutable::instance($this->clock->now()),
+                    DashboardState::Active === $state,
                 ),
         );
     }

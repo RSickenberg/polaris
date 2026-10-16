@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polaris\Dashboard\Service;
 
 use Polaris\Dashboard\Domain\AllowanceProgress;
+use Polaris\Dashboard\Domain\MileageRange;
 use Polaris\Dashboard\Domain\MileageSeries;
 use Polaris\Lease\Domain\LeaseAssessment;
 use Polaris\Shared\Domain\Distance;
@@ -23,6 +24,12 @@ final readonly class DashboardView
         public ?Distance $allowance = null,
         public ?AllowanceProgress $progress = null,
         public ?MileageSeries $mileage = null,
+        /**
+         * The zoom presets of the mileage chart; empty when there is no chart.
+         *
+         * @var list<MileageRange>
+         */
+        public array $mileageRanges = [],
     ) {
     }
 }

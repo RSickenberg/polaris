@@ -118,6 +118,30 @@
         <source>chart.axis.distance</source>
         <target>Distance (%unit%)</target>
       </trans-unit>
+      <trans-unit id="chart.range.label">
+        <source>chart.range.label</source>
+        <target>Period shown</target>
+      </trans-unit>
+      <trans-unit id="chart.range.week">
+        <source>chart.range.week</source>
+        <target>7 days</target>
+      </trans-unit>
+      <trans-unit id="chart.range.month">
+        <source>chart.range.month</source>
+        <target>30 days</target>
+      </trans-unit>
+      <trans-unit id="chart.range.year">
+        <source>chart.range.year</source>
+        <target>1 year</target>
+      </trans-unit>
+      <trans-unit id="chart.range.forecast">
+        <source>chart.range.forecast</source>
+        <target>To lease end</target>
+      </trans-unit>
+      <trans-unit id="chart.range.all">
+        <source>chart.range.all</source>
+        <target>Whole lease</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

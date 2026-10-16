@@ -142,7 +142,9 @@ are specific to Polaris and win when the two disagree.
   resolved from the theme tokens, it redraws when the `dark` class of `<html>` changes, formats axes
   and tooltips with Intl, and destroys the chart on disconnect and before the Turbo cache. The mileage
   curves are built by `Dashboard\Domain\MileageSeriesBuilder` (readonly DTOs, no Lease domain types)
-  from the assessment the dashboard already computed. Icons are Lucide, imported with
+  from the assessment the dashboard already computed. The zoom presets (7 days, 30 days, 1 year, to the lease end,
+  whole lease) are `Dashboard\Domain\MileageRangeBuilder`: look-back windows end now and start no earlier than the
+  lease start, the forecast window only exists with a projection, and the buttons drive the controller's `zoom` action. Icons are Lucide, imported with
   `bin/console ux:icons:import lucide:<name>` into `assets/icons/` and committed, so there is
   no runtime call to Iconify. Dark mode is the `dark` class on `<html>`, set before the first
   paint by the inline script of `base.html.twig` and kept by `theme_controller.js`. Pages

@@ -14,7 +14,13 @@
     ## string The name of the projection line, already translated.
     projectionLabel,
     ## string The title of the distance axis, already translated.
-    distanceLabel
+    distanceLabel,
+    ## list<Polaris\Dashboard\Domain\MileageRange> The zoom presets, the whole lease last.
+    ranges,
+    ## array<string, string> The name of each zoom preset by key, already translated.
+    rangeLabels,
+    ## string The accessible name of the group of zoom buttons, already translated.
+    rangesLabel
 -%}
 {# Points are [Unix milliseconds, kilometres]: the chart_controller formats them in the browser. #}
 {% set curves = [
@@ -25,7 +31,7 @@
     {% set curves = curves|merge([{name: projectionLabel, data: series.projection|map(point => [point.at.getTimestamp() * 1000, point.distance.metres / 1000]), color: 'var(--foreground)', width: 2, dash: 2, marker: 0}]) %}
 {% endif %}
 <div
-    {{ attributes.defaults({class: 'h-72 w-full', role: 'img', 'aria-label': label}) }}
+    {{ attributes.defaults({class: 'flex flex-col gap-3'}) }}
     {{ stimulus_controller('chart', {
         type: 'line',
         locale: locale,
@@ -41,4 +47,21 @@
             tooltip: {shared: true, intersect: false},
         },
     }) }}
-></div>
+>
+    <div role="group" aria-label="{{ rangesLabel }}" class="flex flex-wrap gap-1.5">
+        {% for range in ranges %}
+            <twig:Button
+                variant="outline"
+                size="sm"
+                class="aria-pressed:border-foreground aria-pressed:bg-muted"
+                aria-pressed="{{ loop.last ? 'true' : 'false' }}"
+                data-chart-target="range"
+                data-action="chart#zoom"
+                data-chart-min-param="{{ range.from.getTimestamp() * 1000 }}"
+                data-chart-max-param="{{ range.to.getTimestamp() * 1000 }}"
+                data-range="{{ range.key.value }}"
+            >{{ rangeLabels[range.key.value] }}</twig:Button>
+        {% endfor %}
+    </div>
+    <div class="h-72 w-full" role="img" aria-label="{{ label }}" data-chart-target="canvas"></div>
+</div>

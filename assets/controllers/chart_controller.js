@@ -17,7 +17,14 @@ const TOKEN = /^var\((--[\w-]+)\)$/;
  * The chart is destroyed when the element disconnects and before Turbo caches the page, so
  * a snapshot never holds chart markup and a restored page never shows two charts.
  *
- * Put `role="img"` and an `aria-label` on the element.
+ * Put `role="img"` and an `aria-label` on the `canvas` target (the element itself when there
+ * is none), which holds the chart. Buttons with `data-action="chart#zoom"`, a `min` and a `max`
+ * param (Unix milliseconds) and `data-chart-target="range"` zoom the x axis; the clicked one gets
+ * `aria-pressed="true"`.
+ *
+ * @target canvas  Where the chart is drawn; defaults to the element.
+ * @target range   A zoom button.
+ * @action zoom    Show the x window given by the `min` and `max` params of the clicked button.
  *
  * @value type     ApexCharts chart type (`line`, `area`, ...).
  * @value series   ApexCharts series.
@@ -26,6 +33,8 @@ const TOKEN = /^var\((--[\w-]+)\)$/;
  * @value timeZone IANA time zone for date formats.
  */
 export default class extends Controller {
+    static targets = ['canvas', 'range'];
+
     static values = {
         type: { type: String, default: 'line' },
         series: { type: Array, default: [] },
@@ -36,7 +45,8 @@ export default class extends Controller {
 
     connect() {
         this._dark = this._isDark();
-        this._chart = new ApexCharts(this.element, this._config());
+        this._range = null;
+        this._chart = new ApexCharts(this.hasCanvasTarget ? this.canvasTarget : this.element, this._config());
         this._rendered = this._chart.render();
 
         this._observer = new MutationObserver(() => this._onThemeChange());
@@ -51,6 +61,20 @@ export default class extends Controller {
         this._observer?.disconnect();
         this._observer = null;
         this._destroy();
+    }
+
+    zoom(event) {
+        const { min, max } = event.params;
+        if (!this._chart || !Number.isFinite(min) || !Number.isFinite(max)) {
+            return;
+        }
+
+        this._range = { min, max };
+        for (const button of this.rangeTargets) {
+            button.setAttribute('aria-pressed', String(button === event.currentTarget));
+        }
+
+        this._chart.updateOptions({ xaxis: { min, max } }, false, false);
     }
 
     _onThemeChange() {
@@ -104,7 +128,9 @@ export default class extends Controller {
             series: this.seriesValue,
         };
 
-        return this._merge(base, this._resolve(this.optionsValue, token), this._formatters());
+        const range = this._range ? { xaxis: this._range } : {};
+
+        return this._merge(base, this._resolve(this.optionsValue, token), this._formatters(), range);
     }
 
     _formatters() {

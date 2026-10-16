@@ -77,6 +77,9 @@
                         allowedLabel="{{ 'chart.series.allowed'|trans(domain='dashboard') }}"
                         projectionLabel="{{ 'chart.series.projection'|trans(domain='dashboard') }}"
                         distanceLabel="{{ 'chart.axis.distance'|trans({'%unit%': unit}, 'dashboard') }}"
+                        :ranges="dashboard.mileageRanges"
+                        :rangeLabels="{week: 'chart.range.week'|trans(domain='dashboard'), month: 'chart.range.month'|trans(domain='dashboard'), year: 'chart.range.year'|trans(domain='dashboard'), forecast: 'chart.range.forecast'|trans(domain='dashboard'), all: 'chart.range.all'|trans(domain='dashboard')}"
+                        rangesLabel="{{ 'chart.range.label'|trans(domain='dashboard') }}"
                     />
                 </twig:Card:Content>
             </twig:Card>
