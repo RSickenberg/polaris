@@ -142,7 +142,12 @@ export default class extends Controller {
         const date = (options) => {
             const format = new Intl.DateTimeFormat(this.localeValue, { timeZone: this.timeZoneValue, ...options });
 
-            return (value) => format.format(new Date(value));
+            // On a datetime axis ApexCharts passes its own formatted label first and the timestamp second.
+            return (value, timestamp) => {
+                const at = new Date(Number.isFinite(timestamp) ? timestamp : Number(value));
+
+                return Number.isNaN(at.getTime()) ? '' : format.format(at);
+            };
         };
 
         return {
