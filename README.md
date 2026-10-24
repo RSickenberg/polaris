@@ -98,7 +98,7 @@ Run the steps in order. Every command runs in the container through `make sf`.
 
    `register` sends nothing to Tesla if the check fails, and shows Tesla's error messages with a hint. The partner token is requested with the scopes `openid vehicle_device_data` (checked on a real run in `eu`); Tesla does not document the register response.
 
-   To look at what Tesla answers for your vehicles (for a bug report, for example), use `make sf ARGS="polaris:tesla:debug:fetch list"`, then `state`, `data` or `cached` followed by a VIN. It prints the answer with the VIN, ids, tokens and location removed (`--redact-names` removes the car names too). `data` is a billed live call, and an asleep car answers 408: the command never wakes it.
+   To look at what Tesla answers for your vehicles (for a bug report, for example), use `make sf ARGS="polaris:tesla:debug:fetch list"`, then `state`, `data` or `cached` followed by a VIN. It prints the whole answer; add `--redact` to remove the VIN, ids, car names, tokens and location before you paste it. `data` is a billed live call, and an asleep car answers 408: the command never wakes it.
 
 6. **Connect your Tesla account**, under Tesla app in the account menu (`/settings/tesla`), button Connect Tesla. You first give an explicit opt-in consent (what is read, how it is stored, how to disconnect), then pick one way:
 

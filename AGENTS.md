@@ -402,9 +402,9 @@ are specific to Polaris and win when the two disagree.
   globally.
 - The fetch job (Fetching module, later issue) compares a reading with the last stored one and saves it; this
   module only reads.
-- `polaris:tesla:debug:fetch list|state|data|cached [vin] [--redact-names]` prints the raw answer of one of these
-  reads with the VIN, ids, tokens, location and `drive_state` removed (car names too with `--redact-names`), to debug
-  or to report an issue. `data` is a billed live call. GET only, never `wake_up`.
+- `polaris:tesla:debug:fetch list|state|data|cached [vin] [--redact]` prints the raw answer of one of these reads, whole
+  by default; `--redact` removes the VIN, ids, car names, tokens, location and `drive_state`, to paste it in an issue
+  or to build a fixture. `data` is a billed live call. GET only, never `wake_up`.
 - Unverified (Tesla does not document them, or no real answer was seen): the live `vehicle_data` 200 body, so
   `vehicle_state.odometer` in miles and the absence of a usable live timestamp (the read time is the clock); the
   paging parameters of `/vehicles` (only the answer's `pagination` object was seen); the `endpoints` parameter;

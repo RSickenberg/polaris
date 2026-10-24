@@ -20,17 +20,16 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * Prints the raw answer of one read-only Fleet API call with the VIN, ids and location removed (and the car name with --redact-names),
- * so that it can be pasted into an issue or used as a test fixture. Only GET, only the vehicle reads
+ * Prints the raw answer of one read-only Fleet API call, whole by default. With --redact the VIN, ids, car names,
+ * tokens and location are removed, so that it can be pasted into an issue or used as a test fixture. Only GET, only the vehicle reads
  * (list, state, vehicle_data, vehicle_data_cached), no location_data, never wake_up. `data` is a billed
  * live call and answers 408 when the car is not online.
  */
-#[AsCommand(name: 'polaris:tesla:debug:fetch', description: 'Print a redacted Fleet API vehicle answer, to debug or to report an issue')]
+#[AsCommand(name: 'polaris:tesla:debug:fetch', description: 'Print the answer of a read-only Fleet API vehicle call (--redact to remove the VIN, ids and names)')]
 final readonly class DebugFetchCommand
 {
     private const array ENDPOINTS = ['list' => '', 'state' => '', 'data' => '/vehicle_data', 'cached' => '/vehicle_data_cached'];
-    private const array NAME_KEYS = ['display_name', 'vehicle_name'];
-    private const array REDACTED_KEYS = ['id', 'id_s', 'vehicle_id', 'user_id', 'vin', 'tokens', 'access_type', 'latitude', 'longitude', 'heading', 'drive_state', 'granular_access', 'vehicle_config'];
+    private const array REDACTED_KEYS = ['id', 'id_s', 'vehicle_id', 'user_id', 'vin', 'display_name', 'vehicle_name', 'tokens', 'access_type', 'latitude', 'longitude', 'heading', 'drive_state', 'granular_access', 'vehicle_config'];
 
     public function __construct(
         private TokenProvider $tokens,
@@ -49,8 +48,8 @@ final readonly class DebugFetchCommand
         ?string $vin = null,
         #[Option(description: 'The email of the owner. Optional when there is a single user')]
         ?string $email = null,
-        #[Option(description: 'Also remove the car name (display_name, vehicle_name)')]
-        bool $redactNames = false,
+        #[Option(description: 'Remove the VIN, ids, car names, tokens and location from the answer')]
+        bool $redact = false,
     ): int {
         if (!isset(self::ENDPOINTS[$what]) || ('list' !== $what && null === $vin)) {
             $io->error('Use: list | state <vin> | data <vin> | cached <vin>.');
@@ -87,25 +86,24 @@ final readonly class DebugFetchCommand
         $body = $response->getContent(false);
         $data = json_decode($body, true);
         $io->writeln(\sprintf('HTTP %d (region %s)', $response->getStatusCode(), $region->value ?? '?'));
-        $text = json_encode(\is_array($data) ? $this->redact($data, $redactNames ? [...self::REDACTED_KEYS, ...self::NAME_KEYS] : []) : $body, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
-        $io->writeln(str_replace((string) $vin, 'VIN', $text));
+        $text = json_encode($redact && \is_array($data) ? $this->redact($data) : ($data ?? $body), \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
+        $io->writeln($redact ? str_replace((string) $vin, 'VIN', $text) : $text);
 
         return Command::SUCCESS;
     }
 
     /**
      * @param array<mixed> $data
-     * @param list<string> $keys
      *
      * @return array<mixed>
      */
-    private function redact(array $data, array $keys): array
+    private function redact(array $data): array
     {
         foreach ($data as $key => $value) {
-            if (\in_array($key, $keys, true)) {
+            if (\in_array($key, self::REDACTED_KEYS, true)) {
                 $data[$key] = '<removed>';
             } elseif (\is_array($value)) {
-                $data[$key] = $this->redact($value, $keys);
+                $data[$key] = $this->redact($value);
             }
         }
 

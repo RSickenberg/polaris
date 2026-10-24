@@ -23,7 +23,7 @@ final class DebugFetchCommandTest extends KernelTestCase
     use SignsIn;
     use TeslaFixtures;
 
-    public function testTheListIsPrintedWithTheIdsAndTheVinRemoved(): void
+    public function testTheWholeAnswerIsPrintedByDefault(): void
     {
         $calls = [];
         $tester = $this->connectedTester($calls, FleetApiResponses::vehicleList());
@@ -33,21 +33,26 @@ final class DebugFetchCommandTest extends KernelTestCase
         $display = $tester->getDisplay();
         self::assertStringContainsString('HTTP 200 (region eu)', $display);
         self::assertStringContainsString('"state": "offline"', $display);
+        self::assertStringContainsString(FleetApiResponses::VIN, $display);
         self::assertStringContainsString('Lucia', $display);
-        self::assertStringNotContainsString(FleetApiResponses::VIN, $display);
-        self::assertStringNotContainsString('"id": 1', $display);
+        self::assertStringContainsString('"id": 1', $display);
         self::assertSame(['GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles'], $calls);
     }
 
-    public function testCarNamesAreRemovedOnRequest(): void
+    public function testRedactRemovesTheVinTheIdsAndTheNames(): void
     {
         $calls = [];
         $tester = $this->connectedTester($calls, FleetApiResponses::vehicleList());
 
-        $tester->execute(['what' => 'list', '--redact-names' => true]);
+        $tester->execute(['what' => 'list', '--redact' => true]);
 
-        self::assertStringNotContainsString('Lucia', $tester->getDisplay());
-        self::assertStringNotContainsString('Raven', $tester->getDisplay());
+        $display = $tester->getDisplay();
+        self::assertStringContainsString('"state": "offline"', $display);
+        self::assertStringNotContainsString(FleetApiResponses::VIN, $display);
+        self::assertStringNotContainsString(FleetApiResponses::OTHER_VIN, $display);
+        self::assertStringNotContainsString('Lucia', $display);
+        self::assertStringNotContainsString('Raven', $display);
+        self::assertStringNotContainsString('"id": 1', $display);
     }
 
     public function testAnErrorAnswerIsPrintedWithItsStatus(): void

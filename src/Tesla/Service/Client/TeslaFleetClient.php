@@ -23,6 +23,7 @@ use Psr\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpClient\Retry\GenericRetryStrategy;
 use Symfony\Component\HttpClient\RetryableHttpClient;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -45,7 +46,13 @@ final readonly class TeslaFleetClient implements VehicleClient
 {
     use SendsFleetApiRequests;
 
-    private const array RETRY_STATUS_CODES = [500, 502, 503, 504, 540];
+    private const array RETRY_STATUS_CODES = [
+        Response::HTTP_INTERNAL_SERVER_ERROR,
+        Response::HTTP_BAD_GATEWAY,
+        Response::HTTP_SERVICE_UNAVAILABLE,
+        Response::HTTP_GATEWAY_TIMEOUT,
+        FleetApiError::HTTP_DEVICE_UNEXPECTED_RESPONSE,
+    ];
     private const int MAX_RETRIES = 2;
     private const int MAX_RETRY_DELAY_MS = 4000;
 
@@ -188,7 +195,7 @@ final readonly class TeslaFleetClient implements VehicleClient
         try {
             $vin = new Vin(\is_string($item['vin'] ?? null) ? $item['vin'] : '');
         } catch (\InvalidArgumentException $invalid) {
-            throw FleetApiError::unexpected(FleetApiOperation::ListVehicles, $region, 'a vehicle has no valid VIN');
+            throw FleetApiError::unexpected(FleetApiOperation::ListVehicles, $region, $invalid->getMessage());
         }
 
         $name = $item['display_name'] ?? null;

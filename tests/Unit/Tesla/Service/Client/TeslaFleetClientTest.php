@@ -135,7 +135,7 @@ final class TeslaFleetClientTest extends TestCase
         $client = $this->client([new MockResponse('{"response":[{"vin":"nope","state":"online"}]}')]);
 
         $this->expectException(FleetApiError::class);
-        $this->expectExceptionMessage('no valid VIN');
+        $this->expectExceptionMessage('not a valid VIN');
 
         $client->listVehicles($this->app());
     }
