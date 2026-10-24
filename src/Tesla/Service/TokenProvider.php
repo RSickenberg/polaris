@@ -13,8 +13,10 @@ use Polaris\Tesla\Entity\TeslaApp;
 interface TokenProvider
 {
     /**
+     * @param bool $force refresh even when the token is not due (a manual refresh, to check the connection)
+     *
      * @throws TeslaNotConnected when there is no connection, or Tesla refused the refresh token
      * @throws FleetApiError     when Tesla could not be reached: the stored tokens are untouched
      */
-    public function accessToken(TeslaApp $app): string;
+    public function accessToken(TeslaApp $app, bool $force = false): string;
 }

@@ -6,12 +6,17 @@ namespace Polaris\Tesla\Service;
 
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
+use Polaris\Shared\Service\DecryptionFailed;
 use Polaris\Shared\Service\SecretEncrypter;
 use Polaris\Tesla\Domain\FleetRegion;
 use Polaris\Tesla\Entity\OAuthToken;
 use Polaris\Tesla\Entity\TeslaApp;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Lock\Exception\LockAcquiringException;
+use Symfony\Component\Lock\Exception\LockConflictedException;
+use Symfony\Component\Lock\Exception\LockReleasingException;
 use Symfony\Component\Lock\LockFactory;
 
 /**
@@ -39,7 +44,18 @@ final readonly class LockedTokenProvider implements TokenProvider
     ) {
     }
 
-    public function accessToken(TeslaApp $app): string
+    /**
+     * @throws TeslaNotConnected       when there is no connection, or Tesla refused the refresh token
+     * @throws FleetApiError           when Tesla could not be reached: the stored tokens are untouched
+     * @throws DecryptionFailed        when a stored token cannot be decrypted (wrong key or altered value)
+     * @throws LockAcquiringException  when the refresh lock cannot be taken
+     * @throws LockConflictedException when the refresh lock is held by someone else
+     * @throws LockReleasingException  when the refresh lock cannot be released
+     * @throws ORMException            when the stored row cannot be read again or the rotation cannot be committed
+     * @throws \Random\RandomException
+     * @throws \SodiumException
+     */
+    public function accessToken(TeslaApp $app, bool $force = false): string
     {
         $token = $this->find($app);
 
@@ -47,7 +63,7 @@ final readonly class LockedTokenProvider implements TokenProvider
             throw TeslaNotConnected::expired();
         }
 
-        if (!$token->needsRefresh($this->now(), $this->refreshMarginSeconds)) {
+        if (!$force && !$token->needsRefresh($this->now(), $this->refreshMarginSeconds)) {
             return $this->encrypter->decrypt($token->getEncryptedAccessToken());
         }
 
@@ -62,7 +78,7 @@ final readonly class LockedTokenProvider implements TokenProvider
                 throw TeslaNotConnected::expired();
             }
 
-            if (!$token->needsRefresh($this->now(), $this->refreshMarginSeconds)) {
+            if (!$force && !$token->needsRefresh($this->now(), $this->refreshMarginSeconds)) {
                 return $this->encrypter->decrypt($token->getEncryptedAccessToken());
             }
 
@@ -79,6 +95,13 @@ final readonly class LockedTokenProvider implements TokenProvider
         return $token instanceof OAuthToken ? $token : throw TeslaNotConnected::never();
     }
 
+    /**
+     * @throws TeslaNotConnected
+     * @throws FleetApiError
+     * @throws DecryptionFailed
+     * @throws \Random\RandomException
+     * @throws \SodiumException
+     */
     private function refresh(TeslaApp $app, OAuthToken $token): string
     {
         $region = FleetRegion::fromBaseUrl($token->getFleetApiBaseUrl()) ?? $this->fallbackRegion($app);

@@ -80,6 +80,19 @@ final class LockedTokenProviderTest extends KernelTestCase
         self::assertTrue($token->isConnected());
     }
 
+    public function testForceRefreshesATokenThatIsNotDue(): void
+    {
+        $app = $this->app();
+        self::createToken($app, CarbonImmutable::parse(self::NOW)->addHours(2));
+
+        $access = $this->provider([$this->tokens('new-access', 'new-refresh', 28800)])->accessToken($app, true);
+
+        self::assertSame('new-access', $access);
+        self::assertCount(1, $this->calls);
+        $this->entityManager->clear();
+        self::assertSame('new-refresh', $this->encrypter->decrypt($this->storedToken()->getEncryptedRefreshToken()));
+    }
+
     public function testTheRefreshSendsTheStoredRefreshTokenAndNoSecret(): void
     {
         $app = $this->app();
@@ -222,6 +235,9 @@ final class LockedTokenProviderTest extends KernelTestCase
         $this->provider([])->accessToken($this->app());
     }
 
+    /**
+     * PHPStan narrows the type of $calls after an earlier assertion, hence a method.
+     */
     private function callCount(): int
     {
         return \count($this->calls);
