@@ -38,6 +38,18 @@
         <source>tesla.regions.required</source>
         <target>Activez au moins une région.</target>
       </trans-unit>
+      <trans-unit id="tesla.consent.required">
+        <source>tesla.consent.required</source>
+        <target>Cochez la case pour donner votre consentement.</target>
+      </trans-unit>
+      <trans-unit id="tesla.callback_url.required">
+        <source>tesla.callback_url.required</source>
+        <target>Collez l'URL de rappel.</target>
+      </trans-unit>
+      <trans-unit id="tesla.refresh_token.required">
+        <source>tesla.refresh_token.required</source>
+        <target>Collez le jeton d'actualisation.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

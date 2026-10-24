@@ -29,6 +29,19 @@ enum FleetRegion: string
         };
     }
 
+    public static function fromBaseUrl(string $baseUrl): ?self
+    {
+        $baseUrl = rtrim($baseUrl, '/');
+
+        foreach (self::cases() as $region) {
+            if ($region->baseUrl() === $baseUrl) {
+                return $region;
+            }
+        }
+
+        return null;
+    }
+
     public function isSupported(): bool
     {
         return self::China !== $this;

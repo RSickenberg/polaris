@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Polaris\Tesla\Service;
+
+use Polaris\Tesla\Entity\TeslaApp;
+
+/**
+ * Gives the fetching code a valid Tesla access token for an app, refreshing it when it is about to
+ * expire. The only way to read an access token: callers never touch the refresh token.
+ */
+interface TokenProvider
+{
+    /**
+     * @throws TeslaNotConnected when there is no connection, or Tesla refused the refresh token
+     * @throws FleetApiError     when Tesla could not be reached: the stored tokens are untouched
+     */
+    public function accessToken(TeslaApp $app): string;
+}

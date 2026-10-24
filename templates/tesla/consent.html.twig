@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'page.consent.title'|trans(domain='tesla') }}{% endblock %}
+
+{% block main %}
+    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.consent.title'|trans(domain='tesla') }}</h1>
+
+    {{ include('shared/_flashes.html.twig') }}
+
+    <div class="mt-6 flex max-w-lg flex-col gap-6">
+        <twig:Card id="consent">
+            <twig:Card:Header>
+                <twig:Card:Title><h2>{{ 'page.consent.heading'|trans(domain='tesla') }}</h2></twig:Card:Title>
+                <twig:Card:Description>{{ 'page.consent.description'|trans(domain='tesla') }}</twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content>
+                <ul class="mb-6 list-disc space-y-2 ps-5 text-sm">
+                    <li>{{ 'page.consent.reads'|trans(domain='tesla') }}</li>
+                    <li>{{ 'page.consent.stored'|trans(domain='tesla') }}</li>
+                    <li>{{ 'page.consent.disconnect'|trans(domain='tesla') }}</li>
+                </ul>
+                {{ form(form) }}
+            </twig:Card:Content>
+        </twig:Card>
+    </div>
+{% endblock %}

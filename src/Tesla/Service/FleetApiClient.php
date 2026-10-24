@@ -6,9 +6,7 @@ namespace Polaris\Tesla\Service;
 
 use Polaris\Tesla\Domain\AppDomain;
 use Polaris\Tesla\Domain\FleetRegion;
-use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Contracts\HttpClient\ResponseInterface;
 
 /**
  * The partner calls of the Fleet API that registering an app needs: a partner token
@@ -21,7 +19,8 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
  */
 final readonly class FleetApiClient
 {
-    private const int TIMEOUT_SECONDS = 15;
+    use SendsFleetApiRequests;
+
     private const string PARTNER_SCOPE = 'openid vehicle_device_data';
 
     public function __construct(private HttpClientInterface $client)
@@ -116,71 +115,5 @@ final readonly class FleetApiClient
         }
 
         return $key;
-    }
-
-    /**
-     * @param array<string, mixed> $options
-     * @param list<string>         $secrets
-     *
-     * @return array<mixed>
-     *
-     * @throws FleetApiError
-     */
-    private function send(
-        FleetApiOperation $operation,
-        FleetRegion $region,
-        string $method,
-        string $url,
-        array $options,
-        array $secrets,
-    ): array {
-        try {
-            $response = $this->client->request($method, $url, $options + [
-                'timeout' => self::TIMEOUT_SECONDS,
-                'max_redirects' => 0,
-            ]);
-
-            return $this->decode($operation, $region, $response, $secrets);
-        } catch (ExceptionInterface $failure) {
-            throw FleetApiError::unreachable($operation, $region, $this->redact($failure->getMessage(), $secrets), $failure);
-        }
-    }
-
-    /**
-     * @param list<string> $secrets
-     *
-     * @return array<mixed>
-     *
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-     */
-    private function decode(FleetApiOperation $operation, FleetRegion $region, ResponseInterface $response, array $secrets): array
-    {
-        $status = $response->getStatusCode();
-        $body = $response->getContent(false);
-
-        if ($status < 200 || $status >= 300) {
-            throw FleetApiError::fromResponse($operation, $region, $status, $body, $secrets);
-        }
-
-        $data = json_decode($body, true);
-
-        return \is_array($data) ? $data : [];
-    }
-
-    /**
-     * @param list<string> $secrets
-     */
-    private function redact(string $text, array $secrets): string
-    {
-        foreach ($secrets as $secret) {
-            if ('' !== $secret) {
-                $text = str_replace($secret, '***', $text);
-            }
-        }
-
-        return $text;
     }
 }

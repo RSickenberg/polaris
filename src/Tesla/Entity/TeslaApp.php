@@ -58,6 +58,12 @@ class TeslaApp
     #[ORM\Column(type: Types::JSON, options: ['default' => '[]'])]
     private array $enabledRegions = [];
 
+    /**
+     * When the user gave the opt-in consent to read their Tesla data (Fleet API Agreement, clause 9.3.7).
+     */
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?CarbonImmutable $consentGivenAt = null;
+
     public function __construct(User $owner, string $publicKey, string $encryptedPrivateKey, CarbonImmutable $generatedAt)
     {
         $this->id = new Ulid();
@@ -145,6 +151,26 @@ class TeslaApp
             && null !== $this->encryptedClientSecret
             && null !== $this->domain
             && [] !== $this->enabledRegions;
+    }
+
+    public function giveConsent(CarbonImmutable $now): void
+    {
+        $this->consentGivenAt = $now->utc();
+    }
+
+    public function withdrawConsent(): void
+    {
+        $this->consentGivenAt = null;
+    }
+
+    public function getConsentGivenAt(): ?CarbonImmutable
+    {
+        return $this->consentGivenAt;
+    }
+
+    public function hasConsent(): bool
+    {
+        return null !== $this->consentGivenAt;
     }
 
     /**

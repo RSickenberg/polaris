@@ -1,0 +1,136 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Polaris\Tesla\Service;
+
+use Carbon\CarbonImmutable;
+use Doctrine\ORM\EntityManagerInterface;
+use Polaris\Shared\Service\SecretEncrypter;
+use Polaris\Tesla\Domain\FleetRegion;
+use Polaris\Tesla\Entity\OAuthToken;
+use Polaris\Tesla\Entity\TeslaApp;
+use Psr\Clock\ClockInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Lock\LockFactory;
+
+/**
+ * Refreshes the access token shortly before it expires. A Tesla refresh token is single use, so two
+ * processes must never refresh at once: the refresh runs under a lock per Tesla app, the token is read
+ * again from the database once the lock is held (another process may have refreshed meanwhile, and its
+ * answer is then reused), and the new refresh token is committed in a transaction before the new access
+ * token is handed out.
+ *
+ * Tesla refusing the refresh token marks the connection as expired and keeps the row; nothing is
+ * retried. Any other failure leaves the stored tokens as they were.
+ */
+final readonly class LockedTokenProvider implements TokenProvider
+{
+    private const float LOCK_TTL_SECONDS = 60.0;
+
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        private OAuthClient $client,
+        private SecretEncrypter $encrypter,
+        private LockFactory $lockFactory,
+        private ClockInterface $clock,
+        #[Autowire(env: 'int:POLARIS_TESLA_REFRESH_MARGIN')]
+        private int $refreshMarginSeconds,
+    ) {
+    }
+
+    public function accessToken(TeslaApp $app): string
+    {
+        $token = $this->find($app);
+
+        if (!$token->isConnected()) {
+            throw TeslaNotConnected::expired();
+        }
+
+        if (!$token->needsRefresh($this->now(), $this->refreshMarginSeconds)) {
+            return $this->encrypter->decrypt($token->getEncryptedAccessToken());
+        }
+
+        $lock = $this->lockFactory->createLock('tesla_oauth_refresh_' . $app->getId()->toBase32(), self::LOCK_TTL_SECONDS);
+        $lock->acquire(true);
+
+        try {
+            // Another process may have refreshed while this one waited for the lock.
+            $this->entityManager->refresh($token);
+
+            if (!$token->isConnected()) {
+                throw TeslaNotConnected::expired();
+            }
+
+            if (!$token->needsRefresh($this->now(), $this->refreshMarginSeconds)) {
+                return $this->encrypter->decrypt($token->getEncryptedAccessToken());
+            }
+
+            return $this->refresh($app, $token);
+        } finally {
+            $lock->release();
+        }
+    }
+
+    private function find(TeslaApp $app): OAuthToken
+    {
+        $token = $this->entityManager->getRepository(OAuthToken::class)->findOneBy(['teslaApp' => $app]);
+
+        return $token instanceof OAuthToken ? $token : throw TeslaNotConnected::never();
+    }
+
+    private function refresh(TeslaApp $app, OAuthToken $token): string
+    {
+        $region = FleetRegion::fromBaseUrl($token->getFleetApiBaseUrl()) ?? $this->fallbackRegion($app);
+
+        try {
+            $tokens = $this->client->refresh(
+                $region,
+                (string) $app->getClientId(),
+                $this->encrypter->decrypt($token->getEncryptedRefreshToken()),
+            );
+        } catch (FleetApiError $failure) {
+            if ($failure->refreshTokenRejected()) {
+                $token->markExpired();
+                $this->entityManager->flush();
+
+                throw TeslaNotConnected::expired();
+            }
+
+            throw $failure;
+        }
+
+        $now = $this->now();
+        $encryptedAccess = $this->encrypter->encrypt($tokens->accessToken);
+        $encryptedRefresh = $this->encrypter->encrypt($tokens->refreshToken);
+
+        // The previous refresh token is spent: commit the new one before anything else uses the access token.
+        $this->entityManager->wrapInTransaction(static function () use ($token, $encryptedAccess, $encryptedRefresh, $tokens, $now): void {
+            $token->rotate(
+                $encryptedAccess,
+                $encryptedRefresh,
+                $now->addSeconds($tokens->expiresIn),
+                $tokens->scopes,
+                $now,
+            );
+        });
+
+        return $tokens->accessToken;
+    }
+
+    private function fallbackRegion(TeslaApp $app): FleetRegion
+    {
+        foreach ($app->getEnabledRegions() as $region) {
+            if ($region->isSupported()) {
+                return $region;
+            }
+        }
+
+        return FleetRegion::EuropeMiddleEastAfrica;
+    }
+
+    private function now(): CarbonImmutable
+    {
+        return CarbonImmutable::instance($this->clock->now())->utc();
+    }
+}

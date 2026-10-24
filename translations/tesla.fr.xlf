@@ -106,6 +106,206 @@
         <source>error.rejected</source>
         <target>Les paramètres n’ont pas pu être enregistrés. Vérifiez les valeurs et réessayez.</target>
       </trans-unit>
+      <trans-unit id="page.consent.title">
+        <source>page.consent.title</source>
+        <target>Connecter Tesla</target>
+      </trans-unit>
+      <trans-unit id="page.consent.heading">
+        <source>page.consent.heading</source>
+        <target>Votre consentement</target>
+      </trans-unit>
+      <trans-unit id="page.consent.description">
+        <source>page.consent.description</source>
+        <target>Polaris a besoin de votre accord explicite avant de se connecter à votre compte Tesla.</target>
+      </trans-unit>
+      <trans-unit id="page.consent.reads">
+        <source>page.consent.reads</source>
+        <target>Ce qui est lu : le compteur kilométrique et les données du véhicule de votre compte Tesla (portée vehicle_device_data). Rien n'est modifié sur la voiture.</target>
+      </trans-unit>
+      <trans-unit id="page.consent.stored">
+        <source>page.consent.stored</source>
+        <target>Comment c'est conservé : les jetons d'accès et d'actualisation Tesla sont chiffrés dans la base de données de Polaris et jamais affichés.</target>
+      </trans-unit>
+      <trans-unit id="page.consent.disconnect">
+        <source>page.consent.disconnect</source>
+        <target>Comment se déconnecter : utilisez le bouton Déconnecter de la page Application Tesla, qui supprime les jetons, puis révoquez l'accès dans votre compte Tesla.</target>
+      </trans-unit>
+      <trans-unit id="form.consent.label">
+        <source>form.consent.label</source>
+        <target>J'accepte que Polaris lise mon compteur kilométrique et les données de mon véhicule depuis mon compte Tesla.</target>
+      </trans-unit>
+      <trans-unit id="form.consent.submit">
+        <source>form.consent.submit</source>
+        <target>Continuer</target>
+      </trans-unit>
+      <trans-unit id="page.connect.title">
+        <source>page.connect.title</source>
+        <target>Connecter votre compte Tesla</target>
+      </trans-unit>
+      <trans-unit id="page.authorize.title">
+        <source>page.authorize.title</source>
+        <target>Se connecter avec Tesla</target>
+      </trans-unit>
+      <trans-unit id="page.authorize.description">
+        <source>page.authorize.description</source>
+        <target>Vous êtes envoyé chez Tesla pour approuver l'accès, puis ramené dans Polaris.</target>
+      </trans-unit>
+      <trans-unit id="page.connect.redirect_uri">
+        <source>page.connect.redirect_uri</source>
+        <target>URI de redirection à autoriser dans votre application Tesla :</target>
+      </trans-unit>
+      <trans-unit id="form.authorize.submit">
+        <source>form.authorize.submit</source>
+        <target>Continuer vers Tesla</target>
+      </trans-unit>
+      <trans-unit id="page.callback.title">
+        <source>page.callback.title</source>
+        <target>Coller l'URL de rappel</target>
+      </trans-unit>
+      <trans-unit id="page.callback.description">
+        <source>page.callback.description</source>
+        <target>Si votre navigateur n'a pas pu ouvrir l'adresse de Polaris après l'approbation, copiez l'adresse complète de la barre du navigateur et collez-la ici.</target>
+      </trans-unit>
+      <trans-unit id="form.callback_url.label">
+        <source>form.callback_url.label</source>
+        <target>URL de rappel</target>
+      </trans-unit>
+      <trans-unit id="form.callback_url.help">
+        <source>form.callback_url.help</source>
+        <target>Commencez d'abord avec le bouton ci-dessus, dans cette même session de navigateur. L'adresse contient un code à usage unique, ne la partagez pas.</target>
+      </trans-unit>
+      <trans-unit id="form.callback_url.submit">
+        <source>form.callback_url.submit</source>
+        <target>Connecter avec cette URL</target>
+      </trans-unit>
+      <trans-unit id="page.token.title">
+        <source>page.token.title</source>
+        <target>Coller un jeton d'actualisation</target>
+      </trans-unit>
+      <trans-unit id="page.token.description">
+        <source>page.token.description</source>
+        <target>Utilisez un jeton d'actualisation obtenu en dehors de Polaris. Il est utilisé une fois tout de suite pour le vérifier, et Polaris conserve les nouveaux jetons renvoyés par Tesla.</target>
+      </trans-unit>
+      <trans-unit id="form.refresh_token.label">
+        <source>form.refresh_token.label</source>
+        <target>Jeton d'actualisation</target>
+      </trans-unit>
+      <trans-unit id="form.refresh_token.help">
+        <source>form.refresh_token.help</source>
+        <target>Conservé chiffré et jamais réaffiché. Le jeton collé cesse de fonctionner dès que Polaris l'a utilisé.</target>
+      </trans-unit>
+      <trans-unit id="form.refresh_token.submit">
+        <source>form.refresh_token.submit</source>
+        <target>Connecter avec ce jeton</target>
+      </trans-unit>
+      <trans-unit id="page.connection.title">
+        <source>page.connection.title</source>
+        <target>Connexion Tesla</target>
+      </trans-unit>
+      <trans-unit id="page.connection.description">
+        <source>page.connection.description</source>
+        <target>Indique si Polaris peut lire votre compteur kilométrique depuis votre compte Tesla.</target>
+      </trans-unit>
+      <trans-unit id="connection.none">
+        <source>connection.none</source>
+        <target>Non connecté.</target>
+      </trans-unit>
+      <trans-unit id="connection.connected">
+        <source>connection.connected</source>
+        <target>Connecté.</target>
+      </trans-unit>
+      <trans-unit id="connection.since">
+        <source>connection.since</source>
+        <target>Connecté depuis</target>
+      </trans-unit>
+      <trans-unit id="connection.method_label">
+        <source>connection.method_label</source>
+        <target>Connecté par</target>
+      </trans-unit>
+      <trans-unit id="connection.method.oauth">
+        <source>connection.method.oauth</source>
+        <target>Connexion Tesla</target>
+      </trans-unit>
+      <trans-unit id="connection.method.pasted_callback">
+        <source>connection.method.pasted_callback</source>
+        <target>URL de rappel collée</target>
+      </trans-unit>
+      <trans-unit id="connection.method.pasted_refresh_token">
+        <source>connection.method.pasted_refresh_token</source>
+        <target>Jeton d'actualisation collé</target>
+      </trans-unit>
+      <trans-unit id="connection.base_url">
+        <source>connection.base_url</source>
+        <target>Adresse de l'API Fleet</target>
+      </trans-unit>
+      <trans-unit id="connection.expired.title">
+        <source>connection.expired.title</source>
+        <target>La connexion a expiré</target>
+      </trans-unit>
+      <trans-unit id="connection.expired.description">
+        <source>connection.expired.description</source>
+        <target>Tesla a refusé le jeton d'actualisation conservé. Reconnectez-vous pour continuer à lire le compteur.</target>
+      </trans-unit>
+      <trans-unit id="connection.connect">
+        <source>connection.connect</source>
+        <target>Connecter Tesla</target>
+      </trans-unit>
+      <trans-unit id="connection.reconnect">
+        <source>connection.reconnect</source>
+        <target>Se reconnecter</target>
+      </trans-unit>
+      <trans-unit id="form.disconnect.submit">
+        <source>form.disconnect.submit</source>
+        <target>Déconnecter</target>
+      </trans-unit>
+      <trans-unit id="flash.connected">
+        <source>flash.connected</source>
+        <target>Tesla est connecté.</target>
+      </trans-unit>
+      <trans-unit id="flash.region_differs">
+        <source>flash.region_differs</source>
+        <target>Votre compte Tesla se trouve dans une autre région que celle activée dans les réglages de l'application. Activez cette région dans les réglages de l'application Tesla.</target>
+      </trans-unit>
+      <trans-unit id="flash.disconnected">
+        <source>flash.disconnected</source>
+        <target>Tesla est déconnecté et votre consentement est retiré. Révoquez aussi l'accès dans votre compte Tesla.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.no_app">
+        <source>error.connect.no_app</source>
+        <target>Générez d'abord la paire de clés et saisissez les identifiants de l'application Tesla.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.not_configured">
+        <source>error.connect.not_configured</source>
+        <target>Saisissez d'abord l'identifiant client, le secret client et au moins une région dans les réglages de l'application Tesla.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.no_consent">
+        <source>error.connect.no_consent</source>
+        <target>Donnez votre consentement avant de connecter Tesla.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.bad_state">
+        <source>error.connect.bad_state</source>
+        <target>La demande n'a pas pu être vérifiée : recommencez avec le bouton, dans cette même session de navigateur.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.bad_url">
+        <source>error.connect.bad_url</source>
+        <target>Ce n'est pas une URL de rappel : collez l'adresse complète, y compris la partie après le point d'interrogation.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.no_code">
+        <source>error.connect.no_code</source>
+        <target>L'adresse ne contient pas de code d'autorisation.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.denied">
+        <source>error.connect.denied</source>
+        <target>Tesla n'a pas accordé l'accès.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.token_refused">
+        <source>error.connect.token_refused</source>
+        <target>Tesla l'a refusé : le code ou le jeton est expiré, déjà utilisé ou n'appartient pas à cette application Tesla. Recommencez.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.tesla_failed">
+        <source>error.connect.tesla_failed</source>
+        <target>Tesla est injoignable ou n'a pas répondu correctement. Réessayez plus tard.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

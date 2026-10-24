@@ -24,6 +24,41 @@
                 </twig:Card:Content>
             </twig:Card>
 
+            <twig:Card id="connection">
+                <twig:Card:Header>
+                    <twig:Card:Title><h2>{{ 'page.connection.title'|trans(domain='tesla') }}</h2></twig:Card:Title>
+                    <twig:Card:Description>{{ 'page.connection.description'|trans(domain='tesla') }}</twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    {% if token is null %}
+                        <p class="text-sm" data-connection-status="none">{{ 'connection.none'|trans(domain='tesla') }}</p>
+                    {% elseif token.connected %}
+                        <p class="text-sm font-medium" data-connection-status="connected">{{ 'connection.connected'|trans(domain='tesla') }}</p>
+                        <dl class="mt-3 grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
+                            <dt class="text-muted-foreground">{{ 'connection.since'|trans(domain='tesla') }}</dt>
+                            <dd class="text-end font-medium">{{ token.connectedAt|localized_datetime(timeZone) }}</dd>
+                            <dt class="text-muted-foreground">{{ 'connection.method_label'|trans(domain='tesla') }}</dt>
+                            <dd class="text-end font-medium">{{ ('connection.method.' ~ token.method.value)|trans(domain='tesla') }}</dd>
+                            <dt class="text-muted-foreground">{{ 'connection.base_url'|trans(domain='tesla') }}</dt>
+                            <dd class="text-end font-medium break-all">{{ token.fleetApiBaseUrl }}</dd>
+                        </dl>
+                    {% else %}
+                        <twig:Alert variant="destructive" data-connection-status="expired">
+                            <twig:Alert:Title>{{ 'connection.expired.title'|trans(domain='tesla') }}</twig:Alert:Title>
+                            <twig:Alert:Description>{{ 'connection.expired.description'|trans(domain='tesla') }}</twig:Alert:Description>
+                        </twig:Alert>
+                    {% endif %}
+                    <div class="mt-4 flex flex-wrap items-center gap-3">
+                        {% if teslaApp.configured and (token is null or not token.connected) %}
+                            <twig:Button as="a" href="{{ path('tesla_connect') }}">{{ (token is null ? 'connection.connect' : 'connection.reconnect')|trans(domain='tesla') }}</twig:Button>
+                        {% endif %}
+                        {% if disconnectForm is not null %}
+                            {{ form(disconnectForm) }}
+                        {% endif %}
+                    </div>
+                </twig:Card:Content>
+            </twig:Card>
+
             <twig:Card id="status">
                 <twig:Card:Header>
                     <twig:Card:Title><h2>{{ 'page.status.title'|trans(domain='tesla') }}</h2></twig:Card:Title>

@@ -21,6 +21,7 @@ final class FleetApiError extends \RuntimeException
         public readonly FleetApiOperation $operation,
         public readonly FleetRegion $region,
         public readonly ?int $httpStatus = null,
+        public readonly ?string $oauthError = null,
         ?\Throwable $previous = null,
     ) {
         parent::__construct($message, 0, $previous);
@@ -50,6 +51,7 @@ final class FleetApiError extends \RuntimeException
             $operation,
             $region,
             $httpStatus,
+            self::oauthErrorCode($body),
         );
     }
 
@@ -64,6 +66,7 @@ final class FleetApiError extends \RuntimeException
             $operation,
             $region,
             null,
+            null,
             $previous,
         );
     }
@@ -75,6 +78,25 @@ final class FleetApiError extends \RuntimeException
             $operation,
             $region,
         );
+    }
+
+    /**
+     * Whether Tesla refused the refresh token itself (not the network, not the app): it is expired, was
+     * replaced by a newer one, or the password was reset. Tesla documents 401 login_required for it; the
+     * standard OAuth invalid_grant is accepted too.
+     */
+    public function refreshTokenRejected(): bool
+    {
+        return FleetApiOperation::Refresh === $this->operation
+            && (\in_array($this->oauthError, ['invalid_grant', 'login_required'], true) || 401 === $this->httpStatus);
+    }
+
+    private static function oauthErrorCode(string $body): ?string
+    {
+        $data = json_decode($body, true);
+        $code = \is_array($data) ? ($data['error'] ?? null) : null;
+
+        return \is_string($code) && '' !== $code ? $code : null;
     }
 
     private static function hint(int $status): string
