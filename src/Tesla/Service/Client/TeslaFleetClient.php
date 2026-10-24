@@ -40,7 +40,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  *
  * The shape of the answers is confirmed by real EU ones: the vehicle list, the vehicle state and a live
  * `vehicle_data`, whose `response.vehicle_state` carries `odometer` (a float) and `timestamp` (epoch
- * milliseconds). The odometer has no unit in the answer; it is read as miles, Tesla's convention.
+ * milliseconds). The odometer has no unit field: the API always gives miles, never kilometres.
  */
 final readonly class TeslaFleetClient implements VehicleClient
 {

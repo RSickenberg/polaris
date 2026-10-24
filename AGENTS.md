@@ -409,9 +409,9 @@ are specific to Polaris and win when the two disagree.
   seen), a live `vehicle_data` (`response.vehicle_state.odometer` as a float, `vehicle_state.timestamp` in epoch
   milliseconds, used as the read time; the clock only when it is missing) and the 408 body (`error: "vehicle
   unavailable: vehicle is offline or asleep"`).
-- Unverified (Tesla does not document them, or no real answer was seen): the unit of the odometer (the answer has
-  none; read as miles, Tesla's convention, while `gui_settings.gui_distance_units` is only the display setting);
-  the paging parameters of `/vehicles` (only the answer's `pagination` object was seen); the `endpoints`
+- The odometer of the API is always in miles, never kilometres, whatever `gui_settings.gui_distance_units` (the
+  display setting) says; the answer carries no unit field.
+- Unverified (Tesla does not document them, or no real answer was seen): the paging parameters of `/vehicles` (only the answer's `pagination` object was seen); the `endpoints`
   parameter; the `asleep` state value; that a 408 is the answer of a car that fell asleep after an `online`
   state.
 
