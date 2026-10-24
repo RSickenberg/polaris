@@ -136,10 +136,7 @@ class TeslaApp
         $this->clientId = $clientId;
         $this->encryptedClientSecret = $encryptedClientSecret;
         $this->domain = $domain->toString();
-        $this->enabledRegions = array_values(array_unique(array_map(
-            static fn (FleetRegion $region): string => $region->value,
-            $regions,
-        )));
+        $this->enabledRegions = array_values(array_unique(array_column($regions, 'value')));
     }
 
     /**
