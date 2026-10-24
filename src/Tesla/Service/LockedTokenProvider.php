@@ -63,29 +63,46 @@ final readonly class LockedTokenProvider implements TokenProvider
             throw TeslaNotConnected::expired();
         }
 
-        if (!$force && !$token->needsRefresh($this->now(), $this->refreshMarginSeconds)) {
-            return $this->encrypter->decrypt($token->getEncryptedAccessToken());
+        // Fast path: no lock, the stored token is still good.
+        if (null !== $usable = $this->usableAccessToken($token, $force)) {
+            return $usable;
         }
 
         $lock = $this->lockFactory->createLock('tesla_oauth_refresh_' . $app->getId()->toBase32(), self::LOCK_TTL_SECONDS);
         $lock->acquire(true);
 
         try {
-            // Another process may have refreshed while this one waited for the lock.
+            // The row is read again: another process may have refreshed while this one waited for the lock.
             $this->entityManager->refresh($token);
 
             if (!$token->isConnected()) {
                 throw TeslaNotConnected::expired();
             }
 
-            if (!$force && !$token->needsRefresh($this->now(), $this->refreshMarginSeconds)) {
-                return $this->encrypter->decrypt($token->getEncryptedAccessToken());
+            // Another process may have refreshed while this one waited: reuse its token.
+            if (null !== $usable = $this->usableAccessToken($token, $force)) {
+                return $usable;
             }
 
             return $this->refresh($app, $token);
         } finally {
             $lock->release();
         }
+    }
+
+    /**
+     * The stored access token when it needs no refresh (and a refresh is not forced), else null.
+     *
+     * @throws DecryptionFailed
+     * @throws \SodiumException
+     */
+    private function usableAccessToken(OAuthToken $token, bool $force): ?string
+    {
+        if ($force || $token->needsRefresh($this->now(), $this->refreshMarginSeconds)) {
+            return null;
+        }
+
+        return $this->encrypter->decrypt($token->getEncryptedAccessToken());
     }
 
     private function find(TeslaApp $app): OAuthToken

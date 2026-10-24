@@ -26,7 +26,7 @@ class OAuthToken
     private Ulid $id;
 
     #[ORM\OneToOne]
-    #[ORM\JoinColumn(nullable: false, unique: true, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(unique: true, nullable: false, onDelete: 'CASCADE')]
     private TeslaApp $teslaApp;
 
     #[ORM\Column(type: Types::TEXT)]
