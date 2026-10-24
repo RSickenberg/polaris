@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Account\EventListener;
 
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
 use Polaris\Account\Service\UserPreferredLocaleProvider;
 use Polaris\Account\Service\UserSettings;
@@ -25,6 +26,9 @@ final readonly class SaveSwitchedLocale
     ) {
     }
 
+    /**
+     * @throws ORMException
+     */
     public function __invoke(LocaleSwitched $event): void
     {
         $user = $this->security->getUser();

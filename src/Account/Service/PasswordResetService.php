@@ -6,12 +6,14 @@ namespace Polaris\Account\Service;
 
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Domain\ResetToken;
 use Polaris\Account\Entity\PasswordResetRequest;
 use Polaris\Account\Repository\PasswordResetRequestRepository;
 use Polaris\Account\Repository\UserRepository;
 use Psr\Clock\ClockInterface;
 use Psr\Log\LoggerInterface;
+use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -52,6 +54,9 @@ final readonly class PasswordResetService
 
     /**
      * Sends the link when the email belongs to a user. Returns nothing either way.
+     *
+     * @throws ORMException
+     * @throws RandomException
      */
     public function request(string $email): void
     {
@@ -112,6 +117,7 @@ final readonly class PasswordResetService
      * Sets the new password. The link, and every other one of the user, stops working.
      *
      * @throws \InvalidArgumentException when the password is too short or too long
+     * @throws ORMException
      */
     public function reset(PasswordResetRequest $request, #[\SensitiveParameter] string $newPassword): void
     {

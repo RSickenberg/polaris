@@ -16,6 +16,7 @@ use Polaris\Tesla\Service\Client\OAuthClient;
 use Polaris\Tesla\Service\Exception\FleetApiError;
 use Polaris\Tesla\Service\Exception\TeslaNotConnected;
 use Psr\Clock\ClockInterface;
+use Random\RandomException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Lock\Exception\LockAcquiringException;
 use Symfony\Component\Lock\Exception\LockConflictedException;
@@ -55,7 +56,7 @@ final readonly class LockedTokenProvider implements TokenProvider
      * @throws LockConflictedException when the refresh lock is held by someone else
      * @throws LockReleasingException  when the refresh lock cannot be released
      * @throws ORMException            when the stored row cannot be read again or the rotation cannot be committed
-     * @throws \Random\RandomException
+     * @throws RandomException
      * @throws \SodiumException
      */
     public function accessToken(TeslaApp $app, bool $force = false): string
@@ -119,8 +120,9 @@ final readonly class LockedTokenProvider implements TokenProvider
      * @throws TeslaNotConnected
      * @throws FleetApiError
      * @throws DecryptionFailed
-     * @throws \Random\RandomException
+     * @throws RandomException
      * @throws \SodiumException
+     * @throws ORMException
      */
     private function refresh(TeslaApp $app, OAuthToken $token): string
     {

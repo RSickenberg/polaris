@@ -6,6 +6,7 @@ namespace Polaris\Tesla\Service;
 
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
 use Polaris\Shared\Service\SecretEncrypter;
 use Polaris\Tesla\Domain\CallbackParameters;
@@ -23,6 +24,7 @@ use Polaris\Tesla\Service\Dto\ConnectionResult;
 use Polaris\Tesla\Service\Exception\ConnectionRejected;
 use Polaris\Tesla\Service\Exception\FleetApiError;
 use Psr\Clock\ClockInterface;
+use Random\RandomException;
 
 /**
  * Connects the Tesla account of a user: the opt-in consent (Fleet API Agreement, clause 9.3.7), then one
@@ -62,6 +64,9 @@ final readonly class TeslaConnectionService
         return $this->redirectUri->get();
     }
 
+    /**
+     * @throws ORMException
+     */
     public function giveConsent(TeslaApp $app): void
     {
         $app->giveConsent($this->now());
@@ -71,6 +76,8 @@ final readonly class TeslaConnectionService
     /**
      * Forgets the tokens and the consent. Tesla still lists the app until the user revokes it in their
      * Tesla account, which the interface says.
+     *
+     * @throws ORMException
      */
     public function disconnect(TeslaApp $app): void
     {
@@ -86,6 +93,7 @@ final readonly class TeslaConnectionService
 
     /**
      * @throws ConnectionRejected
+     * @throws RandomException
      */
     public function startAuthorization(TeslaApp $app): AuthorizationRequest
     {
@@ -101,6 +109,9 @@ final readonly class TeslaConnectionService
 
     /**
      * @throws ConnectionRejected
+     * @throws \SodiumException
+     * @throws ORMException
+     * @throws RandomException
      */
     public function completeFromCallback(TeslaApp $app, CallbackParameters $callback, ?string $expectedState): ConnectionResult
     {
@@ -112,6 +123,9 @@ final readonly class TeslaConnectionService
      * the callback.
      *
      * @throws ConnectionRejected
+     * @throws \SodiumException
+     * @throws ORMException
+     * @throws RandomException
      */
     public function completeFromPastedUrl(TeslaApp $app, #[\SensitiveParameter] string $url, ?string $expectedState): ConnectionResult
     {
@@ -129,6 +143,9 @@ final readonly class TeslaConnectionService
      * tokens Tesla returned.
      *
      * @throws ConnectionRejected
+     * @throws ORMException
+     * @throws RandomException
+     * @throws \SodiumException
      */
     public function connectWithRefreshToken(TeslaApp $app, #[\SensitiveParameter] string $refreshToken): ConnectionResult
     {
@@ -150,6 +167,12 @@ final readonly class TeslaConnectionService
         return $this->store($app, $audience, $tokens, ConnectionMethod::PastedRefreshToken);
     }
 
+    /**
+     * @throws ConnectionRejected
+     * @throws \SodiumException
+     * @throws ORMException
+     * @throws RandomException
+     */
     private function complete(TeslaApp $app, CallbackParameters $callback, ?string $expectedState, ConnectionMethod $method): ConnectionResult
     {
         $this->requireReady($app);
@@ -183,6 +206,11 @@ final readonly class TeslaConnectionService
         return $this->store($app, $audience, $tokens, $method);
     }
 
+    /**
+     * @throws ORMException
+     * @throws RandomException
+     * @throws \SodiumException
+     */
     private function store(TeslaApp $app, FleetRegion $audience, TokenSet $tokens, ConnectionMethod $method): ConnectionResult
     {
         try {

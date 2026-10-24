@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Polaris\Tesla\Command;
 
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
 use Polaris\Extension\PublicKeyHosting;
 use Polaris\Tesla\Domain\InvalidKeyPair;
 use Polaris\Tesla\Service\Exception\KeyAlreadyExists;
 use Polaris\Tesla\Service\TeslaKeyService;
 use Polaris\Tesla\Service\TeslaOwnerFinder;
+use Random\RandomException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
@@ -32,6 +34,11 @@ final readonly class KeyImportCommand
     ) {
     }
 
+    /**
+     * @throws ORMException
+     * @throws RandomException
+     * @throws \SodiumException
+     */
     public function __invoke(
         SymfonyStyle $io,
         InputInterface $input,

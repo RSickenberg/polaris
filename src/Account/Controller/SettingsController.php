@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Account\Controller;
 
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
 use Polaris\Account\Form\Model\PasswordChangeData;
 use Polaris\Account\Form\Model\ProfileData;
@@ -39,6 +40,9 @@ final class SettingsController extends AbstractController
     }
 
     #[Route('/settings', name: 'account_settings', methods: ['GET', 'POST'])]
+    /**
+     * @throws ORMException
+     */
     public function settings(Request $request, #[CurrentUser] User $user): Response
     {
         $profile = $this->forms->createNamed('profile', ProfileType::class, ProfileData::fromUser($user));

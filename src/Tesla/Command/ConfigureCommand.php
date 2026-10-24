@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Tesla\Command;
 
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
 use Polaris\Tesla\Domain\FleetRegion;
 use Polaris\Tesla\Service\Dto\TeslaAppSettingsData;
@@ -37,6 +38,8 @@ final readonly class ConfigureCommand
 
     /**
      * @param list<string> $region
+     *
+     * @throws ORMException
      */
     public function __invoke(
         SymfonyStyle $io,

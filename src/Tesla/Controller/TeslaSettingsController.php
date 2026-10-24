@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Tesla\Controller;
 
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
 use Polaris\Tesla\Form\ActionType;
 use Polaris\Tesla\Form\Model\TeslaAppSettingsFormData;
@@ -11,6 +12,7 @@ use Polaris\Tesla\Form\TeslaAppSettingsType;
 use Polaris\Tesla\Service\Exception\TeslaSettingsRejected;
 use Polaris\Tesla\Service\TeslaAppSettings;
 use Polaris\Tesla\Service\TeslaConnectionService;
+use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -38,6 +40,11 @@ final class TeslaSettingsController extends AbstractController
     }
 
     #[Route('/settings/tesla', name: 'tesla_settings', methods: ['GET', 'POST'])]
+    /**
+     * @throws RandomException
+     * @throws \SodiumException
+     * @throws ORMException
+     */
     public function __invoke(Request $request, #[CurrentUser] User $user): Response
     {
         $app = $this->settings->find($user);

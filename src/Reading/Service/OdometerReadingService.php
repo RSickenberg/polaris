@@ -7,6 +7,7 @@ namespace Polaris\Reading\Service;
 use Carbon\CarbonImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Reading\Domain\ReadingOrder;
 use Polaris\Reading\Domain\ReadingRejection;
 use Polaris\Reading\Entity\OdometerReading;
@@ -36,6 +37,7 @@ final readonly class OdometerReadingService
      *
      * @throws \InvalidArgumentException when the data has not been validated first
      * @throws ReadingRejected           when the reading is in the future, duplicates an instant or breaks the order of the readings
+     * @throws ORMException
      */
     public function recordManual(Vehicle $vehicle, OdometerReadingData $data): OdometerReading
     {

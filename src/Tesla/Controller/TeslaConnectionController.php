@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Tesla\Controller;
 
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
 use Polaris\Tesla\Domain\CallbackParameters;
 use Polaris\Tesla\Entity\TeslaApp;
@@ -18,6 +19,7 @@ use Polaris\Tesla\Service\Dto\ConnectionResult;
 use Polaris\Tesla\Service\Exception\ConnectionRejected;
 use Polaris\Tesla\Service\RedirectUriProvider;
 use Polaris\Tesla\Service\TeslaConnectionService;
+use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -46,6 +48,9 @@ final class TeslaConnectionController extends AbstractController
     }
 
     #[Route('/settings/tesla/consent', name: 'tesla_consent', methods: ['GET', 'POST'])]
+    /**
+     * @throws ORMException
+     */
     public function consent(Request $request, #[CurrentUser] User $user): Response
     {
         $app = $this->app($user);
@@ -81,6 +86,9 @@ final class TeslaConnectionController extends AbstractController
     }
 
     #[Route('/settings/tesla/connect/authorize', name: 'tesla_authorize', methods: ['POST'])]
+    /**
+     * @throws RandomException
+     */
     public function authorize(Request $request, #[CurrentUser] User $user): Response
     {
         $app = $this->app($user);
@@ -103,6 +111,11 @@ final class TeslaConnectionController extends AbstractController
     }
 
     #[Route(RedirectUriProvider::CALLBACK_PATH, name: 'tesla_callback', methods: ['GET'])]
+    /**
+     * @throws \SodiumException
+     * @throws ORMException
+     * @throws RandomException
+     */
     public function callback(Request $request, #[CurrentUser] User $user): Response
     {
         $app = $this->app($user);
@@ -125,6 +138,11 @@ final class TeslaConnectionController extends AbstractController
     }
 
     #[Route('/settings/tesla/connect/callback-url', name: 'tesla_paste_callback', methods: ['POST'])]
+    /**
+     * @throws \SodiumException
+     * @throws ORMException
+     * @throws RandomException
+     */
     public function pasteCallback(Request $request, #[CurrentUser] User $user): Response
     {
         $app = $this->app($user);
@@ -157,6 +175,11 @@ final class TeslaConnectionController extends AbstractController
     }
 
     #[Route('/settings/tesla/connect/refresh-token', name: 'tesla_paste_token', methods: ['POST'])]
+    /**
+     * @throws ORMException
+     * @throws RandomException
+     * @throws \SodiumException
+     */
     public function pasteRefreshToken(Request $request, #[CurrentUser] User $user): Response
     {
         $app = $this->app($user);
@@ -184,6 +207,9 @@ final class TeslaConnectionController extends AbstractController
     }
 
     #[Route('/settings/tesla/disconnect', name: 'tesla_disconnect', methods: ['POST'])]
+    /**
+     * @throws ORMException
+     */
     public function disconnect(Request $request, #[CurrentUser] User $user): Response
     {
         $app = $this->app($user);

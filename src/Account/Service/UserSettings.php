@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polaris\Account\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
 use Polaris\Account\Repository\PasswordResetRequestRepository;
 use Polaris\Account\Repository\UserRepository;
@@ -35,6 +36,7 @@ final readonly class UserSettings
     /**
      * @throws UserSettingsRejected      when another user already has the email
      * @throws \InvalidArgumentException when the email, the locale or the time zone is not valid
+     * @throws ORMException
      */
     public function updateProfile(User $user, string $email, string $locale, string $timeZone): void
     {
@@ -54,6 +56,7 @@ final readonly class UserSettings
 
     /**
      * @throws \InvalidArgumentException when the locale is not one of the enabled ones
+     * @throws ORMException
      */
     public function changeLocale(User $user, string $locale): void
     {
@@ -65,6 +68,7 @@ final readonly class UserSettings
 
     /**
      * @throws \InvalidArgumentException when the password is too short or too long
+     * @throws ORMException
      */
     public function changePassword(User $user, #[\SensitiveParameter] string $plainPassword): void
     {

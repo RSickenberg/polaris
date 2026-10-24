@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polaris\Account\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 use Polaris\Account\Entity\User;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
@@ -30,6 +31,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $this->findOneBy(['email' => mb_strtolower(trim($identifier))]);
     }
 
+    /**
+     * @throws ORMException
+     */
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, #[\SensitiveParameter] string $newHashedPassword): void
     {
         if (!$user instanceof User) {

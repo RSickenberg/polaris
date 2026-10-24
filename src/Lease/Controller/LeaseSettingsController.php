@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Lease\Controller;
 
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Lease\Form\LeaseContractType;
 use Polaris\Lease\Form\Model\LeaseContractData;
 use Polaris\Lease\Service\Exception\LeaseTermsRejected;
@@ -30,6 +31,9 @@ final class LeaseSettingsController extends AbstractController
     // Not found rather than forbidden: another user's vehicle must not even be known to exist.
     #[IsGranted(VehiclePermission::Manage->value, 'vehicle', statusCode: Response::HTTP_NOT_FOUND)]
     #[Route('/vehicles/{id}/lease', name: 'lease_settings', methods: ['GET', 'POST'])]
+    /**
+     * @throws ORMException
+     */
     public function settings(Request $request, #[MapEntity(id: 'id')] Vehicle $vehicle): Response
     {
         $contract = $this->leaseTerms->find($vehicle);

@@ -332,6 +332,13 @@ are specific to Polaris and win when the two disagree.
 - Deptrac enforces these boundaries in CI (`make deptrac`). Fix the code, not
   the Deptrac rules, unless an ADR changes them.
 
+### Exceptions
+
+- PHPStan checks `@throws`: a method that lets `\Random\RandomException`, `\SodiumException`, `\JsonException`, a Doctrine
+  `ORMException` or `NonUniqueResultException`, or a `symfony/lock` exception through must list it (see
+  `exceptions.checkedExceptionClasses` in `phpstan.dist.neon`). Controllers, commands and tests are entry points and
+  are exempt. A caller of a documented method documents it too, unless it catches it.
+
 ### Assertions
 
 - `\assert()` is only for narrowing a type or stating an invariant that cannot fail (for example after a

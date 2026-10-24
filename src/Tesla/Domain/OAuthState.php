@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Polaris\Tesla\Domain;
 
+use Random\RandomException;
+
 /**
  * The random `state` of an authorization request. It is kept in the session and compared when the
  * user comes back, so a callback that Polaris did not start is refused.
@@ -17,7 +19,7 @@ final class OAuthState
     }
 
     /**
-     * @throws \Random\RandomException
+     * @throws RandomException
      */
     public static function generate(): string
     {

@@ -6,6 +6,7 @@ namespace Polaris\Account\Service;
 
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
 use Polaris\Account\Service\Dto\NewUser;
 use Polaris\Account\Service\Exception\UserCreationRejected;
@@ -41,6 +42,7 @@ readonly class UserCreator
      *
      * @throws UserCreationRejected      when the sign-up policy refuses the user
      * @throws \InvalidArgumentException when the email or the password is not valid
+     * @throws ORMException
      */
     public function create(NewUser $newUser): User
     {

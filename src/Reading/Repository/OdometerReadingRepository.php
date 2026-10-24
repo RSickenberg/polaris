@@ -6,6 +6,7 @@ namespace Polaris\Reading\Repository;
 
 use Carbon\CarbonImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Vehicle\Entity\Vehicle;
@@ -27,6 +28,8 @@ class OdometerReadingRepository extends ServiceEntityRepository
 
     /**
      * The latest reading strictly before the instant.
+     *
+     * @throws NonUniqueResultException
      */
     public function findBefore(Vehicle $vehicle, CarbonImmutable $readAt): ?OdometerReading
     {
@@ -45,6 +48,8 @@ class OdometerReadingRepository extends ServiceEntityRepository
 
     /**
      * The earliest reading strictly after the instant.
+     *
+     * @throws NonUniqueResultException
      */
     public function findAfter(Vehicle $vehicle, CarbonImmutable $readAt): ?OdometerReading
     {

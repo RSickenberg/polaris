@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polaris\Shared\Service;
 
 use Polaris\Shared\Service\Exception\DecryptionFailed;
+use Random\RandomException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
@@ -39,7 +40,7 @@ final readonly class SecretEncrypter
     }
 
     /**
-     * @throws \Random\RandomException
+     * @throws RandomException
      * @throws \SodiumException
      */
     public function encrypt(#[\SensitiveParameter] string $plaintext): string
