@@ -6,10 +6,10 @@ namespace Polaris\Tesla\Command;
 
 use Polaris\Account\Entity\User;
 use Polaris\Tesla\Domain\FleetRegion;
+use Polaris\Tesla\Service\Dto\TeslaAppSettingsData;
+use Polaris\Tesla\Service\Exception\TeslaSettingsRejected;
 use Polaris\Tesla\Service\TeslaAppSettings;
-use Polaris\Tesla\Service\TeslaAppSettingsData;
 use Polaris\Tesla\Service\TeslaOwnerFinder;
-use Polaris\Tesla\Service\TeslaSettingsRejected;
 use Random\RandomException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;

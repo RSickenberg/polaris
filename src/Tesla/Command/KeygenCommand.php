@@ -6,7 +6,7 @@ namespace Polaris\Tesla\Command;
 
 use Polaris\Account\Entity\User;
 use Polaris\Extension\PublicKeyHosting;
-use Polaris\Tesla\Service\KeyAlreadyExists;
+use Polaris\Tesla\Service\Exception\KeyAlreadyExists;
 use Polaris\Tesla\Service\TeslaKeyService;
 use Polaris\Tesla\Service\TeslaOwnerFinder;
 use Symfony\Component\Console\Attribute\AsCommand;

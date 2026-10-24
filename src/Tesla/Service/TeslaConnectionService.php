@@ -17,6 +17,11 @@ use Polaris\Tesla\Domain\OAuthState;
 use Polaris\Tesla\Domain\TokenSet;
 use Polaris\Tesla\Entity\OAuthToken;
 use Polaris\Tesla\Entity\TeslaApp;
+use Polaris\Tesla\Service\Client\OAuthClient;
+use Polaris\Tesla\Service\Dto\AuthorizationRequest;
+use Polaris\Tesla\Service\Dto\ConnectionResult;
+use Polaris\Tesla\Service\Exception\ConnectionRejected;
+use Polaris\Tesla\Service\Exception\FleetApiError;
 use Psr\Clock\ClockInterface;
 
 /**

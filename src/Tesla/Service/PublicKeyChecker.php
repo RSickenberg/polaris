@@ -7,6 +7,7 @@ namespace Polaris\Tesla\Service;
 use Polaris\Extension\PublicKeyHosting;
 use Polaris\Tesla\Domain\PemComparer;
 use Polaris\Tesla\Entity\TeslaApp;
+use Polaris\Tesla\Service\Dto\PublicKeyCheckResult;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 

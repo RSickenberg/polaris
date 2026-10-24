@@ -8,6 +8,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Polaris\Account\Entity\User;
 use Polaris\Account\Repository\PasswordResetRequestRepository;
 use Polaris\Account\Repository\UserRepository;
+use Polaris\Account\Service\Dto\NewUser;
+use Polaris\Account\Service\Exception\UserSettingsRejected;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 

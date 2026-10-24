@@ -8,7 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use Polaris\Account\Entity\PasswordResetRequest;
 use Polaris\Account\Entity\User;
-use Polaris\Account\Service\NewUser;
+use Polaris\Account\Service\Dto\NewUser;
 use Polaris\Account\Service\UserCreator;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;

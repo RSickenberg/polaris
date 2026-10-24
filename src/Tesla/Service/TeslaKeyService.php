@@ -14,6 +14,7 @@ use Polaris\Tesla\Domain\KeyPair;
 use Polaris\Tesla\Domain\KeyPairGenerator;
 use Polaris\Tesla\Domain\KeyPairImporter;
 use Polaris\Tesla\Entity\TeslaApp;
+use Polaris\Tesla\Service\Exception\KeyAlreadyExists;
 use Psr\Clock\ClockInterface;
 
 /**

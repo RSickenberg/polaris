@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Polaris\Tesla\Service;
 
-use Polaris\Shared\Service\DecryptionFailed;
+use Polaris\Shared\Service\Exception\DecryptionFailed;
 use Polaris\Shared\Service\SecretEncrypter;
 use Polaris\Tesla\Domain\PublicKeyFormat;
 use Polaris\Tesla\Entity\TeslaApp;
+use Polaris\Tesla\Service\Client\FleetApiClient;
+use Polaris\Tesla\Service\Dto\RegionRegistrationResult;
+use Polaris\Tesla\Service\Dto\RegistrationReport;
+use Polaris\Tesla\Service\Enum\RegistrationStatus;
+use Polaris\Tesla\Service\Exception\FleetApiError;
 
 /**
  * Registers the app with the Fleet API, once per enabled region (ADR 0004). Tesla must be able to

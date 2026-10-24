@@ -12,7 +12,7 @@ use Polaris\Lease\Domain\RiskLevel;
 use Polaris\Lease\Entity\LeaseContract;
 use Polaris\Lease\Form\Model\LeaseContractData;
 use Polaris\Lease\Repository\LeaseContractRepository;
-use Polaris\Lease\Service\LeaseTermsRejected;
+use Polaris\Lease\Service\Exception\LeaseTermsRejected;
 use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Currency;

@@ -12,6 +12,7 @@ use Polaris\Reading\Domain\ReadingRejection;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Reading\Form\Model\OdometerReadingData;
 use Polaris\Reading\Repository\OdometerReadingRepository;
+use Polaris\Reading\Service\Exception\ReadingRejected;
 use Polaris\Shared\Domain\Distance;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;

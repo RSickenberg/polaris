@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Shared\Service;
 
+use Polaris\Shared\Service\Exception\DecryptionFailed;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**

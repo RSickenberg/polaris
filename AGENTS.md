@@ -322,6 +322,9 @@ are specific to Polaris and win when the two disagree.
 - A module uses another module only through its `Service/` classes, its entities,
   its `Domain/` types, or Messenger messages and events. Never through its
   controllers, forms, repositories or handlers. Nothing depends on `Dashboard`.
+- `Service/` keeps the services and their interfaces at the top level; the value types sit in subfolders named
+  after their kind: `Exception/`, `Dto/` (data and result objects), `Enum/`, and `Client/` for HTTP clients. The
+  folders are part of the public `Api` layer, so other modules may use them like any `Service/` class.
 - Templates go in `templates/<module>/`, component templates in
   `templates/components/<Module>/`.
 - MakerBundle needs absolute class names, for example

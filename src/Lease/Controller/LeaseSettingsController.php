@@ -6,10 +6,10 @@ namespace Polaris\Lease\Controller;
 
 use Polaris\Lease\Form\LeaseContractType;
 use Polaris\Lease\Form\Model\LeaseContractData;
-use Polaris\Lease\Service\LeaseTermsRejected;
+use Polaris\Lease\Service\Exception\LeaseTermsRejected;
 use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Vehicle\Entity\Vehicle;
-use Polaris\Vehicle\Service\VehiclePermission;
+use Polaris\Vehicle\Service\Enum\VehiclePermission;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;

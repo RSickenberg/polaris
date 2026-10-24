@@ -11,9 +11,9 @@ use Polaris\Account\Entity\User;
 use Polaris\Shared\Service\SecretEncrypter;
 use Polaris\Tesla\Domain\FleetRegion;
 use Polaris\Tesla\Entity\TeslaApp;
+use Polaris\Tesla\Service\Dto\TeslaAppSettingsData;
+use Polaris\Tesla\Service\Exception\TeslaSettingsRejected;
 use Polaris\Tesla\Service\TeslaAppSettings;
-use Polaris\Tesla\Service\TeslaAppSettingsData;
-use Polaris\Tesla\Service\TeslaSettingsRejected;
 use Polaris\Tests\Support\SignsIn;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 

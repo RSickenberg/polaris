@@ -6,8 +6,8 @@ namespace Polaris\Tests\Functional\Extension;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use Polaris\Account\Repository\UserRepository;
-use Polaris\Account\Service\NewUser;
-use Polaris\Account\Service\UserCreationRejected;
+use Polaris\Account\Service\Dto\NewUser;
+use Polaris\Account\Service\Exception\UserCreationRejected;
 use Polaris\Account\Service\UserCreator;
 use Polaris\Extension\SignUpPolicy;
 use Polaris\Extension\SingleUserSignUpPolicy;

@@ -10,6 +10,8 @@ use Polaris\Shared\Service\SecretEncrypter;
 use Polaris\Tesla\Domain\AppDomain;
 use Polaris\Tesla\Domain\InvalidAppDomain;
 use Polaris\Tesla\Entity\TeslaApp;
+use Polaris\Tesla\Service\Dto\TeslaAppSettingsData;
+use Polaris\Tesla\Service\Exception\TeslaSettingsRejected;
 
 /**
  * Stores the credentials of the user's Tesla app. The client secret is encrypted before it reaches

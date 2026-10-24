@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Polaris\Tesla\Command;
 
 use Polaris\Account\Entity\User;
-use Polaris\Tesla\Service\FleetApiError;
+use Polaris\Tesla\Service\Exception\FleetApiError;
+use Polaris\Tesla\Service\Exception\TeslaNotConnected;
 use Polaris\Tesla\Service\TeslaAppSettings;
 use Polaris\Tesla\Service\TeslaConnectionService;
-use Polaris\Tesla\Service\TeslaNotConnected;
 use Polaris\Tesla\Service\TeslaOwnerFinder;
 use Polaris\Tesla\Service\TokenProvider;
 use Symfony\Component\Console\Attribute\AsCommand;

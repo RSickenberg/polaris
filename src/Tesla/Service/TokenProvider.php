@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Polaris\Tesla\Service;
 
 use Polaris\Tesla\Entity\TeslaApp;
+use Polaris\Tesla\Service\Exception\FleetApiError;
+use Polaris\Tesla\Service\Exception\TeslaNotConnected;
 
 /**
  * Gives the fetching code a valid Tesla access token for an app, refreshing it when it is about to

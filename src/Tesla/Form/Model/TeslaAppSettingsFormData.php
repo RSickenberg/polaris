@@ -8,7 +8,7 @@ use Polaris\Tesla\Domain\AppDomain;
 use Polaris\Tesla\Domain\FleetRegion;
 use Polaris\Tesla\Domain\InvalidAppDomain;
 use Polaris\Tesla\Entity\TeslaApp;
-use Polaris\Tesla\Service\TeslaAppSettingsData;
+use Polaris\Tesla\Service\Dto\TeslaAppSettingsData;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 

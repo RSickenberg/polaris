@@ -7,6 +7,8 @@ namespace Polaris\Account\Service;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Polaris\Account\Entity\User;
+use Polaris\Account\Service\Dto\NewUser;
+use Polaris\Account\Service\Exception\UserCreationRejected;
 use Polaris\Extension\SignUpPolicy;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
