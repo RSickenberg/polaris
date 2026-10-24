@@ -98,6 +98,14 @@ Run the steps in order. Every command runs in the container through `make sf`.
 
    `register` sends nothing to Tesla if the check fails, and shows Tesla's error messages with a hint. The partner token is requested with the scopes `openid vehicle_device_data` (checked on a real run in `eu`); Tesla does not document the register response.
 
+6. **Connect your Tesla account**, under Tesla app in the account menu (`/settings/tesla`), button Connect Tesla. You first give an explicit opt-in consent (what is read, how it is stored, how to disconnect), then pick one way:
+
+   - **Sign in with Tesla.** Polaris sends you to Tesla with the scopes `openid offline_access vehicle_device_data` and takes you back to `/tesla/callback`. Add that address to the allowed redirect URIs of your Tesla app. It is `DEFAULT_URI` followed by `/tesla/callback` (the default port is dropped), or the value of `POLARIS_TESLA_REDIRECT_URI` in `.env.local` when set; the connect page shows the exact value, which is sent unchanged to Tesla.
+   - **Paste the callback URL**, when your browser cannot open the Polaris address (a LAN or `.local` host): start with the button above, then copy the full address from the browser bar after approving and paste it on the same page. It goes through the same state check and code exchange.
+   - **Paste a refresh token** obtained outside Polaris. Polaris uses it once right away (Tesla refresh tokens are single use), checks it works and stores only the new tokens.
+
+   Tokens are stored encrypted. Polaris refreshes the access token `POLARIS_TESLA_REFRESH_MARGIN` seconds (600 by default) before it expires, under a lock (`LOCK_DSN`, Redis in Docker Compose), and keeps the new refresh token before using the access token. If Tesla refuses the refresh token (expired after 3 months, replaced, or your Tesla password was reset), the connection is shown as expired on `/settings/tesla` and you connect again. Disconnect there deletes the tokens and withdraws your consent; also revoke the access in your Tesla account.
+
 ## Use it
 
 - **Odometer readings.** Stored in metres and UTC whatever unit you type. Add one on `/vehicles/{id}/readings` (which lists the history) or from the console:
