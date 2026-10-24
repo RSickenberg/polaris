@@ -302,6 +302,7 @@ are specific to Polaris and win when the two disagree.
   lock per app (`LOCK_DSN`, Redis in Compose), reads the row again once the lock is held, and commits the new refresh
   token in a transaction before returning the access token. A refresh token Tesla refuses (`login_required`,
   `invalid_grant`, any 401) marks the row `Expired` and throws `TeslaNotConnected`; an outage leaves the row alone.
+  `polaris:tesla:token:refresh [--force]` runs it by hand (it prints only the new expiry, never a token).
 - Unverified (Tesla does not document them): the shape of the `users/region` answer (`response.region`,
   `response.fleet_api_base_url`), what happens when the account region differs from the audience, and whether
   `http://localhost:8000/tesla/callback` completes the flow end to end.

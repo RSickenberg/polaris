@@ -101,10 +101,24 @@ Run the steps in order. Every command runs in the container through `make sf`.
 6. **Connect your Tesla account**, under Tesla app in the account menu (`/settings/tesla`), button Connect Tesla. You first give an explicit opt-in consent (what is read, how it is stored, how to disconnect), then pick one way:
 
    - **Sign in with Tesla.** Polaris sends you to Tesla with the scopes `openid offline_access vehicle_device_data` and takes you back to `/tesla/callback`. Add that address to the allowed redirect URIs of your Tesla app. It is `DEFAULT_URI` followed by `/tesla/callback` (the default port is dropped), or the value of `POLARIS_TESLA_REDIRECT_URI` in `.env.local` when set; the connect page shows the exact value, which is sent unchanged to Tesla.
+
+     The Tesla developer portal refuses `https://localhost` and any `http` address on port 80, so for a local install register `http://localhost:8000/tesla/callback` and serve the HTTP port of Docker Compose on 8000. Compose reads `.env`, not `.env.local`, so pass the port on the command line (the Caddy server answers it with a redirect to `https://localhost`, which keeps the code and the state):
+
+     ```bash
+     HTTP_PORT=8000 make up
+     ```
+
+     and set `POLARIS_TESLA_REDIRECT_URI=http://localhost:8000/tesla/callback` in `.env.local`. A real domain with `https` needs none of this.
    - **Paste the callback URL**, when your browser cannot open the Polaris address (a LAN or `.local` host): start with the button above, then copy the full address from the browser bar after approving and paste it on the same page. It goes through the same state check and code exchange.
    - **Paste a refresh token** obtained outside Polaris. Polaris uses it once right away (Tesla refresh tokens are single use), checks it works and stores only the new tokens.
 
    Tokens are stored encrypted. Polaris refreshes the access token `POLARIS_TESLA_REFRESH_MARGIN` seconds (600 by default) before it expires, under a lock (`LOCK_DSN`, Redis in Docker Compose), and keeps the new refresh token before using the access token. If Tesla refuses the refresh token (expired after 3 months, replaced, or your Tesla password was reset), the connection is shown as expired on `/settings/tesla` and you connect again. Disconnect there deletes the tokens and withdraws your consent; also revoke the access in your Tesla account.
+
+   To check the connection by hand, refresh the tokens from the console. It never prints a token, only the new expiry. Without `--force` it sends nothing to Tesla unless the token is within the refresh margin; a refresh token is single use, so do not force it needlessly:
+
+   ```bash
+   make sf ARGS="polaris:tesla:token:refresh --force"
+   ```
 
 ## Use it
 
