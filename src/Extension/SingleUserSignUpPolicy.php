@@ -6,8 +6,8 @@ namespace Polaris\Extension;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Polaris\Account\Entity\User;
-use Polaris\Account\Service\NewUser;
-use Polaris\Account\Service\UserCreationRejected;
+use Polaris\Account\Service\Dto\NewUser;
+use Polaris\Account\Service\Exception\UserCreationRejected;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 
 /**

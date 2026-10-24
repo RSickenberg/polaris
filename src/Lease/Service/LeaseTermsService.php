@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Polaris\Lease\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Lease\Domain\LeaseAssessment;
 use Polaris\Lease\Domain\LeaseAssessor;
 use Polaris\Lease\Domain\NoData;
 use Polaris\Lease\Entity\LeaseContract;
 use Polaris\Lease\Form\Model\LeaseContractData;
 use Polaris\Lease\Repository\LeaseContractRepository;
+use Polaris\Lease\Service\Dto\LeaseTerms;
+use Polaris\Lease\Service\Exception\LeaseTermsRejected;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Shared\Domain\OdometerSample;
@@ -48,6 +51,7 @@ final readonly class LeaseTermsService
      *
      * @throws \InvalidArgumentException when the data has not been validated first
      * @throws LeaseTermsRejected        when the terms do not fit the recorded readings; nothing is saved
+     * @throws ORMException
      */
     public function save(Vehicle $vehicle, LeaseContractData $data): LeaseAssessment|NoData
     {

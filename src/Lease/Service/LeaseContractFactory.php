@@ -10,6 +10,7 @@ use Polaris\Lease\Domain\LeaseTerm;
 use Polaris\Lease\Domain\Tolerance;
 use Polaris\Lease\Entity\LeaseContract;
 use Polaris\Lease\Form\Model\LeaseContractData;
+use Polaris\Lease\Service\Dto\LeaseTerms;
 use Polaris\Shared\Domain\Distance;
 use Polaris\Shared\Domain\Money;
 use Polaris\Vehicle\Entity\Vehicle;

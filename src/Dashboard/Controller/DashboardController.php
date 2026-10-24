@@ -7,7 +7,7 @@ namespace Polaris\Dashboard\Controller;
 use Polaris\Account\Entity\User;
 use Polaris\Dashboard\Service\DashboardService;
 use Polaris\Vehicle\Entity\Vehicle;
-use Polaris\Vehicle\Service\VehiclePermission;
+use Polaris\Vehicle\Service\Enum\VehiclePermission;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;

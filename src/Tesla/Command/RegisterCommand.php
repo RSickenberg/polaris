@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Polaris\Tesla\Command;
 
 use Polaris\Account\Entity\User;
+use Polaris\Tesla\Service\Enum\RegistrationStatus;
 use Polaris\Tesla\Service\PartnerRegistrationService;
-use Polaris\Tesla\Service\RegistrationStatus;
 use Polaris\Tesla\Service\TeslaAppSettings;
 use Polaris\Tesla\Service\TeslaOwnerFinder;
 use Symfony\Component\Console\Attribute\AsCommand;

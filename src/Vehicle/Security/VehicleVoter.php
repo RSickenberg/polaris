@@ -6,7 +6,7 @@ namespace Polaris\Vehicle\Security;
 
 use Polaris\Account\Entity\User;
 use Polaris\Vehicle\Entity\Vehicle;
-use Polaris\Vehicle\Service\VehiclePermission;
+use Polaris\Vehicle\Service\Enum\VehiclePermission;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;

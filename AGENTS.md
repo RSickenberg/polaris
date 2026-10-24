@@ -282,6 +282,31 @@ are specific to Polaris and win when the two disagree.
 - Tests never reach the network: they use `MockHttpClient`, and functional tests swap it in with
   `getContainer()->set('http_client', $client)` (public alias `test.polaris.http_client` in `when@test`).
 
+### Tesla connection and tokens (Tesla module)
+
+- `Tesla\Entity\OAuthToken` (one per `TeslaApp`) holds the access and refresh tokens as `SecretEncrypter` ciphertext
+  (left out of `__serialize`), `expiresAt` (UTC, from `expires_in` and the clock), the granted scopes, a
+  `ConnectionStatus` (`Connected`, `Expired`), the `ConnectionMethod` and the user's Fleet API base URL.
+  `TeslaApp::$consentGivenAt` records the opt-in consent (Fleet API Agreement clause 9.3.7); every way to connect
+  is refused without it (`ConnectionRejected::NO_CONSENT`), and the pages redirect to `/settings/tesla/consent`.
+- `Tesla\Service\OAuthClient` does the authorize URL, the code exchange (needs `audience` and the client secret), the
+  refresh (only `client_id` and `refresh_token`) and `GET /api/1/users/region`. PKCE is not documented by Tesla and not
+  used. It shares `SendsFleetApiRequests` (redaction of secrets, no redirects) with `FleetApiClient`. No call is
+  retried: a refresh token is single use.
+- `Tesla\Service\TeslaConnectionService` is the only way to connect (redirect callback, pasted callback URL, pasted
+  refresh token) and to disconnect. The `state` is kept in the session by `TeslaConnectionController` and checked in
+  the service. The redirect URI comes from `RedirectUriProvider` (`POLARIS_TESLA_REDIRECT_URI`, else `DEFAULT_URI` +
+  `/tesla/callback`) and is sent unchanged to `/authorize` and `/token`.
+- Anything that needs a Tesla access token calls `Tesla\Service\TokenProvider::accessToken()`
+  (`LockedTokenProvider`): it refreshes `POLARIS_TESLA_REFRESH_MARGIN` seconds before expiry under a `symfony/lock`
+  lock per app (`LOCK_DSN`, Redis in Compose), reads the row again once the lock is held, and commits the new refresh
+  token in a transaction before returning the access token. A refresh token Tesla refuses (`login_required`,
+  `invalid_grant`, any 401) marks the row `Expired` and throws `TeslaNotConnected`; an outage leaves the row alone.
+  `polaris:tesla:token:refresh [--force]` runs it by hand (it prints only the new expiry, never a token).
+- Unverified (Tesla does not document them): the shape of the `users/region` answer (`response.region`,
+  `response.fleet_api_base_url`), what happens when the account region differs from the audience, and whether
+  `http://localhost:8000/tesla/callback` completes the flow end to end.
+
 ### Code organization (ADR 0001)
 
 - `src/` is organized by feature module, as namespaces (no bundles): `Shared`,
@@ -297,12 +322,22 @@ are specific to Polaris and win when the two disagree.
 - A module uses another module only through its `Service/` classes, its entities,
   its `Domain/` types, or Messenger messages and events. Never through its
   controllers, forms, repositories or handlers. Nothing depends on `Dashboard`.
+- `Service/` keeps the services and their interfaces at the top level; the value types sit in subfolders named
+  after their kind: `Exception/`, `Dto/` (data and result objects), `Enum/`, and `Client/` for HTTP clients. The
+  folders are part of the public `Api` layer, so other modules may use them like any `Service/` class.
 - Templates go in `templates/<module>/`, component templates in
   `templates/components/<Module>/`.
 - MakerBundle needs absolute class names, for example
   `bin/console make:entity '\Polaris\Lease\Entity\LeaseContract' --no-interaction`.
 - Deptrac enforces these boundaries in CI (`make deptrac`). Fix the code, not
   the Deptrac rules, unless an ADR changes them.
+
+### Exceptions
+
+- PHPStan checks `@throws`: a method that lets `\Random\RandomException`, `\SodiumException`, `\JsonException`, a Doctrine
+  `ORMException` or `NonUniqueResultException`, or a `symfony/lock` exception through must list it (see
+  `exceptions.checkedExceptionClasses` in `phpstan.dist.neon`). Controllers, commands and tests are entry points and
+  are exempt. A caller of a documented method documents it too, unless it catches it.
 
 ### Assertions
 

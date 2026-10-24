@@ -106,6 +106,206 @@
         <source>error.rejected</source>
         <target>The settings could not be saved. Check the values and try again.</target>
       </trans-unit>
+      <trans-unit id="page.consent.title">
+        <source>page.consent.title</source>
+        <target>Connect Tesla</target>
+      </trans-unit>
+      <trans-unit id="page.consent.heading">
+        <source>page.consent.heading</source>
+        <target>Your consent</target>
+      </trans-unit>
+      <trans-unit id="page.consent.description">
+        <source>page.consent.description</source>
+        <target>Polaris needs your explicit permission before it connects to your Tesla account.</target>
+      </trans-unit>
+      <trans-unit id="page.consent.reads">
+        <source>page.consent.reads</source>
+        <target>What is read: the odometer and the vehicle data of your Tesla account (scope vehicle_device_data). Nothing is changed on the car.</target>
+      </trans-unit>
+      <trans-unit id="page.consent.stored">
+        <source>page.consent.stored</source>
+        <target>How it is stored: the Tesla access and refresh tokens are encrypted in the Polaris database and never shown.</target>
+      </trans-unit>
+      <trans-unit id="page.consent.disconnect">
+        <source>page.consent.disconnect</source>
+        <target>How to disconnect: use the Disconnect button on the Tesla app page, which deletes the tokens, then revoke the access in your Tesla account.</target>
+      </trans-unit>
+      <trans-unit id="form.consent.label">
+        <source>form.consent.label</source>
+        <target>I agree that Polaris reads my odometer and vehicle data from my Tesla account.</target>
+      </trans-unit>
+      <trans-unit id="form.consent.submit">
+        <source>form.consent.submit</source>
+        <target>Continue</target>
+      </trans-unit>
+      <trans-unit id="page.connect.title">
+        <source>page.connect.title</source>
+        <target>Connect your Tesla account</target>
+      </trans-unit>
+      <trans-unit id="page.authorize.title">
+        <source>page.authorize.title</source>
+        <target>Sign in with Tesla</target>
+      </trans-unit>
+      <trans-unit id="page.authorize.description">
+        <source>page.authorize.description</source>
+        <target>You are sent to Tesla to approve the access, then back to Polaris.</target>
+      </trans-unit>
+      <trans-unit id="page.connect.redirect_uri">
+        <source>page.connect.redirect_uri</source>
+        <target>Redirect URI to allow in your Tesla app:</target>
+      </trans-unit>
+      <trans-unit id="form.authorize.submit">
+        <source>form.authorize.submit</source>
+        <target>Continue to Tesla</target>
+      </trans-unit>
+      <trans-unit id="page.callback.title">
+        <source>page.callback.title</source>
+        <target>Paste the callback URL</target>
+      </trans-unit>
+      <trans-unit id="page.callback.description">
+        <source>page.callback.description</source>
+        <target>If your browser could not open the Polaris address after approving, copy the full address from the browser bar and paste it here.</target>
+      </trans-unit>
+      <trans-unit id="form.callback_url.label">
+        <source>form.callback_url.label</source>
+        <target>Callback URL</target>
+      </trans-unit>
+      <trans-unit id="form.callback_url.help">
+        <source>form.callback_url.help</source>
+        <target>Start with the button above first, in this same browser session. The address contains a one-time code, so do not share it.</target>
+      </trans-unit>
+      <trans-unit id="form.callback_url.submit">
+        <source>form.callback_url.submit</source>
+        <target>Connect with this URL</target>
+      </trans-unit>
+      <trans-unit id="page.token.title">
+        <source>page.token.title</source>
+        <target>Paste a refresh token</target>
+      </trans-unit>
+      <trans-unit id="page.token.description">
+        <source>page.token.description</source>
+        <target>Use a refresh token obtained outside Polaris. It is used once right away to check it, and Polaris stores the new tokens Tesla returns.</target>
+      </trans-unit>
+      <trans-unit id="form.refresh_token.label">
+        <source>form.refresh_token.label</source>
+        <target>Refresh token</target>
+      </trans-unit>
+      <trans-unit id="form.refresh_token.help">
+        <source>form.refresh_token.help</source>
+        <target>Stored encrypted and never shown again. The token you paste stops working once Polaris has used it.</target>
+      </trans-unit>
+      <trans-unit id="form.refresh_token.submit">
+        <source>form.refresh_token.submit</source>
+        <target>Connect with this token</target>
+      </trans-unit>
+      <trans-unit id="page.connection.title">
+        <source>page.connection.title</source>
+        <target>Tesla connection</target>
+      </trans-unit>
+      <trans-unit id="page.connection.description">
+        <source>page.connection.description</source>
+        <target>Whether Polaris can read your odometer from your Tesla account.</target>
+      </trans-unit>
+      <trans-unit id="connection.none">
+        <source>connection.none</source>
+        <target>Not connected.</target>
+      </trans-unit>
+      <trans-unit id="connection.connected">
+        <source>connection.connected</source>
+        <target>Connected.</target>
+      </trans-unit>
+      <trans-unit id="connection.since">
+        <source>connection.since</source>
+        <target>Connected since</target>
+      </trans-unit>
+      <trans-unit id="connection.method_label">
+        <source>connection.method_label</source>
+        <target>Connected with</target>
+      </trans-unit>
+      <trans-unit id="connection.method.oauth">
+        <source>connection.method.oauth</source>
+        <target>Tesla sign-in</target>
+      </trans-unit>
+      <trans-unit id="connection.method.pasted_callback">
+        <source>connection.method.pasted_callback</source>
+        <target>Pasted callback URL</target>
+      </trans-unit>
+      <trans-unit id="connection.method.pasted_refresh_token">
+        <source>connection.method.pasted_refresh_token</source>
+        <target>Pasted refresh token</target>
+      </trans-unit>
+      <trans-unit id="connection.base_url">
+        <source>connection.base_url</source>
+        <target>Fleet API address</target>
+      </trans-unit>
+      <trans-unit id="connection.expired.title">
+        <source>connection.expired.title</source>
+        <target>The connection has expired</target>
+      </trans-unit>
+      <trans-unit id="connection.expired.description">
+        <source>connection.expired.description</source>
+        <target>Tesla refused the stored refresh token. Connect again to keep reading the odometer.</target>
+      </trans-unit>
+      <trans-unit id="connection.connect">
+        <source>connection.connect</source>
+        <target>Connect Tesla</target>
+      </trans-unit>
+      <trans-unit id="connection.reconnect">
+        <source>connection.reconnect</source>
+        <target>Connect again</target>
+      </trans-unit>
+      <trans-unit id="form.disconnect.submit">
+        <source>form.disconnect.submit</source>
+        <target>Disconnect</target>
+      </trans-unit>
+      <trans-unit id="flash.connected">
+        <source>flash.connected</source>
+        <target>Tesla is connected.</target>
+      </trans-unit>
+      <trans-unit id="flash.region_differs">
+        <source>flash.region_differs</source>
+        <target>Your Tesla account is in another region than the one enabled in the app settings. Enable that region in the Tesla app settings.</target>
+      </trans-unit>
+      <trans-unit id="flash.disconnected">
+        <source>flash.disconnected</source>
+        <target>Tesla is disconnected and your consent is withdrawn. Also revoke the access in your Tesla account.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.no_app">
+        <source>error.connect.no_app</source>
+        <target>Generate the key pair and enter the Tesla app credentials first.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.not_configured">
+        <source>error.connect.not_configured</source>
+        <target>Enter the client ID, the client secret and at least one region in the Tesla app settings first.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.no_consent">
+        <source>error.connect.no_consent</source>
+        <target>Give your consent before connecting Tesla.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.bad_state">
+        <source>error.connect.bad_state</source>
+        <target>The request could not be checked: start again with the button, in this same browser session.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.bad_url">
+        <source>error.connect.bad_url</source>
+        <target>This is not a callback URL: paste the full address, including the part after the question mark.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.no_code">
+        <source>error.connect.no_code</source>
+        <target>The address has no authorization code.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.denied">
+        <source>error.connect.denied</source>
+        <target>Tesla did not grant the access.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.token_refused">
+        <source>error.connect.token_refused</source>
+        <target>Tesla refused it: the code or token is expired, already used, or does not belong to this Tesla app. Start again.</target>
+      </trans-unit>
+      <trans-unit id="error.connect.tesla_failed">
+        <source>error.connect.tesla_failed</source>
+        <target>Tesla could not be reached or failed to answer. Try again later.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -15,6 +15,7 @@ services:
       SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
       DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}
       REDIS_URL: redis://redis:6379
+      LOCK_DSN: redis://redis:6379
     volumes:
       - caddy_data:/data
       - caddy_config:/config
@@ -48,6 +49,7 @@ services:
     environment:
       DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}
       REDIS_URL: redis://redis:6379
+      LOCK_DSN: redis://redis:6379
     # The image healthcheck probes the FrankenPHP server, which the worker does not run.
     healthcheck:
       disable: true

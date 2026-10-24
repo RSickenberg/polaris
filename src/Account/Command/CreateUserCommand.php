@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Polaris\Account\Command;
 
-use Polaris\Account\Service\NewUser;
-use Polaris\Account\Service\UserCreationRejected;
+use Doctrine\ORM\Exception\ORMException;
+use Polaris\Account\Service\Dto\NewUser;
+use Polaris\Account\Service\Exception\UserCreationRejected;
 use Polaris\Account\Service\UserCreator;
 use Polaris\Shared\Domain\TimeZone;
 use Symfony\Component\Console\Attribute\Argument;
@@ -29,6 +30,9 @@ final readonly class CreateUserCommand
     {
     }
 
+    /**
+     * @throws ORMException
+     */
     public function __invoke(
         SymfonyStyle $io,
         InputInterface $input,

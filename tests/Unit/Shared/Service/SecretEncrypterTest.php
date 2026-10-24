@@ -6,7 +6,7 @@ namespace Polaris\Tests\Unit\Shared\Service;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Polaris\Shared\Service\DecryptionFailed;
+use Polaris\Shared\Service\Exception\DecryptionFailed;
 use Polaris\Shared\Service\SecretEncrypter;
 
 #[CoversClass(SecretEncrypter::class)]

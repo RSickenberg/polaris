@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'page.connect.title'|trans(domain='tesla') }}{% endblock %}
+
+{% block main %}
+    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.connect.title'|trans(domain='tesla') }}</h1>
+
+    <div class="max-w-3xl">{{ include('shared/_flashes.html.twig') }}</div>
+
+    <div class="mt-6 flex max-w-3xl flex-col gap-6">
+        <twig:Card id="authorize">
+            <twig:Card:Header>
+                <twig:Card:Title><h2>{{ 'page.authorize.title'|trans(domain='tesla') }}</h2></twig:Card:Title>
+                <twig:Card:Description>{{ 'page.authorize.description'|trans(domain='tesla') }}</twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content>
+                <p class="mb-4 text-sm text-muted-foreground">
+                    {{ 'page.connect.redirect_uri'|trans(domain='tesla') }}
+                    <span class="font-medium break-all text-foreground" id="redirect-uri">{{ redirectUri }}</span>
+                </p>
+                {{ form(authorizeForm, {attr: {'data-turbo': 'false'}}) }}
+            </twig:Card:Content>
+        </twig:Card>
+
+        <twig:Card id="paste-callback">
+            <twig:Card:Header>
+                <twig:Card:Title><h2>{{ 'page.callback.title'|trans(domain='tesla') }}</h2></twig:Card:Title>
+                <twig:Card:Description>{{ 'page.callback.description'|trans(domain='tesla') }}</twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content>
+                {{ form(pasteCallbackForm) }}
+            </twig:Card:Content>
+        </twig:Card>
+
+        <twig:Card id="paste-token">
+            <twig:Card:Header>
+                <twig:Card:Title><h2>{{ 'page.token.title'|trans(domain='tesla') }}</h2></twig:Card:Title>
+                <twig:Card:Description>{{ 'page.token.description'|trans(domain='tesla') }}</twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content>
+                {{ form(pasteTokenForm) }}
+            </twig:Card:Content>
+        </twig:Card>
+    </div>
+{% endblock %}

@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 namespace Polaris\Tesla\Command;
 
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
 use Polaris\Tesla\Domain\FleetRegion;
+use Polaris\Tesla\Service\Dto\TeslaAppSettingsData;
+use Polaris\Tesla\Service\Exception\TeslaSettingsRejected;
 use Polaris\Tesla\Service\TeslaAppSettings;
-use Polaris\Tesla\Service\TeslaAppSettingsData;
 use Polaris\Tesla\Service\TeslaOwnerFinder;
-use Polaris\Tesla\Service\TeslaSettingsRejected;
+use Random\RandomException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\StreamableInputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -22,7 +25,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * Stores the credentials of the Tesla app. Like the password of polaris:user:create, the client
  * secret is never an argument or an option (shell history, process list): it is asked with a hidden
  * prompt, or read from the standard input when the command is not interactive. Options left out keep
- * the stored value.
+ * the stored value. The client ID, domain and regions are asked on a terminal when their option is missing.
  */
 #[AsCommand(name: 'polaris:tesla:configure', description: 'Store the client ID, client secret, domain and regions of the Tesla app')]
 final readonly class ConfigureCommand
@@ -35,6 +38,8 @@ final readonly class ConfigureCommand
 
     /**
      * @param list<string> $region
+     *
+     * @throws ORMException
      */
     public function __invoke(
         SymfonyStyle $io,
@@ -64,6 +69,12 @@ final readonly class ConfigureCommand
             return Command::FAILURE;
         }
 
+        $terminal = $this->isTerminal($input);
+
+        if ([] === $region && $terminal) {
+            $region = $this->askRegions($io, $app->getEnabledRegions());
+        }
+
         $regions = [];
         foreach ($region as $code) {
             $parsed = $code
@@ -80,6 +91,14 @@ final readonly class ConfigureCommand
             $regions[] = $parsed;
         }
 
+        if (null === $clientId && $terminal) {
+            $clientId = $this->askClientId($io, $app->getClientId());
+        }
+
+        if (null === $domain && $terminal) {
+            $domain = $this->askDomain($io, $app->getDomain()?->toString());
+        }
+
         $secret = $this->readSecret($io, $input, null !== $app->getEncryptedClientSecret());
 
         try {
@@ -93,6 +112,14 @@ final readonly class ConfigureCommand
             $io->error($rejected->getMessage());
 
             return Command::FAILURE;
+        } catch (RandomException $e) {
+            $io->error('Random error: ' . $e->getMessage());
+
+            return Command::FAILURE;
+        } catch (\SodiumException $e) {
+            $io->outlineError('Sodium error: ' . $e->getMessage());
+
+            return Command::FAILURE;
         }
 
         $io->success('Stored the Tesla app settings. The client secret is encrypted and never shown.');
@@ -103,6 +130,63 @@ final readonly class ConfigureCommand
         );
 
         return Command::SUCCESS;
+    }
+
+    private function askClientId(SymfonyStyle $io, ?string $stored): ?string
+    {
+        $answer = $io->ask(
+            null === $stored ? 'Client ID' : 'Client ID (empty keeps the stored one)',
+            $stored,
+        );
+
+        return \is_string($answer) && '' !== trim($answer) ? trim($answer) : null;
+    }
+
+    private function askDomain(SymfonyStyle $io, ?string $stored): ?string
+    {
+        $answer = $io->ask(
+            null === $stored ? 'Domain that hosts the public key' : 'Domain that hosts the public key (empty keeps the stored one)',
+            $stored,
+        );
+
+        return \is_string($answer) && '' !== trim($answer) ? trim($answer) : null;
+    }
+
+    /**
+     * @param list<FleetRegion> $stored
+     *
+     * @return list<string>
+     */
+    private function askRegions(SymfonyStyle $io, array $stored): array
+    {
+        $choices = [];
+        foreach (FleetRegion::cases() as $case) {
+            if ($case->isSupported()) {
+                $choices[] = $case->value;
+            }
+        }
+
+        $question = new ChoiceQuestion(
+            'Regions to enable (comma separated, empty keeps the stored ones)',
+            $choices,
+            [] === $stored ? null : implode(',', array_map(static fn (FleetRegion $region): string => $region->value, $stored)),
+        );
+        $question->setMultiselect(true);
+
+        $answer = $io->askQuestion($question);
+
+        if (!\is_array($answer)) {
+            return [];
+        }
+
+        return array_values(array_filter($answer, \is_string(...)));
+    }
+
+    private function isTerminal(InputInterface $input): bool
+    {
+        $stream = ($input instanceof StreamableInputInterface ? $input->getStream() : null) ?? \STDIN;
+
+        return $input->isInteractive() && stream_isatty($stream);
     }
 
     private function readSecret(SymfonyStyle $io, InputInterface $input, bool $hasStoredSecret): ?string

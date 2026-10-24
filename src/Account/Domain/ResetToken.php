@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Polaris\Account\Domain;
 
+use Random\RandomException;
+
 /**
  * The secret of a password reset link: a selector, which finds the request in the database, and a
  * verifier, of which only a hash is stored, so a database leak gives no usable link. The link
@@ -21,6 +23,9 @@ final readonly class ResetToken
     ) {
     }
 
+    /**
+     * @throws RandomException
+     */
     public static function generate(): self
     {
         return new self(

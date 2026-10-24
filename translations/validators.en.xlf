@@ -38,6 +38,18 @@
         <source>tesla.regions.required</source>
         <target>Enable at least one region.</target>
       </trans-unit>
+      <trans-unit id="tesla.consent.required">
+        <source>tesla.consent.required</source>
+        <target>Tick the box to give your consent.</target>
+      </trans-unit>
+      <trans-unit id="tesla.callback_url.required">
+        <source>tesla.callback_url.required</source>
+        <target>Paste the callback URL.</target>
+      </trans-unit>
+      <trans-unit id="tesla.refresh_token.required">
+        <source>tesla.refresh_token.required</source>
+        <target>Paste the refresh token.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

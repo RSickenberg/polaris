@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Polaris\Extension;
 
-use Polaris\Account\Service\NewUser;
-use Polaris\Account\Service\UserCreationRejected;
+use Polaris\Account\Service\Dto\NewUser;
+use Polaris\Account\Service\Exception\UserCreationRejected;
 
 /**
  * Decides whether a user may be created.

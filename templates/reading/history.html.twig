@@ -5,10 +5,10 @@
 {% block main %}
     <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.history.title'|trans({'%vehicle%': vehicle.name}, 'reading') }}</h1>
 
-    {{ include('shared/_flashes.html.twig') }}
+    <div class="max-w-3xl">{{ include('shared/_flashes.html.twig') }}</div>
 
     <h2 class="mt-8 mb-3 text-lg font-semibold">{{ 'page.history.add'|trans(domain='reading') }}</h2>
-    <div class="max-w-lg">
+    <div class="max-w-3xl">
         {{ form(form) }}
     </div>
 

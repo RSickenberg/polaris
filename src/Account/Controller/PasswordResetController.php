@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Polaris\Account\Controller;
 
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Form\ForgotPasswordType;
 use Polaris\Account\Form\Model\ForgotPasswordData;
 use Polaris\Account\Form\Model\ResetPasswordData;
 use Polaris\Account\Form\ResetPasswordType;
 use Polaris\Account\Service\PasswordResetService;
+use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormError;
@@ -33,6 +35,10 @@ final class PasswordResetController extends AbstractController
     }
 
     #[Route('/forgot-password', name: 'account_forgot_password', methods: ['GET', 'POST'])]
+    /**
+     * @throws ORMException
+     * @throws RandomException
+     */
     public function forgot(Request $request): Response
     {
         $form = $this->createForm(ForgotPasswordType::class, new ForgotPasswordData());
@@ -63,6 +69,9 @@ final class PasswordResetController extends AbstractController
     }
 
     #[Route('/reset-password/{token}', name: 'account_reset_password', methods: ['GET', 'POST'])]
+    /**
+     * @throws ORMException
+     */
     public function reset(Request $request, string $token): Response
     {
         $pending = $this->reset->find($token);

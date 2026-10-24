@@ -20,6 +20,29 @@ parameters:
         - config/reference.php
     tmpDir: var/cache/phpstan
 
+    exceptions:
+        check:
+            missingCheckedExceptionInThrows: true
+        # Exceptions that a caller must know about, so every method that lets one through lists it in
+        # @throws. Controllers, commands and tests are entry points: the framework or PHPUnit catches them.
+        checkedExceptionClasses:
+            - Random\RandomException
+            - SodiumException
+            - JsonException
+            - Doctrine\ORM\Exception\ORMException
+            - Doctrine\ORM\NonUniqueResultException
+            - Symfony\Component\Lock\Exception\ExceptionInterface
+
+    ignoreErrors:
+        -
+            identifier: missingType.checkedException
+            paths:
+                - tests/*
+                - src/*/Controller/*
+                - src/*/Command/*
+            # A path may have nothing to report today (no command lets a checked exception through).
+            reportUnmatched: false
+
     symfony:
         # Compiled by `bin/console cache:warmup` (APP_ENV=dev), which CI runs first.
         containerXmlPath: var/cache/dev/Polaris_KernelDevDebugContainer.xml

@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Polaris\Reading\Controller;
 
 use Carbon\CarbonImmutable;
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
 use Polaris\Reading\Domain\ReadingRejection;
 use Polaris\Reading\Form\Model\OdometerReadingData;
 use Polaris\Reading\Form\OdometerReadingType;
+use Polaris\Reading\Service\Exception\ReadingRejected;
 use Polaris\Reading\Service\OdometerReadingService;
-use Polaris\Reading\Service\ReadingRejected;
 use Polaris\Vehicle\Entity\Vehicle;
-use Polaris\Vehicle\Service\VehiclePermission;
+use Polaris\Vehicle\Service\Enum\VehiclePermission;
 use Psr\Clock\ClockInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -36,6 +37,9 @@ final class OdometerReadingController extends AbstractController
     // Not found rather than forbidden: another user's vehicle must not even be known to exist.
     #[IsGranted(VehiclePermission::Manage->value, 'vehicle', statusCode: Response::HTTP_NOT_FOUND)]
     #[Route('/vehicles/{id}/readings', name: 'reading_history', methods: ['GET', 'POST'])]
+    /**
+     * @throws ORMException
+     */
     public function history(Request $request, #[MapEntity(id: 'id')] Vehicle $vehicle, #[CurrentUser] User $user): Response
     {
         $data = new OdometerReadingData();

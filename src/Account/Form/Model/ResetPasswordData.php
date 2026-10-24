@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Account\Form\Model;
 
-use Polaris\Account\Service\NewUser;
+use Polaris\Account\Service\Dto\NewUser;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class ResetPasswordData

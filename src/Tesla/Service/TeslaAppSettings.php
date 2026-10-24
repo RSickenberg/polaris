@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace Polaris\Tesla\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
 use Polaris\Shared\Service\SecretEncrypter;
 use Polaris\Tesla\Domain\AppDomain;
 use Polaris\Tesla\Domain\InvalidAppDomain;
 use Polaris\Tesla\Entity\TeslaApp;
+use Polaris\Tesla\Service\Dto\TeslaAppSettingsData;
+use Polaris\Tesla\Service\Exception\TeslaSettingsRejected;
+use Random\RandomException;
 
 /**
  * Stores the credentials of the user's Tesla app. The client secret is encrypted before it reaches
@@ -29,9 +33,10 @@ final readonly class TeslaAppSettings
     }
 
     /**
-     * @throws \Random\RandomException
+     * @throws RandomException
      * @throws \SodiumException
      * @throws TeslaSettingsRejected
+     * @throws ORMException
      */
     public function save(User $owner, TeslaAppSettingsData $data): TeslaApp
     {

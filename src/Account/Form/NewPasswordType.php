@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Account\Form;
 
-use Polaris\Account\Service\NewUser;
+use Polaris\Account\Service\Dto\NewUser;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;

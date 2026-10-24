@@ -6,9 +6,10 @@ namespace Polaris\Reading\Command;
 
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Reading\Form\Model\OdometerReadingData;
+use Polaris\Reading\Service\Exception\ReadingRejected;
 use Polaris\Reading\Service\OdometerReadingService;
-use Polaris\Reading\Service\ReadingRejected;
 use Polaris\Shared\Domain\DistanceUnit;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
@@ -33,6 +34,9 @@ final readonly class AddOdometerReadingCommand
     ) {
     }
 
+    /**
+     * @throws ORMException
+     */
     public function __invoke(
         SymfonyStyle $io,
         #[Argument(description: 'The odometer value, in the unit given by --unit')]

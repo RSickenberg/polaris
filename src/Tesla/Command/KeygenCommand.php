@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Polaris\Tesla\Command;
 
+use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
 use Polaris\Extension\PublicKeyHosting;
-use Polaris\Tesla\Service\KeyAlreadyExists;
+use Polaris\Tesla\Service\Exception\KeyAlreadyExists;
 use Polaris\Tesla\Service\TeslaKeyService;
 use Polaris\Tesla\Service\TeslaOwnerFinder;
+use Random\RandomException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
@@ -28,6 +30,11 @@ final readonly class KeygenCommand
     ) {
     }
 
+    /**
+     * @throws ORMException
+     * @throws RandomException
+     * @throws \SodiumException
+     */
     public function __invoke(
         SymfonyStyle $io,
         #[Option(description: 'Replace an existing key pair. The app must then be registered with Tesla again')]
