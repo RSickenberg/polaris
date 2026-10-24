@@ -38,9 +38,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * 401, 403, 404, 412, 421 or 429. The OAuth and partner clients keep the plain HTTP client: a refresh token is
  * single use and must never be sent twice.
  *
- * The shape of the answers is confirmed by real ones for the vehicle list and the vehicle state. The live
- * `vehicle_data` answer was never seen: `response.vehicle_state.odometer` in miles is assumed from the
- * documented layout of the cached answer, whose `vehicle_state` has no odometer.
+ * The shape of the answers is confirmed by real EU ones: the vehicle list, the vehicle state and a live
+ * `vehicle_data`, whose `response.vehicle_state` carries `odometer` (a float) and `timestamp` (epoch
+ * milliseconds). The odometer has no unit in the answer; it is read as miles, Tesla's convention.
  */
 final readonly class TeslaFleetClient implements VehicleClient
 {
@@ -123,7 +123,12 @@ final readonly class TeslaFleetClient implements VehicleClient
             throw FleetApiError::unexpected(FleetApiOperation::VehicleData, $region, 'the odometer is not a valid distance');
         }
 
-        return new OdometerReading($odometer, CarbonImmutable::instance($this->clock->now())->utc());
+        $timestamp = $state['timestamp'] ?? null;
+        $readAt = \is_int($timestamp) && $timestamp > 0
+            ? CarbonImmutable::createFromTimestampMsUTC($timestamp)
+            : CarbonImmutable::instance($this->clock->now())->utc();
+
+        return new OdometerReading($odometer, $readAt);
     }
 
     /**

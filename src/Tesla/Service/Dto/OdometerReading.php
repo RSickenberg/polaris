@@ -8,8 +8,8 @@ use Carbon\CarbonImmutable;
 use Polaris\Shared\Domain\Distance;
 
 /**
- * An odometer read live from the car. The read time is the clock at the moment of the read (UTC):
- * the timestamp of a live answer is not read, since only the cached answers were seen.
+ * An odometer read live from the car, at the time the car reported it (`vehicle_state.timestamp`, epoch
+ * milliseconds), or at the clock when the answer has none. Always UTC.
  */
 final readonly class OdometerReading
 {

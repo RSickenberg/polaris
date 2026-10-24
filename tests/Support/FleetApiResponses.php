@@ -6,8 +6,8 @@ namespace Polaris\Tests\Support;
 
 /**
  * Fleet API answers for the tests. The list, the vehicle state and the 408 are real answers of an EU
- * account (ids, VIN and tokens removed, VIN replaced by a fake one). The live vehicle_data answer was
- * never seen with the car awake: it is built from the documented layout and is UNVERIFIED.
+ * account (ids, VIN and tokens removed, VIN replaced by a fake one). The live vehicle_data answer is a
+ * shortened real one: only the blocks and fields the client reads are kept.
  */
 final class FleetApiResponses
 {
@@ -64,15 +64,24 @@ final class FleetApiResponses
         ]);
     }
 
+    public const int VEHICLE_DATA_TIMESTAMP_MS = 1792864425066;
+
     /**
-     * UNVERIFIED: the odometer in miles under vehicle_state, as assumed by the client.
+     * @param int|null $timestampMs the `vehicle_state.timestamp`, in epoch milliseconds; null leaves it out
      */
-    public static function vehicleData(float $miles): string
+    public static function vehicleData(float $miles, ?int $timestampMs = self::VEHICLE_DATA_TIMESTAMP_MS): string
     {
+        $vehicleState = ['vehicle_name' => 'Lucia', 'odometer' => $miles, 'locked' => true];
+
+        if (null !== $timestampMs) {
+            $vehicleState['timestamp'] = $timestampMs;
+        }
+
         return (string) json_encode([
             'response' => [
-                'charge_state' => ['battery_level' => 76],
-                'vehicle_state' => ['vehicle_name' => 'Lucia', 'odometer' => $miles, 'locked' => true],
+                'state' => 'online',
+                'charge_state' => ['battery_level' => 76, 'timestamp' => self::VEHICLE_DATA_TIMESTAMP_MS],
+                'vehicle_state' => $vehicleState,
             ],
         ]);
     }

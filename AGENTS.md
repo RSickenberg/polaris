@@ -405,12 +405,15 @@ are specific to Polaris and win when the two disagree.
 - `polaris:tesla:debug:fetch list|state|data|cached [vin] [--redact]` prints the raw answer of one of these reads, whole
   by default; `--redact` removes the VIN, ids, car names, tokens, location and `drive_state`, to paste it in an issue
   or to build a fixture. `data` is a billed live call. GET only, never `wake_up`.
-- Unverified (Tesla does not document them, or no real answer was seen): the live `vehicle_data` 200 body, so
-  `vehicle_state.odometer` in miles and the absence of a usable live timestamp (the read time is the clock); the
-  paging parameters of `/vehicles` (only the answer's `pagination` object was seen); the `endpoints` parameter;
-  the `online` and `asleep` state values (only `offline` was seen); that a 408 is the answer of a car that fell
-  asleep after an `online` state. Confirmed by real EU answers: the shape of the vehicle list and of a vehicle,
-  and the 408 body (`error: "vehicle unavailable: vehicle is offline or asleep"`).
+- Confirmed by real EU answers: the shape of the vehicle list and of a vehicle (`state` `online` and `offline`
+  seen), a live `vehicle_data` (`response.vehicle_state.odometer` as a float, `vehicle_state.timestamp` in epoch
+  milliseconds, used as the read time; the clock only when it is missing) and the 408 body (`error: "vehicle
+  unavailable: vehicle is offline or asleep"`).
+- Unverified (Tesla does not document them, or no real answer was seen): the unit of the odometer (the answer has
+  none; read as miles, Tesla's convention, while `gui_settings.gui_distance_units` is only the display setting);
+  the paging parameters of `/vehicles` (only the answer's `pagination` object was seen); the `endpoints`
+  parameter; the `asleep` state value; that a 408 is the answer of a car that fell asleep after an `online`
+  state.
 
 ### Translations
 

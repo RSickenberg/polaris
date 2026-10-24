@@ -67,12 +67,28 @@ final class TeslaFleetClientTest extends TestCase
         self::assertSame(self::BASE_URL . '/api/1/vehicles/' . FleetApiResponses::VIN, $this->calls[0][1]);
     }
 
-    public function testTheOdometerIsConvertedFromMilesWithoutAnyQuery(): void
+    public function testTheOdometerIsConvertedFromMilesAndReadAtTeslasTimestamp(): void
     {
-        $reading = $this->client([new MockResponse(FleetApiResponses::vehicleData(12345.678))])->vehicleData($this->app(), new Vin(FleetApiResponses::VIN));
+        $reading = $this->client([new MockResponse(FleetApiResponses::vehicleData(980.388329))])->vehicleData($this->app(), new Vin(FleetApiResponses::VIN));
+
+        self::assertSame((int) round(980.388329 * 1609.344), $reading->odometer->metres());
+        self::assertEquals(CarbonImmutable::createFromTimestampMsUTC(FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS), $reading->readAt);
+        self::assertSame(0, $reading->readAt->getOffset());
+        self::assertSame(FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS, (int) $reading->readAt->format('Uv'));
+    }
+
+    public function testWithoutATimestampTheClockIsTheReadTime(): void
+    {
+        $reading = $this->client([new MockResponse(FleetApiResponses::vehicleData(12345.678, null))])->vehicleData($this->app(), new Vin(FleetApiResponses::VIN));
 
         self::assertSame((int) round(12345.678 * 1609.344), $reading->odometer->metres());
         self::assertEquals(CarbonImmutable::parse(self::NOW), $reading->readAt);
+    }
+
+    public function testTheLiveCallSendsNoQuery(): void
+    {
+        $this->client([new MockResponse(FleetApiResponses::vehicleData(1000))])->vehicleData($this->app(), new Vin(FleetApiResponses::VIN));
+
         self::assertSame(self::BASE_URL . '/api/1/vehicles/' . FleetApiResponses::VIN . '/vehicle_data', $this->calls[0][1]);
         self::assertStringNotContainsString('location_data', $this->calls[0][1]);
     }
