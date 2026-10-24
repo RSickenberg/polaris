@@ -50,6 +50,21 @@
                 {%- endif -%}
             </twig:Dashboard:RiskAlert>
 
+            {% if not ended %}
+                <section aria-labelledby="budget-title">
+                    <h2 id="budget-title" class="mb-3 text-lg font-semibold">{{ 'budget.title'|trans(domain='dashboard') }}</h2>
+                    {% if assessment.budget.perDay.metres > 0 or assessment.budget.perWeek.metres > 0 or assessment.budget.perMonth.metres > 0 %}
+                        <div class="flex flex-wrap gap-2">
+                            <twig:Dashboard:BudgetBadge :distance="assessment.budget.perDay" period="day" />
+                            <twig:Dashboard:BudgetBadge :distance="assessment.budget.perWeek" period="week" />
+                            <twig:Dashboard:BudgetBadge :distance="assessment.budget.perMonth" period="month" />
+                        </div>
+                    {% else %}
+                        <p class="text-sm text-muted-foreground">{{ 'budget.none'|trans(domain='dashboard') }}</p>
+                    {% endif %}
+                </section>
+            {% endif %}
+
             <twig:Card>
                 <twig:Card:Content>
                     <twig:Dashboard:LeaseProgress
@@ -108,21 +123,6 @@
                     hint="{{ 'kpi.last_reading.hint'|trans({'%timezone%': timeZone}, 'dashboard') }}"
                 />
             </div>
-
-            {% if not ended %}
-                <section aria-labelledby="budget-title">
-                    <h2 id="budget-title" class="mb-3 text-lg font-semibold">{{ 'budget.title'|trans(domain='dashboard') }}</h2>
-                    {% if assessment.budget.perDay.metres > 0 or assessment.budget.perWeek.metres > 0 or assessment.budget.perMonth.metres > 0 %}
-                        <div class="flex flex-wrap gap-2">
-                            <twig:Dashboard:BudgetBadge :distance="assessment.budget.perDay" period="day" />
-                            <twig:Dashboard:BudgetBadge :distance="assessment.budget.perWeek" period="week" />
-                            <twig:Dashboard:BudgetBadge :distance="assessment.budget.perMonth" period="month" />
-                        </div>
-                    {% else %}
-                        <p class="text-sm text-muted-foreground">{{ 'budget.none'|trans(domain='dashboard') }}</p>
-                    {% endif %}
-                </section>
-            {% endif %}
         {% endif %}
     </div>
 {% endblock %}

@@ -5,9 +5,9 @@
 {% block main %}
     <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.connect.title'|trans(domain='tesla') }}</h1>
 
-    {{ include('shared/_flashes.html.twig') }}
+    <div class="max-w-3xl">{{ include('shared/_flashes.html.twig') }}</div>
 
-    <div class="mt-6 flex max-w-lg flex-col gap-6">
+    <div class="mt-6 flex max-w-3xl flex-col gap-6">
         <twig:Card id="authorize">
             <twig:Card:Header>
                 <twig:Card:Title><h2>{{ 'page.authorize.title'|trans(domain='tesla') }}</h2></twig:Card:Title>
@@ -18,7 +18,7 @@
                     {{ 'page.connect.redirect_uri'|trans(domain='tesla') }}
                     <span class="font-medium break-all text-foreground" id="redirect-uri">{{ redirectUri }}</span>
                 </p>
-                {{ form(authorizeForm) }}
+                {{ form(authorizeForm, {attr: {'data-turbo': 'false'}}) }}
             </twig:Card:Content>
         </twig:Card>
 

@@ -102,10 +102,22 @@
 {% endblock %}
 
 {% block form_row_render %}
-    <twig:Field {{ ...row_attr|merge(errors|length > 0 ? {'data-invalid': 'true'} : {}) }}>
-        {{- form_label(form) -}}
-        {{- form_widget(form, widget_attr) -}}
-        {{- form_help(form) -}}
-        {{- form_errors(form) -}}
-    </twig:Field>
+    {%- if 'checkbox' in block_prefixes and not compound -%}
+        {# A lone checkbox: the control on the left, then its label, the help and the errors. #}
+        <twig:Field orientation="horizontal" {{ ...row_attr|merge(errors|length > 0 ? {'data-invalid': 'true'} : {}) }} class="items-center">
+            <div>{{- form_widget(form, widget_attr) -}}</div>
+            <div class="flex flex-col gap-1">
+                {{- form_label(form) -}}
+                {{- form_help(form) -}}
+                {{- form_errors(form) -}}
+            </div>
+        </twig:Field>
+    {%- else -%}
+        <twig:Field {{ ...row_attr|merge(errors|length > 0 ? {'data-invalid': 'true'} : {}) }}>
+            {{- form_label(form) -}}
+            {{- form_widget(form, widget_attr) -}}
+            {{- form_help(form) -}}
+            {{- form_errors(form) -}}
+        </twig:Field>
+    {%- endif -%}
 {% endblock %}
