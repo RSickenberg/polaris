@@ -8,6 +8,10 @@ parameters:
     # toolbar, the profiler and the assets that AssetMapper serves through a route.
     polaris.security.open_paths: '^(?!)'
 
+    # First delay before the Fleet API vehicle client retries a 5xx, in milliseconds; it doubles on
+    # each retry. Tests set it to 0.
+    polaris.tesla.retry_delay_ms: 500
+
 services:
     _defaults:
         autowire: true
@@ -43,6 +47,7 @@ when@dev:
 when@test:
     parameters:
         polaris.security.open_paths: '^/(_profiler|_wdt|assets)/'
+        polaris.tesla.retry_delay_ms: 0
 
     services:
         # Without Monolog the framework logger writes to stderr, so every expected 404 or 4xx
@@ -56,6 +61,9 @@ when@test:
             public: true
         test.polaris.lease.assessment_service:
             alias: Polaris\Lease\Service\LeaseAssessmentService
+            public: true
+        test.polaris.tesla.odometer_reader:
+            alias: Polaris\Tesla\Service\TeslaOdometerReader
             public: true
         # Tesla tests replace the HTTP client with a MockHttpClient: no test reaches the network.
         test.polaris.http_client:

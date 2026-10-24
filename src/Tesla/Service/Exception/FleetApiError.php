@@ -92,6 +92,14 @@ final class FleetApiError extends \RuntimeException
             && (\in_array($this->oauthError, ['invalid_grant', 'login_required'], true) || 401 === $this->httpStatus);
     }
 
+    /**
+     * HTTP 408: the car was not online when the request was made. Not a failure of Polaris or Tesla.
+     */
+    public function isVehicleNotOnline(): bool
+    {
+        return 408 === $this->httpStatus;
+    }
+
     private static function oauthErrorCode(string $body): ?string
     {
         $data = json_decode($body, true);
@@ -107,8 +115,12 @@ final class FleetApiError extends \RuntimeException
             401 === $status => 'Tesla did not accept the credentials, check the client ID and the client secret',
             403 === $status => 'Tesla refused access, check that the app is approved and that the domain matches an allowed origin',
             404 === $status => 'Tesla does not know this endpoint or domain',
+            408 === $status => 'the vehicle is not online',
+            412 === $status => 'a Tesla precondition is not met, check that the app is registered and that the vehicle supports the call',
+            421 === $status => 'the Tesla account is in another region, check the enabled regions of the app',
             422 === $status => 'Tesla could not validate the request or the public key',
             429 === $status => 'Tesla is rate-limiting the requests, try again later',
+            540 === $status => 'the vehicle returned an error, it may need a reboot or service',
             $status >= 500 => 'Tesla failed to answer, try again later',
             default => 'Tesla answered an unexpected status',
         };
