@@ -158,6 +158,14 @@
         <source>even_pace.basis</source>
         <target>L’allocation du leasing répartie uniformément sur toute la durée, quoi que vous ayez déjà parcouru.</target>
       </trans-unit>
+      <trans-unit id="current_pace.title">
+        <source>current_pace.title</source>
+        <target>Ce que vous parcourez à votre rythme actuel</target>
+      </trans-unit>
+      <trans-unit id="current_pace.basis">
+        <source>current_pace.basis</source>
+        <target>Ce que la projection prévoit par période jusqu’à la fin du leasing. La réduction de l’alerte est ce rythme moins les premiers chiffres.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

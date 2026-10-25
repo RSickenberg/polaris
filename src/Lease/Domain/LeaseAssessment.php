@@ -31,6 +31,12 @@ final readonly class LeaseAssessment
          * the lease has ended.
          */
         public ?DistanceDelta $weeklyCut,
+        /**
+         * What the projection says is driven per day, week and month from now to the lease end, at the current
+         * pace: the projected end minus the distance driven, over the time left. The weekly cut is this minus the
+         * budget. Zero once the lease has ended.
+         */
+        public Budget $currentPace,
     ) {
     }
 }

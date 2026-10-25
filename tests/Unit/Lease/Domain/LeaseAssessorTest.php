@@ -57,6 +57,11 @@ final class LeaseAssessorTest extends TestCase
         self::assertSame(Currency::CHF, $assessment->projectedExcessCost->currency());
         self::assertNotNull($assessment->weeklyCut);
         self::assertSame(29_585, $assessment->weeklyCut->metres());
+        // At the current pace: (37,620,000 - 9,000,000) = 28,620,000 over 265 days = 108,000 a day, 756,000 a week.
+        // The weekly cut is that week minus the budget week: 756,000 - 726,415 = 29,585.
+        self::assertSame(108_000, $assessment->currentPace->perDay->metres());
+        self::assertSame(756_000, $assessment->currentPace->perWeek->metres());
+        self::assertSame($assessment->weeklyCut->metres(), $assessment->currentPace->perWeek->metres() - $assessment->budget->perWeek->metres());
     }
 
     public function testFarUnderTheAllowanceHasRoomAndNoCost(): void

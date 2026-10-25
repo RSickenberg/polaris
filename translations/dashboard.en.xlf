@@ -158,6 +158,14 @@
         <source>even_pace.basis</source>
         <target>The lease allowance spread evenly over the whole term, whatever you have driven so far.</target>
       </trans-unit>
+      <trans-unit id="current_pace.title">
+        <source>current_pace.title</source>
+        <target>What you drive at your current pace</target>
+      </trans-unit>
+      <trans-unit id="current_pace.basis">
+        <source>current_pace.basis</source>
+        <target>What the projection says you will drive per period until the lease ends. The cut in the alert is this minus the first figures.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

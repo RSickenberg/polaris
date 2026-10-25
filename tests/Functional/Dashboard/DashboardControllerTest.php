@@ -126,6 +126,7 @@ final class DashboardControllerTest extends WebTestCase
         self::assertStringContainsString('Driven ' . $km($assessment->projection->driven->metres()), $text);
         self::assertStringContainsString('minus 0 km at the lease start', $text);
         self::assertStringContainsString('What you should drive normally', $text);
+        self::assertStringContainsString('What you drive at your current pace', $text);
         self::assertStringContainsString('1,250 km per month', $text);
         self::assertStringContainsString('Allowed to date ' . $km($assessment->projection->allowedToDate->metres()), $text);
         self::assertStringContainsString('Projected at lease end ' . $km($assessment->projection->projectedAtEnd->metres()), $text);

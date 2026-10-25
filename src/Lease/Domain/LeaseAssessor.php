@@ -53,6 +53,7 @@ final readonly class LeaseAssessor
             projectedExcess: $excess,
             projectedExcessCost: ExcessCost::of($excess, $excessCostPerKm),
             weeklyCut: $secondsLeft > 0 ? self::weeklyCut($projected - $allowed, $secondsLeft) : null,
+            currentPace: Budget::spread(Distance::fromMetres(max(0, $projected - $projection->driven->metres())), $term, $secondsLeft),
         );
     }
 
