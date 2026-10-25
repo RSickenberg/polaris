@@ -323,7 +323,8 @@ are specific to Polaris and win when the two disagree.
   rule below) and `failed` (`failure_transport`, retried by hand with `messenger:failed:retry`). The `worker` service
   (`frankenphp/docker-worker.sh`) consumes `scheduler_default async tesla` explicitly, never `--all`, which would also
   drain `failed` in a loop. Tests use `in-memory://` transports (`messenger.transport.tesla`).
-- `Scheduler\FetchScheduleProvider` has one recurring message, `DispatchDueFetches` every 5 minutes, stateful and locked.
+- `Scheduler\FetchScheduleProvider` has one recurring message, `DispatchDueFetches` every minute on the minute (a cron in UTC: `every('5 minutes')` counts from the worker start and
+  would pick a slot up at an arbitrary time), stateful and locked.
   The slots are not cron entries: `Service\DueFetchDispatcher` turns each vehicle's local slots into UTC instants with
   `Domain\SlotCalculator` on every tick (owner's time zone, so daylight saving is followed with no restart), and queues a
   `FetchOdometerMessage` for each slot whose window is open (`Domain\FetchWindow`: from the slot to 3 hours after) and
@@ -332,7 +333,8 @@ are specific to Polaris and win when the two disagree.
 - Slots are `FetchSchedule` (one per vehicle, `HH:MM` local times, 1 or 2; none stored means 21:00), set with
   `polaris:fetch:schedule [--vin=] [first [second]]` through `Service\FetchScheduleService`.
 - `Service\OdometerFetcher` runs the message with `TeslaOdometerReader` (never wakes the car). Not online: it re-queues the
-  message with `attempt + 1` and a `DelayStamp` of one hour, 4 state checks at most per slot (`FetchWindow::MAX_ATTEMPTS`),
+  message with `attempt + 1` and a `DelayStamp` that lands on the next hour after the slot (`FetchWindow::retryDelaySeconds()`,
+  so a late first check does not shift the others), 4 state checks at most per slot (`FetchWindow::MAX_ATTEMPTS`),
   then the slot is `Skipped`. A value is stored by `OdometerReadingService::recordFromApi()` only when it differs from
   the previous reading (`readAt` is Tesla's `vehicle_state.timestamp`); a value lower than a stored reading is
   `Rejected`, logged as a warning, and never retried. `TeslaNotConnected` ends the slot as `NotConnected` with a warning;

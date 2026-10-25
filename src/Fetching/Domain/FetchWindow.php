@@ -30,6 +30,17 @@ final readonly class FetchWindow
     }
 
     /**
+     * Seconds to wait before the check after $attempt (0 for the first), so that the checks stay on the hours
+     * after the slot (slot, slot + 1 h, slot + 2 h, slot + 3 h) however late the earlier ones ran.
+     */
+    public static function retryDelaySeconds(CarbonImmutable $slot, int $attempt, CarbonImmutable $now): int
+    {
+        $next = $slot->addSeconds(($attempt + 1) * self::RETRY_INTERVAL_SECONDS);
+
+        return max(0, $next->getTimestamp() - $now->getTimestamp());
+    }
+
+    /**
      * Whether the check that just found the car not online is the last one of the window.
      */
     public static function isLastAttempt(int $attempt): bool

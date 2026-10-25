@@ -29,7 +29,7 @@ use Symfony\Component\Uid\Ulid;
 /**
  * Runs one {@see FetchOdometerMessage}: asks {@see TeslaOdometerReader} (which never wakes the car) for
  * the odometer, stores it when it changed, and, when the car is not online, checks again an hour later
- * until the window of the slot closes. Messenger's own retry is off for this message: a billed call is
+ * until the window of the slot closes. The checks stay on the hours after the slot, not an hour after the previous one. Messenger's own retry is off for this message: a billed call is
  * never repeated by it, only by the hourly rule here.
  */
 final readonly class OdometerFetcher
@@ -127,7 +127,8 @@ final readonly class OdometerFetcher
         }
 
         $this->finish($run, SlotRunStatus::Retrying, $attempts, $now);
-        $this->bus->dispatch($message->nextAttempt(), [new DelayStamp(FetchWindow::RETRY_INTERVAL_SECONDS * 1000)]);
+        $delay = FetchWindow::retryDelaySeconds(CarbonImmutable::createFromTimestampUTC($message->slotTimestamp), $message->attempt, $now);
+        $this->bus->dispatch($message->nextAttempt(), [new DelayStamp($delay * 1000)]);
 
         return SlotRunStatus::Retrying;
     }

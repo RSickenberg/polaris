@@ -143,6 +143,16 @@ final class OdometerFetcherTest extends KernelTestCase
         self::assertSame(2, $this->slotRun()->getAttempts());
     }
 
+    public function testALateFirstCheckDoesNotShiftTheNextOnes(): void
+    {
+        self::mockTime('2026-10-25 19:04:00 UTC');
+        $this->answerWith('asleep');
+
+        $this->fetch(0);
+
+        self::assertSame(3_360_000, $this->queued()[0]->last(DelayStamp::class)?->getDelay(), 'The next check is at 20:00, an hour after the slot.');
+    }
+
     public function testACarThatStaysAsleepForTheWholeWindowIsSkippedAfterFourChecksWithoutWaking(): void
     {
         $this->answerWith('asleep');

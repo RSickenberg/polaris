@@ -19,6 +19,7 @@
         "doctrine/doctrine-bundle": "^3.3",
         "doctrine/doctrine-migrations-bundle": "^4.0",
         "doctrine/orm": "^3.7",
+        "dragonmantank/cron-expression": "^3.6",
         "nesbot/carbon": "^3.15",
         "symfony/asset": "8.1.*",
         "symfony/asset-mapper": "8.1.*",

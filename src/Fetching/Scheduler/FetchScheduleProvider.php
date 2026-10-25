@@ -14,13 +14,17 @@ use Symfony\Contracts\Cache\CacheInterface;
 
 /**
  * The one schedule of Polaris ("default", consumed as the `scheduler_default` transport): a tick every
- * 5 minutes that queues the fetches that are due. The slots themselves are not here, because they depend
+ * minute that queues the fetches that are due. The slots themselves are not here, because they depend
  * on each user's time zone and change with daylight saving: see {@see \Polaris\Fetching\Service\DueFetchDispatcher}.
  */
 #[AsSchedule]
 final readonly class FetchScheduleProvider implements ScheduleProviderInterface
 {
-    public const string TICK = '5 minutes';
+    /**
+     * Every minute on the minute (UTC). A fixed interval such as `every('5 minutes')` counts from the moment the worker
+     * started, so a slot would be picked up at an arbitrary time up to 5 minutes late.
+     */
+    public const string TICK = '* * * * *';
 
     public function __construct(
         private CacheInterface $cache,
@@ -31,7 +35,7 @@ final readonly class FetchScheduleProvider implements ScheduleProviderInterface
     public function getSchedule(): Schedule
     {
         return new Schedule()
-            ->with(RecurringMessage::every(self::TICK, new DispatchDueFetches()))
+            ->with(RecurringMessage::cron(self::TICK, new DispatchDueFetches(), 'UTC'))
             // A missed tick is not worth running late: the next one looks at the same slots.
             ->stateful($this->cache)
             ->processOnlyLastMissedRun(true)
