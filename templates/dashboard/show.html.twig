@@ -52,35 +52,35 @@
 
             {% if not ended %}
                 <div class="grid gap-6 lg:grid-cols-3">
-                    <section aria-labelledby="budget-title">
+                    <section aria-labelledby="budget-title" class="flex flex-col">
                         <h2 id="budget-title" class="text-lg font-semibold">{{ 'budget.title'|trans(domain='dashboard') }}</h2>
                         <p class="mb-3 text-sm text-muted-foreground">{{ 'budget.basis'|trans(domain='dashboard') }}</p>
                         {% if assessment.budget.perDay.metres > 0 or assessment.budget.perWeek.metres > 0 or assessment.budget.perMonth.metres > 0 %}
-                            <div class="flex flex-wrap gap-2">
+                            <div class="mt-auto flex flex-wrap gap-2">
                                 <twig:Dashboard:BudgetBadge :distance="assessment.budget.perDay" period="day" />
                                 <twig:Dashboard:BudgetBadge :distance="assessment.budget.perWeek" period="week" />
                                 <twig:Dashboard:BudgetBadge :distance="assessment.budget.perMonth" period="month" />
                             </div>
                         {% else %}
-                            <p class="text-sm text-muted-foreground">{{ 'budget.none'|trans(domain='dashboard') }}</p>
+                            <p class="mt-auto text-sm text-muted-foreground">{{ 'budget.none'|trans(domain='dashboard') }}</p>
                         {% endif %}
                     </section>
 
                     {# A vertical divider between the sections on wide screens, a horizontal one when they stack. #}
-                    <section aria-labelledby="even-pace-title" class="border-t pt-6 lg:border-s lg:border-t-0 lg:ps-6 lg:pt-0">
+                    <section aria-labelledby="even-pace-title" class="flex flex-col border-t pt-6 lg:border-s lg:border-t-0 lg:ps-6 lg:pt-0">
                         <h2 id="even-pace-title" class="text-lg font-semibold">{{ 'even_pace.title'|trans(domain='dashboard') }}</h2>
                         <p class="mb-3 text-sm text-muted-foreground">{{ 'even_pace.basis'|trans(domain='dashboard') }}</p>
-                        <div class="flex flex-wrap gap-2">
+                        <div class="mt-auto flex flex-wrap gap-2">
                             <twig:Dashboard:BudgetBadge :distance="dashboard.evenPace.perDay" period="day" />
                             <twig:Dashboard:BudgetBadge :distance="dashboard.evenPace.perWeek" period="week" />
                             <twig:Dashboard:BudgetBadge :distance="dashboard.evenPace.perMonth" period="month" />
                         </div>
                     </section>
 
-                    <section aria-labelledby="current-pace-title" class="border-t pt-6 lg:border-s lg:border-t-0 lg:ps-6 lg:pt-0">
+                    <section aria-labelledby="current-pace-title" class="flex flex-col border-t pt-6 lg:border-s lg:border-t-0 lg:ps-6 lg:pt-0">
                         <h2 id="current-pace-title" class="text-lg font-semibold">{{ 'current_pace.title'|trans(domain='dashboard') }}</h2>
                         <p class="mb-3 text-sm text-muted-foreground">{{ 'current_pace.basis'|trans(domain='dashboard') }}</p>
-                        <div class="flex flex-wrap gap-2">
+                        <div class="mt-auto flex flex-wrap gap-2">
                             <twig:Dashboard:BudgetBadge :distance="assessment.currentPace.perDay" period="day" />
                             <twig:Dashboard:BudgetBadge :distance="assessment.currentPace.perWeek" period="week" />
                             <twig:Dashboard:BudgetBadge :distance="assessment.currentPace.perMonth" period="month" />
