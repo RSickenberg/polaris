@@ -54,7 +54,6 @@ enum SlotRunStatus: string
      */
     public function isOpen(): bool
     {
-        return self::Dispatched === $this
-            || self::Retrying === $this;
+        return self::Dispatched === $this || self::Retrying === $this;
     }
 }

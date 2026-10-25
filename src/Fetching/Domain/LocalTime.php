@@ -38,8 +38,7 @@ final readonly class LocalTime implements \Stringable
 
     public function equals(self $other): bool
     {
-        return $this->hour === $other->hour
-            && $this->minute === $other->minute;
+        return $this->hour === $other->hour && $this->minute === $other->minute;
     }
 
     public function __toString(): string

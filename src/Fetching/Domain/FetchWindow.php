@@ -25,8 +25,9 @@ final readonly class FetchWindow
      */
     public static function isOpen(CarbonImmutable $slot, CarbonImmutable $now): bool
     {
-        return $slot->lessThanOrEqualTo($now)
-            && $now->lessThan($slot->addSeconds((self::MAX_ATTEMPTS - 1) * self::RETRY_INTERVAL_SECONDS));
+        $closesAt = $slot->addSeconds((self::MAX_ATTEMPTS - 1) * self::RETRY_INTERVAL_SECONDS);
+
+        return $slot->lessThanOrEqualTo($now) && $now->lessThan($closesAt);
     }
 
     /**
