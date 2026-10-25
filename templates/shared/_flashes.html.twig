@@ -1,11 +1,14 @@
 {# The success and error flash messages, once each. #}
 {% for message in app.flashes('success') %}
-    <twig:Alert class="my-4">
+    {# The green of the "on track" alert of the dashboard (Dashboard/RiskAlert, level ok). #}
+    <twig:Alert class="my-4 border-green-600/50 bg-green-50 text-green-900 dark:border-green-400/40 dark:bg-green-950/40 dark:text-green-200" data-flash="success">
+        <twig:ux:icon name="lucide:circle-check" aria-hidden="true" />
         <twig:Alert:Title>{{ message }}</twig:Alert:Title>
     </twig:Alert>
 {% endfor %}
 {% for message in app.flashes('error') %}
-    <twig:Alert variant="destructive" class="my-4">
+    <twig:Alert variant="destructive" class="my-4" data-flash="error">
+        <twig:ux:icon name="lucide:circle-alert" aria-hidden="true" />
         <twig:Alert:Title>{{ message }}</twig:Alert:Title>
     </twig:Alert>
 {% endfor %}
