@@ -22,7 +22,7 @@ class FetchSchedule
     private Ulid $id;
 
     #[ORM\OneToOne]
-    #[ORM\JoinColumn(nullable: false, unique: true)]
+    #[ORM\JoinColumn(unique: true, nullable: false)]
     private Vehicle $vehicle;
 
     #[ORM\Column(length: 5)]

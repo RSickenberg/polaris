@@ -42,12 +42,16 @@ final readonly class DebugFetchCommand
 
     public function __invoke(
         SymfonyStyle $io,
+
         #[Argument(description: 'list | state | data | cached')]
         string $what,
+
         #[Argument(description: 'The VIN (not needed for "list")')]
         ?string $vin = null,
+
         #[Option(description: 'The email of the owner. Optional when there is a single user')]
         ?string $email = null,
+
         #[Option(description: 'Remove the VIN, ids, car names, tokens and location from the answer')]
         bool $redact = false,
     ): int {

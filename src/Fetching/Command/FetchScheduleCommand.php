@@ -29,10 +29,13 @@ final readonly class FetchScheduleCommand
 
     public function __invoke(
         SymfonyStyle $io,
+
         #[Argument(description: 'The first local time, HH:MM (24 hours). Omit it to show the current slots')]
         ?string $first = null,
+
         #[Argument(description: 'An optional second local time, HH:MM')]
         ?string $second = null,
+
         #[Option(description: 'The VIN of the vehicle. Optional when there is a single vehicle')]
         ?string $vin = null,
     ): int {

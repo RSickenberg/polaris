@@ -60,9 +60,13 @@ final readonly class TeslaFleetClient implements VehicleClient
 
     public function __construct(
         HttpClientInterface $client,
+
         private TokenProvider $tokens,
+
         private EntityManagerInterface $entityManager,
+
         private ClockInterface $clock,
+
         #[Autowire(param: 'polaris.tesla.retry_delay_ms')]
         int $retryDelayMs = 500,
     ) {

@@ -37,8 +37,10 @@ final readonly class KeygenCommand
      */
     public function __invoke(
         SymfonyStyle $io,
+
         #[Option(description: 'Replace an existing key pair. The app must then be registered with Tesla again')]
         bool $force = false,
+
         #[Option(description: 'The email of the owner. Optional when there is a single user')]
         ?string $email = null,
     ): int {

@@ -25,6 +25,7 @@ final readonly class UserPreferredLocaleProvider implements PreferredLocaleProvi
     public function __construct(
         #[AutowireDecorated]
         private PreferredLocaleProvider $fallback,
+
         private RequestStack $requestStack,
     ) {
     }

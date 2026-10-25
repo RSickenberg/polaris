@@ -20,10 +20,13 @@ final readonly class ConfiguredPublicKeyHosting implements PublicKeyHosting
 
     public function __construct(
         Filesystem $filesystem,
+
         #[Autowire(env: 'enum:Polaris\Extension\PublicKeyHostingMode:POLARIS_KEY_HOSTING')]
         PublicKeyHostingMode $mode,
+
         #[Autowire(env: 'POLARIS_KEY_HOSTING_DIR')]
         string $directory,
+
         #[Autowire(env: 'POLARIS_KEY_HOSTING_URL')]
         string $url = '',
     ) {

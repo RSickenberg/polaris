@@ -28,10 +28,15 @@ readonly class UserCreator
      */
     public function __construct(
         private EntityManagerInterface $entityManager,
+
         private SignUpPolicy $signUpPolicy,
+
         private UserPasswordHasherInterface $hasher,
+
         private ValidatorInterface $validator,
+
         private ClockInterface $clock,
+
         #[Autowire('%kernel.enabled_locales%')]
         private array $enabledLocales,
     ) {

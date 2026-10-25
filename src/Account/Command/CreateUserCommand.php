@@ -35,11 +35,15 @@ final readonly class CreateUserCommand
      */
     public function __invoke(
         SymfonyStyle $io,
+
         InputInterface $input,
+
         #[Argument(description: 'The email address the user signs in with')]
         string $email,
+
         #[Option(description: 'The preferred language: en or fr. Defaults to en')]
         ?string $locale = null,
+
         #[Option(name: 'time-zone', description: 'The IANA time zone dates are shown in, for example Europe/Zurich')]
         string $timeZone = TimeZone::UTC,
     ): int {

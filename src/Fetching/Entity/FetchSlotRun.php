@@ -58,6 +58,11 @@ class FetchSlotRun
         $this->updatedAt = $now;
     }
 
+    public function getId(): Ulid
+    {
+        return $this->id;
+    }
+
     public function getVehicle(): Vehicle
     {
         return $this->vehicle;

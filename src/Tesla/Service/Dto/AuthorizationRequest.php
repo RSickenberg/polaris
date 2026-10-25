@@ -12,6 +12,7 @@ final readonly class AuthorizationRequest
 {
     public function __construct(
         public string $url,
+
         #[\SensitiveParameter]
         public string $state,
     ) {

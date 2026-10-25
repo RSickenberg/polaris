@@ -16,9 +16,12 @@ final readonly class TeslaAppSettingsData
      */
     public function __construct(
         public string $clientId,
+
         #[\SensitiveParameter]
         public ?string $clientSecret,
+
         public string $domain,
+
         public array $regions,
     ) {
     }

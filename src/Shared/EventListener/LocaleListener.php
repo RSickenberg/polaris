@@ -25,8 +25,10 @@ final readonly class LocaleListener
      */
     public function __construct(
         private PreferredLocaleProvider $preferredLocale,
+
         #[Autowire('%kernel.enabled_locales%')]
         array $enabledLocales,
+
         #[Autowire('%kernel.default_locale%')]
         string $defaultLocale,
     ) {

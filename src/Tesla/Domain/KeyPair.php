@@ -12,6 +12,7 @@ final readonly class KeyPair
 {
     public function __construct(
         public string $publicKeyPem,
+
         #[\SensitiveParameter]
         private string $privateKeyPem,
     ) {

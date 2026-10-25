@@ -39,12 +39,16 @@ final readonly class AddOdometerReadingCommand
      */
     public function __invoke(
         SymfonyStyle $io,
+
         #[Argument(description: 'The odometer value, in the unit given by --unit')]
         int $odometer,
+
         #[Option(description: 'Unit of the value: km or mi')]
         string $unit = 'km',
+
         #[Option(description: 'When it was read, as an ISO 8601 date and time; UTC when it has no offset. Defaults to now')]
         ?string $at = null,
+
         #[Option(description: 'The vehicle, by VIN or id. Optional when only one vehicle exists')]
         ?string $vehicle = null,
     ): int {
