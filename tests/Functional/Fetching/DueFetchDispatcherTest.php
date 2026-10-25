@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Polaris\Tests\Functional\Fetching;
 
+use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Polaris\Fetching\Domain\LocalTime;
+use Polaris\Fetching\Domain\SlotRunStatus;
 use Polaris\Fetching\Entity\FetchSlotRun;
 use Polaris\Fetching\Message\FetchOdometerMessage;
 use Polaris\Fetching\Service\DueFetchDispatcher;
@@ -104,6 +106,28 @@ final class DueFetchDispatcherTest extends KernelTestCase
         self::mockTime('2026-07-10 22:10:00 UTC');
 
         self::assertSame(1, $this->dispatch());
+    }
+
+    public function testANewSlotDropsAnOlderOneStillRetrying(): void
+    {
+        self::getContainer()->get(FetchScheduleService::class)->change($this->vehicle, LocalTime::fromString('08:00'), LocalTime::fromString('09:00'));
+
+        // 08:00 and 09:00 in Zurich are 06:00 and 07:00 UTC in summer.
+        self::mockTime('2026-07-10 06:01:00 UTC');
+        $this->dispatch();
+        $run = $this->entityManager()->getRepository(FetchSlotRun::class)->findOneBy([]);
+        self::assertInstanceOf(FetchSlotRun::class, $run);
+        $run->record(SlotRunStatus::Retrying, 1, CarbonImmutable::now());
+        $this->entityManager()->flush();
+
+        self::mockTime('2026-07-10 07:01:00 UTC');
+        $this->dispatch();
+
+        $statuses = array_map(
+            static fn (FetchSlotRun $r): string => $r->getSlotAt()->format('H:i') . ' ' . $r->getStatus()->value,
+            $this->entityManager()->getRepository(FetchSlotRun::class)->findBy([], ['slotAt' => 'ASC']),
+        );
+        self::assertSame(['06:00 superseded', '07:00 dispatched'], $statuses);
     }
 
     public function testTheSlotsOfAVehicleCanBeChangedBack(): void

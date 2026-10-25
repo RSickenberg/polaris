@@ -81,6 +81,7 @@ final readonly class DashboardService
                     CarbonImmutable::instance($this->clock->now()),
                     DashboardState::Active === $state,
                 ),
+            $contract->getStartOdometer(),
         );
     }
 }

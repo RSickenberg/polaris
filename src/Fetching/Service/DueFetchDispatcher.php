@@ -18,7 +18,7 @@ use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 /**
- * Queues one fetch per vehicle per slot that is due. Slots are the local times of the owner turned into
+ * Queues one fetch per vehicle per slot that is due; a newer slot supersedes an older one that is still retrying. Slots are the local times of the owner turned into
  * UTC instants now, so a daylight saving change moves nothing by hand. A slot is recorded before its message
  * is queued and looked up first, so the tick can run as often as it likes (the unique (vehicle, slot) pair
  * backs this up if two ticks ever overlap). A slot whose window already closed (the worker was down) is not run late.
@@ -29,6 +29,7 @@ final readonly class DueFetchDispatcher
         private EntityManagerInterface $entityManager,
         private FetchSlotRunRepository $runs,
         private FetchScheduleService $schedules,
+        private SlotRunLedger $ledger,
         private SlotCalculator $calculator,
         private MessageBusInterface $bus,
         private ClockInterface $clock,
@@ -68,6 +69,7 @@ final readonly class DueFetchDispatcher
      */
     private function queue(Vehicle $vehicle, CarbonImmutable $slot, CarbonImmutable $now): void
     {
+        $this->ledger->supersedeOpen($vehicle, $now);
         $this->entityManager->persist(new FetchSlotRun($vehicle, $slot, $now));
         $this->entityManager->flush();
 

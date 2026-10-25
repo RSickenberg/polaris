@@ -124,6 +124,7 @@ final class DashboardControllerTest extends WebTestCase
         $text = $this->text();
         $km = static fn (int $metres): string => self::kilometres($metres);
         self::assertStringContainsString('Driven ' . $km($assessment->projection->driven->metres()), $text);
+        self::assertStringContainsString('minus 0 km at the lease start', $text);
         self::assertStringContainsString('Allowed to date ' . $km($assessment->projection->allowedToDate->metres()), $text);
         self::assertStringContainsString('Projected at lease end ' . $km($assessment->projection->projectedAtEnd->metres()), $text);
         self::assertStringContainsString($km($assessment->budget->perDay->metres()) . ' per day', $text);

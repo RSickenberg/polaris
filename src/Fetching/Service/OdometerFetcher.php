@@ -37,6 +37,7 @@ final readonly class OdometerFetcher
     public function __construct(
         private EntityManagerInterface $entityManager,
         private FetchSlotRunRepository $runs,
+        private SlotRunLedger $ledger,
         private TeslaAppSettings $teslaApps,
         private TeslaOdometerReader $reader,
         private OdometerReadingService $readings,
@@ -70,6 +71,16 @@ final readonly class OdometerFetcher
             : $this->runs->findAt($vehicle, CarbonImmutable::createFromTimestampUTC($message->slotTimestamp));
         $attempts = $message->attempt + 1;
 
+        if (null !== $run && !$run->getStatus()->isOpen()) {
+            // A check queued before a newer slot or a successful read: the car is not asked again.
+            $this->logger->info('Odometer fetch dropped: the slot is already settled.', [
+                'vehicle' => $message->vehicleId,
+                'status' => $run->getStatus()->value,
+            ]);
+
+            return $run->getStatus();
+        }
+
         $app = $this->teslaApps->find($vehicle->getOwner());
 
         if (null === $app) {
@@ -97,6 +108,8 @@ final readonly class OdometerFetcher
                 'rule' => $recording->rejection?->name,
             ]);
         }
+
+        $this->ledger->supersedeOpen($vehicle, $now, $run);
 
         return $this->finish(
             $run,
@@ -151,10 +164,8 @@ final readonly class OdometerFetcher
      */
     private function finish(?FetchSlotRun $run, SlotRunStatus $status, int $attempts, CarbonImmutable $now): SlotRunStatus
     {
-        if (null !== $run) {
-            $run->record($status, $attempts, $now);
-            $this->entityManager->flush();
-        }
+        $run?->record($status, $attempts, $now);
+        $this->entityManager->flush();
 
         return $status;
     }

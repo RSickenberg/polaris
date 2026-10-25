@@ -40,16 +40,21 @@ enum SlotRunStatus: string
     case Rejected = 'rejected';
 
     /**
+     * A newer slot came due, or a fetch read the car, before this one finished: its remaining checks are dropped.
+     */
+    case Superseded = 'superseded';
+
+    /**
      * Polaris is not connected to Tesla (no token, expired, or no consent): nothing was asked.
      */
     case NotConnected = 'not_connected';
 
     /**
-     * Nothing more will happen for this slot.
+     * Whether checks are still queued for this slot.
      */
-    public function isFinal(): bool
+    public function isOpen(): bool
     {
-        return self::Dispatched !== $this
-            && self::Retrying !== $this;
+        return self::Dispatched === $this
+            || self::Retrying === $this;
     }
 }

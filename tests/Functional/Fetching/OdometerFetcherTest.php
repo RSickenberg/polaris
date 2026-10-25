@@ -91,7 +91,7 @@ final class OdometerFetcherTest extends KernelTestCase
         $this->fetch(0);
         $this->answerWith('online', 100.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS + 3_600_000);
 
-        $status = $this->fetch(0);
+        $status = $this->fetch(0, 1);
 
         self::assertSame(SlotRunStatus::Unchanged, $status);
         self::assertCount(1, $this->entityManager()->getRepository(OdometerReading::class)->findAll());
@@ -103,7 +103,7 @@ final class OdometerFetcherTest extends KernelTestCase
         $this->fetch(0);
         $this->answerWith('online', 112.5, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS + 3_600_000);
 
-        self::assertSame(SlotRunStatus::Stored, $this->fetch(0));
+        self::assertSame(SlotRunStatus::Stored, $this->fetch(0, 1));
         self::assertCount(2, $this->entityManager()->getRepository(OdometerReading::class)->findAll());
     }
 
@@ -113,7 +113,7 @@ final class OdometerFetcherTest extends KernelTestCase
         $this->fetch(0);
         $this->answerWith('online', 50.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS + 3_600_000);
 
-        $status = $this->fetch(0);
+        $status = $this->fetch(0, 1);
 
         self::assertSame(SlotRunStatus::Rejected, $status);
         self::assertSame(SlotRunStatus::Rejected, $this->slotRun()->getStatus());
@@ -214,6 +214,35 @@ final class OdometerFetcherTest extends KernelTestCase
         self::assertSame([], $this->queued());
     }
 
+    public function testASuccessfulReadDropsTheSlotsStillWaitingForACheck(): void
+    {
+        $earlier = new FetchSlotRun($this->vehicle, self::slot()->subMinutes(10), self::slot());
+        $this->entityManager()->persist($earlier);
+        $this->entityManager()->flush();
+        $earlierId = $earlier->getId();
+        $this->answerWith('online', 100.0);
+
+        self::assertSame(SlotRunStatus::Stored, $this->fetch(0));
+
+        $this->entityManager()->clear();
+        $dropped = $this->entityManager()->find(FetchSlotRun::class, $earlierId);
+        self::assertSame(SlotRunStatus::Superseded, $dropped?->getStatus());
+    }
+
+    public function testACheckQueuedForASupersededSlotDoesNotAskTheCar(): void
+    {
+        $this->answerWith('asleep');
+        $this->fetch(0);
+        $this->answerWith('online', 100.0);
+        $this->requests = [];
+        $this->entityManager()->createQuery('UPDATE ' . FetchSlotRun::class . ' r SET r.status = :status')->setParameter('status', SlotRunStatus::Superseded)->execute();
+        $this->entityManager()->clear();
+
+        self::assertSame(SlotRunStatus::Superseded, $this->fetch(1));
+        self::assertSame([], $this->requests);
+        self::assertSame([], $this->entityManager()->getRepository(OdometerReading::class)->findAll());
+    }
+
     public function testAVehicleThatNoLongerExistsIsDropped(): void
     {
         $status = self::getContainer()->get(OdometerFetcher::class)->fetch(new FetchOdometerMessage('01JAAAAAAAAAAAAAAAAAAAAAAA', self::slot()->getTimestamp()));
@@ -222,10 +251,20 @@ final class OdometerFetcherTest extends KernelTestCase
         self::assertSame([], $this->requests);
     }
 
-    private function fetch(int $attempt): SlotRunStatus
+    /**
+     * @param int $hoursLater fetches a later slot (its run is created), as the next day's slot would
+     */
+    private function fetch(int $attempt, int $hoursLater = 0): SlotRunStatus
     {
+        $slot = self::slot()->addHours($hoursLater);
+
+        if ($hoursLater > 0) {
+            $this->entityManager()->persist(new FetchSlotRun($this->vehicle, $slot, $slot));
+            $this->entityManager()->flush();
+        }
+
         return self::getContainer()->get(OdometerFetcher::class)->fetch(
-            new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), self::slot()->getTimestamp(), $attempt),
+            new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), $slot->getTimestamp(), $attempt),
         );
     }
 
@@ -263,7 +302,7 @@ final class OdometerFetcherTest extends KernelTestCase
     private function slotRun(): FetchSlotRun
     {
         $this->entityManager()->clear();
-        $run = $this->entityManager()->getRepository(FetchSlotRun::class)->findOneBy([]);
+        $run = $this->entityManager()->getRepository(FetchSlotRun::class)->findOneBy([], ['slotAt' => 'DESC']);
         self::assertInstanceOf(FetchSlotRun::class, $run);
 
         return $run;

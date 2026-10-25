@@ -31,6 +31,8 @@ final readonly class DashboardView
          * @var list<MileageRange>
          */
         public array $mileageRanges = [],
+        /** The odometer at the lease start: the distance driven is the latest odometer minus this. */
+        public ?Distance $startOdometer = null,
     ) {
     }
 }

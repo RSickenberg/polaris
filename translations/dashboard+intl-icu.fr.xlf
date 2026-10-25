@@ -54,6 +54,10 @@
         <source>risk.message.ended_over</source>
         <target>Le leasing s’est terminé avec {excess, number, ::precision-integer} {unit} de dépassement, soit {cost} à ce jour.</target>
       </trans-unit>
+      <trans-unit id="kpi.driven.hint">
+        <source>kpi.driven.hint</source>
+        <target>Compteur {odometer, number, ::precision-integer} {unit} moins {start, number, ::precision-integer} {unit} au début du leasing</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

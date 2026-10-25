@@ -54,6 +54,10 @@
         <source>risk.message.ended_over</source>
         <target>The lease ended {excess, number, ::precision-integer} {unit} over the allowance, which costs {cost} so far.</target>
       </trans-unit>
+      <trans-unit id="kpi.driven.hint">
+        <source>kpi.driven.hint</source>
+        <target>Odometer {odometer, number, ::precision-integer} {unit} minus {start, number, ::precision-integer} {unit} at the lease start</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

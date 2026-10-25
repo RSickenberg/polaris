@@ -104,6 +104,7 @@
                 <twig:Dashboard:KpiCard
                     label="{{ 'kpi.driven'|trans(domain='dashboard') }}"
                     value="{{ 'value.distance'|trans({distance: projection.driven.metres / 1000, unit: unit}, 'dashboard') }}"
+                    hint="{{ 'kpi.driven.hint'|trans({odometer: (projection.driven.metres + dashboard.startOdometer.metres) / 1000, start: dashboard.startOdometer.metres / 1000, unit: unit}, 'dashboard') }}"
                 />
                 <twig:Dashboard:KpiCard
                     label="{{ 'kpi.allowed'|trans(domain='dashboard') }}"
