@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Polaris\Fetching\Command;
 
+use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Polaris\Fetching\Domain\LocalTime;
 use Polaris\Fetching\Service\FetchScheduleService;
 use Polaris\Vehicle\Entity\Vehicle;
+use Psr\Clock\ClockInterface;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
@@ -24,6 +26,7 @@ final readonly class FetchScheduleCommand
     public function __construct(
         private EntityManagerInterface $entityManager,
         private FetchScheduleService $schedules,
+        private ClockInterface $clock,
     ) {
     }
 
@@ -81,11 +84,22 @@ final readonly class FetchScheduleCommand
 
     private function show(SymfonyStyle $io, Vehicle $vehicle): void
     {
+        $now = CarbonImmutable::instance($this->clock->now());
+        $next = $this->schedules->nextSlot($vehicle, $now);
+        $zone = $vehicle->getOwner()->getTimeZone();
+
         $io->success(\sprintf(
-            'Odometer reads for %s at %s (%s).',
+            'Odometer reads for %s at %s (%s)%s.',
             $vehicle->getName(),
             implode(' and ', array_map(strval(...), $this->schedules->slotsFor($vehicle))),
-            $vehicle->getOwner()->getTimeZone(),
+            $zone,
+            $this->schedules->isDefault($vehicle) ? ', the default: nothing is stored until you set times' : '',
+        ));
+        $io->writeln(\sprintf(
+            'Next slot: %s UTC (%s %s). A slot row appears in fetch_slot_run when the worker ticks after that time.',
+            $next->format('Y-m-d H:i'),
+            $next->setTimezone($zone)->format('Y-m-d H:i'),
+            $zone,
         ));
     }
 }
