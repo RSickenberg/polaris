@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="page.history.title">
         <source>page.history.title</source>
-        <target>Historique du compteur, %vehicle%</target>
+        <target>Historique du compteur</target>
       </trans-unit>
       <trans-unit id="page.history.add">
         <source>page.history.add</source>

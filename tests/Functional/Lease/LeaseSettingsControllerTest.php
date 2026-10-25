@@ -61,7 +61,7 @@ final class LeaseSettingsControllerTest extends WebTestCase
         $this->client->request('GET', $this->url());
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Lease terms, Model 3');
+        self::assertSelectorTextContains('h1', 'Lease terms | Model 3');
         self::assertSelectorExists('form input[name="lease_contract[allowance]"]');
         self::assertSelectorTextContains('body', 'Save the lease terms to see the projection.');
     }

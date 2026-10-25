@@ -62,7 +62,7 @@ final class DashboardControllerTest extends WebTestCase
         $this->client->request('GET', $this->url());
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Dashboard, Model 3');
+        self::assertSelectorTextContains('h1', 'Dashboard | Model 3');
         self::assertSelectorTextContains('main', 'Add the lease terms of this vehicle');
         self::assertSelectorExists(\sprintf('main a[data-slot=button][href="/vehicles/%s/lease"]', $this->id()));
         self::assertSelectorNotExists('[role=progressbar]');
@@ -200,7 +200,7 @@ final class DashboardControllerTest extends WebTestCase
         $this->client->request('GET', $this->url(), server: ['HTTP_ACCEPT_LANGUAGE' => 'fr']);
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Tableau de bord, Model 3');
+        self::assertSelectorTextContains('h1', 'Tableau de bord | Model 3');
         self::assertSelectorTextContains('[data-slot=alert-title]', 'Au-dessus du kilométrage');
         self::assertSelectorExists('[role=progressbar][aria-label="Part du kilométrage parcourue"]');
         $text = $this->text();

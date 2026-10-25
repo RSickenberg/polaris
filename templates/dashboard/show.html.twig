@@ -4,10 +4,10 @@
 {% set state = dashboard.state.value %}
 {% set km = enum('Polaris\\Shared\\Domain\\DistanceUnit').Kilometre %}
 
-{% block title %}{{ 'page.title'|trans({'%vehicle%': vehicle.name}, 'dashboard') }}{% endblock %}
+{% block title %}{{ 'page.title'|trans(domain='dashboard') }} | {{ vehicle.name }}{% endblock %}
 
 {% block main %}
-    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.title'|trans({'%vehicle%': vehicle.name}, 'dashboard') }}</h1>
+    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.title'|trans(domain='dashboard') }} <span class="font-normal text-muted-foreground">| {{ vehicle.name }}</span></h1>
 
     {{ include('shared/_flashes.html.twig') }}
 

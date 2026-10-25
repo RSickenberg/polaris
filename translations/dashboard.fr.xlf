@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="page.title">
         <source>page.title</source>
-        <target>Tableau de bord, %vehicle%</target>
+        <target>Tableau de bord</target>
       </trans-unit>
       <trans-unit id="progress.label">
         <source>progress.label</source>

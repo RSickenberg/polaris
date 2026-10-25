@@ -48,7 +48,7 @@ final class LocaleTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('Content-Language', 'fr');
         self::assertSelectorExists('html[lang="fr"]');
-        self::assertSelectorTextContains('h1', 'Historique du compteur, Model 3');
+        self::assertSelectorTextContains('h1', 'Historique du compteur | Model 3');
         self::assertSelectorTextContains('main h2', 'Ajouter un relevé');
         self::assertSelectorExists('button:contains("Ajouter le relevé")');
         $cells = $this->client->getCrawler()->filter('tbody td')->each(static fn ($cell): string => self::text($cell->text()));
@@ -61,7 +61,7 @@ final class LocaleTest extends WebTestCase
 
         self::assertResponseHeaderSame('Content-Language', 'en');
         self::assertSelectorExists('html[lang="en"]');
-        self::assertSelectorTextContains('h1', 'Odometer history, Model 3');
+        self::assertSelectorTextContains('h1', 'Odometer history | Model 3');
         $cells = $this->client->getCrawler()->filter('tbody td')->each(static fn ($cell): string => self::text($cell->text()));
         self::assertSame(['Oct 1, 2026, 8:00 AM UTC', '12,345', 'Manual'], $cells);
     }

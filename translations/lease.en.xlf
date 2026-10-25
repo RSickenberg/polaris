@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="page.settings.title">
         <source>page.settings.title</source>
-        <target>Lease terms, %vehicle%</target>
+        <target>Lease terms</target>
       </trans-unit>
       <trans-unit id="page.settings.assessment">
         <source>page.settings.assessment</source>
