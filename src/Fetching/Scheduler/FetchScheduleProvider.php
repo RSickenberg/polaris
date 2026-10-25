@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Polaris\Fetching\Scheduler;
 
 use Polaris\Fetching\Message\DispatchDueFetches;
-use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
@@ -28,7 +27,6 @@ final readonly class FetchScheduleProvider implements ScheduleProviderInterface
 
     public function __construct(
         private CacheInterface $cache,
-        private LockFactory $lockFactory,
     ) {
     }
 
@@ -38,8 +36,9 @@ final readonly class FetchScheduleProvider implements ScheduleProviderInterface
             ->with(RecurringMessage::cron(self::TICK, new DispatchDueFetches(), 'UTC'))
             // A missed tick is not worth running late: the next one looks at the same slots.
             ->stateful($this->cache)
-            ->processOnlyLastMissedRun(true)
-            // Two workers on the same Redis tick once, not twice.
-            ->lock($this->lockFactory->createLock('polaris-fetch-schedule'));
+            ->processOnlyLastMissedRun(true);
+        // No ->lock(): the scheduler would hold it for as long as the worker lives, and a killed worker leaves it behind
+        // for several minutes, which silences every tick after a restart. Two workers are safe without it, because
+        // DueFetchDispatcher queues a slot once (FetchSlotRun, unique per vehicle and slot).
     }
 }

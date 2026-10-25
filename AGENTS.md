@@ -324,7 +324,8 @@ are specific to Polaris and win when the two disagree.
   (`frankenphp/docker-worker.sh`) consumes `scheduler_default async tesla` explicitly, never `--all`, which would also
   drain `failed` in a loop. Tests use `in-memory://` transports (`messenger.transport.tesla`).
 - `Scheduler\FetchScheduleProvider` has one recurring message, `DispatchDueFetches` every minute on the minute (a cron in UTC: `every('5 minutes')` counts from the worker start and
-  would pick a slot up at an arbitrary time), stateful and locked.
+  would pick a slot up at an arbitrary time), stateful, not locked (a lock held by a killed worker silences the ticks after a restart; the
+  `FetchSlotRun` uniqueness already keeps two workers from queuing a slot twice).
   The slots are not cron entries: `Service\DueFetchDispatcher` turns each vehicle's local slots into UTC instants with
   `Domain\SlotCalculator` on every tick (owner's time zone, so daylight saving is followed with no restart), and queues a
   `FetchOdometerMessage` for each slot whose window is open (`Domain\FetchWindow`: from the slot to 3 hours after) and
