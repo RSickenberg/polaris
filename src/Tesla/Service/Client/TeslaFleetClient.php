@@ -75,6 +75,7 @@ final readonly class TeslaFleetClient implements VehicleClient
 
     public function listVehicles(TeslaApp $app): array
     {
+        /** @var FleetRegion $region */
         $region = null;
         $data = $this->get(FleetApiOperation::ListVehicles, $app, '/api/1/vehicles', $region);
         $items = $data['response'] ?? null;
@@ -94,6 +95,7 @@ final readonly class TeslaFleetClient implements VehicleClient
 
     public function vehicleState(TeslaApp $app, Vin $vin): VehicleState
     {
+        /** @var FleetRegion $region */
         $region = null;
         $data = $this->get(FleetApiOperation::VehicleState, $app, $this->vehiclePath($vin), $region);
         $response = $data['response'] ?? null;
@@ -107,6 +109,7 @@ final readonly class TeslaFleetClient implements VehicleClient
 
     public function vehicleData(TeslaApp $app, Vin $vin): OdometerReading
     {
+        /** @var FleetRegion $region */
         $region = null;
         $data = $this->get(FleetApiOperation::VehicleData, $app, $this->vehiclePath($vin) . '/vehicle_data', $region);
         $response = $data['response'] ?? null;
@@ -132,7 +135,7 @@ final readonly class TeslaFleetClient implements VehicleClient
     }
 
     /**
-     * @param-out FleetRegion $region
+     * @param-out  FleetRegion  $region
      *
      * @return array<mixed>
      *
