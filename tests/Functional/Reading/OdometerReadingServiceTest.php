@@ -11,6 +11,7 @@ use Polaris\Reading\Domain\ReadingRejection;
 use Polaris\Reading\Domain\ReadingSource;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Reading\Form\Model\OdometerReadingData;
+use Polaris\Reading\Service\Enum\RecordOutcome;
 use Polaris\Reading\Service\Exception\ReadingRejected;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Shared\Domain\Distance;
@@ -211,6 +212,57 @@ final class OdometerReadingServiceTest extends KernelTestCase
             6,
             $entityManager->getConnection()->fetchOne("SELECT datetime_precision FROM information_schema.columns WHERE table_name = 'odometer_reading' AND column_name = 'read_at'"),
         );
+    }
+
+    public function testAValueReadFromTheCarIsStoredWithItsRawMiles(): void
+    {
+        $recording = self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-01 08:00', 'UTC'), Distance::fromMiles(1_000.5));
+
+        self::assertSame(RecordOutcome::Stored, $recording->outcome);
+        self::assertSame(ReadingSource::Api, $recording->stored?->getSource());
+        self::assertSame('1000.500', $recording->stored->getOdometerRaw());
+        self::assertSame(DistanceUnit::Mile, $recording->stored->getOdometerRawUnit());
+        self::assertSame(1_610_149, $recording->stored->getOdometer()->metres());
+    }
+
+    public function testTheSameValueAtALaterInstantIsNotStored(): void
+    {
+        self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-01 08:00', 'UTC'), Distance::fromMiles(1_000.5));
+
+        $recording = self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-02 08:00', 'UTC'), Distance::fromMiles(1_000.5));
+
+        self::assertSame(RecordOutcome::Unchanged, $recording->outcome);
+        self::assertCount(1, self::service()->history($this->vehicle));
+    }
+
+    public function testAReadingAtAnInstantThatIsAlreadyStoredIsNotStored(): void
+    {
+        self::service()->recordManual($this->vehicle, self::data('2026-10-01 08:00', 1_000));
+
+        $recording = self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-01 08:00', 'UTC'), Distance::fromKilometres(2_000));
+
+        self::assertSame(RecordOutcome::Unchanged, $recording->outcome);
+    }
+
+    public function testAValueLowerThanThePreviousReadingIsRejectedWithoutAnException(): void
+    {
+        self::service()->recordManual($this->vehicle, self::data('2026-10-01 08:00', 10_000));
+
+        $recording = self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-02 08:00', 'UTC'), Distance::fromKilometres(9_000));
+
+        self::assertSame(RecordOutcome::Rejected, $recording->outcome);
+        self::assertSame(ReadingRejection::LowerThanPrevious, $recording->rejection);
+        self::assertSame(10_000_000, $recording->conflicting?->getOdometer()->metres());
+        self::assertCount(1, self::service()->history($this->vehicle));
+    }
+
+    public function testAValueHigherThanALaterReadingIsRejected(): void
+    {
+        self::service()->recordManual($this->vehicle, self::data('2026-10-03 08:00', 10_000));
+
+        $recording = self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-02 08:00', 'UTC'), Distance::fromKilometres(11_000));
+
+        self::assertSame(ReadingRejection::HigherThanNext, $recording->rejection);
     }
 
     private static function data(string $readAtUtc, int $value, DistanceUnit $unit = DistanceUnit::Kilometre): OdometerReadingData

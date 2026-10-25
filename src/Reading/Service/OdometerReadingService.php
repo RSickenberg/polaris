@@ -13,13 +13,15 @@ use Polaris\Reading\Domain\ReadingRejection;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Reading\Form\Model\OdometerReadingData;
 use Polaris\Reading\Repository\OdometerReadingRepository;
+use Polaris\Reading\Service\Dto\ApiRecording;
 use Polaris\Reading\Service\Exception\ReadingRejected;
 use Polaris\Shared\Domain\Distance;
+use Polaris\Shared\Domain\DistanceUnit;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
 
 /**
- * Records manual odometer readings and lists the history. The only place the rules live:
+ * Records odometer readings (typed by the user or read from the car) and lists the history. The only place the rules live:
  * the form controller and the console command both call it.
  */
 final readonly class OdometerReadingService
@@ -77,6 +79,55 @@ final readonly class OdometerReadingService
         }
 
         return $reading;
+    }
+
+    /**
+     * Records an odometer value read from the car, only when it changed: a value equal to the previous
+     * reading (or a reading already stored at the same instant) is not stored. A value that breaks the
+     * order of the readings is refused without an exception, so a scheduled fetch is not retried.
+     *
+     * @throws ORMException
+     */
+    public function recordFromApi(Vehicle $vehicle, CarbonImmutable $readAt, Distance $odometer): ApiRecording
+    {
+        $readAt = $readAt->utc();
+
+        if (null !== $this->readings->findAt($vehicle, $readAt)) {
+            return ApiRecording::unchanged();
+        }
+
+        // Built first: the stored value is the one derived from the raw miles, which is what the next read is compared with.
+        $reading = OdometerReading::fromTesla(
+            $vehicle,
+            $readAt,
+            number_format($odometer->in(DistanceUnit::Mile), 3, '.', ''),
+            DistanceUnit::Mile,
+        );
+        $previous = $this->readings->findBefore($vehicle, $readAt);
+
+        if (null !== $previous && $previous->getOdometer()->equals($reading->getOdometer())) {
+            return ApiRecording::unchanged();
+        }
+
+        $next = $this->readings->findAfter($vehicle, $readAt);
+
+        $rejection = $this->order->check($reading->toSample(), $previous?->toSample(), $next?->toSample());
+        if (null !== $rejection) {
+            $neighbour = ReadingRejection::LowerThanPrevious === $rejection ? $previous : $next;
+            \assert(null !== $neighbour);
+
+            return ApiRecording::rejected($rejection, $neighbour);
+        }
+
+        try {
+            $this->entityManager->persist($reading);
+            $this->entityManager->flush();
+        } catch (UniqueConstraintViolationException) {
+            // Another writer stored a reading at the same instant after the check above.
+            return ApiRecording::unchanged();
+        }
+
+        return ApiRecording::stored($reading);
     }
 
     /**
