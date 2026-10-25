@@ -75,11 +75,11 @@ final readonly class TeslaFleetClient implements VehicleClient
 
     public function listVehicles(TeslaApp $app): array
     {
-        /** @var FleetRegion $region */
         $region = null;
         $data = $this->get(FleetApiOperation::ListVehicles, $app, '/api/1/vehicles', $region);
         $items = $data['response'] ?? null;
 
+        /* @var FleetRegion $region */
         if (!\is_array($items)) {
             throw FleetApiError::unexpected(FleetApiOperation::ListVehicles, $region, 'the answer has no vehicle list');
         }
@@ -95,11 +95,11 @@ final readonly class TeslaFleetClient implements VehicleClient
 
     public function vehicleState(TeslaApp $app, Vin $vin): VehicleState
     {
-        /** @var FleetRegion $region */
         $region = null;
         $data = $this->get(FleetApiOperation::VehicleState, $app, $this->vehiclePath($vin), $region);
         $response = $data['response'] ?? null;
 
+        /* @var FleetRegion $region */
         if (!\is_array($response)) {
             throw FleetApiError::unexpected(FleetApiOperation::VehicleState, $region, 'the answer has no vehicle');
         }
@@ -109,13 +109,13 @@ final readonly class TeslaFleetClient implements VehicleClient
 
     public function vehicleData(TeslaApp $app, Vin $vin): OdometerReading
     {
-        /** @var FleetRegion $region */
         $region = null;
         $data = $this->get(FleetApiOperation::VehicleData, $app, $this->vehiclePath($vin) . '/vehicle_data', $region);
         $response = $data['response'] ?? null;
         $state = \is_array($response) ? ($response['vehicle_state'] ?? null) : null;
         $miles = \is_array($state) ? ($state['odometer'] ?? null) : null;
 
+        /* @var FleetRegion $region */
         if (!\is_int($miles) && !\is_float($miles)) {
             throw FleetApiError::unexpected(FleetApiOperation::VehicleData, $region, 'the answer has no vehicle_state.odometer');
         }
