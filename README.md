@@ -122,6 +122,8 @@ Run the steps in order. Every command runs in the container through `make sf`.
    make sf ARGS="polaris:tesla:token:refresh --force"
    ```
 
+7. **Choose when the odometer is read.** By default Polaris reads it once a day at 21:00 in your time zone (set on the settings page), only when the car is already online: it never wakes the car. If the car is asleep or offline, it checks again every hour for 3 hours, then skips that day. Change the times (one or two a day, `HH:MM`, 24 hours) with `make sf ARGS="polaris:fetch:schedule 07:30 18:00"`; without arguments the command shows the current ones. The `worker` service does the reading, so it must be running. A value is stored only when it changed. Messages that fail are kept in the `failed` queue: list them with `make sf ARGS="messenger:failed:show"` and retry with `messenger:failed:retry`.
+
 ## Use it
 
 - **Odometer readings.** Stored in metres and UTC whatever unit you type. Add one on `/vehicles/{id}/readings` (which lists the history) or from the console:
@@ -163,7 +165,7 @@ The setup is based on [dunglas/symfony-docker](https://github.com/dunglas/symfon
 | Service | Role | Host port (dev) |
 | --- | --- | --- |
 | `php` | FrankenPHP web server | https://localhost |
-| `worker` | `messenger:consume` (idle until Messenger is installed) | none |
+| `worker` | Scheduler tick and `messenger:consume scheduler_default async tesla` | none |
 | `database` | PostgreSQL 18, UTC | `127.0.0.1:5432` |
 | `redis` | Redis 8 | `127.0.0.1:6379` |
 | `mailer` | Mailpit | UI http://localhost:8025, SMTP `127.0.0.1:1025` |
