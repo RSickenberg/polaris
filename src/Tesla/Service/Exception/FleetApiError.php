@@ -6,6 +6,7 @@ namespace Polaris\Tesla\Service\Exception;
 
 use Polaris\Tesla\Domain\FleetRegion;
 use Polaris\Tesla\Service\Enum\FleetApiOperation;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * A failed Fleet API call, with a message for the person running the command: what was attempted,
@@ -15,6 +16,11 @@ use Polaris\Tesla\Service\Enum\FleetApiOperation;
  */
 final class FleetApiError extends \RuntimeException
 {
+    /**
+     * Tesla's own status for a vehicle that answered with an error; Symfony has no constant for it.
+     */
+    public const int HTTP_DEVICE_UNEXPECTED_RESPONSE = 540;
+
     private const int MAX_DETAIL = 200;
 
     private function __construct(
@@ -89,7 +95,15 @@ final class FleetApiError extends \RuntimeException
     public function refreshTokenRejected(): bool
     {
         return FleetApiOperation::Refresh === $this->operation
-            && (\in_array($this->oauthError, ['invalid_grant', 'login_required'], true) || 401 === $this->httpStatus);
+            && (\in_array($this->oauthError, ['invalid_grant', 'login_required'], true) || Response::HTTP_UNAUTHORIZED === $this->httpStatus);
+    }
+
+    /**
+     * HTTP 408: the car was not online when the request was made. Not a failure of Polaris or Tesla.
+     */
+    public function isVehicleNotOnline(): bool
+    {
+        return Response::HTTP_REQUEST_TIMEOUT === $this->httpStatus;
     }
 
     private static function oauthErrorCode(string $body): ?string
@@ -103,13 +117,17 @@ final class FleetApiError extends \RuntimeException
     private static function hint(int $status): string
     {
         return match (true) {
-            400 === $status => 'Tesla rejected the request',
-            401 === $status => 'Tesla did not accept the credentials, check the client ID and the client secret',
-            403 === $status => 'Tesla refused access, check that the app is approved and that the domain matches an allowed origin',
-            404 === $status => 'Tesla does not know this endpoint or domain',
-            422 === $status => 'Tesla could not validate the request or the public key',
-            429 === $status => 'Tesla is rate-limiting the requests, try again later',
-            $status >= 500 => 'Tesla failed to answer, try again later',
+            Response::HTTP_BAD_REQUEST === $status => 'Tesla rejected the request',
+            Response::HTTP_UNAUTHORIZED === $status => 'Tesla did not accept the credentials, check the client ID and the client secret',
+            Response::HTTP_FORBIDDEN === $status => 'Tesla refused access, check that the app is approved and that the domain matches an allowed origin',
+            Response::HTTP_NOT_FOUND === $status => 'Tesla does not know this endpoint or domain',
+            Response::HTTP_REQUEST_TIMEOUT === $status => 'the vehicle is not online',
+            Response::HTTP_PRECONDITION_FAILED === $status => 'a Tesla precondition is not met, check that the app is registered and that the vehicle supports the call',
+            Response::HTTP_MISDIRECTED_REQUEST === $status => 'the Tesla account is in another region, check the enabled regions of the app',
+            Response::HTTP_UNPROCESSABLE_ENTITY === $status => 'Tesla could not validate the request or the public key',
+            Response::HTTP_TOO_MANY_REQUESTS === $status => 'Tesla is rate-limiting the requests, try again later',
+            self::HTTP_DEVICE_UNEXPECTED_RESPONSE === $status => 'the vehicle returned an error, it may need a reboot or service',
+            $status >= Response::HTTP_INTERNAL_SERVER_ERROR => 'Tesla failed to answer, try again later',
             default => 'Tesla answered an unexpected status',
         };
     }

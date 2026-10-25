@@ -378,6 +378,43 @@ are specific to Polaris and win when the two disagree.
 - Tesla can revoke API access at any time: manual odometer entry must always keep
   working.
 
+### Vehicle reads (Tesla module)
+
+- `Tesla\Service\VehicleClient` (implemented by `Client\TeslaFleetClient`) lists vehicles
+  (`GET /api/1/vehicles`, first page only), reads a state (`/vehicles/{vin}`, `VehicleState`) and a live odometer
+  (`/vehicles/{vin}/vehicle_data`, `OdometerReading`). Callers pass the `TeslaApp` and a `Vin`: the client gets the
+  token from `TokenProvider` and the base URL from the stored `OAuthToken`, lets `TeslaNotConnected` through
+  (before any HTTP call) and has no wake method. It sends no `endpoints` query, so never `location_data`. The
+  odometer is `Distance::fromMiles()` of `vehicle_state.odometer`; a missing or invalid one is
+  `FleetApiError::unexpected`, as is an unknown state value.
+- `Tesla\Service\TeslaOdometerReader::read()` is the read flow: state first, then `vehicle_data` only when the
+  car is `online`. `asleep` and `offline` give `NoReadingReason::Asleep|Offline` without asking the car, and a 408
+  on the live call (it fell asleep in between) gives `Unavailable`, not retried. To get a reading the user wakes the
+  car in the Tesla app and refetches. It never wakes the car (#32 decides how: the default is the Tesla app, with an
+  opt-in daily automatic wake at an hour the user chooses, which needs an ADR and a change of the rule above).
+- `vehicle_data_cached` is not used: a real answer of an offline car has no `odometer` in its `vehicle_state`
+  (car name, version, tyre pressures, doors and lock only). Its `timestamp` blocks are epoch milliseconds.
+- Retries are on this client only (`RetryableHttpClient` built in its constructor): 500, 502, 503, 504 and 540, at
+  most 2 retries, delay `polaris.tesla.retry_delay_ms` (500 ms, doubling, capped at 4 s, `0` in tests);
+  `Retry-After` is honoured by the Symfony client. 408 is never retried (the car is not online and every status
+  below 500 is billed), nor 401, 403, 404, 412, 421 or 429. `OAuthClient` and `FleetApiClient` keep the plain
+  `http_client`: a refresh token is single use and must never be sent twice. Do not configure `retry_failed`
+  globally.
+- The fetch job (Fetching module, later issue) compares a reading with the last stored one and saves it; this
+  module only reads.
+- `polaris:tesla:debug:fetch list|state|data|cached [vin] [--redact]` prints the raw answer of one of these reads, whole
+  by default; `--redact` removes the VIN, ids, car names, tokens, location and `drive_state`, to paste it in an issue
+  or to build a fixture. `data` is a billed live call. GET only, never `wake_up`.
+- Confirmed by real EU answers: the shape of the vehicle list and of a vehicle (`state` `online` and `offline`
+  seen), a live `vehicle_data` (`response.vehicle_state.odometer` as a float, `vehicle_state.timestamp` in epoch
+  milliseconds, used as the read time; the clock only when it is missing) and the 408 body (`error: "vehicle
+  unavailable: vehicle is offline or asleep"`).
+- The odometer of the API is always in miles, never kilometres, whatever `gui_settings.gui_distance_units` (the
+  display setting) says; the answer carries no unit field.
+- Unverified (Tesla does not document them, or no real answer was seen): the paging parameters of `/vehicles` (only the answer's `pagination` object was seen); the `endpoints`
+  parameter; the `asleep` state value; that a 408 is the answer of a car that fell asleep after an `online`
+  state.
+
 ### Translations
 
 - Locales: `en` (default and fallback) and `fr`, set in `config/packages/translation.yaml`.

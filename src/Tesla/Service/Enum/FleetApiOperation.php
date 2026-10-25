@@ -12,6 +12,9 @@ enum FleetApiOperation: string
     case CodeExchange = 'code_exchange';
     case Refresh = 'refresh';
     case UserRegion = 'user_region';
+    case ListVehicles = 'list_vehicles';
+    case VehicleState = 'vehicle_state';
+    case VehicleData = 'vehicle_data';
 
     public function describe(): string
     {
@@ -22,6 +25,9 @@ enum FleetApiOperation: string
             self::CodeExchange => 'Exchanging the authorization code',
             self::Refresh => 'Refreshing the access token',
             self::UserRegion => 'Reading the region of the Tesla account',
+            self::ListVehicles => 'Listing the vehicles',
+            self::VehicleState => 'Reading the state of the vehicle',
+            self::VehicleData => 'Reading the vehicle data',
         };
     }
 }
