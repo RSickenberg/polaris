@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'page.import.title'|trans(domain='vehicle') }}{% endblock %}
+
+{% block main %}
+    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.import.title'|trans(domain='vehicle') }}</h1>
+
+    <div class="max-w-3xl">{{ include('shared/_flashes.html.twig') }}</div>
+
+    <div class="mt-6 flex max-w-3xl flex-col gap-6">
+        {% if status == 'ready' %}
+            <twig:Card>
+                <twig:Card:Header>
+                    <twig:Card:Title><h2>{{ 'page.import.heading'|trans(domain='vehicle') }}</h2></twig:Card:Title>
+                    <twig:Card:Description>{{ 'page.import.description'|trans(domain='vehicle') }}</twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    {{ form(form) }}
+                </twig:Card:Content>
+            </twig:Card>
+        {% elseif status == 'nothing_new' %}
+            {{ include('dashboard/_empty.html.twig', {
+                text: 'import.none.text'|trans(domain='vehicle'),
+                cta: 'import.back'|trans(domain='vehicle'),
+                href: path('dashboard_home'),
+            }) }}
+        {% elseif status == 'not_connected' %}
+            <twig:Alert variant="destructive" data-import-status="not_connected">
+                <twig:Alert:Title>{{ 'import.not_connected.title'|trans(domain='vehicle') }}</twig:Alert:Title>
+                <twig:Alert:Description>{{ 'import.not_connected.description'|trans(domain='vehicle') }}</twig:Alert:Description>
+            </twig:Alert>
+            <div><twig:Button as="a" href="{{ path('tesla_settings') }}">{{ 'import.not_connected.cta'|trans(domain='vehicle') }}</twig:Button></div>
+        {% else %}
+            <twig:Alert variant="destructive" data-import-status="error">
+                <twig:Alert:Title>{{ 'import.error.title'|trans(domain='vehicle') }}</twig:Alert:Title>
+                <twig:Alert:Description>{{ 'import.error.description'|trans(domain='vehicle') }}</twig:Alert:Description>
+            </twig:Alert>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -50,6 +50,10 @@
         <source>tesla.refresh_token.required</source>
         <target>Collez le jeton d'actualisation.</target>
       </trans-unit>
+      <trans-unit id="vehicle.import.none_selected">
+        <source>vehicle.import.none_selected</source>
+        <target>Cochez au moins un véhicule.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

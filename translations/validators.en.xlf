@@ -50,6 +50,10 @@
         <source>tesla.refresh_token.required</source>
         <target>Paste the refresh token.</target>
       </trans-unit>
+      <trans-unit id="vehicle.import.none_selected">
+        <source>vehicle.import.none_selected</source>
+        <target>Tick at least one vehicle.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

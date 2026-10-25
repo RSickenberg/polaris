@@ -307,6 +307,15 @@ are specific to Polaris and win when the two disagree.
   `response.fleet_api_base_url`), what happens when the account region differs from the audience, and whether
   `http://localhost:8000/tesla/callback` completes the flow end to end.
 
+### Vehicles (Vehicle module)
+
+- A vehicle is created by `Vehicle\Service\TeslaVehicleImporter` (list of the Tesla account through `VehicleClient::listVehicles()`,
+  first page only; no car is contacted), by `polaris:vehicle:import [--vin=] [--dry-run]`, by the page `/vehicles/import`
+  (`Vehicle\Controller\VehicleImportController`, route priority above `/vehicles/{id}`, translation domain `vehicle`) or by hand
+  with `polaris:vehicle:add <vin> <name>`. The importer reads the listing again when importing: a posted VIN is only a choice
+  among the vehicles Tesla returned. A VIN is unique across users, so one that exists is "already added". The name is the Tesla
+  display name, else `Tesla` and the last 4 characters of the VIN. The home page links to the import page.
+
 ### Scheduled fetching (Fetching module)
 
 - Messenger (`config/packages/messenger.yaml`) has three Redis stream transports on `MESSENGER_TRANSPORT_DSN`: `async`

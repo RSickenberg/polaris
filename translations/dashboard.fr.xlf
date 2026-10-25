@@ -80,7 +80,7 @@
       </trans-unit>
       <trans-unit id="page.home.empty">
         <source>page.home.empty</source>
-        <target>Il n'y a pas encore de véhicule. Dès qu'un véhicule est ajouté, il est listé ici.</target>
+        <target>Il n’y a pas encore de véhicule. Importez-les depuis votre compte Tesla.</target>
       </trans-unit>
       <trans-unit id="home.dashboard">
         <source>home.dashboard</source>
@@ -141,6 +141,10 @@
       <trans-unit id="chart.range.all">
         <source>chart.range.all</source>
         <target>Tout le bail</target>
+      </trans-unit>
+      <trans-unit id="home.import">
+        <source>home.import</source>
+        <target>Importer depuis Tesla</target>
       </trans-unit>
     </body>
   </file>

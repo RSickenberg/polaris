@@ -80,7 +80,7 @@
       </trans-unit>
       <trans-unit id="page.home.empty">
         <source>page.home.empty</source>
-        <target>There is no vehicle yet. Once a vehicle is added, it is listed here.</target>
+        <target>There is no vehicle yet. Import them from your Tesla account.</target>
       </trans-unit>
       <trans-unit id="home.dashboard">
         <source>home.dashboard</source>
@@ -141,6 +141,10 @@
       <trans-unit id="chart.range.all">
         <source>chart.range.all</source>
         <target>Whole lease</target>
+      </trans-unit>
+      <trans-unit id="home.import">
+        <source>home.import</source>
+        <target>Import from Tesla</target>
       </trans-unit>
     </body>
   </file>
