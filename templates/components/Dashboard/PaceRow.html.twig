@@ -1,0 +1,27 @@
+{%- props
+    ## string The name of the row, used by the tests and the styles (data-pace).
+    key,
+    ## string The translated title of the row.
+    title,
+    ## string The translated sentence that says what the figures are based on.
+    basis,
+    ## \Polaris\Lease\Domain\Budget The distances to drive per day, week and month.
+    budget,
+    ## string|null The translated message shown instead of the figures when the row has none (a budget of zero everywhere).
+    fallback = null
+-%}
+{# One row of the pace table: a title with its basis, then the distance per day, week and month. #}
+<twig:Table:Row data-pace="{{ key }}" {{ ...attributes }}>
+    <twig:Table:Cell class="max-w-sm py-3 whitespace-normal">
+        <span class="block font-medium">{{ title }}</span>
+        <span class="block text-sm text-muted-foreground">{{ basis }}</span>
+    </twig:Table:Cell>
+    {% if fallback is not null and budget.perDay.metres == 0 and budget.perWeek.metres == 0 and budget.perMonth.metres == 0 %}
+        <twig:Table:Cell colspan="3" class="text-sm text-muted-foreground whitespace-normal">{{ fallback }}</twig:Table:Cell>
+    {% else %}
+        {% set unit = 'unit.km'|trans(domain='shared') %}
+        {% for distance in [budget.perDay, budget.perWeek, budget.perMonth] %}
+            <twig:Table:Cell class="text-end tabular-nums" data-figure>{{ 'value.distance'|trans({distance: distance.metres / 1000, unit: unit}, 'dashboard') }}</twig:Table:Cell>
+        {% endfor %}
+    {% endif %}
+</twig:Table:Row>

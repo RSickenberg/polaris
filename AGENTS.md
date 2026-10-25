@@ -135,7 +135,7 @@ are specific to Polaris and win when the two disagree.
   edits so far replace hardcoded English text with translation keys. `symfony/ux-toolkit`
   is a dev dependency: the installed files are committed. Polaris's own components go in
   `templates/components/<Module>/` (the shell is `Shared`; the dashboard building blocks `KpiCard`,
-  `LeaseProgress`, `BudgetBadge`, `RiskAlert` and `MileageChart` are `Dashboard`, anonymous components built on the
+  `LeaseProgress`, `PaceRow` (a row of the pace table: budget, even pace, current pace), `RiskAlert` and `MileageChart` are `Dashboard`, anonymous components built on the
   kit Card, Progress, Badge and Alert; `MileageChart` only feeds `chart_controller.js`).
   `assets/controllers/chart_controller.js` is the one generic chart controller: chart type, series,
   options, `locale` and `timeZone` are Stimulus values, options strings written `var(--token)` are

@@ -18,18 +18,6 @@
         <source>kpi.projected.hint</source>
         <target>Kilométrage autorisé : {allowance, number, ::precision-integer} {unit}</target>
       </trans-unit>
-      <trans-unit id="budget.per_day">
-        <source>budget.per_day</source>
-        <target>{distance, number, ::precision-integer} {unit} / jour</target>
-      </trans-unit>
-      <trans-unit id="budget.per_week">
-        <source>budget.per_week</source>
-        <target>{distance, number, ::precision-integer} {unit} / semaine</target>
-      </trans-unit>
-      <trans-unit id="budget.per_month">
-        <source>budget.per_month</source>
-        <target>{distance, number, ::precision-integer} {unit} / mois</target>
-      </trans-unit>
       <trans-unit id="risk.message.ok">
         <source>risk.message.ok</source>
         <target>Projection de {projected, number, ::precision-integer} {unit} à la fin du leasing, dans la limite de {allowance, number, ::precision-integer} {unit} autorisés.</target>

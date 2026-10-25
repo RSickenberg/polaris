@@ -127,12 +127,19 @@ final class DashboardControllerTest extends WebTestCase
         self::assertStringContainsString('minus 0 km at the lease start', $text);
         self::assertStringContainsString('What you should drive normally', $text);
         self::assertStringContainsString('What you drive at your current pace', $text);
-        self::assertStringContainsString('1,250 km / month', $text);
         self::assertStringContainsString('Allowed to date ' . $km($assessment->projection->allowedToDate->metres()), $text);
         self::assertStringContainsString('Projected at lease end ' . $km($assessment->projection->projectedAtEnd->metres()), $text);
-        self::assertStringContainsString($km($assessment->budget->perDay->metres()) . ' / day', $text);
-        self::assertStringContainsString($km($assessment->budget->perWeek->metres()) . ' / week', $text);
-        self::assertStringContainsString($km($assessment->budget->perMonth->metres()) . ' / month', $text);
+        self::assertStringContainsString('per day per week per month', $text);
+        self::assertSame(
+            [$km($assessment->budget->perDay->metres()), $km($assessment->budget->perWeek->metres()), $km($assessment->budget->perMonth->metres())],
+            $this->figures('budget'),
+        );
+        self::assertSame(
+            [$km($assessment->currentPace->perDay->metres()), $km($assessment->currentPace->perWeek->metres()), $km($assessment->currentPace->perMonth->metres())],
+            $this->figures('current'),
+        );
+        // 15,000 km over 12 months: 1,250 km a lease month.
+        self::assertSame('1,250 km', $this->figures('even')[2]);
         // The reading is dated 11:00 UTC on 2 July 2026.
         // The clock is at 12:00 UTC: the day is said in words, and the zone only in the hint.
         self::assertStringContainsString('Last reading Today at 11:00 AM Time zone: UTC', $text);
@@ -174,7 +181,7 @@ final class DashboardControllerTest extends WebTestCase
         self::assertSame('110% of the allowance driven', $crawler->filter('[role=progressbar]')->attr('aria-valuetext'));
         self::assertSelectorTextContains('main', '110%');
         self::assertSelectorTextContains('main', 'No budget left: the allowance is used up.');
-        self::assertSelectorNotExists('section[aria-labelledby=budget-title] [data-slot=badge]');
+        self::assertSelectorNotExists('[data-pace=budget] [data-figure]');
     }
 
     public function testAnEndedLeaseShowsTheCostSoFarAndNoBudget(): void
@@ -209,9 +216,9 @@ final class DashboardControllerTest extends WebTestCase
         self::assertSelectorExists('[role=progressbar][aria-label="Part du kilométrage parcourue"]');
         $text = $this->text();
         self::assertStringContainsString('Parcouru 10', $text);
-        self::assertStringContainsString(' / jour', $text);
-        self::assertStringContainsString(' / semaine', $text);
-        self::assertStringContainsString(' / mois', $text);
+        self::assertStringContainsString('par jour', $text);
+        self::assertStringContainsString('par semaine', $text);
+        self::assertStringContainsString('par mois', $text);
         self::assertStringContainsString('Dernier relevé', $text);
         self::assertMatchesRegularExpression('/\d\s€|\d\sCHF/u', $text);
     }
@@ -230,6 +237,16 @@ final class DashboardControllerTest extends WebTestCase
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 0);
 
         return $formatter->format($metres / 1000) . ' km';
+    }
+
+    /**
+     * The figures (per day, week and month) of a row of the pace table.
+     *
+     * @return list<string>
+     */
+    private function figures(string $row): array
+    {
+        return $this->client->getCrawler()->filter(\sprintf('[data-pace=%s] [data-figure]', $row))->each(static fn ($cell): string => preg_replace('/\s+/u', ' ', trim($cell->text())) ?? '');
     }
 
     private function lease(string $start, int $months, int $allowanceKm, int $tolerancePercent): void

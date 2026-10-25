@@ -166,6 +166,22 @@
         <source>current_pace.basis</source>
         <target>What the projection says you will drive per period until the lease ends. The cut in the alert is this minus the first figures.</target>
       </trans-unit>
+      <trans-unit id="pace.row">
+        <source>pace.row</source>
+        <target>Pace</target>
+      </trans-unit>
+      <trans-unit id="pace.day">
+        <source>pace.day</source>
+        <target>per day</target>
+      </trans-unit>
+      <trans-unit id="pace.week">
+        <source>pace.week</source>
+        <target>per week</target>
+      </trans-unit>
+      <trans-unit id="pace.month">
+        <source>pace.month</source>
+        <target>per month</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
