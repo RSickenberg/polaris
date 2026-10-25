@@ -122,7 +122,7 @@ Run the steps in order. Every command runs in the container through `make sf`.
    make sf ARGS="polaris:tesla:token:refresh --force"
    ```
 
-7. **Choose when the odometer is read.** By default Polaris reads it once a day at 21:00 in your time zone (set on the settings page), only when the car is already online: it never wakes the car. If the car is asleep or offline, it checks again every hour for 3 hours, then skips that day. Change the times (one or two a day, `HH:MM`, 24 hours) with `make sf ARGS="polaris:fetch:schedule 07:30 18:00"`; without arguments the command shows the current ones. The `worker` service does the reading, so it must be running. A value is stored only when it changed. Messages that fail are kept in the `failed` queue: list them with `make sf ARGS="messenger:failed:show"` and retry with `messenger:failed:retry`.
+7. **Add your vehicle and choose when the odometer is read.** Find the VIN with `make sf ARGS="polaris:tesla:debug:fetch list"`, then add the vehicle with `make sf ARGS="polaris:vehicle:add <VIN> 'Model 3'"`. By default Polaris reads it once a day at 21:00 in your time zone (set on the settings page), only when the car is already online: it never wakes the car. If the car is asleep or offline, it checks again every hour for 3 hours, then skips that day. Change the times (one or two a day, `HH:MM`, 24 hours) with `make sf ARGS="polaris:fetch:schedule 07:30 18:00"`; without arguments the command shows the current ones. The `worker` service does the reading, so it must be running. A value is stored only when it changed. Messages that fail are kept in the `failed` queue: list them with `make sf ARGS="messenger:failed:show"` and retry with `messenger:failed:retry`.
 
 ## Use it
 
