@@ -20,15 +20,15 @@
       </trans-unit>
       <trans-unit id="budget.per_day">
         <source>budget.per_day</source>
-        <target>{distance, number, ::precision-integer} {unit} par jour</target>
+        <target>{distance, number, ::precision-integer} {unit}/jour</target>
       </trans-unit>
       <trans-unit id="budget.per_week">
         <source>budget.per_week</source>
-        <target>{distance, number, ::precision-integer} {unit} par semaine</target>
+        <target>{distance, number, ::precision-integer} {unit}/semaine</target>
       </trans-unit>
       <trans-unit id="budget.per_month">
         <source>budget.per_month</source>
-        <target>{distance, number, ::precision-integer} {unit} par mois</target>
+        <target>{distance, number, ::precision-integer} {unit}/mois</target>
       </trans-unit>
       <trans-unit id="risk.message.ok">
         <source>risk.message.ok</source>

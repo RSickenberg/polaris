@@ -127,12 +127,12 @@ final class DashboardControllerTest extends WebTestCase
         self::assertStringContainsString('minus 0 km at the lease start', $text);
         self::assertStringContainsString('What you should drive normally', $text);
         self::assertStringContainsString('What you drive at your current pace', $text);
-        self::assertStringContainsString('1,250 km per month', $text);
+        self::assertStringContainsString('1,250 km/month', $text);
         self::assertStringContainsString('Allowed to date ' . $km($assessment->projection->allowedToDate->metres()), $text);
         self::assertStringContainsString('Projected at lease end ' . $km($assessment->projection->projectedAtEnd->metres()), $text);
-        self::assertStringContainsString($km($assessment->budget->perDay->metres()) . ' per day', $text);
-        self::assertStringContainsString($km($assessment->budget->perWeek->metres()) . ' per week', $text);
-        self::assertStringContainsString($km($assessment->budget->perMonth->metres()) . ' per month', $text);
+        self::assertStringContainsString($km($assessment->budget->perDay->metres()) . '/day', $text);
+        self::assertStringContainsString($km($assessment->budget->perWeek->metres()) . '/week', $text);
+        self::assertStringContainsString($km($assessment->budget->perMonth->metres()) . '/month', $text);
         // The reading is dated 11:00 UTC on 2 July 2026.
         // The clock is at 12:00 UTC: the day is said in words, and the zone only in the hint.
         self::assertStringContainsString('Last reading Today at 11:00 AM Time zone: UTC', $text);
@@ -209,9 +209,9 @@ final class DashboardControllerTest extends WebTestCase
         self::assertSelectorExists('[role=progressbar][aria-label="Part du kilométrage parcourue"]');
         $text = $this->text();
         self::assertStringContainsString('Parcouru 10', $text);
-        self::assertStringContainsString('par jour', $text);
-        self::assertStringContainsString('par semaine', $text);
-        self::assertStringContainsString('par mois', $text);
+        self::assertStringContainsString('/jour', $text);
+        self::assertStringContainsString('/semaine', $text);
+        self::assertStringContainsString('/mois', $text);
         self::assertStringContainsString('Dernier relevé', $text);
         self::assertMatchesRegularExpression('/\d\s€|\d\sCHF/u', $text);
     }
