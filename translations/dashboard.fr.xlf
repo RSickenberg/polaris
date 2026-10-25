@@ -146,6 +146,18 @@
         <source>home.import</source>
         <target>Importer depuis Tesla</target>
       </trans-unit>
+      <trans-unit id="even_pace.title">
+        <source>even_pace.title</source>
+        <target>Ce que vous devriez parcourir normalement</target>
+      </trans-unit>
+      <trans-unit id="budget.basis">
+        <source>budget.basis</source>
+        <target>Parcourez ceci dès maintenant pour terminer le leasing exactement comme planifié, selon le dernier relevé.</target>
+      </trans-unit>
+      <trans-unit id="even_pace.basis">
+        <source>even_pace.basis</source>
+        <target>L’allocation du leasing répartie uniformément sur toute la durée, quoi que vous ayez déjà parcouru.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

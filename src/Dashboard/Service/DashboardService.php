@@ -11,6 +11,7 @@ use Polaris\Dashboard\Domain\MileageRangeBuilder;
 use Polaris\Dashboard\Domain\MileageSeriesBuilder;
 use Polaris\Dashboard\Service\Dto\DashboardView;
 use Polaris\Dashboard\Service\Enum\DashboardState;
+use Polaris\Lease\Domain\Budget;
 use Polaris\Lease\Domain\LeaseStatus;
 use Polaris\Lease\Domain\NoData;
 use Polaris\Lease\Service\LeaseTermsService;
@@ -82,6 +83,7 @@ final readonly class DashboardService
                     DashboardState::Active === $state,
                 ),
             $contract->getStartOdometer(),
+            Budget::evenPace($allowance, $contract->getTerm()),
         );
     }
 }

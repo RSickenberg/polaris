@@ -146,6 +146,18 @@
         <source>home.import</source>
         <target>Import from Tesla</target>
       </trans-unit>
+      <trans-unit id="even_pace.title">
+        <source>even_pace.title</source>
+        <target>What you should drive normally</target>
+      </trans-unit>
+      <trans-unit id="budget.basis">
+        <source>budget.basis</source>
+        <target>Drive this from now on to end the lease exactly on your allowance, from your latest reading.</target>
+      </trans-unit>
+      <trans-unit id="even_pace.basis">
+        <source>even_pace.basis</source>
+        <target>The lease allowance spread evenly over the whole term, whatever you have driven so far.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

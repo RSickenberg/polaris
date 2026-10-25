@@ -125,6 +125,8 @@ final class DashboardControllerTest extends WebTestCase
         $km = static fn (int $metres): string => self::kilometres($metres);
         self::assertStringContainsString('Driven ' . $km($assessment->projection->driven->metres()), $text);
         self::assertStringContainsString('minus 0 km at the lease start', $text);
+        self::assertStringContainsString('What you should drive normally', $text);
+        self::assertStringContainsString('1,250 km per month', $text);
         self::assertStringContainsString('Allowed to date ' . $km($assessment->projection->allowedToDate->metres()), $text);
         self::assertStringContainsString('Projected at lease end ' . $km($assessment->projection->projectedAtEnd->metres()), $text);
         self::assertStringContainsString($km($assessment->budget->perDay->metres()) . ' per day', $text);
@@ -171,7 +173,7 @@ final class DashboardControllerTest extends WebTestCase
         self::assertSame('110% of the allowance driven', $crawler->filter('[role=progressbar]')->attr('aria-valuetext'));
         self::assertSelectorTextContains('main', '110%');
         self::assertSelectorTextContains('main', 'No budget left: the allowance is used up.');
-        self::assertSelectorNotExists('main [data-slot=badge]');
+        self::assertSelectorNotExists('section[aria-labelledby=budget-title] [data-slot=badge]');
     }
 
     public function testAnEndedLeaseShowsTheCostSoFarAndNoBudget(): void

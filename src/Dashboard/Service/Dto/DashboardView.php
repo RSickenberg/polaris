@@ -8,6 +8,7 @@ use Polaris\Dashboard\Domain\AllowanceProgress;
 use Polaris\Dashboard\Domain\MileageRange;
 use Polaris\Dashboard\Domain\MileageSeries;
 use Polaris\Dashboard\Service\Enum\DashboardState;
+use Polaris\Lease\Domain\Budget;
 use Polaris\Lease\Domain\LeaseAssessment;
 use Polaris\Shared\Domain\Distance;
 
@@ -33,6 +34,8 @@ final readonly class DashboardView
         public array $mileageRanges = [],
         /** The odometer at the lease start: the distance driven is the latest odometer minus this. */
         public ?Distance $startOdometer = null,
+        /** What the allowance is made for per day, week and month, whatever was driven so far. */
+        public ?Budget $evenPace = null,
     ) {
     }
 }

@@ -27,6 +27,14 @@ final class BudgetTest extends TestCase
         self::assertSame(1_000_000, $budget->perMonth->metres());
     }
 
+    public function testTheEvenPaceSpreadsTheWholeAllowanceOverTheWholeTerm(): void
+    {
+        $pace = Budget::evenPace(Distance::fromMetres(60_000_000), self::term());
+
+        self::assertEquals(Budget::spread(Distance::fromMetres(60_000_000), self::term(), 1_826 * 86_400), $pace);
+        self::assertSame(1_000_000, $pace->perMonth->metres());
+    }
+
     public function testAMonthIsOneLeaseMonthNotACalendarMonth(): void
     {
         // Half the term left (913 days): 30,000,000 m over 30 lease months = 1,000,000 a month.
