@@ -38,7 +38,7 @@ class OdometerReadingRepository extends ServiceEntityRepository
             ->andWhere('r.readAt < :readAt')
             ->setParameter('vehicle', $vehicle->getId(), 'ulid')
             ->setParameter('readAt', $readAt, 'datetime_immutable')
-            ->orderBy('r.readAt', 'DESC')
+            ->orderBy('r.readAt', \SortDirection::Descending)
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
@@ -58,7 +58,7 @@ class OdometerReadingRepository extends ServiceEntityRepository
             ->andWhere('r.readAt > :readAt')
             ->setParameter('vehicle', $vehicle->getId(), 'ulid')
             ->setParameter('readAt', $readAt, 'datetime_immutable')
-            ->orderBy('r.readAt', 'ASC')
+            ->orderBy('r.readAt', \SortDirection::Ascending)
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
@@ -76,7 +76,7 @@ class OdometerReadingRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('r')
             ->where('r.vehicle = :vehicle')
             ->setParameter('vehicle', $vehicle->getId(), 'ulid')
-            ->orderBy('r.readAt', 'DESC')
+            ->orderBy('r.readAt', \SortDirection::Descending)
             ->getQuery()
             ->getResult();
     }

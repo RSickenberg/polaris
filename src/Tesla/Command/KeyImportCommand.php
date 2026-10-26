@@ -41,11 +41,15 @@ final readonly class KeyImportCommand
      */
     public function __invoke(
         SymfonyStyle $io,
+
         InputInterface $input,
+
         #[Option(description: 'Path of the private key PEM file, as seen by the process. Without it the key is read from the standard input')]
         ?string $file = null,
+
         #[Option(description: 'Replace an existing key pair. The app must then be registered with Tesla again')]
         bool $force = false,
+
         #[Option(description: 'The email of the owner. Optional when there is a single user')]
         ?string $email = null,
     ): int {

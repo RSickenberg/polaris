@@ -32,7 +32,7 @@ final class HomeControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('main h1', 'Your vehicles');
-        self::assertSelectorTextContains('main', 'There is no vehicle yet.');
+        self::assertSelectorTextContains('main', 'No vehicle yet.');
     }
 
     public function testTheSidebarAlwaysLinksToTheVehicleList(): void

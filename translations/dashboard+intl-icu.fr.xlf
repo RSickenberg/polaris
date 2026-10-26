@@ -16,43 +16,35 @@
       </trans-unit>
       <trans-unit id="kpi.projected.hint">
         <source>kpi.projected.hint</source>
-        <target>Kilométrage autorisé : {allowance, number, ::precision-integer} {unit}</target>
-      </trans-unit>
-      <trans-unit id="budget.per_day">
-        <source>budget.per_day</source>
-        <target>{distance, number, ::precision-integer} {unit} par jour</target>
-      </trans-unit>
-      <trans-unit id="budget.per_week">
-        <source>budget.per_week</source>
-        <target>{distance, number, ::precision-integer} {unit} par semaine</target>
-      </trans-unit>
-      <trans-unit id="budget.per_month">
-        <source>budget.per_month</source>
-        <target>{distance, number, ::precision-integer} {unit} par mois</target>
+        <target>Limite : {allowance, number, ::precision-integer} {unit}</target>
       </trans-unit>
       <trans-unit id="risk.message.ok">
         <source>risk.message.ok</source>
-        <target>Projection de {projected, number, ::precision-integer} {unit} à la fin du leasing, dans la limite de {allowance, number, ::precision-integer} {unit} autorisés.</target>
+        <target>Projection de {projected, number, ::precision-integer} {unit} en fin de leasing, dans la limite de {allowance, number, ::precision-integer} {unit}.</target>
       </trans-unit>
       <trans-unit id="risk.message.watch">
         <source>risk.message.watch</source>
-        <target>Projection de {projected, number, ::precision-integer} {unit} à la fin du leasing, proche des {allowance, number, ::precision-integer} {unit} autorisés.</target>
+        <target>Projection de {projected, number, ::precision-integer} {unit} en fin de leasing, proche de la limite de {allowance, number, ::precision-integer} {unit}.</target>
       </trans-unit>
       <trans-unit id="risk.message.over">
         <source>risk.message.over</source>
-        <target>Dépassement projeté de {excess, number, ::precision-integer} {unit} à la fin du leasing, soit environ {cost}. Roulez {cut, number, ::precision-integer} {unit} de moins par semaine pour rester dans la limite.</target>
+        <target>Dépassement projeté de {excess, number, ::precision-integer} {unit} en fin de leasing, environ {cost}. Roulez {cut, number, ::precision-integer} {unit} / semaine de moins pour rester dans la limite.</target>
       </trans-unit>
       <trans-unit id="risk.message.over_no_cut">
         <source>risk.message.over_no_cut</source>
-        <target>Dépassement projeté de {excess, number, ::precision-integer} {unit} à la fin du leasing, soit environ {cost}.</target>
+        <target>Dépassement projeté de {excess, number, ::precision-integer} {unit} en fin de leasing, environ {cost}.</target>
       </trans-unit>
       <trans-unit id="risk.message.ended_ok">
         <source>risk.message.ended_ok</source>
-        <target>Le leasing s’est terminé dans la limite de {allowance, number, ::precision-integer} {unit} autorisés.</target>
+        <target>Terminé dans la limite de {allowance, number, ::precision-integer} {unit}.</target>
       </trans-unit>
       <trans-unit id="risk.message.ended_over">
         <source>risk.message.ended_over</source>
-        <target>Le leasing s’est terminé avec {excess, number, ::precision-integer} {unit} de dépassement, soit {cost} à ce jour.</target>
+        <target>Terminé avec {excess, number, ::precision-integer} {unit} de dépassement, {cost} à ce jour.</target>
+      </trans-unit>
+      <trans-unit id="kpi.driven.hint">
+        <source>kpi.driven.hint</source>
+        <target>Compteur {odometer, number, ::precision-integer} {unit} moins {start, number, ::precision-integer} {unit} au début du leasing</target>
       </trans-unit>
     </body>
   </file>

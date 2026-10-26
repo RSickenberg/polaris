@@ -16,6 +16,7 @@ services:
       DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}
       REDIS_URL: redis://redis:6379
       LOCK_DSN: redis://redis:6379
+      MESSENGER_TRANSPORT_DSN: redis://redis:6379
     volumes:
       - caddy_data:/data
       - caddy_config:/config
@@ -38,7 +39,7 @@ services:
       redis:
         condition: service_healthy
 
-  # Same image as "php": consumes the Messenger queues (idle until symfony/messenger is installed).
+  # Same image as "php": runs the scheduler tick and consumes the Messenger queues (see frankenphp/docker-worker.sh).
   worker:
     restart: unless-stopped
     command: ["docker-worker"]
@@ -50,6 +51,7 @@ services:
       DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}
       REDIS_URL: redis://redis:6379
       LOCK_DSN: redis://redis:6379
+      MESSENGER_TRANSPORT_DSN: redis://redis:6379
     # The image healthcheck probes the FrankenPHP server, which the worker does not run.
     healthcheck:
       disable: true

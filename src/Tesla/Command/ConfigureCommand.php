@@ -43,13 +43,18 @@ final readonly class ConfigureCommand
      */
     public function __invoke(
         SymfonyStyle $io,
+
         InputInterface $input,
+
         #[Option(description: 'The client ID of the Tesla developer app', name: 'client-id')]
         ?string $clientId = null,
+
         #[Option(description: 'The domain that hosts the public key, for example polaris.example.com')]
         ?string $domain = null,
+
         #[Option(description: 'A Fleet API region to enable: na (North America and Asia-Pacific) or eu (Europe, Middle East, Africa). Repeat for several')]
         array $region = [],
+
         #[Option(description: 'The email of the owner. Optional when there is a single user')]
         ?string $email = null,
     ): int {

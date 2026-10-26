@@ -28,8 +28,10 @@ final class PasswordResetController extends AbstractController
 {
     public function __construct(
         private readonly PasswordResetService $reset,
+
         #[Autowire(service: 'limiter.password_reset')]
         private readonly RateLimiterFactoryInterface $limiter,
+
         private readonly TranslatorInterface $translator,
     ) {
     }

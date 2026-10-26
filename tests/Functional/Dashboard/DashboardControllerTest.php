@@ -62,8 +62,8 @@ final class DashboardControllerTest extends WebTestCase
         $this->client->request('GET', $this->url());
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Dashboard, Model 3');
-        self::assertSelectorTextContains('main', 'Add the lease terms of this vehicle');
+        self::assertSelectorTextContains('h1', 'Dashboard | Model 3');
+        self::assertSelectorTextContains('main', 'Add the lease terms to see where you stand');
         self::assertSelectorExists(\sprintf('main a[data-slot=button][href="/vehicles/%s/lease"]', $this->id()));
         self::assertSelectorNotExists('[role=progressbar]');
     }
@@ -77,7 +77,7 @@ final class DashboardControllerTest extends WebTestCase
         $this->client->request('GET', $this->url());
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('main', 'No odometer reading after the lease start yet.');
+        self::assertSelectorTextContains('main', 'No reading since the lease start.');
         self::assertSelectorExists(\sprintf('main a[data-slot=button][href="/vehicles/%s/readings"]', $this->id()));
         self::assertSelectorNotExists('[role=progressbar]');
     }
@@ -124,18 +124,32 @@ final class DashboardControllerTest extends WebTestCase
         $text = $this->text();
         $km = static fn (int $metres): string => self::kilometres($metres);
         self::assertStringContainsString('Driven ' . $km($assessment->projection->driven->metres()), $text);
+        self::assertStringContainsString('minus 0 km at the lease start', $text);
+        self::assertStringContainsString('Current pace', $text);
+        self::assertStringContainsString('From now on', $text);
+        self::assertStringContainsString('Normal pace', $text);
+        self::assertStringContainsString('km / week', $text);
         self::assertStringContainsString('Allowed to date ' . $km($assessment->projection->allowedToDate->metres()), $text);
         self::assertStringContainsString('Projected at lease end ' . $km($assessment->projection->projectedAtEnd->metres()), $text);
-        self::assertStringContainsString($km($assessment->budget->perDay->metres()) . ' per day', $text);
-        self::assertStringContainsString($km($assessment->budget->perWeek->metres()) . ' per week', $text);
-        self::assertStringContainsString($km($assessment->budget->perMonth->metres()) . ' per month', $text);
+        // The cards show the bare numbers, the unit is in the label under them.
+        $number = static fn (int $metres): string => substr($km($metres), 0, -3);
+        self::assertSame(
+            [$number($assessment->budget->perDay->metres()), $number($assessment->budget->perWeek->metres()), $number($assessment->budget->perMonth->metres())],
+            $this->figures('budget'),
+        );
+        self::assertSame(
+            [$number($assessment->currentPace->perDay->metres()), $number($assessment->currentPace->perWeek->metres()), $number($assessment->currentPace->perMonth->metres())],
+            $this->figures('current'),
+        );
+        // 15,000 km over 12 months: 1,250 km a lease month.
+        self::assertSame('1,250', $this->figures('even')[2]);
         // The reading is dated 11:00 UTC on 2 July 2026.
         // The clock is at 12:00 UTC: the day is said in words, and the zone only in the hint.
         self::assertStringContainsString('Last reading Today at 11:00 AM Time zone: UTC', $text);
         // Projected excess and its cost, in the lease currency (0.12 CHF per km).
         $excess = $assessment->projectedExcess->metres() / 1000;
         self::assertGreaterThan(0, $excess);
-        self::assertStringContainsString('Projected excess of ' . $km($assessment->projectedExcess->metres()), $text);
+        self::assertStringContainsString('Projected ' . $km($assessment->projectedExcess->metres()) . ' over at lease end', $text);
         $cost = new \NumberFormatter('en', \NumberFormatter::CURRENCY)->formatCurrency((float) $assessment->projectedExcessCost->toDecimal(), 'CHF');
         self::assertStringContainsString('about ' . self::normalize($cost), $text);
     }
@@ -169,8 +183,8 @@ final class DashboardControllerTest extends WebTestCase
         self::assertSame('100', $crawler->filter('[role=progressbar]')->attr('aria-valuenow'));
         self::assertSame('110% of the allowance driven', $crawler->filter('[role=progressbar]')->attr('aria-valuetext'));
         self::assertSelectorTextContains('main', '110%');
-        self::assertSelectorTextContains('main', 'No budget left: the allowance is used up.');
-        self::assertSelectorNotExists('main [data-slot=badge]');
+        self::assertSelectorTextContains('main', 'Allowance used up.');
+        self::assertSelectorNotExists('[data-pace=budget] [data-figure]');
     }
 
     public function testAnEndedLeaseShowsTheCostSoFarAndNoBudget(): void
@@ -184,7 +198,7 @@ final class DashboardControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('main', 'The lease has ended');
         self::assertSelectorExists(\sprintf('main a[data-slot=button][href="/vehicles/%s/lease"]', $this->id()));
-        self::assertSelectorTextContains('[data-slot=alert][data-risk=over]', 'The lease ended 1,000 km over the allowance, which costs');
+        self::assertSelectorTextContains('[data-slot=alert][data-risk=over]', 'Ended 1,000 km over,');
         self::assertStringContainsString('CHF 120.00', $this->text());
         self::assertSelectorNotExists('main [data-slot=badge]');
         self::assertStringNotContainsString('What you can drive from now on', $this->text());
@@ -200,14 +214,14 @@ final class DashboardControllerTest extends WebTestCase
         $this->client->request('GET', $this->url(), server: ['HTTP_ACCEPT_LANGUAGE' => 'fr']);
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Tableau de bord, Model 3');
+        self::assertSelectorTextContains('h1', 'Tableau de bord | Model 3');
         self::assertSelectorTextContains('[data-slot=alert-title]', 'Au-dessus du kilométrage');
         self::assertSelectorExists('[role=progressbar][aria-label="Part du kilométrage parcourue"]');
         $text = $this->text();
         self::assertStringContainsString('Parcouru 10', $text);
-        self::assertStringContainsString('par jour', $text);
-        self::assertStringContainsString('par semaine', $text);
-        self::assertStringContainsString('par mois', $text);
+        self::assertStringContainsString('km / jour', $text);
+        self::assertStringContainsString('km / semaine', $text);
+        self::assertStringContainsString('km / mois', $text);
         self::assertStringContainsString('Dernier relevé', $text);
         self::assertMatchesRegularExpression('/\d\s€|\d\sCHF/u', $text);
     }
@@ -226,6 +240,16 @@ final class DashboardControllerTest extends WebTestCase
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 0);
 
         return $formatter->format($metres / 1000) . ' km';
+    }
+
+    /**
+     * The figures (per day, week and month) of a row of the pace table.
+     *
+     * @return list<string>
+     */
+    private function figures(string $row): array
+    {
+        return $this->client->getCrawler()->filter(\sprintf('[data-pace=%s] [data-figure]', $row))->each(static fn ($cell): string => preg_replace('/\s+/u', ' ', trim($cell->text())) ?? '');
     }
 
     private function lease(string $start, int $months, int $allowanceKm, int $tolerancePercent): void

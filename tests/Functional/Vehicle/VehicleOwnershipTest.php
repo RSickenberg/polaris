@@ -95,6 +95,6 @@ final class VehicleOwnershipTest extends WebTestCase
         $this->client->request('GET', '/');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('main', 'There is no vehicle yet.');
+        self::assertSelectorTextContains('main', 'No vehicle yet.');
     }
 }

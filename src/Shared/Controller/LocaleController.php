@@ -28,7 +28,9 @@ final class LocaleController extends AbstractController
      */
     public function __construct(
         private readonly ClockInterface $clock,
+
         private readonly EventDispatcherInterface $dispatcher,
+
         #[Autowire('%kernel.enabled_locales%')]
         private readonly array $enabledLocales,
     ) {

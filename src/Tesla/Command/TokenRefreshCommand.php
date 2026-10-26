@@ -34,8 +34,10 @@ final readonly class TokenRefreshCommand
 
     public function __invoke(
         SymfonyStyle $io,
+
         #[Option(description: 'Refresh even when the token is not due. A refresh token is single use, so do not repeat it needlessly')]
         bool $force = false,
+
         #[Option(description: 'The email of the owner. Optional when there is a single user')]
         ?string $email = null,
     ): int {

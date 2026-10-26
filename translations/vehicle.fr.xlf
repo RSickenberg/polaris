@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="fr" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="page.import.title">
+        <source>page.import.title</source>
+        <target>Importer depuis Tesla</target>
+      </trans-unit>
+      <trans-unit id="page.import.heading">
+        <source>page.import.heading</source>
+        <target>Véhicules de votre compte Tesla</target>
+      </trans-unit>
+      <trans-unit id="page.import.description">
+        <source>page.import.description</source>
+        <target>Cochez les véhicules à ajouter à Polaris. Seule la liste de votre compte est lue : aucun véhicule n’est contacté et aucun ne se réveille.</target>
+      </trans-unit>
+      <trans-unit id="form.vehicles.label">
+        <source>form.vehicles.label</source>
+        <target>Véhicules</target>
+      </trans-unit>
+      <trans-unit id="form.submit">
+        <source>form.submit</source>
+        <target>Importer les véhicules cochés</target>
+      </trans-unit>
+      <trans-unit id="import.none.text">
+        <source>import.none.text</source>
+        <target>Tous les véhicules de votre compte Tesla sont déjà dans Polaris.</target>
+      </trans-unit>
+      <trans-unit id="import.back">
+        <source>import.back</source>
+        <target>Retour à vos véhicules</target>
+      </trans-unit>
+      <trans-unit id="import.not_connected.title">
+        <source>import.not_connected.title</source>
+        <target>Tesla n’est pas connecté</target>
+      </trans-unit>
+      <trans-unit id="import.not_connected.description">
+        <source>import.not_connected.description</source>
+        <target>Connectez d’abord votre compte Tesla, puis revenez importer vos véhicules.</target>
+      </trans-unit>
+      <trans-unit id="import.not_connected.cta">
+        <source>import.not_connected.cta</source>
+        <target>Ouvrir les réglages Tesla</target>
+      </trans-unit>
+      <trans-unit id="import.error.title">
+        <source>import.error.title</source>
+        <target>Tesla n’a pas répondu</target>
+      </trans-unit>
+      <trans-unit id="import.error.description">
+        <source>import.error.description</source>
+        <target>La liste de vos véhicules n’a pas pu être lue chez Tesla. Réessayez dans un instant.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

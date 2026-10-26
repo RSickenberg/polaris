@@ -36,16 +36,26 @@ final readonly class PasswordResetService
 
     public function __construct(
         private EntityManagerInterface $entityManager,
+
         private UserRepository $users,
+
         private PasswordResetRequestRepository $requests,
+
         private UserSettings $settings,
+
         private MailerInterface $mailer,
+
         private TranslatorInterface $translator,
+
         private UrlGeneratorInterface $urlGenerator,
+
         private ClockInterface $clock,
+
         private LoggerInterface $logger,
+
         #[Autowire('%env(MAILER_FROM)%')]
         private string $from,
+
         // The public address of the app: the link is built from it, never from the Host header of the request.
         #[Autowire('%env(DEFAULT_URI)%')]
         private string $publicUrl,

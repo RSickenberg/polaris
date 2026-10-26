@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="page.title">
         <source>page.title</source>
-        <target>Tableau de bord, %vehicle%</target>
+        <target>Tableau de bord</target>
       </trans-unit>
       <trans-unit id="progress.label">
         <source>progress.label</source>
@@ -36,15 +36,15 @@
       </trans-unit>
       <trans-unit id="budget.title">
         <source>budget.title</source>
-        <target>Ce que vous pouvez encore parcourir</target>
+        <target>Dès maintenant</target>
       </trans-unit>
       <trans-unit id="budget.none">
         <source>budget.none</source>
-        <target>Plus de budget : le kilométrage autorisé est épuisé.</target>
+        <target>Kilométrage épuisé.</target>
       </trans-unit>
       <trans-unit id="empty.no_lease.text">
         <source>empty.no_lease.text</source>
-        <target>Ajoutez les conditions du leasing de ce véhicule pour voir où vous en êtes.</target>
+        <target>Ajoutez les conditions du leasing pour voir où vous en êtes.</target>
       </trans-unit>
       <trans-unit id="empty.no_lease.cta">
         <source>empty.no_lease.cta</source>
@@ -52,7 +52,7 @@
       </trans-unit>
       <trans-unit id="empty.no_reading.text">
         <source>empty.no_reading.text</source>
-        <target>Aucun relevé du compteur après le début du leasing. Ajoutez-en un pour voir où vous en êtes.</target>
+        <target>Aucun relevé depuis le début du leasing. Ajoutez-en un pour voir où vous en êtes.</target>
       </trans-unit>
       <trans-unit id="empty.no_reading.cta">
         <source>empty.no_reading.cta</source>
@@ -60,7 +60,7 @@
       </trans-unit>
       <trans-unit id="empty.draft.text">
         <source>empty.draft.text</source>
-        <target>Ce leasing n’a pas encore commencé. Les chiffres apparaîtront dès son début.</target>
+        <target>Le leasing n’a pas encore commencé.</target>
       </trans-unit>
       <trans-unit id="empty.draft.cta">
         <source>empty.draft.cta</source>
@@ -68,7 +68,7 @@
       </trans-unit>
       <trans-unit id="ended.text">
         <source>ended.text</source>
-        <target>Le leasing est terminé : il n’y a plus de budget à répartir. Les chiffres ci-dessous sont les chiffres finaux à ce jour.</target>
+        <target>Le leasing est terminé. Voici les chiffres finaux.</target>
       </trans-unit>
       <trans-unit id="ended.cta">
         <source>ended.cta</source>
@@ -80,7 +80,7 @@
       </trans-unit>
       <trans-unit id="page.home.empty">
         <source>page.home.empty</source>
-        <target>Il n'y a pas encore de véhicule. Dès qu'un véhicule est ajouté, il est listé ici.</target>
+        <target>Aucun véhicule. Importez-les depuis votre compte Tesla.</target>
       </trans-unit>
       <trans-unit id="home.dashboard">
         <source>home.dashboard</source>
@@ -141,6 +141,42 @@
       <trans-unit id="chart.range.all">
         <source>chart.range.all</source>
         <target>Tout le bail</target>
+      </trans-unit>
+      <trans-unit id="home.import">
+        <source>home.import</source>
+        <target>Importer depuis Tesla</target>
+      </trans-unit>
+      <trans-unit id="even_pace.title">
+        <source>even_pace.title</source>
+        <target>Rythme normal</target>
+      </trans-unit>
+      <trans-unit id="budget.basis">
+        <source>budget.basis</source>
+        <target>Pour finir pile sur le contrat.</target>
+      </trans-unit>
+      <trans-unit id="even_pace.basis">
+        <source>even_pace.basis</source>
+        <target>Kilométrage du contrat, réparti uniformément.</target>
+      </trans-unit>
+      <trans-unit id="current_pace.title">
+        <source>current_pace.title</source>
+        <target>Rythme actuel</target>
+      </trans-unit>
+      <trans-unit id="current_pace.basis">
+        <source>current_pace.basis</source>
+        <target>Projeté jusqu’à la fin du leasing.</target>
+      </trans-unit>
+      <trans-unit id="pace.day">
+        <source>pace.day</source>
+        <target>km / jour</target>
+      </trans-unit>
+      <trans-unit id="pace.week">
+        <source>pace.week</source>
+        <target>km / semaine</target>
+      </trans-unit>
+      <trans-unit id="pace.month">
+        <source>pace.month</source>
+        <target>km / mois</target>
       </trans-unit>
     </body>
   </file>

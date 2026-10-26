@@ -1,0 +1,41 @@
+framework:
+    messenger:
+        # Messages that fail for good land here and are retried by hand (bin/console messenger:failed:retry).
+        # The worker does not consume it (see frankenphp/docker-worker.sh).
+        failure_transport: failed
+
+        transports:
+            # General background work (nothing is routed here yet).
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    stream: async
+                retry_strategy:
+                    max_retries: 3
+                    delay: 1000
+                    multiplier: 2
+
+            # Tesla Fleet API calls. Messenger never retries them: a billed read is repeated only by the
+            # hourly rule of the fetch itself (see Polaris\Fetching\Domain\FetchWindow).
+            tesla:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    stream: tesla
+                retry_strategy:
+                    max_retries: 0
+
+            failed:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    stream: failed
+
+        routing:
+            Polaris\Fetching\Message\FetchOdometerMessage: tesla
+
+when@test:
+    framework:
+        messenger:
+            transports:
+                async: 'in-memory://'
+                tesla: 'in-memory://'
+                failed: 'in-memory://'

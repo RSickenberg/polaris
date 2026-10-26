@@ -26,11 +26,14 @@ final readonly class NewUser
         #[Assert\Length(max: User::EMAIL_MAX_LENGTH)]
         #[Assert\Email]
         public string $email,
+
         #[\SensitiveParameter]
         #[Assert\NotBlank]
         #[Assert\Length(min: self::PASSWORD_MIN_LENGTH, max: self::PASSWORD_MAX_LENGTH)]
         public string $plainPassword,
+
         public ?string $locale = null,
+
         #[Assert\Choice(callback: [\DateTimeZone::class, 'listIdentifiers'])]
         public string $timeZone = TimeZone::UTC,
     ) {

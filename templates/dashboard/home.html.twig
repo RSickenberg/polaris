@@ -3,7 +3,14 @@
 {% block title %}{{ 'page.home.title'|trans(domain='dashboard') }}{% endblock %}
 
 {% block main %}
-    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.home.title'|trans(domain='dashboard') }}</h1>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.home.title'|trans(domain='dashboard') }}</h1>
+        {% if vehicles is not empty %}
+            <twig:Button as="a" variant="outline" href="{{ path('vehicle_import') }}">{{ 'home.import'|trans(domain='dashboard') }}</twig:Button>
+        {% endif %}
+    </div>
+
+    {{ include('shared/_flashes.html.twig') }}
 
     <div class="mt-6 flex flex-col gap-4">
         {% for vehicle in vehicles %}
@@ -19,11 +26,11 @@
                 </twig:Card:Content>
             </twig:Card>
         {% else %}
-            <twig:Card>
-                <twig:Card:Content>
-                    <p class="text-sm text-muted-foreground">{{ 'page.home.empty'|trans(domain='dashboard') }}</p>
-                </twig:Card:Content>
-            </twig:Card>
+            {{ include('dashboard/_empty.html.twig', {
+                text: 'page.home.empty'|trans(domain='dashboard'),
+                cta: 'home.import'|trans(domain='dashboard'),
+                href: path('vehicle_import'),
+            }) }}
         {% endfor %}
     </div>
 {% endblock %}

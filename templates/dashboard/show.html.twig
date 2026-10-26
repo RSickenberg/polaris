@@ -4,10 +4,10 @@
 {% set state = dashboard.state.value %}
 {% set km = enum('Polaris\\Shared\\Domain\\DistanceUnit').Kilometre %}
 
-{% block title %}{{ 'page.title'|trans({'%vehicle%': vehicle.name}, 'dashboard') }}{% endblock %}
+{% block title %}{{ 'page.title'|trans(domain='dashboard') }} | {{ vehicle.name }}{% endblock %}
 
 {% block main %}
-    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.title'|trans({'%vehicle%': vehicle.name}, 'dashboard') }}</h1>
+    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.title'|trans(domain='dashboard') }} <span class="font-normal text-muted-foreground">| {{ vehicle.name }}</span></h1>
 
     {{ include('shared/_flashes.html.twig') }}
 
@@ -51,18 +51,27 @@
             </twig:Dashboard:RiskAlert>
 
             {% if not ended %}
-                <section aria-labelledby="budget-title">
-                    <h2 id="budget-title" class="mb-3 text-lg font-semibold">{{ 'budget.title'|trans(domain='dashboard') }}</h2>
-                    {% if assessment.budget.perDay.metres > 0 or assessment.budget.perWeek.metres > 0 or assessment.budget.perMonth.metres > 0 %}
-                        <div class="flex flex-wrap gap-2">
-                            <twig:Dashboard:BudgetBadge :distance="assessment.budget.perDay" period="day" />
-                            <twig:Dashboard:BudgetBadge :distance="assessment.budget.perWeek" period="week" />
-                            <twig:Dashboard:BudgetBadge :distance="assessment.budget.perMonth" period="month" />
-                        </div>
-                    {% else %}
-                        <p class="text-sm text-muted-foreground">{{ 'budget.none'|trans(domain='dashboard') }}</p>
-                    {% endif %}
-                </section>
+                <div class="grid gap-4 lg:grid-cols-3">
+                    <twig:Dashboard:PaceCard
+                        key="current"
+                        title="{{ 'current_pace.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'current_pace.basis'|trans(domain='dashboard') }}"
+                        :budget="assessment.currentPace"
+                    />
+                    <twig:Dashboard:PaceCard
+                        key="budget"
+                        title="{{ 'budget.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'budget.basis'|trans(domain='dashboard') }}"
+                        :budget="assessment.budget"
+                        fallback="{{ 'budget.none'|trans(domain='dashboard') }}"
+                    />
+                    <twig:Dashboard:PaceCard
+                        key="even"
+                        title="{{ 'even_pace.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'even_pace.basis'|trans(domain='dashboard') }}"
+                        :budget="dashboard.evenPace"
+                    />
+                </div>
             {% endif %}
 
             <twig:Card>
@@ -104,6 +113,7 @@
                 <twig:Dashboard:KpiCard
                     label="{{ 'kpi.driven'|trans(domain='dashboard') }}"
                     value="{{ 'value.distance'|trans({distance: projection.driven.metres / 1000, unit: unit}, 'dashboard') }}"
+                    hint="{{ 'kpi.driven.hint'|trans({odometer: (projection.driven.metres + dashboard.startOdometer.metres) / 1000, start: dashboard.startOdometer.metres / 1000, unit: unit}, 'dashboard') }}"
                 />
                 <twig:Dashboard:KpiCard
                     label="{{ 'kpi.allowed'|trans(domain='dashboard') }}"

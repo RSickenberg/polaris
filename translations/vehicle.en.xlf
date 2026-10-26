@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="en" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="page.import.title">
+        <source>page.import.title</source>
+        <target>Import from Tesla</target>
+      </trans-unit>
+      <trans-unit id="page.import.heading">
+        <source>page.import.heading</source>
+        <target>Vehicles of your Tesla account</target>
+      </trans-unit>
+      <trans-unit id="page.import.description">
+        <source>page.import.description</source>
+        <target>Tick the vehicles to add to Polaris. Only the list of your account is read: no car is contacted and none wakes up.</target>
+      </trans-unit>
+      <trans-unit id="form.vehicles.label">
+        <source>form.vehicles.label</source>
+        <target>Vehicles</target>
+      </trans-unit>
+      <trans-unit id="form.submit">
+        <source>form.submit</source>
+        <target>Import selected vehicles</target>
+      </trans-unit>
+      <trans-unit id="import.none.text">
+        <source>import.none.text</source>
+        <target>Every vehicle of your Tesla account is already in Polaris.</target>
+      </trans-unit>
+      <trans-unit id="import.back">
+        <source>import.back</source>
+        <target>Back to your vehicles</target>
+      </trans-unit>
+      <trans-unit id="import.not_connected.title">
+        <source>import.not_connected.title</source>
+        <target>Tesla is not connected</target>
+      </trans-unit>
+      <trans-unit id="import.not_connected.description">
+        <source>import.not_connected.description</source>
+        <target>Connect your Tesla account first, then come back to import your vehicles.</target>
+      </trans-unit>
+      <trans-unit id="import.not_connected.cta">
+        <source>import.not_connected.cta</source>
+        <target>Open the Tesla settings</target>
+      </trans-unit>
+      <trans-unit id="import.error.title">
+        <source>import.error.title</source>
+        <target>Tesla did not answer</target>
+      </trans-unit>
+      <trans-unit id="import.error.description">
+        <source>import.error.description</source>
+        <target>The list of your vehicles could not be read from Tesla. Try again in a moment.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

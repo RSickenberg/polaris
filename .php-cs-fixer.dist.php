@@ -20,6 +20,7 @@ $finder = new PhpCsFixer\Finder()
 ;
 
 return new PhpCsFixer\Config()
+    ->registerCustomFixers(new PhpCsFixerCustomFixers\Fixers())
     ->setRiskyAllowed(true)
     ->setRules([
         '@Symfony' => true,
@@ -28,7 +29,16 @@ return new PhpCsFixer\Config()
         '@PHP8x5Migration:risky' => true,
         'concat_space' => ['spacing' => 'one'],
         'no_redundant_readonly_property' => true,
+        'php_unit_data_provider_return_type' => true,
         'declare_strict_types' => ['strategy' => 'enforce'],
+        PhpCsFixerCustomFixers\Fixer\FunctionParameterSeparationFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\MultilineCommentOpeningClosingAloneFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\NoImportFromGlobalNamespaceFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\NoUselessParenthesisFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\SingleSpaceBeforeStatementFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\SingleSpaceAfterStatementFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\StringableInterfaceFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\PhpUnitAssertArgumentsOrderFixer::name() => true,
     ])
     ->setFinder($finder)
     ->setCacheFile(__DIR__ . '/var/cache/php-cs-fixer/.php-cs-fixer.cache')

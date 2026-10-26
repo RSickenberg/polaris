@@ -32,6 +32,17 @@ final readonly class Budget
     }
 
     /**
+     * The even pace the allowance is made for: the whole allowance spread over the whole term, the distance to drive
+     * per day, week and month to end the lease exactly on it if nothing had been driven yet.
+     */
+    public static function evenPace(Distance $allowance, LeaseTerm $term): self
+    {
+        $termSeconds = $term->exclusiveEnd()->getTimestamp() - $term->start()->getTimestamp();
+
+        return self::spread($allowance, $term, $termSeconds);
+    }
+
+    /**
      * @param int $secondsLeft the time between the latest reading and the lease end; 0 or less gives no budget
      */
     public static function spread(Distance $remaining, LeaseTerm $term, int $secondsLeft): self

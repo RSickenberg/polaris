@@ -127,15 +127,15 @@ are specific to Polaris and win when the two disagree.
   the Symfony UX Toolkit Shadcn kit and ApexCharts 8.3.1 (importmap, pinned; Community License,
   which does not cover embedding it in a product used by other people, so the hosted layer needs
   an OEM license; its ESM build injects its own CSS and imports `apexcharts/core`) behind one
-  reusable Stimulus controller. Planned, not installed yet: Redis (Messenger,
-  Lock, Cache). Check `composer.json` before assuming a package is there.
+  reusable Stimulus controller. Messenger with Redis streams and Scheduler run the fetches (see
+  "Scheduled fetching"). Planned, not installed yet: Redis as the cache. Check `composer.json` before assuming a package is there.
 - UI: kit components are installed with `bin/console ux:install <name> --kit shadcn` into
   `templates/components/` (Stimulus controllers into `assets/controllers/`) and are then ours
   to edit, but keep edits minimal so a later `ux:install` diff stays readable; the only
   edits so far replace hardcoded English text with translation keys. `symfony/ux-toolkit`
   is a dev dependency: the installed files are committed. Polaris's own components go in
   `templates/components/<Module>/` (the shell is `Shared`; the dashboard building blocks `KpiCard`,
-  `LeaseProgress`, `BudgetBadge`, `RiskAlert` and `MileageChart` are `Dashboard`, anonymous components built on the
+  `LeaseProgress`, `PaceRow` (a row of the pace table: budget, even pace, current pace), `RiskAlert` and `MileageChart` are `Dashboard`, anonymous components built on the
   kit Card, Progress, Badge and Alert; `MileageChart` only feeds `chart_controller.js`).
   `assets/controllers/chart_controller.js` is the one generic chart controller: chart type, series,
   options, `locale` and `timeZone` are Stimulus values, options strings written `var(--token)` are
@@ -306,6 +306,43 @@ are specific to Polaris and win when the two disagree.
 - Unverified (Tesla does not document them): the shape of the `users/region` answer (`response.region`,
   `response.fleet_api_base_url`), what happens when the account region differs from the audience, and whether
   `http://localhost:8000/tesla/callback` completes the flow end to end.
+
+### Vehicles (Vehicle module)
+
+- A vehicle is created by `Vehicle\Service\TeslaVehicleImporter` (list of the Tesla account through `VehicleClient::listVehicles()`,
+  first page only; no car is contacted), by `polaris:vehicle:import [--vin=] [--dry-run]`, by the page `/vehicles/import`
+  (`Vehicle\Controller\VehicleImportController`, route priority above `/vehicles/{id}`, translation domain `vehicle`) or by hand
+  with `polaris:vehicle:add <vin> <name>`. The importer reads the listing again when importing: a posted VIN is only a choice
+  among the vehicles Tesla returned. A VIN is unique across users, so one that exists is "already added". The name is the Tesla
+  display name, else `Tesla` and the last 4 characters of the VIN. The home page links to the import page.
+
+### Scheduled fetching (Fetching module)
+
+- Messenger (`config/packages/messenger.yaml`) has three Redis stream transports on `MESSENGER_TRANSPORT_DSN`: `async`
+  (nothing routed yet), `tesla` (`FetchOdometerMessage`, no Messenger retry: a billed read is repeated only by the hourly
+  rule below) and `failed` (`failure_transport`, retried by hand with `messenger:failed:retry`). The `worker` service
+  (`frankenphp/docker-worker.sh`) consumes `scheduler_default async tesla` explicitly, never `--all`, which would also
+  drain `failed` in a loop. Tests use `in-memory://` transports (`messenger.transport.tesla`).
+- `Scheduler\FetchScheduleProvider` has one recurring message, `DispatchDueFetches` every minute on the minute (a cron in UTC: `every('5 minutes')` counts from the worker start and
+  would pick a slot up at an arbitrary time), stateful, not locked (a lock held by a killed worker silences the ticks after a restart; the
+  `FetchSlotRun` uniqueness already keeps two workers from queuing a slot twice).
+  The slots are not cron entries: `Service\DueFetchDispatcher` turns each vehicle's local slots into UTC instants with
+  `Domain\SlotCalculator` on every tick (owner's time zone, so daylight saving is followed with no restart), and queues a
+  `FetchOdometerMessage` for each slot whose window is open (`Domain\FetchWindow`: from the slot to 3 hours after) and
+  that has no `FetchSlotRun` yet. The row is written first and is unique on (vehicle, slot), so repeated ticks and
+  restarts queue a slot once; a window that closed while the worker was down is not run late.
+- Slots are `FetchSchedule` (one per vehicle, `HH:MM` local times, 1 or 2; none stored means 21:00), set with
+  `polaris:fetch:schedule [--vin=] [first [second]]` through `Service\FetchScheduleService`.
+- `Service\OdometerFetcher` runs the message with `TeslaOdometerReader` (never wakes the car). Not online: it re-queues the
+  message with `attempt + 1` and a `DelayStamp` that lands on the next hour after the slot (`FetchWindow::retryDelaySeconds()`,
+  so a late first check does not shift the others), 4 state checks at most per slot (`FetchWindow::MAX_ATTEMPTS`),
+  then the slot is `Skipped`. A value is stored by `OdometerReadingService::recordFromApi()` only when it differs from
+  the previous reading (`readAt` is Tesla's `vehicle_state.timestamp`); a value lower than a stored reading is
+  `Rejected`, logged as a warning, and never retried. `TeslaNotConnected` ends the slot as `NotConnected` with a warning;
+  other `FleetApiError`s are rethrown to the `failed` transport.
+- `FetchOdometerMessage` has scalar fields and a null `slotTimestamp` for a fetch that belongs to no slot (never retried):
+  the manual refresh dispatches it, and new fields (such as an `allowWake` flag) are added at the end with a default.
+  The per-vehicle lock between a scheduled and a manual fetch is not there yet: it belongs with the manual refresh.
 
 ### Code organization (ADR 0001)
 

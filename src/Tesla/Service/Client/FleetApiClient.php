@@ -34,7 +34,9 @@ final readonly class FleetApiClient
      */
     public function partnerToken(
         FleetRegion $region,
+
         string $clientId,
+
         #[\SensitiveParameter]
         string $clientSecret,
     ): string {
@@ -69,8 +71,10 @@ final readonly class FleetApiClient
      */
     public function registerPartner(
         FleetRegion $region,
+
         #[\SensitiveParameter]
         string $partnerToken,
+
         AppDomain $domain,
     ): void {
         $this->send(
@@ -93,8 +97,10 @@ final readonly class FleetApiClient
      */
     public function registeredPublicKey(
         FleetRegion $region,
+
         #[\SensitiveParameter]
         string $partnerToken,
+
         AppDomain $domain,
     ): string {
         $data = $this->send(
