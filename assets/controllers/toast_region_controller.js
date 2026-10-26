@@ -5,7 +5,7 @@ import { Controller } from '@hotwired/stimulus';
  * that other controllers ask for with a `polaris:toast` event on `window` (`detail: {variant, message}`).
  * Twig renders one empty toast per variant, so the markup and the translated texts stay out of the JavaScript.
  *
- * @value toasts The HTML of an empty toast for each variant (success, error, info), each with a
+ * @value toasts The HTML of an empty toast for each variant (success, warning, info, danger), each with a
  *               `[data-toast-message]` element.
  */
 export default class extends Controller {

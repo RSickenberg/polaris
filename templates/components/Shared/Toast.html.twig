@@ -1,20 +1,22 @@
 {%- props
-    ## 'success'|'error'|'info' The look and the icon of the toast. An error stays until it is dismissed.
+    ## 'success'|'warning'|'info'|'danger' The look and the icon of the toast. A danger toast stays until it is dismissed.
     variant = 'info',
-    ## string The message, already translated; empty in the <template> that the toast region clones.
+    ## string The message, already translated; empty in the empty toasts that the toast region clones.
     message = ''
 -%}
-{# The green of the "on track" alert of the dashboard (Dashboard/RiskAlert, level ok). #}
+{# The colors of the alerts of the dashboard (Dashboard/RiskAlert): green, amber, and red through the destructive Alert. #}
 {%- set tone = {
     success: 'border-green-600/50 bg-green-50 text-green-900 dark:border-green-400/40 dark:bg-green-950/40 dark:text-green-200',
-    error: '',
+    warning: 'border-amber-500/60 bg-amber-50 text-amber-900 dark:border-amber-400/40 dark:bg-amber-950/40 dark:text-amber-200',
     info: '',
+    danger: '',
 }[variant] -%}
 {# Set here: inside the Alert tag, `variant` is the one of the Alert. #}
-{%- set icon = {success: 'lucide:circle-check', error: 'lucide:circle-alert', info: 'lucide:info'}[variant] -%}
-{%- set delay = 'error' == variant ? 0 : 6000 -%}
+{%- set icon = {success: 'lucide:circle-check', warning: 'lucide:triangle-alert', info: 'lucide:info', danger: 'lucide:circle-alert'}[variant] -%}
+{%- set delay = 'danger' == variant ? 0 : 6000 -%}
+{%- set alertVariant = 'danger' == variant ? 'destructive' : 'default' -%}
 <twig:Alert
-    variant="{{ 'error' == variant ? 'destructive' : 'default' }}"
+    variant="{{ alertVariant }}"
     class="pointer-events-auto pe-10 shadow-lg {{ tone }}"
     data-flash="{{ variant }}"
     data-controller="toast"

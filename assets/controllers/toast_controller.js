@@ -13,8 +13,8 @@ export default class extends Controller {
     static values = { delay: { type: Number, default: 6000 } };
 
     connect() {
-        this.element.classList.add('transition-all', 'duration-200', 'opacity-0', 'translate-y-2');
-        requestAnimationFrame(() => this.element.classList.remove('opacity-0', 'translate-y-2'));
+        this.element.classList.add('transition-all', 'duration-200', 'opacity-0', '-translate-y-2');
+        requestAnimationFrame(() => this.element.classList.remove('opacity-0', '-translate-y-2'));
         this.resume();
     }
 
@@ -36,7 +36,7 @@ export default class extends Controller {
 
     dismiss() {
         this.pause();
-        this.element.classList.add('opacity-0', 'translate-y-2');
+        this.element.classList.add('opacity-0', '-translate-y-2');
         setTimeout(() => this.element.remove(), 200);
     }
 }

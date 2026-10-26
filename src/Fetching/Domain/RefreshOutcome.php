@@ -61,17 +61,18 @@ enum RefreshOutcome: string
     case Failed = 'failed';
 
     /**
-     * How to tell the user: a new reading is good news, a car that is not reachable is information, and what
-     * needs an action of theirs or went wrong is an error.
+     * How to tell the user: a new reading is good news, a car that is not reachable is a warning, and what
+     * needs an action of theirs or went wrong is danger.
      *
-     * @return 'success'|'info'|'error'
+     * @return 'success'|'warning'|'info'|'danger'
      */
     public function toastVariant(): string
     {
         return match ($this) {
             self::Stored => 'success',
-            self::Queued, self::Unchanged, self::Asleep, self::Offline, self::Unavailable, self::Busy => 'info',
-            self::NotConnected, self::Rejected, self::Failed => 'error',
+            self::Queued, self::Unchanged => 'info',
+            self::Asleep, self::Offline, self::Unavailable, self::Busy => 'warning',
+            self::NotConnected, self::Rejected, self::Failed => 'danger',
         };
     }
 

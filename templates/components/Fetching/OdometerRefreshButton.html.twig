@@ -4,7 +4,7 @@
 {# The toast: one element per click and result, so that a poll that shows the same result does not announce it again. #}
 {% set toast = null %}
 {% if until is not null %}
-    {% set toast = {id: 'limited-' ~ this.clicks, variant: 'info', message: 'limited.message'|trans({time: until|format_time('short', timezone=this.timeZone)}, 'fetching')} %}
+    {% set toast = {id: 'limited-' ~ this.clicks, variant: 'warning', message: 'limited.message'|trans({time: until|format_time('short', timezone=this.timeZone), zone: until|format_datetime(pattern: 'zzz', timezone: this.timeZone)}, 'fetching')} %}
 {% elseif outcome is not null and (outcome.value != 'queued' or not polling) %}
     {% set key = outcome.value == 'queued' ? 'queued_late' : outcome.value %}
     {% set toast = {id: 'result-' ~ this.clicks, variant: outcome.toastVariant, message: ('outcome.' ~ key)|trans(domain='fetching')} %}

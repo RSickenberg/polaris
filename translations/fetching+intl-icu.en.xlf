@@ -8,7 +8,7 @@
       </trans-unit>
       <trans-unit id="limited.message">
         <source>limited.message</source>
-        <target>You can refresh again at {time}.</target>
+        <target>You can refresh again at {time} ({zone}).</target>
       </trans-unit>
       <trans-unit id="outcome.queued">
         <source>outcome.queued</source>

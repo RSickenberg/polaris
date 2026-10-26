@@ -74,7 +74,7 @@ final class OdometerRefreshButtonTest extends WebTestCase
 
         $html = (string) $component->refresh()->render();
         self::assertStringNotContainsString('data-poll', $html);
-        self::assertStringContainsString('data-toast-announce-variant-value="info"', $html, 'A car that is asleep is information, not an error.');
+        self::assertStringContainsString('data-toast-announce-variant-value="warning"', $html, 'A car that is asleep is a warning, not an error.');
         self::assertDoesNotMatchRegularExpression('/<button[^>]*\sdisabled(?=[\s=>])/', $html);
         self::assertStringContainsString('The car is asleep. Polaris does not wake it', $html);
         self::assertCount(1, $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(), 'Rendering never starts another refresh.');
@@ -88,7 +88,8 @@ final class OdometerRefreshButtonTest extends WebTestCase
         $html = (string) $component->call('refresh')->render();
 
         self::assertStringContainsString('You can refresh again at', $html);
-        self::assertStringContainsString('data-toast-announce-variant-value="info"', $html);
+        self::assertStringContainsString('data-toast-announce-variant-value="warning"', $html);
+        self::assertMatchesRegularExpression('/You can refresh again at [^(]+\(UTC\)\./', $html, 'The time says its zone.');
         self::assertStringContainsString('id="limited-2"', $html, 'Each click is a new toast.');
         self::assertStringNotContainsString('data-poll', $html);
         self::assertCount(1, $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(), 'The limited click starts nothing.');
