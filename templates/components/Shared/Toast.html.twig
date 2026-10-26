@@ -4,11 +4,11 @@
     ## string The message, already translated; empty in the empty toasts that the toast region clones.
     message = ''
 -%}
-{# The colors of the alerts of the dashboard (Dashboard/RiskAlert): green, amber, and red through the destructive Alert. #}
+{# The colors of the alerts of the dashboard (Dashboard/RiskAlert, and the blue of the empty states): green, amber, blue, and red through the destructive Alert. #}
 {%- set tone = {
     success: 'border-green-600/50 bg-green-50 text-green-900 dark:border-green-400/40 dark:bg-green-950/40 dark:text-green-200',
     warning: 'border-amber-500/60 bg-amber-50 text-amber-900 dark:border-amber-400/40 dark:bg-amber-950/40 dark:text-amber-200',
-    info: '',
+    info: 'border-blue-600/50 bg-blue-50 text-blue-900 dark:border-blue-400/40 dark:bg-blue-950/40 dark:text-blue-200',
     danger: '',
 }[variant] -%}
 {# Set here: inside the Alert tag, `variant` is the one of the Alert. #}
