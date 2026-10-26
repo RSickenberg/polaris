@@ -17,7 +17,7 @@
                     <twig:Card:Description>{{ 'page.login.description'|trans(domain='account') }}</twig:Card:Description>
                 </twig:Card:Header>
                 <twig:Card:Content>
-                    {{ include('shared/_flashes.html.twig') }}
+                    <twig:Shared:ToastRegion />
                     <form method="post" action="{{ path('account_login') }}" class="flex flex-col gap-4">
                         {% if error %}
                             <twig:Alert variant="destructive">

@@ -1,0 +1,10 @@
+{%- props
+    ## string Identifies this toast: change it for every message, as a morphed element that keeps its id says nothing twice.
+    id,
+    ## 'success'|'warning'|'info'|'danger' The variant of the toast.
+    variant = 'info',
+    ## string The message, already translated.
+    message
+-%}
+{# For a Live Component (or any page that re-renders in place): asks the toast region for a toast when it appears. #}
+<span id="{{ id }}" hidden data-controller="toast-announce" data-toast-announce-variant-value="{{ variant }}" data-toast-announce-message-value="{{ message }}">{{ message }}</span>

@@ -27,12 +27,6 @@
         {%- if polling -%}{{- 'outcome.queued'|trans(domain='fetching') -}}{%- endif -%}
     </p>
     {% if toast is not null %}
-        <span
-            id="{{ toast.id }}"
-            hidden
-            data-controller="toast-announce"
-            data-toast-announce-variant-value="{{ toast.variant }}"
-            data-toast-announce-message-value="{{ toast.message }}"
-        >{{ toast.message }}</span>
+        <twig:Shared:ToastAnnounce :id="toast.id" :variant="toast.variant" :message="toast.message" />
     {% endif %}
 </div>
