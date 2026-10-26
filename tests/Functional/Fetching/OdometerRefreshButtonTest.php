@@ -64,6 +64,8 @@ final class OdometerRefreshButtonTest extends WebTestCase
         $html = (string) $component->render();
         self::assertStringContainsString('data-poll="delay(2000)|$render"', $html);
         self::assertStringContainsString('Reading the odometer', $html);
+        self::assertMatchesRegularExpression('/<button[^>]*\sdisabled/', $html, 'The button stays disabled while the fetch is queued.');
+        self::assertStringContainsString('animate-spin', $html);
 
         $attempt = $this->entityManager()->find(RefreshAttempt::class, $message->refreshId);
         self::assertInstanceOf(RefreshAttempt::class, $attempt);
@@ -72,6 +74,7 @@ final class OdometerRefreshButtonTest extends WebTestCase
 
         $html = (string) $component->refresh()->render();
         self::assertStringNotContainsString('data-poll', $html);
+        self::assertDoesNotMatchRegularExpression('/<button[^>]*\sdisabled/', $html);
         self::assertStringContainsString('The car is asleep. Polaris does not wake it', $html);
         self::assertCount(1, $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(), 'Rendering never starts another refresh.');
     }
