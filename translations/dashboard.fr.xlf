@@ -80,7 +80,7 @@
       </trans-unit>
       <trans-unit id="page.home.empty">
         <source>page.home.empty</source>
-        <target>Aucun véhicule. Importez-les depuis Tesla.</target>
+        <target>Aucun véhicule. Importez-les depuis votre compte Tesla.</target>
       </trans-unit>
       <trans-unit id="home.dashboard">
         <source>home.dashboard</source>
