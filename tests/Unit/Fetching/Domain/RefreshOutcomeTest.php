@@ -24,6 +24,7 @@ final class RefreshOutcomeTest extends TestCase
     public function testTheVariantSaysWhatTheUserCanDoAboutIt(): void
     {
         self::assertSame('success', RefreshOutcome::Stored->toastVariant());
+        self::assertSame('info', RefreshOutcome::Unchanged->toastVariant());
         self::assertSame('warning', RefreshOutcome::Asleep->toastVariant());
         self::assertSame('danger', RefreshOutcome::NotConnected->toastVariant());
     }
