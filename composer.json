@@ -47,6 +47,7 @@
         "symfony/twig-bundle": "8.1.*",
         "symfony/uid": "8.1.*",
         "symfony/ux-icons": "^3.6",
+        "symfony/ux-live-component": "^3.6",
         "symfony/ux-turbo": "^3.6",
         "symfony/ux-twig-component": "^3.6",
         "symfony/validator": "8.1.*",

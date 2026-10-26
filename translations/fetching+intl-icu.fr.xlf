@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="fr" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="button.label">
+        <source>button.label</source>
+        <target>Actualiser maintenant</target>
+      </trans-unit>
+      <trans-unit id="limited.message">
+        <source>limited.message</source>
+        <target>Vous pourrez actualiser à nouveau à {time}.</target>
+      </trans-unit>
+      <trans-unit id="outcome.queued">
+        <source>outcome.queued</source>
+        <target>Lecture du compteur…</target>
+      </trans-unit>
+      <trans-unit id="outcome.queued_late">
+        <source>outcome.queued_late</source>
+        <target>L’actualisation est en attente. Le résultat apparaîtra à la prochaine lecture.</target>
+      </trans-unit>
+      <trans-unit id="outcome.stored">
+        <source>outcome.stored</source>
+        <target>Nouveau relevé enregistré.</target>
+      </trans-unit>
+      <trans-unit id="outcome.unchanged">
+        <source>outcome.unchanged</source>
+        <target>Le compteur n’a pas changé depuis le dernier relevé.</target>
+      </trans-unit>
+      <trans-unit id="outcome.asleep">
+        <source>outcome.asleep</source>
+        <target>La voiture dort. Polaris ne la réveille pas : le dernier relevé est conservé. Réveillez-la depuis l’application Tesla puis actualisez à nouveau.</target>
+      </trans-unit>
+      <trans-unit id="outcome.offline">
+        <source>outcome.offline</source>
+        <target>La voiture est hors ligne : le dernier relevé est conservé.</target>
+      </trans-unit>
+      <trans-unit id="outcome.unavailable">
+        <source>outcome.unavailable</source>
+        <target>La voiture s’est endormie pendant la lecture : le dernier relevé est conservé.</target>
+      </trans-unit>
+      <trans-unit id="outcome.not_connected">
+        <source>outcome.not_connected</source>
+        <target>Polaris n’est pas connecté à Tesla. Connectez-le dans les réglages Tesla.</target>
+      </trans-unit>
+      <trans-unit id="outcome.rejected">
+        <source>outcome.rejected</source>
+        <target>La voiture a indiqué un compteur inférieur à un relevé enregistré : il n’a pas été enregistré.</target>
+      </trans-unit>
+      <trans-unit id="outcome.busy">
+        <source>outcome.busy</source>
+        <target>Une autre lecture de ce véhicule est en cours. Réessayez dans un instant.</target>
+      </trans-unit>
+      <trans-unit id="outcome.failed">
+        <source>outcome.failed</source>
+        <target>Tesla a renvoyé une erreur. L’actualisation ne sera pas relancée automatiquement.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

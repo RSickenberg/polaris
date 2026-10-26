@@ -187,6 +187,53 @@ final class DashboardControllerTest extends WebTestCase
         self::assertSelectorNotExists('[data-pace=budget] [data-figure]');
     }
 
+    public function testTheRefreshButtonIsNotOnTheDashboardWithoutALease(): void
+    {
+        $this->client->request('GET', $this->url());
+
+        self::assertSelectorNotExists('[data-live-name-value="Fetching:OdometerRefreshButton"]');
+    }
+
+    public function testTheRefreshButtonIsNotOnTheDashboardWithoutAReading(): void
+    {
+        $this->lease('2026-01-01', 12, 15_000, 0);
+
+        $this->client->request('GET', $this->url());
+
+        self::assertSelectorNotExists('[data-live-name-value="Fetching:OdometerRefreshButton"]');
+    }
+
+    public function testTheRefreshButtonIsNotOnTheDashboardOfAnEndedLease(): void
+    {
+        $this->lease('2025-01-01', 12, 15_000, 0);
+        $this->reading('2026-01-02 10:00:00', 16_000);
+
+        $this->client->request('GET', $this->url());
+
+        self::assertSelectorNotExists('[data-live-name-value="Fetching:OdometerRefreshButton"]');
+    }
+
+    public function testTheRefreshButtonIsOnTheDashboardOfARunningLease(): void
+    {
+        $this->lease('2026-01-01', 12, 15_000, 0);
+        $this->reading('2026-07-02 11:00:00', 10_000);
+
+        $this->client->request('GET', $this->url());
+
+        self::assertSelectorExists('main [data-live-name-value="Fetching:OdometerRefreshButton"] button[data-live-action-param=refresh]');
+        self::assertSelectorTextContains('main [data-live-name-value="Fetching:OdometerRefreshButton"]', 'Refresh now');
+    }
+
+    public function testTheRefreshButtonIsTranslatedToFrench(): void
+    {
+        $this->lease('2026-01-01', 12, 15_000, 0);
+        $this->reading('2026-07-02 11:00:00', 10_000);
+
+        $this->client->request('GET', $this->url(), server: ['HTTP_ACCEPT_LANGUAGE' => 'fr']);
+
+        self::assertSelectorTextContains('[data-live-name-value="Fetching:OdometerRefreshButton"]', 'Actualiser maintenant');
+    }
+
     public function testAnEndedLeaseShowsTheCostSoFarAndNoBudget(): void
     {
         $this->lease('2025-01-01', 12, 15_000, 0);

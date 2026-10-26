@@ -1,0 +1,25 @@
+{% set outcome = this.outcome %}
+{% set until = this.retryAt %}
+<div
+    {{ attributes.defaults({class: 'flex flex-col items-start gap-1.5'}) }}
+    {%- if this.polling %} data-poll="delay(2000)|$render"{% endif %}
+>
+    <twig:Button
+        variant="outline"
+        size="sm"
+        data-action="live#action"
+        data-live-action-param="refresh"
+        data-loading="addAttribute(disabled)"
+        :disabled="this.polling"
+    >
+        <twig:ux:icon name="lucide:refresh-cw" aria-hidden="true" data-icon="inline-start" />
+        {{ 'button.label'|trans(domain='fetching') }}
+    </twig:Button>
+    <p class="min-h-4 text-xs text-muted-foreground" role="status">
+        {%- if until is not null -%}
+            {{- 'limited.message'|trans({time: until|format_time('short', timezone=this.timeZone)}, 'fetching') -}}
+        {%- elseif outcome is not null -%}
+            {{- ('outcome.' ~ (outcome.value == 'queued' and not this.polling ? 'queued_late' : outcome.value))|trans(domain='fetching') -}}
+        {%- endif -%}
+    </p>
+</div>

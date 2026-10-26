@@ -31,4 +31,5 @@ return [
     'tw-animate-css/dist/tw-animate.css' => ['version' => '1.4.0', 'type' => 'css'],
     'apexcharts' => ['version' => '8.3.1'],
     'apexcharts/core' => ['version' => '8.3.1'],
+    '@symfony/ux-live-component' => ['path' => './vendor/symfony/ux-live-component/assets/dist/live_controller.js'],
 ];

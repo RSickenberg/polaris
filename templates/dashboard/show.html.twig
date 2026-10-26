@@ -133,6 +133,10 @@
                     hint="{{ 'kpi.last_reading.hint'|trans({'%timezone%': timeZone}, 'dashboard') }}"
                 />
             </div>
+
+            {% if not ended %}
+                <twig:Fetching:OdometerRefreshButton :vehicleId="vehicle.id.toRfc4122()" />
+            {% endif %}
         {% endif %}
     </div>
 {% endblock %}

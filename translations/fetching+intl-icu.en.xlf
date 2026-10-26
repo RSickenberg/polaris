@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="en" datatype="plaintext" original="file.ext">
+    <body>
+      <trans-unit id="button.label">
+        <source>button.label</source>
+        <target>Refresh now</target>
+      </trans-unit>
+      <trans-unit id="limited.message">
+        <source>limited.message</source>
+        <target>You can refresh again at {time}.</target>
+      </trans-unit>
+      <trans-unit id="outcome.queued">
+        <source>outcome.queued</source>
+        <target>Reading the odometer…</target>
+      </trans-unit>
+      <trans-unit id="outcome.queued_late">
+        <source>outcome.queued_late</source>
+        <target>The refresh is queued. The result will show on the next reading.</target>
+      </trans-unit>
+      <trans-unit id="outcome.stored">
+        <source>outcome.stored</source>
+        <target>New reading stored.</target>
+      </trans-unit>
+      <trans-unit id="outcome.unchanged">
+        <source>outcome.unchanged</source>
+        <target>The odometer has not changed since the last reading.</target>
+      </trans-unit>
+      <trans-unit id="outcome.asleep">
+        <source>outcome.asleep</source>
+        <target>The car is asleep. Polaris does not wake it: the last reading is kept. Wake it from the Tesla app and refresh again.</target>
+      </trans-unit>
+      <trans-unit id="outcome.offline">
+        <source>outcome.offline</source>
+        <target>The car is offline: the last reading is kept.</target>
+      </trans-unit>
+      <trans-unit id="outcome.unavailable">
+        <source>outcome.unavailable</source>
+        <target>The car went to sleep during the read: the last reading is kept.</target>
+      </trans-unit>
+      <trans-unit id="outcome.not_connected">
+        <source>outcome.not_connected</source>
+        <target>Polaris is not connected to Tesla. Connect it in the Tesla settings.</target>
+      </trans-unit>
+      <trans-unit id="outcome.rejected">
+        <source>outcome.rejected</source>
+        <target>The car reported a lower odometer than a stored reading: it was not stored.</target>
+      </trans-unit>
+      <trans-unit id="outcome.busy">
+        <source>outcome.busy</source>
+        <target>Another read of this vehicle is running. Try again in a moment.</target>
+      </trans-unit>
+      <trans-unit id="outcome.failed">
+        <source>outcome.failed</source>
+        <target>Tesla returned an error. The refresh will not be repeated automatically.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -128,7 +128,8 @@ are specific to Polaris and win when the two disagree.
   which does not cover embedding it in a product used by other people, so the hosted layer needs
   an OEM license; its ESM build injects its own CSS and imports `apexcharts/core`) behind one
   reusable Stimulus controller. Messenger with Redis streams and Scheduler run the fetches (see
-  "Scheduled fetching"). Planned, not installed yet: Redis as the cache. Check `composer.json` before assuming a package is there.
+  "Scheduled fetching"). Symfony UX Live Component (^3.6, recipe route `/_components`, behind the catch-all
+  `ROLE_USER` `access_control`) drives the manual refresh button. Planned, not installed yet: Redis as the cache. Check `composer.json` before assuming a package is there.
 - UI: kit components are installed with `bin/console ux:install <name> --kit shadcn` into
   `templates/components/` (Stimulus controllers into `assets/controllers/`) and are then ours
   to edit, but keep edits minimal so a later `ux:install` diff stays readable; the only
@@ -136,7 +137,13 @@ are specific to Polaris and win when the two disagree.
   is a dev dependency: the installed files are committed. Polaris's own components go in
   `templates/components/<Module>/` (the shell is `Shared`; the dashboard building blocks `KpiCard`,
   `LeaseProgress`, `PaceRow` (a row of the pace table: budget, even pace, current pace), `RiskAlert` and `MileageChart` are `Dashboard`, anonymous components built on the
-  kit Card, Progress, Badge and Alert; `MileageChart` only feeds `chart_controller.js`).
+  kit Card, Progress, Badge and Alert; `MileageChart` only feeds `chart_controller.js`). `Fetching:OdometerRefreshButton`
+  (`Fetching\Twig\Components\OdometerRefreshButton`, template `templates/components/Fetching/`) is the first
+  PHP-backed Live Component: `config/packages/twig_component.yaml` maps `Polaris\Fetching\Twig\Components\` to the
+  name prefix `Fetching`. It sits under the dashboard KPIs while the lease runs (not without a lease or reading, not once ended). Live Component 3.6 protects an action only by
+  POST plus the `X-Requested-With` header (no CSRF token), and has no `#[IsGranted]` support: the component checks
+  `VehiclePermission::Manage` itself on every request (render and action) and answers 404. A `LiveProp` named like a
+  method of the component breaks hydration (the property accessor calls the method): name them differently.
   `assets/controllers/chart_controller.js` is the one generic chart controller: chart type, series,
   options, `locale` and `timeZone` are Stimulus values, options strings written `var(--token)` are
   resolved from the theme tokens, it redraws when the `dark` class of `<html>` changes, formats axes
@@ -342,7 +349,21 @@ are specific to Polaris and win when the two disagree.
   other `FleetApiError`s are rethrown to the `failed` transport.
 - `FetchOdometerMessage` has scalar fields and a null `slotTimestamp` for a fetch that belongs to no slot (never retried):
   the manual refresh dispatches it, and new fields (such as an `allowWake` flag) are added at the end with a default.
-  The per-vehicle lock between a scheduled and a manual fetch is not there yet: it belongs with the manual refresh.
+- `OdometerFetcher` runs one fetch per vehicle at a time, scheduled or manual, under a `symfony/lock` lock
+  `odometer_fetch_<vehicle base32>` (TTL 60 s, non-blocking). Held: a manual refresh ends as `RefreshOutcome::Busy` and asks
+  nothing; a scheduled check is queued again 30 s later with the same `attempt` (no state check is used).
+- Manual refresh (`Service\ManualRefreshService::request()`, the only entry; the component and a later
+  `POST /api/vehicles/{id}/refresh` call it and read `RefreshRequestResult`: `Accepted` -> 202, `RateLimited` with
+  `retryAfter` -> 429). The limit is decided there, not in the UI: `Extension\ManualRefreshPolicy` says whether the
+  vehicle is limited (self-hosted default `ConfiguredManualRefreshPolicy`, `POLARIS_MANUAL_REFRESH_LIMIT`: `1` limits, `0`
+  lifts it since the owner pays the Tesla bill; the hosted layer replaces the policy and always limits), and the
+  `manual_refresh` limiter (`fixed_window`, 1 per hour, key = vehicle id, default `cache.rate_limiter` pool, i.e. the
+  filesystem app cache: one web container only, move the pool to Redis when the cache does) counts every accepted request,
+  whatever the car answers. The Symfony limiter reads the wall clock, so tests age its stored `Window` instead of
+  freezing time. An accepted request writes a `RefreshAttempt` (`Queued`) and dispatches `FetchOdometerMessage` with a null
+  slot and `refreshId`; the fetcher settles the attempt (`RefreshOutcome`: `Stored`, `Unchanged`, `Asleep`, `Offline`,
+  `Unavailable`, `NotConnected`, `Rejected`, `Busy`, `Failed`) and the component polls every 2 s (`data-poll`) for at most
+  2 minutes after the click. The car is never woken (#32).
 
 ### Code organization (ADR 0001)
 

@@ -7,12 +7,15 @@ namespace Polaris\Tests\Functional\Fetching;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Polaris\Fetching\Domain\RefreshOutcome;
 use Polaris\Fetching\Domain\SlotRunStatus;
 use Polaris\Fetching\Entity\FetchSlotRun;
+use Polaris\Fetching\Entity\RefreshAttempt;
 use Polaris\Fetching\Message\FetchOdometerMessage;
 use Polaris\Fetching\Service\OdometerFetcher;
 use Polaris\Reading\Domain\ReadingSource;
 use Polaris\Reading\Entity\OdometerReading;
+use Polaris\Tesla\Service\Exception\FleetApiError;
 use Polaris\Tests\Support\FleetApiResponses;
 use Polaris\Tests\Support\SignsIn;
 use Polaris\Tests\Support\TeslaFixtures;
@@ -22,6 +25,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Clock\Test\ClockSensitiveTrait;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
+use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
@@ -52,6 +56,11 @@ final class OdometerFetcherTest extends KernelTestCase
      * Whether the live call answers 408, as a car that fell asleep after reporting itself online.
      */
     private bool $fallsAsleep = false;
+
+    /**
+     * Whether Tesla answers every call with 400.
+     */
+    private bool $teslaRefuses = false;
 
     protected function setUp(): void
     {
@@ -251,6 +260,162 @@ final class OdometerFetcherTest extends KernelTestCase
         self::assertSame([], $this->requests);
     }
 
+    public function testAManualRefreshOfAnAsleepCarDoesNotWakeItAndKeepsTheLastReading(): void
+    {
+        $this->answerWith('online', 100.0);
+        $this->fetch(0);
+        $this->requests = [];
+        $this->answerWith('asleep');
+
+        [$status, $outcome] = $this->refresh();
+
+        self::assertSame(SlotRunStatus::Skipped, $status);
+        self::assertSame(RefreshOutcome::Asleep, $outcome);
+        self::assertSame([], $this->queued());
+        self::assertCount(1, $this->requests);
+        self::assertStringStartsWith('GET ', $this->requests[0]);
+        self::assertStringNotContainsString('wake_up', $this->requests[0]);
+        $readings = $this->entityManager()->getRepository(OdometerReading::class)->findAll();
+        self::assertCount(1, $readings);
+        self::assertSame(160_934, $readings[0]->getOdometer()->metres());
+    }
+
+    public function testAManualRefreshOfAnOfflineCarSaysSo(): void
+    {
+        $this->answerWith('offline');
+
+        self::assertSame(RefreshOutcome::Offline, $this->refresh()[1]);
+    }
+
+    public function testAManualRefreshOfAnOnlineCarStoresTheNewValue(): void
+    {
+        $this->answerWith('online', 100.0);
+
+        [$status, $outcome] = $this->refresh();
+
+        self::assertSame(SlotRunStatus::Stored, $status);
+        self::assertSame(RefreshOutcome::Stored, $outcome);
+        self::assertCount(1, $this->entityManager()->getRepository(OdometerReading::class)->findAll());
+    }
+
+    public function testAManualRefreshThatFindsTheSameValueIsUnchanged(): void
+    {
+        $this->answerWith('online', 100.0);
+        $this->refresh();
+
+        self::assertSame(RefreshOutcome::Unchanged, $this->refresh()[1]);
+    }
+
+    public function testAManualRefreshOfACarThatFallsAsleepBetweenTheTwoCallsIsUnavailable(): void
+    {
+        $this->answerWith('online', 100.0);
+        $this->fallsAsleep = true;
+
+        self::assertSame(RefreshOutcome::Unavailable, $this->refresh()[1]);
+        self::assertCount(2, $this->requests, '408 is not retried.');
+        self::assertSame([], $this->queued());
+    }
+
+    public function testAManualRefreshWithoutAConnectionIsNotConnected(): void
+    {
+        $this->entityManager()->createQuery('DELETE FROM ' . \Polaris\Tesla\Entity\OAuthToken::class)->execute();
+
+        self::assertSame(RefreshOutcome::NotConnected, $this->refresh()[1]);
+        self::assertSame([], $this->requests);
+    }
+
+    public function testAManualRefreshThatTeslaRefusesIsFailedAndTheErrorGoesOn(): void
+    {
+        $this->teslaRefuses = true;
+        $attempt = $this->newAttempt();
+
+        try {
+            self::getContainer()->get(OdometerFetcher::class)->fetch(new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), null, 0, $attempt->getId()->toRfc4122()));
+            self::fail('The Tesla error must reach the failure transport.');
+        } catch (FleetApiError) {
+            self::assertSame(RefreshOutcome::Failed, $this->outcomeOf($attempt));
+        }
+    }
+
+    public function testAManualRefreshWhileAnotherFetchRunsIsBusyAndAsksNothing(): void
+    {
+        $this->answerWith('online', 100.0);
+        $lock = $this->holdLock();
+
+        [$status, $outcome] = $this->refresh();
+        $lock->release();
+
+        self::assertSame(SlotRunStatus::Skipped, $status);
+        self::assertSame(RefreshOutcome::Busy, $outcome);
+        self::assertSame([], $this->requests);
+        self::assertSame([], $this->entityManager()->getRepository(OdometerReading::class)->findAll());
+    }
+
+    public function testAScheduledCheckWhileAnotherFetchRunsIsQueuedAgainWithoutUsingACheck(): void
+    {
+        $this->answerWith('online', 100.0);
+        $lock = $this->holdLock();
+
+        $status = $this->fetch(0);
+        $lock->release();
+
+        self::assertSame(SlotRunStatus::Retrying, $status);
+        self::assertSame([], $this->requests);
+        $queued = $this->queued();
+        self::assertCount(1, $queued);
+        self::assertSame(30_000, $queued[0]->last(DelayStamp::class)?->getDelay());
+        $retry = $queued[0]->getMessage();
+        self::assertInstanceOf(FetchOdometerMessage::class, $retry);
+        self::assertSame(0, $retry->attempt);
+        self::assertSame(SlotRunStatus::Dispatched, $this->slotRun()->getStatus());
+    }
+
+    public function testTheLockIsReleasedAfterEachFetch(): void
+    {
+        $this->answerWith('asleep');
+        $this->refresh();
+
+        // holdLock() fails the test when the lock is still held.
+        $this->holdLock()->release();
+    }
+
+    /**
+     * @return array{SlotRunStatus, RefreshOutcome}
+     */
+    private function refresh(): array
+    {
+        $attempt = $this->newAttempt();
+        $status = self::getContainer()->get(OdometerFetcher::class)->fetch(
+            new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), null, 0, $attempt->getId()->toRfc4122()),
+        );
+
+        return [$status, $this->outcomeOf($attempt)];
+    }
+
+    private function newAttempt(): RefreshAttempt
+    {
+        $attempt = new RefreshAttempt($this->vehicle, self::slot());
+        $this->entityManager()->persist($attempt);
+        $this->entityManager()->flush();
+
+        return $attempt;
+    }
+
+    private function outcomeOf(RefreshAttempt $attempt): RefreshOutcome
+    {
+        $this->entityManager()->refresh($attempt);
+
+        return $attempt->getOutcome();
+    }
+
+    private function holdLock(): \Symfony\Component\Lock\SharedLockInterface
+    {
+        $lock = self::getContainer()->get(LockFactory::class)->createLock('odometer_fetch_' . $this->vehicle->getId()->toBase32(), 60);
+        self::assertTrue($lock->acquire(), 'The test could not take the lock.');
+
+        return $lock;
+    }
+
     /**
      * @param int $hoursLater fetches a later slot (its run is created), as the next day's slot would
      */
@@ -278,6 +443,10 @@ final class OdometerFetcherTest extends KernelTestCase
     private function respond(string $method, string $url): MockResponse
     {
         $this->requests[] = $method . ' ' . $url;
+
+        if ($this->teslaRefuses) {
+            return new MockResponse('{}', ['http_code' => 400]);
+        }
 
         if (!str_ends_with($url, '/vehicle_data')) {
             return new MockResponse(FleetApiResponses::vehicle($this->state));
