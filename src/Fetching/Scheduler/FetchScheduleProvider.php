@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polaris\Fetching\Scheduler;
 
 use Polaris\Fetching\Message\DispatchDueFetches;
+use Polaris\Fetching\Message\PurgeRefreshAttempts;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
@@ -13,7 +14,7 @@ use Symfony\Contracts\Cache\CacheInterface;
 
 /**
  * The one schedule of Polaris ("default", consumed as the `scheduler_default` transport): a tick every
- * minute that queues the fetches that are due. The slots themselves are not here, because they depend
+ * minute that queues the fetches that are due, and a daily purge of old manual refreshes. The slots themselves are not here, because they depend
  * on each user's time zone and change with daylight saving: see {@see \Polaris\Fetching\Service\DueFetchDispatcher}.
  */
 #[AsSchedule]
@@ -25,6 +26,8 @@ final readonly class FetchScheduleProvider implements ScheduleProviderInterface
      */
     public const string TICK = '* * * * *';
 
+    public const string PURGE = '17 3 * * *';
+
     public function __construct(
         private CacheInterface $cache,
     ) {
@@ -33,7 +36,12 @@ final readonly class FetchScheduleProvider implements ScheduleProviderInterface
     public function getSchedule(): Schedule
     {
         return new Schedule()
-            ->with(RecurringMessage::cron(self::TICK, new DispatchDueFetches(), 'UTC'))
+            // One call: with() starts a new schedule from the messages it is given, it does not add to the previous ones.
+            ->with(
+                RecurringMessage::cron(self::TICK, new DispatchDueFetches(), 'UTC'),
+                // Once a day, at a quiet hour: the manual refreshes nobody waits for any more.
+                RecurringMessage::cron(self::PURGE, new PurgeRefreshAttempts(), 'UTC'),
+            )
             // A missed tick is not worth running late: the next one looks at the same slots.
             ->stateful($this->cache)
             ->processOnlyLastMissedRun(true);
