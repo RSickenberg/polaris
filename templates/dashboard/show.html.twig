@@ -51,41 +51,27 @@
             </twig:Dashboard:RiskAlert>
 
             {% if not ended %}
-                <twig:Card>
-                    <twig:Card:Content>
-                        <twig:Table>
-                            <twig:Table:Header>
-                                <twig:Table:Row>
-                                    <twig:Table:Head><span class="sr-only">{{ 'pace.row'|trans(domain='dashboard') }}</span></twig:Table:Head>
-                                    <twig:Table:Head class="text-end">{{ 'pace.day'|trans(domain='dashboard') }}</twig:Table:Head>
-                                    <twig:Table:Head class="text-end">{{ 'pace.week'|trans(domain='dashboard') }}</twig:Table:Head>
-                                    <twig:Table:Head class="text-end">{{ 'pace.month'|trans(domain='dashboard') }}</twig:Table:Head>
-                                </twig:Table:Row>
-                            </twig:Table:Header>
-                            <twig:Table:Body>
-                                <twig:Dashboard:PaceRow
-                                    key="budget"
-                                    title="{{ 'budget.title'|trans(domain='dashboard') }}"
-                                    basis="{{ 'budget.basis'|trans(domain='dashboard') }}"
-                                    :budget="assessment.budget"
-                                    fallback="{{ 'budget.none'|trans(domain='dashboard') }}"
-                                />
-                                <twig:Dashboard:PaceRow
-                                    key="even"
-                                    title="{{ 'even_pace.title'|trans(domain='dashboard') }}"
-                                    basis="{{ 'even_pace.basis'|trans(domain='dashboard') }}"
-                                    :budget="dashboard.evenPace"
-                                />
-                                <twig:Dashboard:PaceRow
-                                    key="current"
-                                    title="{{ 'current_pace.title'|trans(domain='dashboard') }}"
-                                    basis="{{ 'current_pace.basis'|trans(domain='dashboard') }}"
-                                    :budget="assessment.currentPace"
-                                />
-                            </twig:Table:Body>
-                        </twig:Table>
-                    </twig:Card:Content>
-                </twig:Card>
+                <div class="grid gap-4 lg:grid-cols-3">
+                    <twig:Dashboard:PaceCard
+                        key="current"
+                        title="{{ 'current_pace.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'current_pace.basis'|trans(domain='dashboard') }}"
+                        :budget="assessment.currentPace"
+                    />
+                    <twig:Dashboard:PaceCard
+                        key="budget"
+                        title="{{ 'budget.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'budget.basis'|trans(domain='dashboard') }}"
+                        :budget="assessment.budget"
+                        fallback="{{ 'budget.none'|trans(domain='dashboard') }}"
+                    />
+                    <twig:Dashboard:PaceCard
+                        key="even"
+                        title="{{ 'even_pace.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'even_pace.basis'|trans(domain='dashboard') }}"
+                        :budget="dashboard.evenPace"
+                    />
+                </div>
             {% endif %}
 
             <twig:Card>

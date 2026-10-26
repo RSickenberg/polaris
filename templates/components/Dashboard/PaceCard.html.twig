@@ -1,0 +1,33 @@
+{%- props
+    ## string The name of the card, used by the tests and the styles (data-pace).
+    key,
+    ## string The translated title of the card.
+    title,
+    ## string The translated sentence that says what the figures are based on.
+    basis,
+    ## \Polaris\Lease\Domain\Budget The distances to drive per day, week and month.
+    budget,
+    ## string|null The translated message shown instead of the figures when there are none (a budget of zero everywhere).
+    fallback = null
+-%}
+{# A card with the distance to drive per day, week and month, the figures as large as the other KPIs, three equal columns with a vertical separator between them. #}
+<twig:Card data-pace="{{ key }}" {{ ...attributes }}>
+    <twig:Card:Header>
+        <twig:Card:Title><h2>{{ title }}</h2></twig:Card:Title>
+        <twig:Card:Description>{{ basis }}</twig:Card:Description>
+    </twig:Card:Header>
+    <twig:Card:Content class="mt-auto">
+        {% if fallback is not null and budget.perDay.metres == 0 and budget.perWeek.metres == 0 and budget.perMonth.metres == 0 %}
+            <p class="text-sm text-muted-foreground">{{ fallback }}</p>
+        {% else %}
+            <dl class="grid grid-cols-3 divide-x">
+                {% for period, distance in {day: budget.perDay, week: budget.perWeek, month: budget.perMonth} %}
+                    <div class="px-2 text-center">
+                        <dd class="text-2xl font-semibold tracking-tight tabular-nums" data-figure>{{ (distance.metres / 1000)|format_number({max_fraction_digit: 0}) }}</dd>
+                        <dt class="text-sm text-muted-foreground">{{ ('pace.' ~ period)|trans(domain='dashboard') }}</dt>
+                    </div>
+                {% endfor %}
+            </dl>
+        {% endif %}
+    </twig:Card:Content>
+</twig:Card>

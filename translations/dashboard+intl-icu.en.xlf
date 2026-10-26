@@ -16,31 +16,31 @@
       </trans-unit>
       <trans-unit id="kpi.projected.hint">
         <source>kpi.projected.hint</source>
-        <target>Allowance: {allowance, number, ::precision-integer} {unit}</target>
+        <target>Limit: {allowance, number, ::precision-integer} {unit}</target>
       </trans-unit>
       <trans-unit id="risk.message.ok">
         <source>risk.message.ok</source>
-        <target>Projected {projected, number, ::precision-integer} {unit} at the end of the lease, within the allowance of {allowance, number, ::precision-integer} {unit}.</target>
+        <target>Projected {projected, number, ::precision-integer} {unit} at lease end, within {allowance, number, ::precision-integer} {unit}.</target>
       </trans-unit>
       <trans-unit id="risk.message.watch">
         <source>risk.message.watch</source>
-        <target>Projected {projected, number, ::precision-integer} {unit} at the end of the lease, close to the allowance of {allowance, number, ::precision-integer} {unit}.</target>
+        <target>Projected {projected, number, ::precision-integer} {unit} at lease end, close to the {allowance, number, ::precision-integer} {unit} limit.</target>
       </trans-unit>
       <trans-unit id="risk.message.over">
         <source>risk.message.over</source>
-        <target>Projected excess of {excess, number, ::precision-integer} {unit} at the end of the lease, about {cost}. Cut {cut, number, ::precision-integer} {unit} per week to land on the allowance.</target>
+        <target>Projected {excess, number, ::precision-integer} {unit} over at lease end, about {cost}. Cut {cut, number, ::precision-integer} {unit} / week to stay within.</target>
       </trans-unit>
       <trans-unit id="risk.message.over_no_cut">
         <source>risk.message.over_no_cut</source>
-        <target>Projected excess of {excess, number, ::precision-integer} {unit} at the end of the lease, about {cost}.</target>
+        <target>Projected {excess, number, ::precision-integer} {unit} over at lease end, about {cost}.</target>
       </trans-unit>
       <trans-unit id="risk.message.ended_ok">
         <source>risk.message.ended_ok</source>
-        <target>The lease ended within the allowance of {allowance, number, ::precision-integer} {unit}.</target>
+        <target>Ended within the {allowance, number, ::precision-integer} {unit} allowance.</target>
       </trans-unit>
       <trans-unit id="risk.message.ended_over">
         <source>risk.message.ended_over</source>
-        <target>The lease ended {excess, number, ::precision-integer} {unit} over the allowance, which costs {cost} so far.</target>
+        <target>Ended {excess, number, ::precision-integer} {unit} over, {cost} so far.</target>
       </trans-unit>
       <trans-unit id="kpi.driven.hint">
         <source>kpi.driven.hint</source>

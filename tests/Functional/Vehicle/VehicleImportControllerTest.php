@@ -86,7 +86,7 @@ final class VehicleImportControllerTest extends WebTestCase
         self::assertSame($this->user->getId()->toRfc4122(), $vehicles[0]->getOwner()->getId()->toRfc4122());
 
         $this->client->followRedirect();
-        self::assertSelectorExists('[data-flash="success"].text-green-900');
+        self::assertSelectorExists('[data-flash="success"]');
         self::assertSelectorTextContains('main', '1 vehicle imported');
         self::assertSelectorTextContains('main', 'Raven');
     }

@@ -36,15 +36,15 @@
       </trans-unit>
       <trans-unit id="budget.title">
         <source>budget.title</source>
-        <target>What you can drive from now on</target>
+        <target>From now on</target>
       </trans-unit>
       <trans-unit id="budget.none">
         <source>budget.none</source>
-        <target>No budget left: the allowance is used up.</target>
+        <target>Allowance used up.</target>
       </trans-unit>
       <trans-unit id="empty.no_lease.text">
         <source>empty.no_lease.text</source>
-        <target>Add the lease terms of this vehicle to see where you stand.</target>
+        <target>Add the lease terms to see where you stand.</target>
       </trans-unit>
       <trans-unit id="empty.no_lease.cta">
         <source>empty.no_lease.cta</source>
@@ -52,7 +52,7 @@
       </trans-unit>
       <trans-unit id="empty.no_reading.text">
         <source>empty.no_reading.text</source>
-        <target>No odometer reading after the lease start yet. Add one to see where you stand.</target>
+        <target>No reading since the lease start. Add one to see where you stand.</target>
       </trans-unit>
       <trans-unit id="empty.no_reading.cta">
         <source>empty.no_reading.cta</source>
@@ -60,7 +60,7 @@
       </trans-unit>
       <trans-unit id="empty.draft.text">
         <source>empty.draft.text</source>
-        <target>This lease has not started yet. The figures appear once it does.</target>
+        <target>The lease has not started yet.</target>
       </trans-unit>
       <trans-unit id="empty.draft.cta">
         <source>empty.draft.cta</source>
@@ -68,7 +68,7 @@
       </trans-unit>
       <trans-unit id="ended.text">
         <source>ended.text</source>
-        <target>The lease has ended, so there is no budget left to spread. The figures below are the final ones so far.</target>
+        <target>The lease has ended. These are the final figures.</target>
       </trans-unit>
       <trans-unit id="ended.cta">
         <source>ended.cta</source>
@@ -80,7 +80,7 @@
       </trans-unit>
       <trans-unit id="page.home.empty">
         <source>page.home.empty</source>
-        <target>There is no vehicle yet. Import them from your Tesla account.</target>
+        <target>No vehicle yet. Import them from Tesla.</target>
       </trans-unit>
       <trans-unit id="home.dashboard">
         <source>home.dashboard</source>
@@ -148,39 +148,35 @@
       </trans-unit>
       <trans-unit id="even_pace.title">
         <source>even_pace.title</source>
-        <target>What you should drive normally</target>
+        <target>Normal pace</target>
       </trans-unit>
       <trans-unit id="budget.basis">
         <source>budget.basis</source>
-        <target>Drive this from now on to end the lease exactly on your allowance, from your latest reading.</target>
+        <target>To land exactly on the contract.</target>
       </trans-unit>
       <trans-unit id="even_pace.basis">
         <source>even_pace.basis</source>
-        <target>The lease allowance spread evenly over the whole term, whatever you have driven so far.</target>
+        <target>Contract mileage, spread evenly.</target>
       </trans-unit>
       <trans-unit id="current_pace.title">
         <source>current_pace.title</source>
-        <target>What you drive at your current pace</target>
+        <target>Current pace</target>
       </trans-unit>
       <trans-unit id="current_pace.basis">
         <source>current_pace.basis</source>
-        <target>What the projection says you will drive per period until the lease ends. The cut in the alert is this minus the first figures.</target>
-      </trans-unit>
-      <trans-unit id="pace.row">
-        <source>pace.row</source>
-        <target>Pace</target>
+        <target>Projected until the lease ends.</target>
       </trans-unit>
       <trans-unit id="pace.day">
         <source>pace.day</source>
-        <target>per day</target>
+        <target>km / day</target>
       </trans-unit>
       <trans-unit id="pace.week">
         <source>pace.week</source>
-        <target>per week</target>
+        <target>km / week</target>
       </trans-unit>
       <trans-unit id="pace.month">
         <source>pace.month</source>
-        <target>per month</target>
+        <target>km / month</target>
       </trans-unit>
     </body>
   </file>
