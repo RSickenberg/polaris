@@ -6,29 +6,34 @@
     <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.settings.title'|trans(domain='lease') }} <span class="font-normal text-muted-foreground">| {{ vehicle.name }}</span></h1>
 
 
-    <div class="my-4 max-w-3xl">
-        {{ form(form) }}
-    </div>
+    {# The form and, from the large breakpoint, the projection stacked on its right; on a phone one below the other. #}
+    <div class="my-4 grid items-start gap-8 lg:grid-cols-[minmax(0,48rem)_20rem]">
+        <div>
+            {{ form(form) }}
+        </div>
 
-    <h2 class="mt-8 mb-3 text-lg font-semibold">{{ 'page.settings.assessment'|trans(domain='lease') }}</h2>
-    {% if assessment is null %}
-        <p class="text-sm text-muted-foreground">{{ 'assessment.no_contract'|trans(domain='lease') }}</p>
-    {% elseif assessment.riskLevel is not defined %}
-        <p class="text-sm text-muted-foreground">{{ 'assessment.no_data'|trans(domain='lease') }}</p>
-    {% else %}
-        <twig:Card>
-            <twig:Card:Content>
-                <dl id="assessment" class="grid grid-cols-[1fr_auto] gap-x-6 gap-y-3 text-sm">
-                    <dt class="text-muted-foreground">{{ 'assessment.risk'|trans(domain='lease') }}</dt>
-                    <dd class="text-end font-medium" data-risk="{{ assessment.riskLevel.value }}">{{ ('risk.' ~ assessment.riskLevel.value)|trans(domain='lease') }}</dd>
-                    <dt class="text-muted-foreground">{{ 'assessment.allowed_to_date'|trans(domain='lease') }}</dt>
-                    <dd class="text-end font-medium">{{ (assessment.projection.allowedToDate.metres / 1000)|format_number({fraction_digit: 1}) }}</dd>
-                    <dt class="text-muted-foreground">{{ 'assessment.projected_end'|trans(domain='lease') }}</dt>
-                    <dd class="text-end font-medium">{{ (assessment.projection.projectedAtEnd.metres / 1000)|format_number({fraction_digit: 1}) }}</dd>
-                    <dt class="text-muted-foreground">{{ 'assessment.projected_excess'|trans(domain='lease') }}</dt>
-                    <dd class="text-end font-medium">{{ (assessment.projectedExcess.metres / 1000)|format_number({fraction_digit: 1}) }}</dd>
-                </dl>
-            </twig:Card:Content>
-        </twig:Card>
-    {% endif %}
+        <aside class="lg:sticky lg:top-4">
+            <h2 class="mb-3 text-lg font-semibold">{{ 'page.settings.assessment'|trans(domain='lease') }}</h2>
+            {% if assessment is null %}
+                <p class="text-sm text-muted-foreground">{{ 'assessment.no_contract'|trans(domain='lease') }}</p>
+            {% elseif assessment.riskLevel is not defined %}
+                <p class="text-sm text-muted-foreground">{{ 'assessment.no_data'|trans(domain='lease') }}</p>
+            {% else %}
+                <twig:Card>
+                    <twig:Card:Content>
+                        <dl id="assessment" class="grid grid-cols-[1fr_auto] gap-x-6 gap-y-3 text-sm">
+                            <dt class="text-muted-foreground">{{ 'assessment.risk'|trans(domain='lease') }}</dt>
+                            <dd class="text-end font-medium" data-risk="{{ assessment.riskLevel.value }}">{{ ('risk.' ~ assessment.riskLevel.value)|trans(domain='lease') }}</dd>
+                            <dt class="text-muted-foreground">{{ 'assessment.allowed_to_date'|trans(domain='lease') }}</dt>
+                            <dd class="text-end font-medium">{{ (assessment.projection.allowedToDate.metres / 1000)|format_number({fraction_digit: 1}) }}</dd>
+                            <dt class="text-muted-foreground">{{ 'assessment.projected_end'|trans(domain='lease') }}</dt>
+                            <dd class="text-end font-medium">{{ (assessment.projection.projectedAtEnd.metres / 1000)|format_number({fraction_digit: 1}) }}</dd>
+                            <dt class="text-muted-foreground">{{ 'assessment.projected_excess'|trans(domain='lease') }}</dt>
+                            <dd class="text-end font-medium">{{ (assessment.projectedExcess.metres / 1000)|format_number({fraction_digit: 1}) }}</dd>
+                        </dl>
+                    </twig:Card:Content>
+                </twig:Card>
+            {% endif %}
+</aside>
+    </div>
 {% endblock %}
