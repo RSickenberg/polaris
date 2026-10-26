@@ -286,6 +286,22 @@ final class DashboardControllerTest extends WebTestCase
         self::assertStringNotContainsString("\u{202F}", $figures, 'The narrow space looks like no space at this size.');
     }
 
+    public function testOnlyTheDigitsOfAFigureAreMonospaced(): void
+    {
+        $this->lease('2026-01-01', 12, 15_000, 0);
+        $this->reading('2026-07-02 11:00:00', 10_000);
+
+        $this->client->request('GET', $this->url());
+
+        $mono = $this->client->getCrawler()->filter('main dl dd span.font-mono')->each(static fn ($figure): string => $figure->text());
+        self::assertContains('10,000', $mono);
+        foreach ($mono as $figure) {
+            self::assertStringNotContainsString('km', $figure, 'The unit stays in the regular font.');
+            self::assertStringNotContainsString('Today', $figure, 'A date is not a number.');
+        }
+        self::assertStringContainsString("10,000\u{00A0}km", implode('|', $this->client->getCrawler()->filter('main dd.text-2xl')->each(static fn ($figure): string => $figure->text())));
+    }
+
     public function testTheEmptyStateIsTranslatedToFrench(): void
     {
         $this->client->request('GET', $this->url(), server: ['HTTP_ACCEPT_LANGUAGE' => 'fr']);

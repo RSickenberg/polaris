@@ -115,24 +115,28 @@
             <div class="grid gap-4 sm:grid-cols-2">
                 <twig:Dashboard:KpiCard
                     label="{{ 'kpi.driven'|trans(domain='dashboard') }}"
-                    value="{{ 'value.distance'|trans({distance: projection.driven.metres / 1000, unit: unit}, 'dashboard') }}"
+                    value="{{ (projection.driven.metres / 1000)|format_number({max_fraction_digit: 0}) }}"
+                    unit="{{ unit }}"
                     hint="{{ 'kpi.driven.hint'|trans({odometer: (projection.driven.metres + dashboard.startOdometer.metres) / 1000, start: dashboard.startOdometer.metres / 1000, unit: unit}, 'dashboard') }}"
                 />
                 <twig:Dashboard:KpiCard
                     label="{{ 'kpi.allowed'|trans(domain='dashboard') }}"
-                    value="{{ 'value.distance'|trans({distance: projection.allowedToDate.metres / 1000, unit: unit}, 'dashboard') }}"
+                    value="{{ (projection.allowedToDate.metres / 1000)|format_number({max_fraction_digit: 0}) }}"
+                    unit="{{ unit }}"
                     hint="{{ 'kpi.allowed.hint'|trans({sign: projection.margin.isNegative ? 'negative' : 'other', margin: projection.margin.absolute.metres / 1000, unit: unit}, 'dashboard') }}"
                 />
                 {% if not ended %}
                     <twig:Dashboard:KpiCard
                         label="{{ 'kpi.projected'|trans(domain='dashboard') }}"
-                        value="{{ 'value.distance'|trans({distance: projection.projectedAtEnd.metres / 1000, unit: unit}, 'dashboard') }}"
+                        value="{{ (projection.projectedAtEnd.metres / 1000)|format_number({max_fraction_digit: 0}) }}"
+                    unit="{{ unit }}"
                         hint="{{ 'kpi.projected.hint'|trans({allowance: dashboard.allowance.metres / 1000, unit: unit}, 'dashboard') }}"
                     />
                 {% endif %}
                 <twig:Dashboard:KpiCard
                     label="{{ 'kpi.last_reading.label'|trans(domain='dashboard') }}"
                     value="{{ projection.asOf|humanized_datetime(timeZone) }}"
+                    :mono="false"
                     hint="{{ 'kpi.last_reading.hint'|trans({'%timezone%': timeZone}, 'dashboard') }}"
                 />
             </div>

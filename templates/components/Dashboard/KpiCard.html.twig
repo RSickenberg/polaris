@@ -1,8 +1,12 @@
 {%- props
     ## string The name of the figure, already translated.
     label,
-    ## string The figure itself, already formatted for the active locale.
+    ## string The figure itself, already formatted for the active locale, without its unit.
     value,
+    ## string|null The unit, shown after the figure in the regular font.
+    unit = null,
+    ## bool Whether the figure is monospaced: true for a number, false for a text such as a date.
+    mono = true,
     ## string|null A short complement under the figure, already translated.
     hint = null
 -%}
@@ -10,8 +14,11 @@
     <twig:Card:Content>
         <dl class="flex flex-col gap-1">
             <dt class="text-sm text-muted-foreground">{{ label }}</dt>
-            {# A French number groups its thousands with a narrow no-break space, which looks like no space at this size: a regular no-break space reads better. The figures are monospaced: tabular digits made the grouping uneven. #}
-            <dd class="text-2xl font-mono font-semibold">{{ value|replace({" ": " "}) }}</dd>
+            {# A French number groups its thousands with a narrow no-break space, which looks like no space at this size: a regular no-break space reads better. Only the digits are monospaced: tabular digits made the grouping uneven. #}
+            <dd class="text-2xl font-semibold">
+                <span{% if mono %} class="font-mono"{% endif %}>{{ value|replace({" ": " "}) }}</span>
+                {%- if unit is not null %}&nbsp;<span>{{ unit }}</span>{% endif -%}
+            </dd>
             {% if hint is not null %}
                 <dd class="text-xs text-muted-foreground">{{ hint }}</dd>
             {% endif %}
