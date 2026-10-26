@@ -27,6 +27,10 @@ final class OdometerReadingType extends AbstractType
                 'label' => 'form.read_at.label',
                 'widget' => 'single_text',
                 'input' => 'datetime_immutable',
+                // A text field in the format of the locale: a datetime-local input follows the language of the browser.
+                'html5' => false,
+                'format' => LocalizedDateTimePattern::for($options['locale']),
+                'attr' => ['placeholder' => LocalizedDateTimePattern::example($options['locale']), 'autocomplete' => 'off'],
                 // Stored in UTC, entered and shown in the time zone of the user (ADR 0003).
                 'model_timezone' => TimeZone::UTC,
                 'view_timezone' => $options['time_zone'],
@@ -48,7 +52,10 @@ final class OdometerReadingType extends AbstractType
             'translation_domain' => 'reading',
             // The IANA time zone the date is entered in.
             'time_zone' => TimeZone::UTC,
+            // The locale the date is entered in.
+            'locale' => 'en',
         ]);
         $resolver->setAllowedTypes('time_zone', 'string');
+        $resolver->setAllowedTypes('locale', 'string');
     }
 }

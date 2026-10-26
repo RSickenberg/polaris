@@ -107,7 +107,7 @@ final class FormThemeTest extends WebTestCase
     {
         $this->get('readings', $locale);
         $this->client->submitForm('fr' === $locale ? 'Ajouter le relevé' : 'Add reading', [
-            'odometer_reading[readAt]' => '2026-10-02T08:00',
+            'odometer_reading[readAt]' => 'fr' === $locale ? '02/10/2026 08:00' : '10/02/2026, 08:00 AM',
             'odometer_reading[odometer]' => '-1',
             'odometer_reading[distanceUnit]' => 'km',
         ]);

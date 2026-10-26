@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Tests\Functional\Reading;
 
+use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Polaris\Reading\Controller\OdometerReadingController;
@@ -42,7 +43,18 @@ final class OdometerReadingControllerTest extends WebTestCase
         self::assertSelectorTextContains('h1', 'Model 3');
         self::assertSelectorTextContains('body', 'No reading yet.');
         self::assertSelectorExists('form input[name="odometer_reading[odometer]"]');
-        self::assertInputValueSame('odometer_reading[readAt]', '2026-10-20T12:00');
+        self::assertInputValueSame('odometer_reading[readAt]', '10/20/2026, 12:00 PM');
+        self::assertSelectorExists('input[name="odometer_reading[readAt]"][type=text][placeholder="12/31/2026, 11:59 PM"]');
+    }
+
+    public function testTheDateIsShownAndTypedInTheFormatOfTheLocale(): void
+    {
+        $this->client->setServerParameter('HTTP_ACCEPT_LANGUAGE', 'fr');
+
+        $this->client->request('GET', $this->url());
+
+        self::assertInputValueSame('odometer_reading[readAt]', '20/10/2026 12:00');
+        self::assertSelectorExists('input[name="odometer_reading[readAt]"][placeholder="31/12/2026 23:59"]');
     }
 
     public function testUnknownVehicleIsNotFound(): void
@@ -109,7 +121,7 @@ final class OdometerReadingControllerTest extends WebTestCase
     {
         $this->client->request('GET', $this->url());
         $this->client->submitForm('Add reading', [
-            'odometer_reading[readAt]' => $readAt,
+            'odometer_reading[readAt]' => CarbonImmutable::parse($readAt, 'UTC')->format('m/d/Y, h:i A'),
             'odometer_reading[odometer]' => $odometer,
             'odometer_reading[distanceUnit]' => $unit,
         ]);

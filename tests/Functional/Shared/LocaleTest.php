@@ -78,7 +78,7 @@ final class LocaleTest extends WebTestCase
     {
         $this->client->setServerParameter('HTTP_ACCEPT_LANGUAGE', 'fr');
         $this->client->request('GET', $this->url);
-        $this->client->submitForm('Ajouter le relevé', ['odometer_reading[readAt]' => '2026-10-02T08:00', 'odometer_reading[odometer]' => '9000', 'odometer_reading[distanceUnit]' => 'km']);
+        $this->client->submitForm('Ajouter le relevé', ['odometer_reading[readAt]' => '02/10/2026 08:00', 'odometer_reading[odometer]' => '9000', 'odometer_reading[distanceUnit]' => 'km']);
 
         self::assertResponseStatusCodeSame(422);
         self::assertStringContainsString('Le compteur ne peut pas être inférieur au relevé précédent (12 345 km le 1 oct. 2026 à 08:00 UTC).', self::text($this->client->getCrawler()->filter('body')->text()));
