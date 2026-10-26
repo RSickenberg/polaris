@@ -14,7 +14,6 @@ use Polaris\Lease\Form\Model\LeaseContractData;
 use Polaris\Lease\Repository\LeaseContractRepository;
 use Polaris\Lease\Service\Dto\LeaseTerms;
 use Polaris\Lease\Service\Exception\LeaseTermsRejected;
-use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Shared\Domain\OdometerSample;
 use Polaris\Vehicle\Entity\Vehicle;
@@ -129,13 +128,27 @@ final readonly class LeaseTermsService
     }
 
     /**
+     * The readings as samples, and the confirmations: a reading that the car still had later (it had not moved) adds a
+     * sample with the same odometer at that instant, so the projection goes on from there. A confirmation is dropped
+     * when a later reading comes first (it would contradict it).
+     *
      * @return list<OdometerSample>
      */
     private function samples(Vehicle $vehicle): array
     {
-        return array_map(
-            static fn (OdometerReading $reading): OdometerSample => $reading->toSample(),
-            $this->readings->history($vehicle)
-        );
+        $readings = array_reverse($this->readings->history($vehicle));
+        $samples = [];
+
+        foreach ($readings as $index => $reading) {
+            $samples[] = $reading->toSample();
+            $confirmedAt = $reading->getConfirmedAt();
+            $next = $readings[$index + 1] ?? null;
+
+            if (null !== $confirmedAt && (null === $next || $confirmedAt->lessThan($next->getReadAt()))) {
+                $samples[] = new OdometerSample($confirmedAt, $reading->getOdometer());
+            }
+        }
+
+        return $samples;
     }
 }

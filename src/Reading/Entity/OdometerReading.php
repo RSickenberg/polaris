@@ -53,6 +53,13 @@ class OdometerReading
     #[ORM\Column(length: 16, enumType: ReadingSource::class)]
     private ReadingSource $source;
 
+    /**
+     * The latest instant at which the car was seen with this same odometer, when it was read again later and had not
+     * moved (the same value is not stored twice). Null when it never was.
+     */
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?CarbonImmutable $confirmedAt = null;
+
     private function __construct(Vehicle $vehicle, CarbonImmutable $readAt, Distance $odometer, ?string $odometerRaw, ?DistanceUnit $odometerRawUnit, ReadingSource $source)
     {
         if (0 !== $readAt->getOffset()) {
@@ -119,6 +126,25 @@ class OdometerReading
     public function getSource(): ReadingSource
     {
         return $this->source;
+    }
+
+    public function getConfirmedAt(): ?CarbonImmutable
+    {
+        return $this->confirmedAt;
+    }
+
+    /**
+     * Notes that the car still had this odometer at $at. It only moves forward in time.
+     */
+    public function confirm(CarbonImmutable $at): void
+    {
+        if (0 !== $at->getOffset()) {
+            throw new \InvalidArgumentException(\sprintf('A confirmation must be a UTC instant, got %s.', $at->toIso8601String()));
+        }
+
+        if ($at->greaterThan($this->confirmedAt ?? $this->readAt)) {
+            $this->confirmedAt = $at;
+        }
     }
 
     public function toSample(): OdometerSample

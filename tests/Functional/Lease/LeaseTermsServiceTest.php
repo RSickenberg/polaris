@@ -15,8 +15,12 @@ use Polaris\Lease\Repository\LeaseContractRepository;
 use Polaris\Lease\Service\Exception\LeaseTermsRejected;
 use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Reading\Entity\OdometerReading;
+use Polaris\Reading\Form\Model\OdometerReadingData;
+use Polaris\Reading\Service\Enum\RecordOutcome;
+use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Shared\Domain\Currency;
 use Polaris\Shared\Domain\Distance;
+use Polaris\Shared\Domain\DistanceUnit;
 use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
@@ -114,6 +118,43 @@ final class LeaseTermsServiceTest extends KernelTestCase
         $this->entityManager->clear();
         $contract = $this->entityManager->getRepository(LeaseContract::class)->findOneBy([]);
         self::assertSame(0, $contract?->getStartOdometer()->metres());
+    }
+
+    public function testAnUnchangedReadingMovesTheProjectionForwardSoTheMarginGrows(): void
+    {
+        $this->service->save($this->vehicle, self::data(15_000));
+        $before = $this->service->assess($this->vehicle);
+        self::assertInstanceOf(LeaseAssessment::class, $before);
+
+        // The car is read again the next day and has not moved: only the confirmation is stored.
+        self::mockTime('2026-07-03 12:00:00 UTC');
+        $recording = self::getContainer()->get(OdometerReadingService::class)->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-07-03 12:00:00', 'UTC'), Distance::fromKilometres(10_000));
+        self::assertSame(RecordOutcome::Unchanged, $recording->outcome);
+        $after = $this->service->assess($this->vehicle);
+
+        self::assertInstanceOf(LeaseAssessment::class, $after);
+        self::assertSame('2026-07-03T12:00:00+00:00', $after->projection->asOf->toIso8601String());
+        self::assertSame($before->projection->driven->metres(), $after->projection->driven->metres());
+        self::assertGreaterThan($before->projection->allowedToDate->metres(), $after->projection->allowedToDate->metres());
+        self::assertGreaterThan($before->projection->margin->metres(), $after->projection->margin->metres(), 'A day without driving: the margin grows.');
+    }
+
+    public function testAConfirmationThatALaterReadingContradictsIsIgnored(): void
+    {
+        $readings = self::getContainer()->get(OdometerReadingService::class);
+        self::mockTime('2026-07-03 12:00:00 UTC');
+        $readings->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-07-03 12:00:00', 'UTC'), Distance::fromKilometres(10_000));
+        // A reading typed in between, at a higher odometer, makes the confirmation impossible.
+        $data = new OdometerReadingData();
+        $data->readAt = CarbonImmutable::parse('2026-07-03 08:00:00', 'UTC');
+        $data->odometer = 10_100;
+        $data->distanceUnit = DistanceUnit::Kilometre;
+        $readings->recordManual($this->vehicle, $data);
+
+        $assessment = $this->service->save($this->vehicle, self::data(15_000));
+
+        self::assertInstanceOf(LeaseAssessment::class, $assessment);
+        self::assertSame('2026-07-03T08:00:00+00:00', $assessment->projection->asOf->toIso8601String());
     }
 
     public function testIncompleteDataIsRefused(): void
