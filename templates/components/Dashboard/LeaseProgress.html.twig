@@ -18,7 +18,7 @@
 <div {{ attributes.defaults({class: 'flex flex-col gap-2'}) }}>
     <div class="flex items-baseline justify-between gap-2 text-sm">
         <span class="text-muted-foreground">{{ label }}</span>
-        <span class="font-mono font-semibold">{{ (used / 100)|format_number(style: 'percent') }}</span>
+        <span class="font-normal">{{ (used / 100)|format_number(style: 'percent') }}</span>
     </div>
     <div class="relative flex items-center">
         <twig:Progress :value="min(used, 100)" class="h-2 {{ barColor }}" aria-label="{{ label }}" aria-valuetext="{{ valueText }}" />

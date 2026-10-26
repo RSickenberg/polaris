@@ -117,19 +117,22 @@
                     label="{{ 'kpi.driven'|trans(domain='dashboard') }}"
                     value="{{ (projection.driven.metres / 1000)|format_number({max_fraction_digit: 0}) }}"
                     unit="{{ unit }}"
+                    :mono="false"
                     hint="{{ 'kpi.driven.hint'|trans({odometer: (projection.driven.metres + dashboard.startOdometer.metres) / 1000, start: dashboard.startOdometer.metres / 1000, unit: unit}, 'dashboard') }}"
                 />
                 <twig:Dashboard:KpiCard
                     label="{{ 'kpi.allowed'|trans(domain='dashboard') }}"
                     value="{{ (projection.allowedToDate.metres / 1000)|format_number({max_fraction_digit: 0}) }}"
                     unit="{{ unit }}"
+                    :mono="false"
                     hint="{{ 'kpi.allowed.hint'|trans({sign: projection.margin.isNegative ? 'negative' : 'other', margin: projection.margin.absolute.metres / 1000, unit: unit}, 'dashboard') }}"
                 />
                 {% if not ended %}
                     <twig:Dashboard:KpiCard
                         label="{{ 'kpi.projected'|trans(domain='dashboard') }}"
                         value="{{ (projection.projectedAtEnd.metres / 1000)|format_number({max_fraction_digit: 0}) }}"
-                    unit="{{ unit }}"
+                        unit="{{ unit }}"
+                        :mono="false"
                         hint="{{ 'kpi.projected.hint'|trans({allowance: dashboard.allowance.metres / 1000, unit: unit}, 'dashboard') }}"
                     />
                 {% endif %}
