@@ -25,11 +25,11 @@
                             <dt class="text-muted-foreground">{{ 'assessment.risk'|trans(domain='lease') }}</dt>
                             <dd class="text-end font-medium" data-risk="{{ assessment.riskLevel.value }}">{{ ('risk.' ~ assessment.riskLevel.value)|trans(domain='lease') }}</dd>
                             <dt class="text-muted-foreground">{{ 'assessment.allowed_to_date'|trans(domain='lease') }}</dt>
-                            <dd class="text-end font-medium">{{ (assessment.projection.allowedToDate.metres / 1000)|format_number({fraction_digit: 1}) }}</dd>
+                            <dd class="text-end font-medium">{{ (assessment.projection.allowedToDate.metres / 1000)|format_number({fraction_digit: 1}) }}&nbsp;{{ 'unit.km'|trans(domain='shared') }}</dd>
                             <dt class="text-muted-foreground">{{ 'assessment.projected_end'|trans(domain='lease') }}</dt>
-                            <dd class="text-end font-medium">{{ (assessment.projection.projectedAtEnd.metres / 1000)|format_number({fraction_digit: 1}) }}</dd>
+                            <dd class="text-end font-medium">{{ (assessment.projection.projectedAtEnd.metres / 1000)|format_number({fraction_digit: 1}) }}&nbsp;{{ 'unit.km'|trans(domain='shared') }}</dd>
                             <dt class="text-muted-foreground">{{ 'assessment.projected_excess'|trans(domain='lease') }}</dt>
-                            <dd class="text-end font-medium">{{ (assessment.projectedExcess.metres / 1000)|format_number({fraction_digit: 1}) }}</dd>
+                            <dd class="text-end font-medium">{{ (assessment.projectedExcess.metres / 1000)|format_number({fraction_digit: 1}) }}&nbsp;{{ 'unit.km'|trans(domain='shared') }}</dd>
                         </dl>
                     </twig:Card:Content>
                 </twig:Card>
