@@ -1,14 +1,18 @@
-{# The success and error flash messages, once each. #}
-{% for message in app.flashes('success') %}
-    {# The green of the "on track" alert of the dashboard (Dashboard/RiskAlert, level ok). #}
-    <twig:Alert class="my-4 border-green-600/50 bg-green-50 text-green-900 dark:border-green-400/40 dark:bg-green-950/40 dark:text-green-200" data-flash="success">
-        <twig:ux:icon name="lucide:circle-check" aria-hidden="true" />
-        <twig:Alert:Title>{{ message }}</twig:Alert:Title>
-    </twig:Alert>
-{% endfor %}
-{% for message in app.flashes('error') %}
-    <twig:Alert variant="destructive" class="my-4" data-flash="error">
-        <twig:ux:icon name="lucide:circle-alert" aria-hidden="true" />
-        <twig:Alert:Title>{{ message }}</twig:Alert:Title>
-    </twig:Alert>
-{% endfor %}
+{# The toast region: the success and error flash messages, once each, and the toasts that scripts ask for. #}
+{# The empty toasts scripts clone are handed over as strings, not as <template>s: nothing inert sits in the page. #}
+{% set success %}<twig:Shared:Toast variant="success" />{% endset %}
+{% set info %}<twig:Shared:Toast variant="info" />{% endset %}
+{% set error %}<twig:Shared:Toast variant="error" />{% endset %}
+<div
+    class="pointer-events-none fixed bottom-4 end-4 z-50 flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-2"
+    aria-live="polite"
+    data-controller="toast-region"
+    data-toast-region-toasts-value="{{ {success: success|raw, info: info|raw, error: error|raw}|json_encode|e('html_attr') }}"
+>
+    {% for message in app.flashes('success') %}
+        <twig:Shared:Toast variant="success" :message="message" />
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <twig:Shared:Toast variant="error" :message="message" />
+    {% endfor %}
+</div>

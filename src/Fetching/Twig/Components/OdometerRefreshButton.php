@@ -58,6 +58,12 @@ final class OdometerRefreshButton
     #[LiveProp]
     public ?int $limitedUntil = null;
 
+    /**
+     * How many times the button was clicked in this page: it makes the toast of each click a new element.
+     */
+    #[LiveProp]
+    public int $clicks = 0;
+
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly RefreshAttemptRepository $attempts,
@@ -75,6 +81,7 @@ final class OdometerRefreshButton
     public function refresh(): void
     {
         $result = $this->refreshes->request($this->vehicle());
+        ++$this->clicks;
 
         $this->attemptId = $result->attemptId?->toRfc4122();
         $this->limitedUntil = $result->retryAfter?->getTimestamp();

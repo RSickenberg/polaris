@@ -222,6 +222,7 @@ final class DashboardControllerTest extends WebTestCase
 
         self::assertSelectorExists('main [data-live-name-value="Fetching:OdometerRefreshButton"] button[data-live-action-param=refresh]');
         self::assertSelectorTextContains('main [data-live-name-value="Fetching:OdometerRefreshButton"]', 'Refresh now');
+        self::assertSelectorExists('body > [data-controller=toast-region][aria-live=polite]', 'The toast region is in the layout.');
     }
 
     public function testTheRefreshButtonIsTranslatedToFrench(): void

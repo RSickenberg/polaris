@@ -1,0 +1,31 @@
+{%- props
+    ## 'success'|'error'|'info' The look and the icon of the toast. An error stays until it is dismissed.
+    variant = 'info',
+    ## string The message, already translated; empty in the <template> that the toast region clones.
+    message = ''
+-%}
+{# The green of the "on track" alert of the dashboard (Dashboard/RiskAlert, level ok). #}
+{%- set tone = {
+    success: 'border-green-600/50 bg-green-50 text-green-900 dark:border-green-400/40 dark:bg-green-950/40 dark:text-green-200',
+    error: '',
+    info: '',
+}[variant] -%}
+{# Set here: inside the Alert tag, `variant` is the one of the Alert. #}
+{%- set icon = {success: 'lucide:circle-check', error: 'lucide:circle-alert', info: 'lucide:info'}[variant] -%}
+{%- set delay = 'error' == variant ? 0 : 6000 -%}
+<twig:Alert
+    variant="{{ 'error' == variant ? 'destructive' : 'default' }}"
+    class="pointer-events-auto pe-10 shadow-lg {{ tone }}"
+    data-flash="{{ variant }}"
+    data-controller="toast"
+    data-toast-delay-value="{{ delay }}"
+    data-action="mouseenter->toast#pause mouseleave->toast#resume focusin->toast#pause focusout->toast#resume"
+>
+    <twig:ux:icon name="{{ icon }}" aria-hidden="true" />
+    <twig:Alert:Title data-toast-message>{{ message }}</twig:Alert:Title>
+    <twig:Alert:Action>
+        <twig:Button variant="ghost" size="icon-xs" data-action="toast#dismiss" aria-label="{{ 'toast.dismiss'|trans(domain='shared') }}">
+            <twig:ux:icon name="lucide:x" aria-hidden="true" />
+        </twig:Button>
+    </twig:Alert:Action>
+</twig:Alert>

@@ -87,7 +87,7 @@ final class VehicleImportControllerTest extends WebTestCase
 
         $this->client->followRedirect();
         self::assertSelectorExists('[data-flash="success"]');
-        self::assertSelectorTextContains('main', '1 vehicle imported');
+        self::assertSelectorTextContains('[data-flash="success"]', '1 vehicle imported');
         self::assertSelectorTextContains('main', 'Raven');
     }
 
