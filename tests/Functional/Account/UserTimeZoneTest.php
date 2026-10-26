@@ -45,9 +45,9 @@ final class UserTimeZoneTest extends WebTestCase
         self::assertSelectorTextContains('tbody tr', '10:00');
         self::assertSelectorTextContains('thead', 'Europe/Zurich');
         self::assertSelectorTextContains('label[for=odometer_reading_readAt]', 'Read at (Europe/Zurich)');
-        self::assertInputValueSame('odometer_reading[readAt]', '07/01/2026, 02:00 PM');
+        self::assertInputValueSame('odometer_reading[readAt]', '2026-07-01T14:00');
 
-        $client->submitForm('Add reading', ['odometer_reading[readAt]' => '07/01/2026, 11:30 AM', 'odometer_reading[odometer]' => '1100', 'odometer_reading[distanceUnit]' => 'km']);
+        $client->submitForm('Add reading', ['odometer_reading[readAt]' => '2026-07-01T11:30', 'odometer_reading[odometer]' => '1100', 'odometer_reading[distanceUnit]' => 'km']);
 
         self::assertResponseRedirects($path);
         $stored = $entityManager->getRepository(OdometerReading::class)->findBy([], ['odometerM' => 'DESC'])[0];

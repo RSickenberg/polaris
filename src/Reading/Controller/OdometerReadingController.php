@@ -45,7 +45,7 @@ final class OdometerReadingController extends AbstractController
         $data = new OdometerReadingData();
         $data->readAt = CarbonImmutable::instance($this->clock->now())->startOfMinute();
 
-        $form = $this->createForm(OdometerReadingType::class, $data, ['time_zone' => $user->getTimeZone(), 'locale' => $request->getLocale()]);
+        $form = $this->createForm(OdometerReadingType::class, $data, ['time_zone' => $user->getTimeZone()]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
