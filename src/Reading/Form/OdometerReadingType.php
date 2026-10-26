@@ -22,6 +22,8 @@ final class OdometerReadingType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        \assert(\is_string($options['locale']));
+
         $builder
             ->add('readAt', DateTimeType::class, [
                 'label' => 'form.read_at.label',
