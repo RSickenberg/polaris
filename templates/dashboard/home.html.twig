@@ -15,7 +15,11 @@
             <twig:Card>
                 <twig:Card:Header>
                     <twig:Card:Title><h2>{{ vehicle.name }}</h2></twig:Card:Title>
-                    <twig:Card:Description>{{ vehicle.vin.value }}</twig:Card:Description>
+                  <twig:Card:Description>
+                    <div class="font-mono">
+                      {{ vehicle.vin.value }}
+                    </div>
+                  </twig:Card:Description>
                 </twig:Card:Header>
                 <twig:Card:Content class="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                     <twig:Button as="a" href="{{ path('dashboard_show', {id: vehicle.id.toBase32()}) }}">{{ 'home.dashboard'|trans(domain='dashboard') }}</twig:Button>
