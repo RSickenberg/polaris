@@ -17,7 +17,7 @@
                     <twig:Card:Description>{{ 'page.login.description'|trans(domain='account') }}</twig:Card:Description>
                 </twig:Card:Header>
                 <twig:Card:Content>
-                    {{ include('shared/_flashes.html.twig') }}
+                    <twig:Shared:ToastRegion />
                     <form method="post" action="{{ path('account_login') }}" class="flex flex-col gap-4">
                         {% if error %}
                             <twig:Alert variant="destructive">
@@ -33,7 +33,7 @@
                             <twig:Input id="login-password" type="password" name="_password" autocomplete="current-password" required />
                         </twig:Field>
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                        <twig:Button type="submit">{{ 'form.submit'|trans(domain='account') }}</twig:Button>
+                        <twig:Button type="submit" class="w-full">{{ 'form.submit'|trans(domain='account') }}</twig:Button>
                         <a href="{{ path('account_forgot_password') }}" class="text-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground">{{ 'link.forgot'|trans(domain='account') }}</a>
                     </form>
                 </twig:Card:Content>

@@ -1,520 +1,205 @@
 # AGENTS.md
 
-This is a Symfony project. Check `composer.json` for the exact Symfony/PHP version
-in use, and read `symfony.lock` to see which recipes ran. Don't assume Doctrine,
-Twig, API Platform, Messenger, or Lock are installed unless one of those says so.
+Symfony project. Check `composer.json` for Symfony/PHP versions and `symfony.lock` for the recipes that ran. Don't assume Doctrine, Twig, API Platform, Messenger or Lock are installed unless those say so.
 
 ## Ask before generating
 
-If the task doesn't specify, ask rather than guess:
-
-- Persistence: Doctrine ORM, Doctrine ODM, or none?
-- Interface: server-rendered (Twig), API (Serializer, maybe API Platform), or both?
-- Auth: SecurityBundle, and which authenticator?
-
-If you can't ask (no interactive channel), state the assumption you're making and
-pick the smallest option (e.g. no persistence layer) rather than scaffolding a
-full stack nobody asked for.
+If unspecified, ask rather than guess: persistence (Doctrine ORM, ODM, none), interface (Twig, API, both), auth (SecurityBundle, which authenticator). With no interactive channel, state the assumption and pick the smallest option (e.g. no persistence layer).
 
 ## Adding features: Flex, not hand-wiring
 
-Install new capabilities with `composer require <package>` (e.g. `symfony/lock`,
-`symfony/messenger`, `orm-pack`) and let the Flex recipe register the bundle and
-generate its config. Don't hand-edit `config/bundles.php` or hand-write a bundle's
-base config; that's what the recipe is for. Don't skip a good-fit component just
-because it isn't installed yet; installing it is one command.
+Install capabilities with `composer require <package>` and let the Flex recipe register the bundle and config. Don't hand-edit `config/bundles.php` or a bundle's base config. Don't skip a good-fit component because it isn't installed yet.
 
 ## Conventions
 
-Follow https://symfony.com/doc/current/best_practices.html to write idiomatic
-Symfony:
+Follow https://symfony.com/doc/current/best_practices.html:
 
-- Use PHP attributes for framework metadata, and not only on controllers:
-  `#[Route]`, `#[MapRequestPayload]`, `#[IsGranted]` on actions, `#[Assert\...]`
-  on properties, `#[AsCommand]`, `#[AsEventListener]`, `#[AsMessageHandler]`, and
-  `#[AsAlias]` / `#[AsTaggedItem]` / `#[Autoconfigure]` on services. No YAML or
-  XML routing.
-- Rely on autowiring and autoconfiguration. Type-hint constructor arguments and
-  let the container resolve them. Where a type-hint can't express it, stay in the
-  class with `#[Autowire]` (parameters, env vars, expressions) or `#[Target]` (one
-  of several implementations of an interface). A YAML service definition is the
-  last resort, not the first.
-- Controllers extend `AbstractController`, stay thin, and delegate to services.
-- Use the framework for what it already does: Form for server-rendered forms,
-  Validator for validation, Serializer for JSON, Messenger for async work,
-  Security (voters, authenticators) for access control, Twig `path()`/`url()`
-  instead of hardcoded URLs.
-- Before hand-writing infrastructure (locks, queues, caches, HTTP clients,
-  mailers, schedulers) or reaching for a third-party library, check whether a
-  Symfony component covers it. It usually does.
-
-Three specifics worth spelling out, because they are easy to get wrong:
-
-- Bind request data with `#[MapRequestPayload]` / `#[MapQueryString]` on action
-  arguments, which wires up Serializer and Validator for you, instead of calling
-  `json_decode()` or `SerializerInterface` by hand. If neither package is
-  installed yet, `composer require` them rather than falling back to manual
-  parsing.
-- Use constructor property promotion, and `readonly` for DTOs and value objects.
-  Don't mark a service `readonly` if it might become `lazy: true`: a lazy proxy
-  can't extend a `readonly` class.
-- Use `symfony/lock` (`LockFactory`) for mutual exclusion. A hand-built flag or
-  lock file looks fine in review and is usually wrong under concurrency.
+- PHP attributes for framework metadata: `#[Route]`, `#[MapRequestPayload]`, `#[IsGranted]`, `#[Assert\...]`, `#[AsCommand]`, `#[AsEventListener]`, `#[AsMessageHandler]`, `#[AsAlias]` / `#[AsTaggedItem]` / `#[Autoconfigure]`. No YAML or XML routing.
+- Autowiring and autoconfiguration. Where a type-hint can't express it, use `#[Autowire]` (parameters, env, expressions) or `#[Target]`. YAML service definitions are the last resort.
+- Controllers extend `AbstractController`, stay thin, delegate to services.
+- Use the framework: Form, Validator, Serializer, Messenger, Security (voters, authenticators), Twig `path()`/`url()`. Before hand-writing infrastructure (locks, queues, caches, HTTP clients, mailers, schedulers) or adding a third-party library, check for a Symfony component.
+- Bind request data with `#[MapRequestPayload]` / `#[MapQueryString]`, not `json_decode()` or manual `SerializerInterface`; `composer require` the packages if missing.
+- Constructor property promotion; `readonly` for DTOs and value objects. Don't mark a service `readonly` if it might become `lazy: true`.
+- Mutual exclusion uses `symfony/lock` (`LockFactory`), never a hand-built flag or lock file.
 
 ## Everyday workflow
 
-- Run the app with `symfony serve -d`, and commands with `symfony console ...`
-  (or `bin/console` when the Symfony CLI isn't available).
-- When something fails, read `var/log/dev.log` and the web profiler
-  (`/_profiler`) before changing code.
-- If `maker-bundle` is installed, prefer `bin/console make:*` with every argument
-  passed up front and `--no-interaction` where supported: makers prompt on a
-  terminal by default, which hangs a non-interactive shell. If a maker still
-  needs interactive input, hand-write the code instead.
-- If Doctrine ORM is installed, schema changes go through migrations
-  (`bin/console make:migration`, then `doctrine:migrations:migrate`), never
-  `doctrine:schema:update` or hand-written SQL.
-- `.env` is committed and holds defaults only. Real secrets belong in `.env.local`
-  (git-ignored) or the secrets vault (`bin/console secrets:set`), read via
-  `%env(...)%`.
+- Run the app with `symfony serve -d`, commands with `symfony console ...` (or `bin/console`). In Polaris use Docker and the Makefile instead (see below).
+- On failure read `var/log/dev.log` and the profiler (`/_profiler`) before changing code.
+- With `maker-bundle`, prefer `bin/console make:*` with all arguments up front and `--no-interaction`; if a maker still prompts, hand-write the code.
+- Doctrine schema changes go through migrations (`make:migration`, `doctrine:migrations:migrate`), never `doctrine:schema:update` or hand-written SQL.
+- `.env` is committed with defaults only. Secrets go in `.env.local` (git-ignored) or the vault (`bin/console secrets:set`), read via `%env(...)%`.
 
 ## Testing
 
-Install `symfony/test-pack` if it isn't already. Functional/HTTP tests extend
-`WebTestCase`; service-level tests extend `KernelTestCase`. Run
-`php bin/phpunit` (falls back to `vendor/bin/phpunit`). A feature isn't done
-until it has a test that exercises it the way a caller would, an HTTP request for
-a controller or a service call for a service, not just "it didn't throw."
+Install `symfony/test-pack` if missing. Functional tests extend `WebTestCase`, service tests `KernelTestCase`. Run `php bin/phpunit`. A feature isn't done without a test that exercises it as a caller would (HTTP request for a controller, service call for a service).
 
 ## Code style
 
-Symfony's coding standard, the `@Symfony` php-cs-fixer ruleset (a PSR-12-derived
-superset). Run `vendor/bin/php-cs-fixer fix` if `friendsofphp/php-cs-fixer` is
-installed; it isn't part of the skeleton by default.
+Symfony coding standard (`@Symfony` php-cs-fixer ruleset). Run `vendor/bin/php-cs-fixer fix`.
 
 ## Discover, don't guess
 
-Framework APIs change between versions and your training data may be stale. Look
-things up in the project instead of relying on memory:
-
-- `bin/console about`: versions, environment, paths.
-- `bin/console debug:router`, `debug:container`, `debug:autowiring <name>`,
-  `debug:config <bundle>`, `config:dump-reference <bundle>`: what exists and how
-  it is configured.
-- `bin/console lint:container`, plus `lint:twig templates/` and
-  `lint:yaml config/` where those packages are installed: validate before running.
-- Read the installed source and docblocks under `vendor/`.
-- Docs: https://symfony.com/doc/current/ (switch to the version matching
-  `composer.json` if it differs).
+Look things up in the project, not from memory: `bin/console about`, `debug:router`, `debug:container`, `debug:autowiring <name>`, `debug:config <bundle>`, `config:dump-reference <bundle>`, `lint:container`, `lint:twig templates/`, `lint:yaml config/`; read `vendor/` sources and docblocks; docs at https://symfony.com/doc/current/ (match the `composer.json` version).
 
 ## Polaris project rules
 
-Everything above is the generic Symfony guidance from the recipe. The rules below
-are specific to Polaris and win when the two disagree.
+These win over the generic guidance above.
 
 ### Context
 
-- Polaris tracks a Tesla's odometer against the lease allowance, projects the
-  mileage at lease end and warns before the limit. Decisions are recorded in
-  `docs/adr/`; read them before changing structure.
-- This repository is public under the PolyForm Noncommercial License 1.0.0 (ADR 0008) and is the
-  self-hostable application, for personal use only. A private hosted layer builds on its Docker image and plugs in
-  only through `src/Extension/`. Never add hosted-only code here (billing, plans,
-  sign-up policy, APNs keys).
-- Stack in place: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine ORM and
-  Migrations, Security (form login, login throttling with the Rate Limiter), Carbon, PHPUnit, Tailwind CSS 4 through symfonycasts/tailwind-bundle on
-  AssetMapper (no npm for application assets), Stimulus, Turbo, TwigComponent, UX Icons
-  the Symfony UX Toolkit Shadcn kit and ApexCharts 8.3.1 (importmap, pinned; Community License,
-  which does not cover embedding it in a product used by other people, so the hosted layer needs
-  an OEM license; its ESM build injects its own CSS and imports `apexcharts/core`) behind one
-  reusable Stimulus controller. Messenger with Redis streams and Scheduler run the fetches (see
-  "Scheduled fetching"). Planned, not installed yet: Redis as the cache. Check `composer.json` before assuming a package is there.
-- UI: kit components are installed with `bin/console ux:install <name> --kit shadcn` into
-  `templates/components/` (Stimulus controllers into `assets/controllers/`) and are then ours
-  to edit, but keep edits minimal so a later `ux:install` diff stays readable; the only
-  edits so far replace hardcoded English text with translation keys. `symfony/ux-toolkit`
-  is a dev dependency: the installed files are committed. Polaris's own components go in
-  `templates/components/<Module>/` (the shell is `Shared`; the dashboard building blocks `KpiCard`,
-  `LeaseProgress`, `PaceRow` (a row of the pace table: budget, even pace, current pace), `RiskAlert` and `MileageChart` are `Dashboard`, anonymous components built on the
-  kit Card, Progress, Badge and Alert; `MileageChart` only feeds `chart_controller.js`).
-  `assets/controllers/chart_controller.js` is the one generic chart controller: chart type, series,
-  options, `locale` and `timeZone` are Stimulus values, options strings written `var(--token)` are
-  resolved from the theme tokens, it redraws when the `dark` class of `<html>` changes, formats axes
-  and tooltips with Intl, and destroys the chart on disconnect and before the Turbo cache. The mileage
-  curves are built by `Dashboard\Domain\MileageSeriesBuilder` (readonly DTOs, no Lease domain types)
-  from the assessment the dashboard already computed. The driven and projected curves take the risk color of the
-  alert through the `--risk-ok`, `--risk-watch` and `--risk-over` tokens of `app.css` (the Tailwind green, amber and red
-  of `LeaseProgress`, lighter in dark mode). The last reading is shown with the `humanized_datetime` Twig filter
-  ("Today at ...", "Yesterday at ...", older dates in full), whose days are those of the user's time zone and whose
-  "now" comes from the clock. The zoom presets (7 days, 30 days, 1 year, to the lease end,
-  whole lease) are `Dashboard\Domain\MileageRangeBuilder`: look-back windows end now and start no earlier than the
-  lease start, the forecast window only exists with a projection, and the buttons drive the controller's `zoom` action. Icons are Lucide, imported with
-  `bin/console ux:icons:import lucide:<name>` into `assets/icons/` and committed, so there is
-  no runtime call to Iconify. Dark mode is the `dark` class on `<html>`, set before the first
-  paint by the inline script of `base.html.twig` and kept by `theme_controller.js`. Pages
-  extend `base.html.twig` and fill the `main` block.
-  Nothing styles bare elements: `app.css` holds only the theme variables, so titles,
-  paragraphs and lists carry their own utility classes. Forms render through the global form
-  theme `templates/shared/form_theme.html.twig` (registered in `twig.form_themes`), which extends
-  Symfony's `form_div_layout.html.twig` and overrides only the blocks it needs: each row is a kit
-  `Field` (`Field:Label`, the control, `Field:Description` for `help`, one `Field:Error` per error),
-  text-like widgets are `Input`, choice selects are `NativeSelect` (size `sm`, to match the Input
-  height) and buttons are `Button`. Symfony's `form_row` already hands `aria-describedby` and
-  `aria-invalid` to the widget through `attr`; the theme only forwards them. Checkbox widgets (alone, or as an expanded
-  choice: one line per choice, label without asterisk) are the kit `Checkbox`; radio, file, range and color
-  widgets are not themed yet and fall back to the default layout. Tables use
-  `Table` inside a `Card`, success flashes use `Alert` through `shared/_flashes.html.twig`. The
-  installed kit files are unedited, apart from the translated text noted above.
-- The `tailwind` compose service watches and builds the CSS in dev (binary and output in
-  `var/tailwind`, a volume shared with `php`); `make tailwind` builds once, and `make test`
-  and `make ci` do it first because the pages link the built stylesheet. The prod image runs
-  `tailwind:build --minify` before `asset-map:compile`; CI builds it before PHPUnit.
-- `twig-tailwind-extra`, which the kit templates need, ships a recipe in recipes-contrib.
-  `extra.symfony.allow-contrib` is `false`, so Flex skips it: its bundle is registered by hand
-  in `config/bundles.php`.
-- Run everything through Docker and the `Makefile` (see README): `make start`,
-  `make test`, `make ci`, `make sf ARGS="..."`. This replaces the generic
-  `symfony serve` and `php bin/phpunit` advice above.
-- Work is tracked on the GitHub Project "Polaris"
-  (https://github.com/users/RSickenberg/projects/4). Each story has acceptance
-  criteria and "blocked by" links: read the issue before starting and do not
-  start a story whose blockers are still open.
+- Polaris tracks a Tesla's odometer against the lease allowance, projects mileage at lease end and warns before the limit. Decisions are in `docs/adr/`; read them before changing structure.
+- Public repo under PolyForm Noncommercial 1.0.0 (ADR 0008): the self-hostable app, personal use only. A private hosted layer builds on its Docker image and plugs in only through `src/Extension/`. Never add hosted-only code here (billing, plans, sign-up policy, APNs keys).
+- Stack: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine ORM and Migrations, Security (form login, login throttling with Rate Limiter), Carbon, PHPUnit, Tailwind CSS 4 via symfonycasts/tailwind-bundle on AssetMapper (no npm for app assets), Stimulus, Turbo, TwigComponent, UX Icons, UX Toolkit Shadcn kit, UX Live Component ^3.6 (route `/_components`, behind the catch-all `ROLE_USER`), ApexCharts 8.3.1 (importmap, pinned; Community License does not cover embedding in a product used by others, so the hosted layer needs an OEM license; its ESM build injects its own CSS and imports `apexcharts/core`) behind one Stimulus controller. Messenger (Redis streams) and Scheduler run the fetches. Planned, not installed: Redis as the cache. Check `composer.json` before assuming a package.
+- UI:
+  - Kit components: `bin/console ux:install <name> --kit shadcn` into `templates/components/` (controllers into `assets/controllers/`); ours to edit but keep edits minimal so a later `ux:install` diff stays readable (so far translation keys replace hardcoded English, and `Alert:Description` is `text-pretty` instead of `text-balance` on a phone, which broke lines early). `symfony/ux-toolkit` is a dev dependency; installed files are committed.
+  - Polaris components: `templates/components/<Module>/` (`Shared` is the shell; `Dashboard` has `KpiCard`, `LeaseProgress`, `PaceRow`, `RiskAlert`, `MileageChart`, anonymous, built on kit Card, Progress, Badge, Alert).
+  - `Fetching:OdometerRefreshButton` (`Fetching\Twig\Components\OdometerRefreshButton`, template `templates/components/Fetching/`) is the first PHP-backed Live Component; `config/packages/twig_component.yaml` maps `Polaris\Fetching\Twig\Components\` to name prefix `Fetching`. It sits at the top right of the dashboard, level with the title, while the lease runs (not without lease or reading, not once ended). Live Component 3.6 guards actions only by POST plus `X-Requested-With` (no CSRF token) and has no `#[IsGranted]`: the component checks `VehiclePermission::Manage` itself on every request (render and action) and answers 404. A `LiveProp` named like a component method breaks hydration.
+  - `assets/controllers/chart_controller.js` is the one generic chart controller: type, series, options, `locale`, `timeZone` are Stimulus values; option strings `var(--token)` resolve from theme tokens; it redraws when `<html>` `dark` changes, formats with Intl, and destroys the chart on disconnect and before the Turbo cache. `Dashboard\Domain\MileageSeriesBuilder` builds the curves (readonly DTOs, no Lease domain types) from the dashboard's assessment; driven/projected curves take the alert's risk color via `--risk-ok`, `--risk-watch`, `--risk-over` in `app.css` (lighter in dark mode). Zoom presets (7 days, 30 days, 1 year, to lease end, whole lease) are `Dashboard\Domain\MileageRangeBuilder`: look-back windows end now and start no earlier than the lease start; the forecast window exists only with a projection; buttons drive the controller's `zoom` action.
+  - Flash messages and notices are toasts: `base.html.twig` renders `<twig:Shared:ToastRegion />` once (the fixed top-right `toast-region`, `aria-live`; login renders it itself, so pages don't). It renders the session flashes as `Shared:Toast` (kit Alert, `data-flash`, variants `success`, `warning`, `info`, `danger`; the `error` flash type is a `danger` toast; danger stays until dismissed, others leave after 6 s, paused on hover or focus) and hands one empty toast per variant to `toast_region_controller.js`, which shows any `polaris:toast` window event (`detail: {variant, message}`). A Live Component announces a toast with `<twig:Shared:ToastAnnounce :id :variant :message>` (a hidden `toast-announce` element whose `id` must change per message (a morphed element that keeps its `id` says nothing twice). Inside a `<twig:...>` tag the variable `variant` is the child's: set anything derived from your own beforehand.
+  - The dashboard figures (`KpiCard` with its `value` and `unit` props, `PaceCard`, the progress value) have monospaced digits only (`font-mono`, the unit and a date stay in the regular font), not `tabular-nums` (it spaced the groups of digits unevenly), and French thousands use a regular no-break space, not the narrow one of ICU.
+  - The last reading uses the `humanized_datetime` Twig filter ("Today at ...", "Yesterday at ...", older in full), days in the user's time zone, "now" from the clock.
+  - Icons are Lucide: `bin/console ux:icons:import lucide:<name>` into `assets/icons/`, committed (no runtime Iconify call).
+  - Dark mode is the `dark` class on `<html>`, set before first paint by the inline script of `base.html.twig`, kept by `theme_controller.js`. Pages extend `base.html.twig` and fill `main`.
+  - Nothing styles bare elements: `app.css` holds only theme variables; titles, paragraphs and lists carry utility classes.
+  - Forms use the global theme `templates/shared/form_theme.html.twig` (in `twig.form_themes`), extending `form_div_layout.html.twig` and overriding only needed blocks: rows are kit `Field` (`Field:Label`, control, `Field:Description` for `help`, one `Field:Error` per error); text-like widgets `Input`; choice selects `NativeSelect` (size `sm`); buttons `Button`; checkboxes (alone or expanded choice, one line per choice, no asterisk) kit `Checkbox`. `form_row` already passes `aria-describedby`/`aria-invalid` via `attr`; the theme forwards them. Radio, file, range, color widgets are not themed (default layout). Tables: `Table` inside `Card`. Flashes: toasts (see above).
+- The `tailwind` compose service watches/builds CSS in dev (binary and output in `var/tailwind`, volume shared with `php`); `make tailwind` builds once; `make test` and `make ci` do it first. The prod image runs `tailwind:build --minify` before `asset-map:compile`; CI builds it before PHPUnit.
+- `twig-tailwind-extra` (needed by kit templates) ships a recipes-contrib recipe; `extra.symfony.allow-contrib` is `false`, so its bundle is registered by hand in `config/bundles.php`.
+- Run everything through Docker and the Makefile (see README): `make start`, `make test`, `make ci`, `make sf ARGS="..."` (replaces `symfony serve` / `php bin/phpunit`).
+- Work is tracked on the GitHub Project "Polaris" (https://github.com/users/RSickenberg/projects/4). Read the story's acceptance criteria and "blocked by" links; don't start a story whose blockers are open.
 
 ### Language and writing
 
-- Code, comments, commit messages, docs and issues are in English, even when the
-  conversation is in French.
-- Do not use the em dash character in prose, comments, strings or docs.
-- If something cannot be verified (a Tesla API behaviour, a package version),
-  say so instead of guessing. Check `vendor/` sources and official docs first.
+- Code, comments, commits, docs and issues in English, even if the conversation is in French.
+- No em dash in prose, comments, strings or docs.
+- If something can't be verified (Tesla API behaviour, package version), say so; check `vendor/` and official docs first.
 
 ### Accounts and access (Account module)
 
-- The self-hosted app has a single user. `Account\Entity\User` (table `app_user`, as `user` is
-  reserved in PostgreSQL) holds the email (unique, trimmed, lower-cased), the password hash
-  (property `password`), `locale` and `timeZone` (an IANA name, `UTC` by default). The only way
-  to create it is `Account\Service\UserCreator`, which the console command
-  `polaris:user:create` calls. Whether a user may be created is decided by
-  `Extension\SignUpPolicy`: the self-hosted default `SingleUserSignUpPolicy` allows one user,
-  and the hosted layer replaces the policy. The command takes the password from a hidden prompt or the standard input, never
-  from an argument or option, and never prints it.
-- Access is denied by default: `access_control` in `config/packages/security.yaml` ends with
-  `^/` requires `ROLE_USER`, and the public exceptions (`/login`, `/locale/`) are listed above
-  it. A new page needs nothing; a new public page needs an entry there and in
-  `PUBLIC_ROUTES` of `AccessControlTest`, which walks the router and fails on any route an
-  anonymous visitor can open. The login page is `Account\Controller\LoginController`
-  (`account_login`, `templates/account/login.html.twig`, the bare layout through the `body`
-  block of `base.html.twig`); the logout control is in the sidebar footer.
-- The settings page (`Account\Controller\SettingsController`, `/settings`) has two forms, `profile`
-  (email, locale, time zone) and `password` (current password, new one twice), both going through
-  `Account\Service\UserSettings`. A changed email or password makes the session stale, so the
-  controller signs the user in again with `Security::login()`. When API tokens exist (ADR 0005), a
-  password change must revoke them in `UserSettings::changePassword()`. The sidebar user menu is in
-  `templates/components/Shared/AppSidebar.html.twig`, the avatar letters come from
-  `Account\Domain\Initials`.
-- Password reset (`Account\Controller\PasswordResetController`, `Account\Service\PasswordResetService`):
-  `PasswordResetRequest` stores a selector and the sha256 of a verifier (`Account\Domain\ResetToken`),
-  never the link. Asking never reveals whether the email exists, is limited by the `password_reset`
-  rate limiter (per client address) and sends at most one link every 2 minutes per account. The
-  link is built from `DEFAULT_URI`, not the request host. `UserSettings::changePassword()` removes
-  the pending requests, so both the reset and the settings page cancel old links. Emails are in the
-  language of the user (`account` domain); the mailer needs `MAILER_DSN`, `MAILER_FROM` and `DEFAULT_URI`.
-- The firewall form login and logout use the stateless CSRF token ids `authenticate` and
-  `logout`; `login_throttling` allows 5 attempts per 15 minutes. The `dev` firewall that leaves
-  the profiler, the toolbar and the AssetMapper routes open is driven by the parameter
-  `polaris.security.open_paths`, which matches nothing in production.
-- Pages that show or take a date read the time zone from the signed-in user
-  (`#[CurrentUser] User $user`); `Vehicle::$owner` links every vehicle to its user (required). A user
-  reaches only their own vehicles: every action that takes a vehicle carries
-  `#[IsGranted(VehiclePermission::Manage->value, 'vehicle', statusCode: Response::HTTP_NOT_FOUND)]`,
-  decided by `Vehicle\Security\VehicleVoter` (another user's vehicle is a 404), and a query that
-  lists vehicles filters on `owner`. A new page about a vehicle needs the attribute, and a test in
-  `VehicleOwnershipTest`.
-- In functional tests, sign in with `Polaris\Tests\Support\SignsIn`; do not post the login
-  form unless the test is about the login.
+- Single user when self-hosted. `Account\Entity\User` (table `app_user`) holds email (unique, trimmed, lower-cased), password hash (property `password`), `locale`, `timeZone` (IANA, `UTC` default). Created only by `Account\Service\UserCreator` (console `polaris:user:create`), gated by `Extension\SignUpPolicy` (default `SingleUserSignUpPolicy` allows one user; the hosted layer replaces it). The command reads the password from a hidden prompt or stdin, never an argument/option, and never prints it.
+- Access is denied by default: `access_control` in `config/packages/security.yaml` ends with `^/` requiring `ROLE_USER`; public exceptions (`/login`, `/locale/`) sit above. A new public page needs an entry there and in `PUBLIC_ROUTES` of `AccessControlTest`, which walks the router and fails on any anonymously reachable route. Login: `Account\Controller\LoginController` (`account_login`, `templates/account/login.html.twig`, bare layout via the `body` block of `base.html.twig`); logout is in the sidebar footer.
+- Settings (`Account\Controller\SettingsController`, `/settings`): forms `profile` (email, locale, time zone) and `password` (current, new twice) via `Account\Service\UserSettings`. A changed email or password stales the session, so the controller re-signs in with `Security::login()`. When API tokens exist (ADR 0005), `changePassword()` must revoke them. Sidebar menu: `templates/components/Shared/AppSidebar.html.twig`; avatar letters: `Account\Domain\Initials`.
+- Password reset (`PasswordResetController`, `PasswordResetService`): `PasswordResetRequest` stores a selector and the sha256 of a verifier (`Account\Domain\ResetToken`), never the link. Asking never reveals whether the email exists, is limited by the `password_reset` limiter (per client address), and sends at most one link per 2 minutes per account. Link built from `DEFAULT_URI`, not the request host. `changePassword()` removes pending requests. Emails use the user's language (`account` domain); the mailer needs `MAILER_DSN`, `MAILER_FROM`, `DEFAULT_URI`.
+- Form login and logout use stateless CSRF ids `authenticate` and `logout`; `login_throttling` allows 5 attempts per 15 minutes. The `dev` firewall (profiler, toolbar, AssetMapper open) is driven by `polaris.security.open_paths`, which matches nothing in production.
+- Pages showing or taking dates read the time zone from the user (`#[CurrentUser] User $user`). `Vehicle::$owner` (required) links every vehicle to its user; users reach only their own: every action taking a vehicle carries `#[IsGranted(VehiclePermission::Manage->value, 'vehicle', statusCode: Response::HTTP_NOT_FOUND)]` (`Vehicle\Security\VehicleVoter`), and vehicle-listing queries filter on `owner`. A new vehicle page needs the attribute and a test in `VehicleOwnershipTest`.
+- Functional tests sign in with `Polaris\Tests\Support\SignsIn`; post the login form only when testing login.
 
 ### Tesla key pair (Tesla module)
 
-- `Tesla\Entity\TeslaApp` (owned by a `User`) holds the prime256v1 public key in clear (PKIX PEM) and the
-  private key as the `Shared\Service\SecretEncrypter` ciphertext (ADR 0007: libsodium secretbox, `v1:` prefix,
-  key in `POLARIS_ENCRYPTION_KEY`). The private key PEM is PKCS8; vehicle-command's loaders read both
-  PKCS8 and SEC1 (checked in its source, not run). Never log, dump or echo it: `Tesla\Domain\KeyPair` and
-  `TeslaApp::__serialize()` leave it out.
-- `polaris:tesla:keygen` (`Tesla\Service\TeslaKeyService`) refuses to replace a key without `--force`.
-- `Extension\PublicKeyHosting` decides where Tesla finds the public key. The default `ConfiguredPublicKeyHosting`
-  follows `POLARIS_KEY_HOSTING`: `polaris` (`PolarisPublicKeyHosting`, `Tesla\Controller\PublicKeyController`
-  serves the only app's key whatever the Host, stateless, public) or `external` (`ExternalPublicKeyHosting`
-  writes the PEM into `POLARIS_KEY_HOSTING_DIR` when set, and `POLARIS_KEY_HOSTING_URL`, the https URL of the PEM,
-  makes `publicKeyUrl()` non-null so `PublicKeyChecker` reads that URL and notes the well-known URL Tesla reads;
-  either one is enough; the route then answers 404). The hosted layer replaces the alias and must implement
-  `publicKeyUrl()` (null to keep using the app domain).
-- The well-known route is public: its `access_control` entry precedes the catch-all and `tesla_public_key` is in
-  `PUBLIC_ROUTES` of `AccessControlTest`.
+- `Tesla\Entity\TeslaApp` (owned by a `User`) holds the prime256v1 public key in clear (PKIX PEM) and the private key as `Shared\Service\SecretEncrypter` ciphertext (ADR 0007: libsodium secretbox, `v1:` prefix, key `POLARIS_ENCRYPTION_KEY`). Private PEM is PKCS8; vehicle-command reads PKCS8 and SEC1 (checked in source, not run). Never log, dump or echo it: `Tesla\Domain\KeyPair` and `TeslaApp::__serialize()` leave it out.
+- `polaris:tesla:keygen` (`TeslaKeyService`) refuses to replace a key without `--force`.
+- `Extension\PublicKeyHosting` decides where Tesla finds the public key. Default `ConfiguredPublicKeyHosting` follows `POLARIS_KEY_HOSTING`: `polaris` (`PolarisPublicKeyHosting`; `Tesla\Controller\PublicKeyController` serves the only app's key whatever the Host, stateless, public) or `external` (`ExternalPublicKeyHosting` writes the PEM into `POLARIS_KEY_HOSTING_DIR` when set; `POLARIS_KEY_HOSTING_URL`, the https URL of the PEM, makes `publicKeyUrl()` non-null so `PublicKeyChecker` reads that URL; either is enough; the route then 404s). The hosted layer replaces the alias and implements `publicKeyUrl()` (null keeps the app domain).
+- The well-known route is public: its `access_control` entry precedes the catch-all and `tesla_public_key` is in `PUBLIC_ROUTES`.
 
 ### Tesla app credentials and registration (Tesla module)
 
-- `TeslaApp` also holds `clientId`, `encryptedClientSecret` (SecretEncrypter, kept out of `__serialize`), `domain`
-  (the host that serves the public key, `Tesla\Domain\AppDomain`; not derived from `DEFAULT_URI`, since external
-  hosting uses another domain) and `enabledRegions` (`Tesla\Domain\FleetRegion` codes). The row is created by
-  keygen, so `Tesla\Service\TeslaAppSettings::save()` and `polaris:tesla:configure` need the key pair first.
-  `TeslaOwnerFinder` resolves the user for every Tesla command.
-- `FleetRegion` is `na`, `eu` and `cn`. China is a separate Tesla account and developer app: the case exists only
-  to be refused (`isSupported()` is false, `tokenUrl()` throws, settings and `register` reject it). The token host
-  for NA and EMEA is the global `fleet-auth.prd.vn.cloud.tesla.com`.
-- `polaris:tesla:key:import` (`KeyPairImporter`, `TeslaKeyService::import()`) keeps an existing prime256v1 private key
-  (PKCS8 or SEC1 PEM, no passphrase) read from the standard input or `--file`, never an argument: the public key is
-  derived from it, the private key is re-exported as PKCS8 and stored encrypted like a generated one, and `--force`
-  rules are those of keygen. It never prints the private key.
-- `polaris:tesla:key:check` (`PublicKeyChecker`) fetches the well-known URL without following redirects and compares
-  it to the stored key. `polaris:tesla:register` (`PartnerRegistrationService`) runs it first and sends nothing to
-  Tesla on failure; per enabled region it calls `FleetApiClient` for a partner token, `POST /api/1/partner_accounts`
-  and `GET /api/1/partner_accounts/public_key?domain=`, and one region failing does not stop the others.
-- Unverified (Tesla does not document them): the register body
-  (`{"domain": ...}`), the shape of Tesla error bodies (`FleetApiError` reads `error`, `error_description`,
-  `error_message`, `message`, else a truncated body) and of the public key response (`response.public_key`, PEM or
-  hex of the uncompressed point, see `PublicKeyFormat`). The first real run confirmed that the partner token needs a scope (`openid vehicle_device_data`; without one the key read-back answered 403 "missing scopes") and that register works for `eu`.
-- The settings page (`Tesla\Controller\TeslaSettingsController`, `/settings/tesla`, linked from the account menu) edits
-  the same settings through `TeslaAppSettings`, with the form model `Tesla\Form\Model\TeslaAppSettingsFormData`.
-  The app is looked up by owner (no id in the URL), the client secret field is write-only (never rendered, empty
-  keeps the stored one), China is listed but disabled and rejected server-side. Without a key pair it shows how to
-  run keygen. It does not register: `key:check` and `register` stay on the console. Pass the app to the template as
-  `teslaApp`: `app` is the Twig global.
-- Tests never reach the network: they use `MockHttpClient`, and functional tests swap it in with
-  `getContainer()->set('http_client', $client)` (public alias `test.polaris.http_client` in `when@test`).
+- `TeslaApp` also holds `clientId`, `encryptedClientSecret` (SecretEncrypter, out of `__serialize`), `domain` (host serving the public key, `Tesla\Domain\AppDomain`; not derived from `DEFAULT_URI`) and `enabledRegions` (`Tesla\Domain\FleetRegion`). Keygen creates the row, so `TeslaAppSettings::save()` and `polaris:tesla:configure` need the key pair first. `TeslaOwnerFinder` resolves the user for every Tesla command.
+- `FleetRegion`: `na`, `eu`, `cn`. China is a separate Tesla account/developer app: the case exists only to be refused (`isSupported()` false, `tokenUrl()` throws, settings and `register` reject it). The NA and EMEA token host is `fleet-auth.prd.vn.cloud.tesla.com`.
+- `polaris:tesla:key:import` (`KeyPairImporter`, `TeslaKeyService::import()`) keeps an existing prime256v1 key (PKCS8 or SEC1 PEM, no passphrase) from stdin or `--file`, never an argument: derives the public key, re-exports PKCS8, stores encrypted; `--force` rules as keygen; never prints the private key.
+- `polaris:tesla:key:check` (`PublicKeyChecker`) fetches the well-known URL without redirects and compares to the stored key. `polaris:tesla:register` (`PartnerRegistrationService`) runs it first and sends nothing on failure; per enabled region it gets a partner token, `POST /api/1/partner_accounts`, `GET /api/1/partner_accounts/public_key?domain=`; one region failing doesn't stop the others.
+- Unverified (undocumented): the register body (`{"domain": ...}`); Tesla error body shape (`FleetApiError` reads `error`, `error_description`, `error_message`, `message`, else truncated body); public key response (`response.public_key`, PEM or hex of the uncompressed point, see `PublicKeyFormat`). The first real run confirmed the partner token needs a scope (`openid vehicle_device_data`; without one the key read-back gave 403 "missing scopes") and that register works for `eu`.
+- Settings page (`Tesla\Controller\TeslaSettingsController`, `/settings/tesla`, linked from the account menu) edits the same settings via `TeslaAppSettings` and `Tesla\Form\Model\TeslaAppSettingsFormData`. App found by owner (no id in URL); client secret field write-only (never rendered, empty keeps stored); China listed but disabled and rejected server-side; without a key pair it shows how to run keygen; it doesn't register (`key:check`, `register` stay on the console). Pass the app to the template as `teslaApp` (`app` is the Twig global).
+- Tests never reach the network: `MockHttpClient`, swapped in with `getContainer()->set('http_client', $client)` (public alias `test.polaris.http_client` in `when@test`).
 
 ### Tesla connection and tokens (Tesla module)
 
-- `Tesla\Entity\OAuthToken` (one per `TeslaApp`) holds the access and refresh tokens as `SecretEncrypter` ciphertext
-  (left out of `__serialize`), `expiresAt` (UTC, from `expires_in` and the clock), the granted scopes, a
-  `ConnectionStatus` (`Connected`, `Expired`), the `ConnectionMethod` and the user's Fleet API base URL.
-  `TeslaApp::$consentGivenAt` records the opt-in consent (Fleet API Agreement clause 9.3.7); every way to connect
-  is refused without it (`ConnectionRejected::NO_CONSENT`), and the pages redirect to `/settings/tesla/consent`.
-- `Tesla\Service\OAuthClient` does the authorize URL, the code exchange (needs `audience` and the client secret), the
-  refresh (only `client_id` and `refresh_token`) and `GET /api/1/users/region`. PKCE is not documented by Tesla and not
-  used. It shares `SendsFleetApiRequests` (redaction of secrets, no redirects) with `FleetApiClient`. No call is
-  retried: a refresh token is single use.
-- `Tesla\Service\TeslaConnectionService` is the only way to connect (redirect callback, pasted callback URL, pasted
-  refresh token) and to disconnect. The `state` is kept in the session by `TeslaConnectionController` and checked in
-  the service. The redirect URI comes from `RedirectUriProvider` (`POLARIS_TESLA_REDIRECT_URI`, else `DEFAULT_URI` +
-  `/tesla/callback`) and is sent unchanged to `/authorize` and `/token`.
-- Anything that needs a Tesla access token calls `Tesla\Service\TokenProvider::accessToken()`
-  (`LockedTokenProvider`): it refreshes `POLARIS_TESLA_REFRESH_MARGIN` seconds before expiry under a `symfony/lock`
-  lock per app (`LOCK_DSN`, Redis in Compose), reads the row again once the lock is held, and commits the new refresh
-  token in a transaction before returning the access token. A refresh token Tesla refuses (`login_required`,
-  `invalid_grant`, any 401) marks the row `Expired` and throws `TeslaNotConnected`; an outage leaves the row alone.
-  `polaris:tesla:token:refresh [--force]` runs it by hand (it prints only the new expiry, never a token).
-- Unverified (Tesla does not document them): the shape of the `users/region` answer (`response.region`,
-  `response.fleet_api_base_url`), what happens when the account region differs from the audience, and whether
-  `http://localhost:8000/tesla/callback` completes the flow end to end.
+- `Tesla\Entity\OAuthToken` (one per `TeslaApp`): access and refresh tokens as SecretEncrypter ciphertext (out of `__serialize`), `expiresAt` (UTC), scopes, `ConnectionStatus` (`Connected`, `Expired`), `ConnectionMethod`, the user's Fleet API base URL. `TeslaApp::$consentGivenAt` records the opt-in consent (Fleet API Agreement 9.3.7); every way to connect is refused without it (`ConnectionRejected::NO_CONSENT`) and pages redirect to `/settings/tesla/consent`.
+- `Tesla\Service\OAuthClient`: authorize URL, code exchange (needs `audience` and client secret), refresh (only `client_id` and `refresh_token`), `GET /api/1/users/region`. No PKCE (undocumented by Tesla). Shares `SendsFleetApiRequests` (secret redaction, no redirects) with `FleetApiClient`. No call is retried: a refresh token is single use.
+- `TeslaConnectionService` is the only way to connect (redirect callback, pasted callback URL, pasted refresh token) and disconnect. `state` is kept in the session by `TeslaConnectionController` and checked in the service. Redirect URI from `RedirectUriProvider` (`POLARIS_TESLA_REDIRECT_URI`, else `DEFAULT_URI` + `/tesla/callback`), sent unchanged to `/authorize` and `/token`.
+- Anything needing an access token calls `TokenProvider::accessToken()` (`LockedTokenProvider`): refreshes `POLARIS_TESLA_REFRESH_MARGIN` seconds before expiry under a `symfony/lock` lock per app (`LOCK_DSN`, Redis in Compose), re-reads the row once locked, commits the new refresh token in a transaction before returning. A refused refresh token (`login_required`, `invalid_grant`, any 401) marks the row `Expired` and throws `TeslaNotConnected`; an outage leaves the row alone. `polaris:tesla:token:refresh [--force]` runs it by hand (prints only the new expiry).
+- Unverified: the `users/region` answer shape (`response.region`, `response.fleet_api_base_url`); behaviour when account region differs from audience; whether `http://localhost:8000/tesla/callback` completes the flow.
 
 ### Vehicles (Vehicle module)
 
-- A vehicle is created by `Vehicle\Service\TeslaVehicleImporter` (list of the Tesla account through `VehicleClient::listVehicles()`,
-  first page only; no car is contacted), by `polaris:vehicle:import [--vin=] [--dry-run]`, by the page `/vehicles/import`
-  (`Vehicle\Controller\VehicleImportController`, route priority above `/vehicles/{id}`, translation domain `vehicle`) or by hand
-  with `polaris:vehicle:add <vin> <name>`. The importer reads the listing again when importing: a posted VIN is only a choice
-  among the vehicles Tesla returned. A VIN is unique across users, so one that exists is "already added". The name is the Tesla
-  display name, else `Tesla` and the last 4 characters of the VIN. The home page links to the import page.
+- Created by `Vehicle\Service\TeslaVehicleImporter` (Tesla account list via `VehicleClient::listVehicles()`, first page only; no car contacted), `polaris:vehicle:import [--vin=] [--dry-run]`, page `/vehicles/import` (`VehicleImportController`, route priority above `/vehicles/{id}`, domain `vehicle`), or `polaris:vehicle:add <vin> <name>`. The importer re-reads the listing: a posted VIN is only a choice among returned vehicles. VIN is unique across users (existing = "already added"). Name: Tesla display name, else `Tesla` + last 4 VIN characters. The home page links to the import page.
 
 ### Scheduled fetching (Fetching module)
 
-- Messenger (`config/packages/messenger.yaml`) has three Redis stream transports on `MESSENGER_TRANSPORT_DSN`: `async`
-  (nothing routed yet), `tesla` (`FetchOdometerMessage`, no Messenger retry: a billed read is repeated only by the hourly
-  rule below) and `failed` (`failure_transport`, retried by hand with `messenger:failed:retry`). The `worker` service
-  (`frankenphp/docker-worker.sh`) consumes `scheduler_default async tesla` explicitly, never `--all`, which would also
-  drain `failed` in a loop. Tests use `in-memory://` transports (`messenger.transport.tesla`).
-- `Scheduler\FetchScheduleProvider` has one recurring message, `DispatchDueFetches` every minute on the minute (a cron in UTC: `every('5 minutes')` counts from the worker start and
-  would pick a slot up at an arbitrary time), stateful, not locked (a lock held by a killed worker silences the ticks after a restart; the
-  `FetchSlotRun` uniqueness already keeps two workers from queuing a slot twice).
-  The slots are not cron entries: `Service\DueFetchDispatcher` turns each vehicle's local slots into UTC instants with
-  `Domain\SlotCalculator` on every tick (owner's time zone, so daylight saving is followed with no restart), and queues a
-  `FetchOdometerMessage` for each slot whose window is open (`Domain\FetchWindow`: from the slot to 3 hours after) and
-  that has no `FetchSlotRun` yet. The row is written first and is unique on (vehicle, slot), so repeated ticks and
-  restarts queue a slot once; a window that closed while the worker was down is not run late.
-- Slots are `FetchSchedule` (one per vehicle, `HH:MM` local times, 1 or 2; none stored means 21:00), set with
-  `polaris:fetch:schedule [--vin=] [first [second]]` through `Service\FetchScheduleService`.
-- `Service\OdometerFetcher` runs the message with `TeslaOdometerReader` (never wakes the car). Not online: it re-queues the
-  message with `attempt + 1` and a `DelayStamp` that lands on the next hour after the slot (`FetchWindow::retryDelaySeconds()`,
-  so a late first check does not shift the others), 4 state checks at most per slot (`FetchWindow::MAX_ATTEMPTS`),
-  then the slot is `Skipped`. A value is stored by `OdometerReadingService::recordFromApi()` only when it differs from
-  the previous reading (`readAt` is Tesla's `vehicle_state.timestamp`); a value lower than a stored reading is
-  `Rejected`, logged as a warning, and never retried. `TeslaNotConnected` ends the slot as `NotConnected` with a warning;
-  other `FleetApiError`s are rethrown to the `failed` transport.
-- `FetchOdometerMessage` has scalar fields and a null `slotTimestamp` for a fetch that belongs to no slot (never retried):
-  the manual refresh dispatches it, and new fields (such as an `allowWake` flag) are added at the end with a default.
-  The per-vehicle lock between a scheduled and a manual fetch is not there yet: it belongs with the manual refresh.
+- Messenger (`config/packages/messenger.yaml`): three Redis stream transports on `MESSENGER_TRANSPORT_DSN`: `async` (nothing routed), `tesla` (`FetchOdometerMessage`, no Messenger retry: a billed read repeats only via the hourly rule) and `failed` (`failure_transport`, retried by hand with `messenger:failed:retry`). The `worker` service (`frankenphp/docker-worker.sh`) consumes `scheduler_default async tesla` explicitly, never `--all` (it would drain `failed` in a loop). Tests use `in-memory://` transports (`messenger.transport.tesla`).
+- `Scheduler\FetchScheduleProvider` has one recurring message, `DispatchDueFetches`, every minute on the minute (UTC cron; `every('5 minutes')` counts from worker start), stateful, not locked (a lock held by a killed worker would silence ticks after restart; `FetchSlotRun` uniqueness already prevents double queuing). Slots aren't cron entries: `Service\DueFetchDispatcher` converts each vehicle's local slots to UTC with `Domain\SlotCalculator` every tick (owner's time zone, so DST needs no restart) and queues a `FetchOdometerMessage` for each slot whose window is open (`Domain\FetchWindow`: slot to +3 h) and has no `FetchSlotRun`. The row is written first and unique on (vehicle, slot); a window closed while the worker was down is not run late.
+- Slots: `FetchSchedule` (one per vehicle, 1 or 2 `HH:MM` local times; none stored = 21:00), set by `polaris:fetch:schedule [--vin=] [first [second]]` via `Service\FetchScheduleService`.
+- `Service\OdometerFetcher` runs the message with `TeslaOdometerReader` (never wakes the car). Not online: re-queues with `attempt + 1` and a `DelayStamp` to the next hour after the slot (`FetchWindow::retryDelaySeconds()`, so a late first check doesn't shift the rest), max 4 state checks (`FetchWindow::MAX_ATTEMPTS`), then `Skipped`. `OdometerReadingService::recordFromApi()` stores a value only if it differs from the previous (`readAt` = Tesla's `vehicle_state.timestamp`); lower than a stored reading = `Rejected`, warning, never retried. `TeslaNotConnected` ends the slot `NotConnected` with a warning; other `FleetApiError`s are rethrown to `failed`. After a read that Tesla answered, `SlotRunLedger::purgeOld()` deletes the vehicle's `FetchSlotRun`s older than 24 h (their 3 h window is long closed), after the flush of the run, so nothing is written to a deleted row; a vehicle that never gets an answer keeps them.
+- `FetchOdometerMessage` has scalar fields; null `slotTimestamp` = a fetch with no slot (manual refresh, never retried). New fields (e.g. `allowWake`, #32) go at the end with a default; `refreshId` is the latest.
+- `OdometerFetcher` runs one fetch per vehicle at a time, scheduled or manual, under a `symfony/lock` lock `odometer_fetch_<vehicle base32>` (TTL 60 s, non-blocking). Held: a manual refresh ends `RefreshOutcome::Busy` and asks nothing; a scheduled check is re-queued 30 s later with the same `attempt`.
+- Manual refresh: `Service\ManualRefreshService::request()` is the only entry (component and a later `POST /api/vehicles/{id}/refresh` use it and read `RefreshRequestResult`: `Accepted` = 202, `RateLimited` with `retryAfter` = 429). The limit is decided there, not in the UI. `Extension\ManualRefreshPolicy` says whether a vehicle is limited (self-hosted default `ConfiguredManualRefreshPolicy`, `POLARIS_MANUAL_REFRESH_LIMIT`: `1` limits, `0` lifts it; the hosted layer replaces it and always limits). The `manual_refresh` limiter (`fixed_window`, 1/hour, key = vehicle id, default `cache.rate_limiter` pool = filesystem app cache: one web container only, move to Redis with the cache) counts every accepted request whatever the car answers. The Symfony limiter reads the wall clock, so tests age its stored `Window` rather than freeze time. An accepted request writes a `RefreshAttempt` (`Queued`) and dispatches `FetchOdometerMessage` with null slot and `refreshId`; the fetcher settles it (`RefreshOutcome`: `Stored`, `Unchanged`, `Asleep`, `Offline`, `Unavailable`, `NotConnected`, `Rejected`, `Busy`, `Failed`); the component polls every 2 s (`data-poll`) for at most 2 minutes. `RefreshAttempt`s are deleted after 24 h by `Service\RefreshAttemptPurger`, run daily at 03:17 UTC by the scheduler (`PurgeRefreshAttempts`); `FetchScheduleProvider` passes all its recurring messages to one `with()` call, as each `with()` starts a new schedule. Never wakes the car (#32).
+
+### Readings and the projection
+
+- The projection is measured from the latest instant the car is known to be at an odometer, not from the clock. A value read from the car that equals the latest reading is not stored again: `OdometerReadingService::recordFromApi()` notes it as `OdometerReading::confirm()` (`confirmed_at`, forward only, never past the clock, only on the latest reading). `LeaseTermsService::samples()` adds a sample with the same odometer at `confirmed_at`, so a day without driving moves the allowance to date and grows the margin; a confirmation a later reading contradicts is dropped. A car that cannot be read (asleep, offline) confirms nothing, so the figures stay as of the last answer.
 
 ### Code organization (ADR 0001)
 
-- `src/` is organized by feature module, as namespaces (no bundles): `Shared`,
-  `Account`, `Vehicle`, `Lease`, `Reading`, `Tesla`, `Fetching`, `Alert`,
-  `Dashboard`, `Extension`.
-- Inside a module, use the usual Symfony folders (`Entity/`, `Repository/`,
-  `Service/`, `Message/`, `MessageHandler/`, `Controller/`, `Form/`, `Command/`,
-  `Twig/Components/`) plus `Domain/` for calculations and value objects.
-- `Domain/` is plain PHP: only its own module's `Domain/`, `Shared\Domain`,
-  `Psr\Clock\ClockInterface` and `CarbonImmutable`; nothing from Symfony,
-  Doctrine or HTTP, and no other module's `Domain/`. Unit-test it without booting
-  the kernel.
-- A module uses another module only through its `Service/` classes, its entities,
-  its `Domain/` types, or Messenger messages and events. Never through its
-  controllers, forms, repositories or handlers. Nothing depends on `Dashboard`.
-- `Service/` keeps the services and their interfaces at the top level; the value types sit in subfolders named
-  after their kind: `Exception/`, `Dto/` (data and result objects), `Enum/`, and `Client/` for HTTP clients. The
-  folders are part of the public `Api` layer, so other modules may use them like any `Service/` class.
-- Templates go in `templates/<module>/`, component templates in
-  `templates/components/<Module>/`.
-- MakerBundle needs absolute class names, for example
-  `bin/console make:entity '\Polaris\Lease\Entity\LeaseContract' --no-interaction`.
-- Deptrac enforces these boundaries in CI (`make deptrac`). Fix the code, not
-  the Deptrac rules, unless an ADR changes them.
+- `src/` is organized by feature module as namespaces (no bundles): `Shared`, `Account`, `Vehicle`, `Lease`, `Reading`, `Tesla`, `Fetching`, `Alert`, `Dashboard`, `Extension`.
+- Inside a module: `Entity/`, `Repository/`, `Service/`, `Message/`, `MessageHandler/`, `Controller/`, `Form/`, `Command/`, `Twig/Components/`, plus `Domain/` for calculations and value objects.
+- `Domain/` is plain PHP: only its own module's `Domain/`, `Shared\Domain`, `Psr\Clock\ClockInterface`, `CarbonImmutable`; nothing from Symfony, Doctrine, HTTP, nor another module's `Domain/`. Unit-test it without the kernel.
+- A module uses another only through its `Service/` classes, entities, `Domain/` types, or Messenger messages/events; never its controllers, forms, repositories or handlers. Nothing depends on `Dashboard`.
+- `Service/` keeps services and interfaces at top level; value types go in subfolders by kind: `Exception/`, `Dto/` (data and result objects), `Enum/`, `Client/` (HTTP clients). They are part of the public `Api` layer.
+- Templates: `templates/<module>/`; component templates: `templates/components/<Module>/`.
+- MakerBundle needs absolute class names: `bin/console make:entity '\Polaris\Lease\Entity\LeaseContract' --no-interaction`.
+- Deptrac enforces this in CI (`make deptrac`). Fix the code, not the rules, unless an ADR changes them.
 
 ### Exceptions
 
-- PHPStan checks `@throws`: a method that lets `\Random\RandomException`, `\SodiumException`, `\JsonException`, a Doctrine
-  `ORMException` or `NonUniqueResultException`, or a `symfony/lock` exception through must list it (see
-  `exceptions.checkedExceptionClasses` in `phpstan.dist.neon`). Controllers, commands and tests are entry points and
-  are exempt. A caller of a documented method documents it too, unless it catches it.
+- PHPStan checks `@throws`: a method letting `\Random\RandomException`, `\SodiumException`, `\JsonException`, Doctrine `ORMException` or `NonUniqueResultException`, or a `symfony/lock` exception through must list it (`exceptions.checkedExceptionClasses` in `phpstan.dist.neon`). Controllers, commands and tests are exempt. A caller of a documented method documents it too unless it catches it.
 
 ### Assertions
 
-- `\assert()` is only for narrowing a type or stating an invariant that cannot fail (for example after a
-  Carbon call PHPStan types as `static|string`). Never use it to validate input, to guard a state that can
-  happen, or for anything with a side effect: production runs with `zend.assertions = -1` (set in
-  `frankenphp/conf.d/20-app.prod.ini`), which compiles it out, while dev and tests keep it on.
+- `\assert()` only narrows a type or states an invariant that cannot fail (e.g. after a Carbon call PHPStan types as `static|string`). Never use it to validate input, guard a possible state, or for side effects: production runs `zend.assertions = -1` (`frankenphp/conf.d/20-app.prod.ini`); dev and tests keep it on.
 
 ### Data types
 
-- Use DTOs (readonly classes) instead of associative arrays for
-  application-specific data, and backed enums instead of magic strings or array
-  keys. Arrays are fine for plain lists and framework APIs that require them.
-- Entities are identified by a ULID created in the constructor (ADR 0002):
-  `#[ORM\Id] #[ORM\Column(type: UlidType::NAME)] private Ulid $id;` with
-  `$this->id = new Ulid();`, never `#[ORM\GeneratedValue]`. Bind ids in raw
-  DBAL queries with the `ulid` type.
+- DTOs (readonly classes) instead of associative arrays for app data; backed enums instead of magic strings or array keys. Arrays fine for plain lists and framework APIs.
+- Entities get a ULID in the constructor (ADR 0002): `#[ORM\Id] #[ORM\Column(type: UlidType::NAME)] private Ulid $id;` with `$this->id = new Ulid();`, never `#[ORM\GeneratedValue]`. Bind ids in raw DBAL with the `ulid` type.
 
 ### Dates, units and business rules
 
-- UTC everywhere (ADR 0003): storage, computation, API, logs. The kernel forces UTC at boot.
-  Get the current time from `ClockInterface`, never from `new \DateTimeImmutable()`
-  or `time()`. Use `CarbonImmutable`, never mutable `Carbon`. The user's time zone
-  is only for display and for converting fetch slots.
-- Distances are stored as integer metres. The Tesla odometer is in miles:
-  1 mi = 1.609344 km.
-- The lease allowance is linear over the whole term: total km = km per year x
-  years, no yearly reset.
+- UTC everywhere (ADR 0003): storage, computation, API, logs; the kernel forces UTC. Current time from `ClockInterface`, never `new \DateTimeImmutable()` or `time()`. `CarbonImmutable`, never `Carbon`. The user's time zone is only for display and converting fetch slots.
+- Distances are stored as integer metres. The Tesla odometer is in miles: 1 mi = 1.609344 km.
+- The lease allowance is linear over the whole term: total km = km per year x years, no yearly reset.
 
 ### Tesla Fleet API
 
-- Never wake the car automatically. `wake_up` (after the first release, #32) is
-  only called on a manual refresh the user confirmed, within the daily wake cap.
-- Scheduled reads run only when the vehicle state is `online`. Manual refresh is
-  limited to once per hour per vehicle.
-- Request the minimal OAuth scopes. Tokens are encrypted at rest; refresh tokens
-  are single-use and are rotated under a lock.
-- Tesla can revoke API access at any time: manual odometer entry must always keep
-  working.
+- Never wake the car automatically. `wake_up` (after the first release, #32) is only called on a manual refresh the user confirmed, within the daily wake cap.
+- Scheduled reads run only when the state is `online`. Manual refresh: once per hour per vehicle.
+- Minimal OAuth scopes. Tokens encrypted at rest; refresh tokens single-use, rotated under a lock.
+- Tesla can revoke API access at any time: manual odometer entry must always keep working.
 
 ### Vehicle reads (Tesla module)
 
-- `Tesla\Service\VehicleClient` (implemented by `Client\TeslaFleetClient`) lists vehicles
-  (`GET /api/1/vehicles`, first page only), reads a state (`/vehicles/{vin}`, `VehicleState`) and a live odometer
-  (`/vehicles/{vin}/vehicle_data`, `OdometerReading`). Callers pass the `TeslaApp` and a `Vin`: the client gets the
-  token from `TokenProvider` and the base URL from the stored `OAuthToken`, lets `TeslaNotConnected` through
-  (before any HTTP call) and has no wake method. It sends no `endpoints` query, so never `location_data`. The
-  odometer is `Distance::fromMiles()` of `vehicle_state.odometer`; a missing or invalid one is
-  `FleetApiError::unexpected`, as is an unknown state value.
-- `Tesla\Service\TeslaOdometerReader::read()` is the read flow: state first, then `vehicle_data` only when the
-  car is `online`. `asleep` and `offline` give `NoReadingReason::Asleep|Offline` without asking the car, and a 408
-  on the live call (it fell asleep in between) gives `Unavailable`, not retried. To get a reading the user wakes the
-  car in the Tesla app and refetches. It never wakes the car (#32 decides how: the default is the Tesla app, with an
-  opt-in daily automatic wake at an hour the user chooses, which needs an ADR and a change of the rule above).
-- `vehicle_data_cached` is not used: a real answer of an offline car has no `odometer` in its `vehicle_state`
-  (car name, version, tyre pressures, doors and lock only). Its `timestamp` blocks are epoch milliseconds.
-- Retries are on this client only (`RetryableHttpClient` built in its constructor): 500, 502, 503, 504 and 540, at
-  most 2 retries, delay `polaris.tesla.retry_delay_ms` (500 ms, doubling, capped at 4 s, `0` in tests);
-  `Retry-After` is honoured by the Symfony client. 408 is never retried (the car is not online and every status
-  below 500 is billed), nor 401, 403, 404, 412, 421 or 429. `OAuthClient` and `FleetApiClient` keep the plain
-  `http_client`: a refresh token is single use and must never be sent twice. Do not configure `retry_failed`
-  globally.
-- The fetch job (Fetching module, later issue) compares a reading with the last stored one and saves it; this
-  module only reads.
-- `polaris:tesla:debug:fetch list|state|data|cached [vin] [--redact]` prints the raw answer of one of these reads, whole
-  by default; `--redact` removes the VIN, ids, car names, tokens, location and `drive_state`, to paste it in an issue
-  or to build a fixture. `data` is a billed live call. GET only, never `wake_up`.
-- Confirmed by real EU answers: the shape of the vehicle list and of a vehicle (`state` `online` and `offline`
-  seen), a live `vehicle_data` (`response.vehicle_state.odometer` as a float, `vehicle_state.timestamp` in epoch
-  milliseconds, used as the read time; the clock only when it is missing) and the 408 body (`error: "vehicle
-  unavailable: vehicle is offline or asleep"`).
-- The odometer of the API is always in miles, never kilometres, whatever `gui_settings.gui_distance_units` (the
-  display setting) says; the answer carries no unit field.
-- Unverified (Tesla does not document them, or no real answer was seen): the paging parameters of `/vehicles` (only the answer's `pagination` object was seen); the `endpoints`
-  parameter; the `asleep` state value; that a 408 is the answer of a car that fell asleep after an `online`
-  state.
+- `Tesla\Service\VehicleClient` (impl. `Client\TeslaFleetClient`) lists vehicles (`GET /api/1/vehicles`, first page only), reads a state (`/vehicles/{vin}`, `VehicleState`) and a live odometer (`/vehicles/{vin}/vehicle_data`, `OdometerReading`). Callers pass `TeslaApp` and `Vin`; the client gets the token from `TokenProvider` and the base URL from the stored `OAuthToken`, lets `TeslaNotConnected` through (before any HTTP call), has no wake method, and sends no `endpoints` query (never `location_data`). Odometer = `Distance::fromMiles()` of `vehicle_state.odometer`; a missing/invalid one or an unknown state value is `FleetApiError::unexpected`.
+- `TeslaOdometerReader::read()`: state first, then `vehicle_data` only when `online`. `asleep`/`offline` give `NoReadingReason::Asleep|Offline` without asking the car; a 408 on the live call gives `Unavailable`, not retried. The user wakes the car in the Tesla app and refetches. It never wakes the car (#32 decides how: default is the Tesla app, with an opt-in daily automatic wake at a user-chosen hour, which needs an ADR and a change of the rule above).
+- `vehicle_data_cached` is unused: a real offline answer has no `odometer` in `vehicle_state`. Its `timestamp` blocks are epoch milliseconds.
+- Retries only on this client (`RetryableHttpClient` built in its constructor): 500, 502, 503, 504, 540; max 2 retries; delay `polaris.tesla.retry_delay_ms` (500 ms, doubling, cap 4 s, `0` in tests); `Retry-After` honoured. Never retry 408 (car not online; every status below 500 is billed), 401, 403, 404, 412, 421, 429. `OAuthClient` and `FleetApiClient` keep the plain `http_client` (single-use refresh token must never be sent twice). Don't configure `retry_failed` globally.
+- The fetch job compares a reading with the last stored one and saves it; this module only reads.
+- `polaris:tesla:debug:fetch list|state|data|cached [vin] [--redact]` prints the raw answer, whole by default; `--redact` removes VIN, ids, car names, tokens, location, `drive_state` (for issues/fixtures). `data` is a billed live call. GET only, never `wake_up`.
+- Confirmed by real EU answers: vehicle list and vehicle shape (`state` `online`, `offline`), live `vehicle_data` (`response.vehicle_state.odometer` float, `vehicle_state.timestamp` epoch ms, used as read time, clock only if missing), 408 body (`error: "vehicle unavailable: vehicle is offline or asleep"`).
+- The API odometer is always miles, whatever `gui_settings.gui_distance_units` says; no unit field.
+- Unverified: `/vehicles` paging parameters (only the answer's `pagination` object seen); the `endpoints` parameter; the `asleep` state value; that a 408 means a car that fell asleep after an `online` state.
 
 ### Translations
 
-- Locales: `en` (default and fallback) and `fr`, set in `config/packages/translation.yaml`.
-  The locale of a request is decided by `Shared\EventListener\LocaleListener` through the
-  framework-free `Shared\Domain\LocaleNegotiator`: the user's preference
-  (`Shared\Service\PreferredLocaleProvider`), then the best `Accept-Language` match among
-  the enabled locales, then `en`.
-- The language switcher (`Shared\Controller\LocaleController`, `/locale/{locale}`) stores the
-  choice in the `polaris_locale` cookie, read by `Shared\Service\CookiePreferredLocaleProvider`,
-  and dispatches `Shared\Event\LocaleSwitched`. `Account\Service\UserPreferredLocaleProvider`
-  decorates the cookie provider and reads the signed-in user's locale from the session, where
-  `Account\EventListener\RememberLocaleOnLogin` and `SaveSwitchedLocale` put it (and the latter
-  also writes `User.locale`). It cannot read the token: `LocaleListener` runs at priority 20,
-  before the firewall (8). A new language also needs its `locale.<code>` key in `shared`.
-- Never write user-facing text in a template, form, flash message, validator or email: use
-  a key. Exceptions: the console commands stay in English, and brand names (`Polaris`).
-- One XLIFF 1.2 domain per module: `translations/<domain>.<locale>.xlf` with `<domain>` the
-  module name in lowercase (`reading`, `lease`, ...), plus `shared` for text used by several
-  modules. The source is the key, the target is the text, the `id` repeats the key.
-  Constraint and callback messages must live in Symfony's `validators` domain; their keys
-  start with the module (`reading.odometer.too_large`).
-- Keys are lowercase `snake_case` segments joined by `.`, at most three levels, without the
-  module prefix (the domain is the prefix): `page.history.title`, `form.odometer.label`,
-  `form.submit`, `flash.reading_added`, `rejected.in_future`, `table.empty`.
-  Form labels and buttons are `form.<field>.label` and `form.submit`. Pass the domain
-  explicitly: `|trans(domain='reading')`, `$translator->trans($key, $params, 'reading')`,
-  or `translation_domain` on the form type.
-- A message that formats a number or a date goes in `<domain>+intl-icu.<locale>.xlf` (ICU
-  MessageFormat, `{limit, number}`, `{at, date, medium}`), and the code passes raw numbers
-  and timestamps. Never write an apostrophe in these files (ICU treats it as an escape).
-  Other messages use `%name%` parameters.
-- Numbers and dates: format them in Twig for the active locale (`format_number`,
-  `format_currency`, `localized_datetime(timeZone)`), never with `number_format()` or a fixed
-  date pattern. Dates stay stored and computed in UTC; the time zone only converts for display.
-- Add a key: add it to the `en` and the `fr` file of its domain in the same change.
-  Add a language: copy every `*.en.xlf` to `*.<locale>.xlf`, translate the targets, add the
-  locale to `enabled_locales` and to the `fr` checks below, and extend the tests.
-- CI runs `composer translations` (`make translations`): `lint:xliff translations` (syntax),
-  `lint:translations` (messages parse) and `debug:translation fr --only-missing` (a key used
-  in the code but absent from `fr` exits non-zero). That command cannot see keys built at run
-  time (enum values such as `source.manual`), so `TranslationFilesTest` also compares every
-  `en` file with its `fr` twin key by key and placeholder by placeholder.
+- Locales `en` (default, fallback) and `fr` in `config/packages/translation.yaml`. `Shared\EventListener\LocaleListener` picks the request locale through the framework-free `Shared\Domain\LocaleNegotiator`: user preference (`Shared\Service\PreferredLocaleProvider`), then best `Accept-Language` match, then `en`.
+- Switcher `Shared\Controller\LocaleController` (`/locale/{locale}`) stores the `polaris_locale` cookie (`CookiePreferredLocaleProvider`) and dispatches `Shared\Event\LocaleSwitched`. `Account\Service\UserPreferredLocaleProvider` decorates the cookie provider and reads the user's locale from the session, where `RememberLocaleOnLogin` and `SaveSwitchedLocale` put it (the latter also writes `User.locale`). It can't read the token: `LocaleListener` runs at priority 20, before the firewall (8). A new language also needs its `locale.<code>` key in `shared`.
+- Never write user-facing text in a template, form, flash, validator or email: use a key. Exceptions: console commands (English), brand names (`Polaris`).
+- One XLIFF 1.2 domain per module: `translations/<domain>.<locale>.xlf`, `<domain>` = lowercase module name, plus `shared` for multi-module text. Source = key, target = text, `id` repeats the key. Constraint and callback messages live in `validators` with keys starting with the module (`reading.odometer.too_large`).
+- Keys: lowercase `snake_case` segments joined by `.`, max three levels, no module prefix: `page.history.title`, `form.odometer.label`, `form.submit`, `flash.reading_added`, `rejected.in_future`, `table.empty`. Form labels/buttons: `form.<field>.label`, `form.submit`. Pass the domain explicitly: `|trans(domain='reading')`, `$translator->trans($key, $params, 'reading')`, or `translation_domain` on the form type.
+- A message formatting a number or date goes in `<domain>+intl-icu.<locale>.xlf` (ICU: `{limit, number}`, `{at, date, medium}`); code passes raw numbers/timestamps. No apostrophes in these files (ICU escape; use `’`). Other messages use `%name%`.
+- Format numbers and dates in Twig for the active locale (`format_number`, `format_currency`, `localized_datetime(timeZone)`), never `number_format()` or fixed patterns. Stored and computed in UTC; the time zone only converts for display.
+- Add a key: `en` and `fr` file of its domain in the same change. Add a language: copy every `*.en.xlf` to `*.<locale>.xlf`, translate targets, add the locale to `enabled_locales` and the `fr` checks, extend tests.
+- CI runs `composer translations` (`make translations`): `lint:xliff translations`, `lint:translations`, `debug:translation fr --only-missing` (a key used in code but absent from `fr` fails). It can't see run-time keys (enum values like `source.manual`), so `TranslationFilesTest` compares every `en` file with its `fr` twin key by key and placeholder by placeholder.
 
 ### Secrets
 
-- Never commit a secret, not even a development `APP_SECRET`. GitGuardian scans
-  every pull request. Generated values go in `.env.local`.
-- `.env.example` lists every variable that must be set per install, with empty
-  values. When a change introduces such a variable (a secret, a password, an API
-  key), add it there, empty, in the same pull request.
+- Never commit a secret, not even a dev `APP_SECRET` (GitGuardian scans every PR). Generated values go in `.env.local`.
+- `.env.example` lists every per-install variable (secret, password, API key) with an empty value; add new ones in the same PR.
 
 ### Git and delivery
 
-- Conventional Commits (`feat`, `fix`, `docs`, `refactor`, `test`, `build`,
-  `ci`, `chore`); pull request titles are checked in CI.
-- Versions and `CHANGELOG.md` are produced by release-it from the commits: do not
-  edit them by hand.
-- One issue per pull request, small, with "Closes #N". Pull requests are
-  squash-merged.
-- No `.bak` or backup copies of files: git is the history.
+- Conventional Commits (`feat`, `fix`, `docs`, `refactor`, `test`, `build`, `ci`, `chore`); PR titles are checked in CI.
+- Versions and `CHANGELOG.md` come from release-it: don't edit by hand.
+- One issue per small PR, with "Closes #N"; squash-merged.
+- No `.bak` or backup copies: git is the history.
 
 ### Definition of done
 
-- Tests pass (unit tests for `Domain/`, functional tests for controllers and
-  commands), PHPStan passes, php-cs-fixer is clean, Deptrac passes (`make ci`
-  runs all four), docs are updated, and the story's acceptance criteria are all met.
+- Tests pass (unit for `Domain/`, functional for controllers and commands), PHPStan, php-cs-fixer and Deptrac pass (`make ci` runs all four), docs updated, story acceptance criteria met.

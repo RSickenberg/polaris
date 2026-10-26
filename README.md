@@ -116,6 +116,8 @@ Run the steps in order. Every command runs in the container through `make sf`.
 
    Tokens are stored encrypted. Polaris refreshes the access token `POLARIS_TESLA_REFRESH_MARGIN` seconds (600 by default) before it expires, under a lock (`LOCK_DSN`, Redis in Docker Compose), and keeps the new refresh token before using the access token. If Tesla refuses the refresh token (expired after 3 months, replaced, or your Tesla password was reset), the connection is shown as expired on `/settings/tesla` and you connect again. Disconnect there deletes the tokens and withdraws your consent; also revoke the access in your Tesla account.
 
+   The dashboard has a **Refresh now** button that reads the odometer once, without waking the car (an asleep car keeps its last reading). Tesla bills every read, so Polaris allows one refresh per vehicle and hour. Set `POLARIS_MANUAL_REFRESH_LIMIT=0` in `.env.local` to lift the limit on your own install.
+
    To check the connection by hand, refresh the tokens from the console. It never prints a token, only the new expiry. Without `--force` it sends nothing to Tesla unless the token is within the refresh margin; a refresh token is single use, so do not force it needlessly:
 
    ```bash

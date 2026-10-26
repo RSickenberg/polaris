@@ -13,6 +13,8 @@ use Polaris\Vehicle\Entity\Vehicle;
 use Polaris\Vehicle\Security\VehicleVoter;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\UX\LiveComponent\Test\InteractsWithLiveComponents;
 
 /**
  * A user reaches only the vehicles they own; another user's vehicle is not found.
@@ -20,6 +22,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 #[CoversClass(VehicleVoter::class)]
 final class VehicleOwnershipTest extends WebTestCase
 {
+    use InteractsWithLiveComponents;
     use SignsIn;
 
     private KernelBrowser $client;
@@ -96,5 +99,21 @@ final class VehicleOwnershipTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('main', 'No vehicle yet.');
+    }
+
+    public function testTheRefreshActionOfAnotherUsersVehicleIsNotFound(): void
+    {
+        $component = $this->createLiveComponent('Fetching:OdometerRefreshButton', ['vehicleId' => $this->theirs->getId()->toRfc4122()], $this->client);
+
+        $this->expectException(NotFoundHttpException::class);
+
+        $component->call('refresh');
+    }
+
+    public function testTheRefreshActionOfTheOwnVehicleIsAccepted(): void
+    {
+        $component = $this->createLiveComponent('Fetching:OdometerRefreshButton', ['vehicleId' => $this->mine->getId()->toRfc4122()], $this->client);
+
+        self::assertSame(200, $component->call('refresh')->response()->getStatusCode());
     }
 }

@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="form.read_at.label">
         <source>form.read_at.label</source>
-        <target>Read at (UTC)</target>
+        <target>Read at (%timezone%)</target>
       </trans-unit>
       <trans-unit id="form.odometer.label">
         <source>form.odometer.label</source>

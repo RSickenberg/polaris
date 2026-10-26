@@ -2,10 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
   <file source-language="en" target-language="en" datatype="plaintext" original="file.ext">
     <body>
-      <trans-unit id="value.distance">
-        <source>value.distance</source>
-        <target>{distance, number, ::precision-integer} {unit}</target>
-      </trans-unit>
       <trans-unit id="progress.value_text">
         <source>progress.value_text</source>
         <target>{share, number, percent} of the allowance driven</target>

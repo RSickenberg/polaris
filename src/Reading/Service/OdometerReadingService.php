@@ -83,7 +83,8 @@ final readonly class OdometerReadingService
 
     /**
      * Records an odometer value read from the car, only when it changed: a value equal to the previous
-     * reading (or a reading already stored at the same instant) is not stored. A value that breaks the
+     * reading (or a reading already stored at the same instant) is not stored; an equal one is noted on the latest
+     * reading as {@see OdometerReading::confirm()}. A value that breaks the
      * order of the readings is refused without an exception, so a scheduled fetch is not retried.
      *
      * @throws ORMException
@@ -105,11 +106,18 @@ final readonly class OdometerReadingService
         );
         $previous = $this->readings->findBefore($vehicle, $readAt);
 
+        $next = $this->readings->findAfter($vehicle, $readAt);
+
         if (null !== $previous && $previous->getOdometer()->equals($reading->getOdometer())) {
+            // The car has not moved: it is noted on the reading, so that the projection goes on from now. Only for the
+            // latest reading (a later one would contradict it), and never later than the clock.
+            if (null === $next) {
+                $previous->confirm($readAt->min(CarbonImmutable::instance($this->clock->now())->utc()));
+                $this->entityManager->flush();
+            }
+
             return ApiRecording::unchanged();
         }
-
-        $next = $this->readings->findAfter($vehicle, $readAt);
 
         $rejection = $this->order->check($reading->toSample(), $previous?->toSample(), $next?->toSample());
         if (null !== $rejection) {

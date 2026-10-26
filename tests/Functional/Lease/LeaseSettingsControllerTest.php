@@ -131,6 +131,8 @@ final class LeaseSettingsControllerTest extends WebTestCase
         $this->client->followRedirect();
 
         self::assertSelectorTextContains('#assessment dd[data-risk]', 'Over the allowance');
+        self::assertMatchesRegularExpression('/^[\\d,.]+\x{00A0}km$/u', trim($this->client->getCrawler()->filter('#assessment dd')->eq(1)->text()), 'The unit follows the value.');
+        self::assertStringNotContainsString('(km)', $this->client->getCrawler()->filter('#assessment')->text());
         $excessBefore = $this->client->getCrawler()->filter('#assessment dd')->eq(3)->text();
 
         $this->submit(['lease_contract[allowance]' => '30000', 'lease_contract[startOdometer]' => '0', 'lease_contract[tolerancePercent]' => '0']);

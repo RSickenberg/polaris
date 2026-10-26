@@ -74,7 +74,8 @@
 
 {% block button_widget %}
     {%- set label_content -%}{{- block('form_label_content') -}}{%- endset -%}
-    <twig:Button {{ ...attr|merge({type: type|default('button'), id: id, name: full_name, disabled: disabled}) }}>{{ label_content }}</twig:Button>
+    {# A block on a phone, as wide as its label from the small breakpoint. #}
+    <twig:Button {{ ...attr|merge({type: type|default('button'), id: id, name: full_name, disabled: disabled, class: ('w-full sm:w-auto ' ~ attr.class|default(''))|trim}) }}>{{ label_content }}</twig:Button>
 {% endblock %}
 
 {% block form_label %}

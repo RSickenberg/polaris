@@ -1,0 +1,19 @@
+{# The toast region, at the top right: the flash messages, once each, and the toasts that scripts ask for. Put it once in a layout. #}
+{# The empty toasts scripts clone are handed over as strings, not as <template>s: nothing inert sits in the page. #}
+{% set success %}<twig:Shared:Toast variant="success" />{% endset %}
+{% set warning %}<twig:Shared:Toast variant="warning" />{% endset %}
+{% set info %}<twig:Shared:Toast variant="info" />{% endset %}
+{% set danger %}<twig:Shared:Toast variant="danger" />{% endset %}
+<div
+    class="pointer-events-none fixed top-4 end-4 z-50 flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-2"
+    aria-live="polite"
+    data-controller="toast-region"
+    data-toast-region-toasts-value="{{ {success: success|raw, warning: warning|raw, info: info|raw, danger: danger|raw}|json_encode|e('html_attr') }}"
+>
+    {# The flash types of Symfony, and the toast variant each one gets. #}
+    {% for type, variant in {success: 'success', warning: 'warning', info: 'info', error: 'danger'} %}
+        {% for message in app.flashes(type) %}
+            <twig:Shared:Toast :variant="variant" :message="message" />
+        {% endfor %}
+    {% endfor %}
+</div>

@@ -44,6 +44,7 @@ final class UserTimeZoneTest extends WebTestCase
         // 08:00 UTC is 10:00 in Zurich in July (UTC+2), and "now" (12:00 UTC) is offered as 14:00.
         self::assertSelectorTextContains('tbody tr', '10:00');
         self::assertSelectorTextContains('thead', 'Europe/Zurich');
+        self::assertSelectorTextContains('label[for=odometer_reading_readAt]', 'Read at (Europe/Zurich)');
         self::assertInputValueSame('odometer_reading[readAt]', '2026-07-01T14:00');
 
         $client->submitForm('Add reading', ['odometer_reading[readAt]' => '2026-07-01T11:30', 'odometer_reading[odometer]' => '1100', 'odometer_reading[distanceUnit]' => 'km']);

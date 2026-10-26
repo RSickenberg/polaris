@@ -124,15 +124,15 @@
       </trans-unit>
       <trans-unit id="assessment.allowed_to_date">
         <source>assessment.allowed_to_date</source>
-        <target>Autorisé à ce jour (km)</target>
+        <target>Autorisé à ce jour</target>
       </trans-unit>
       <trans-unit id="assessment.projected_end">
         <source>assessment.projected_end</source>
-        <target>Projeté en fin de leasing (km)</target>
+        <target>Projeté en fin de leasing</target>
       </trans-unit>
       <trans-unit id="assessment.projected_excess">
         <source>assessment.projected_excess</source>
-        <target>Excédent projeté (km)</target>
+        <target>Excédent projeté</target>
       </trans-unit>
     </body>
   </file>

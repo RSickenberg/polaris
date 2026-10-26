@@ -5,3 +5,9 @@ framework:
             policy: fixed_window
             limit: 5
             interval: '1 hour'
+
+        # Refreshing the odometer by hand: one accepted request per vehicle and hour (key: the vehicle id).
+        manual_refresh:
+            policy: fixed_window
+            limit: 1
+            interval: '1 hour'

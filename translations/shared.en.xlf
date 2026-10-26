@@ -10,6 +10,10 @@
         <source>unit.mi</source>
         <target>mi</target>
       </trans-unit>
+      <trans-unit id="toast.dismiss">
+        <source>toast.dismiss</source>
+        <target>Dismiss</target>
+      </trans-unit>
       <trans-unit id="layout.skip">
         <source>layout.skip</source>
         <target>Skip to the main content</target>

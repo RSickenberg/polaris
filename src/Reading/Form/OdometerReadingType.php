@@ -25,6 +25,7 @@ final class OdometerReadingType extends AbstractType
         $builder
             ->add('readAt', DateTimeType::class, [
                 'label' => 'form.read_at.label',
+                'label_translation_parameters' => ['%timezone%' => $options['time_zone']],
                 'widget' => 'single_text',
                 'input' => 'datetime_immutable',
                 // Stored in UTC, entered and shown in the time zone of the user (ADR 0003).
