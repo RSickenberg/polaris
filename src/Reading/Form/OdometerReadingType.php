@@ -27,6 +27,7 @@ final class OdometerReadingType extends AbstractType
         $builder
             ->add('readAt', DateTimeType::class, [
                 'label' => 'form.read_at.label',
+                'label_translation_parameters' => ['%timezone%' => $options['time_zone']],
                 'widget' => 'single_text',
                 'input' => 'datetime_immutable',
                 // A text field in the format of the locale: a datetime-local input follows the language of the browser.
