@@ -274,6 +274,18 @@ final class DashboardControllerTest extends WebTestCase
         self::assertMatchesRegularExpression('/\d\s€|\d\sCHF/u', $text);
     }
 
+    public function testFrenchThousandsAreSeparatedByARegularNoBreakSpace(): void
+    {
+        $this->lease('2026-01-01', 12, 15_000, 0);
+        $this->reading('2026-07-02 11:00:00', 10_000);
+
+        $this->client->request('GET', $this->url(), server: ['HTTP_ACCEPT_LANGUAGE' => 'fr']);
+
+        $figures = implode(' | ', $this->client->getCrawler()->filter('main dl dd.text-2xl')->each(static fn ($figure): string => $figure->text()));
+        self::assertMatchesRegularExpression('/\\d\x{00A0}\\d{3}/u', $figures);
+        self::assertStringNotContainsString("\u{202F}", $figures, 'The narrow space looks like no space at this size.');
+    }
+
     public function testTheEmptyStateIsTranslatedToFrench(): void
     {
         $this->client->request('GET', $this->url(), server: ['HTTP_ACCEPT_LANGUAGE' => 'fr']);
