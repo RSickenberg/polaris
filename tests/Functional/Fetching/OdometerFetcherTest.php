@@ -260,6 +260,35 @@ final class OdometerFetcherTest extends KernelTestCase
         self::assertSame([], $this->requests);
     }
 
+    public function testASuccessfulReadDeletesTheSlotsOlderThanADay(): void
+    {
+        $this->entityManager()->persist(new FetchSlotRun($this->vehicle, self::slot()->subHours(25), self::slot()->subHours(25)));
+        $this->entityManager()->persist(new FetchSlotRun($this->vehicle, self::slot()->subHours(23), self::slot()->subHours(23)));
+        $this->entityManager()->flush();
+        $this->answerWith('online', 100.0);
+
+        self::assertSame(SlotRunStatus::Stored, $this->fetch(0));
+
+        $this->entityManager()->clear();
+        $slots = array_map(
+            static fn (FetchSlotRun $run): string => $run->getSlotAt()->toDateTimeString(),
+            $this->entityManager()->getRepository(FetchSlotRun::class)->findBy([], ['slotAt' => 'ASC']),
+        );
+        self::assertSame([self::slot()->subHours(23)->toDateTimeString(), self::slot()->toDateTimeString()], $slots);
+    }
+
+    public function testNothingIsDeletedWhenTheCarDoesNotAnswer(): void
+    {
+        $this->entityManager()->persist(new FetchSlotRun($this->vehicle, self::slot()->subHours(25), self::slot()->subHours(25)));
+        $this->entityManager()->flush();
+        $this->answerWith('asleep');
+
+        $this->fetch(0);
+
+        $this->entityManager()->clear();
+        self::assertCount(2, $this->entityManager()->getRepository(FetchSlotRun::class)->findAll());
+    }
+
     public function testAManualRefreshOfAnAsleepCarDoesNotWakeItAndKeepsTheLastReading(): void
     {
         $this->answerWith('online', 100.0);

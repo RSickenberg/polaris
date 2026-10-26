@@ -174,7 +174,7 @@ final readonly class OdometerFetcher
             $now,
         );
 
-        return $this->finish(
+        $status = $this->finish(
             $run,
             match ($recording->outcome) {
                 RecordOutcome::Stored => SlotRunStatus::Stored,
@@ -184,6 +184,12 @@ final readonly class OdometerFetcher
             $attempts,
             $now,
         );
+
+        // Tesla answered, so the worker and the API work: this is the moment to tidy the slots of the vehicle that no
+        // window refers to any more. After the flush of finish(), so no slot is written once it is deleted.
+        $this->ledger->purgeOld($vehicle, $now);
+
+        return $status;
     }
 
     /**
