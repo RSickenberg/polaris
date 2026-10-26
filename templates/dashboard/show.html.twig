@@ -28,6 +28,10 @@
             {% set cost = assessment.projectedExcessCost.toDecimal()|format_currency(assessment.projectedExcessCost.currency.value) %}
             {% set cut = assessment.weeklyCut %}
 
+            {% if not ended %}
+                <twig:Fetching:OdometerRefreshButton :vehicleId="vehicle.id.toRfc4122()" />
+            {% endif %}
+
             {% if ended %}
                 {{ include('dashboard/_empty.html.twig', {text: 'ended.text'|trans(domain='dashboard'), cta: 'ended.cta'|trans(domain='dashboard'), href: path('lease_settings', {id: id})}) }}
             {% endif %}
@@ -133,10 +137,6 @@
                     hint="{{ 'kpi.last_reading.hint'|trans({'%timezone%': timeZone}, 'dashboard') }}"
                 />
             </div>
-
-            {% if not ended %}
-                <twig:Fetching:OdometerRefreshButton :vehicleId="vehicle.id.toRfc4122()" />
-            {% endif %}
         {% endif %}
     </div>
 {% endblock %}
