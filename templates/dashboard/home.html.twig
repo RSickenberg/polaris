@@ -6,7 +6,7 @@
     <div class="flex flex-wrap items-center justify-between gap-3">
         <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.home.title'|trans(domain='dashboard') }}</h1>
         {% if vehicles is not empty %}
-            <twig:Button as="a" variant="outline" href="{{ path('vehicle_import') }}">{{ 'home.import'|trans(domain='dashboard') }}</twig:Button>
+            <twig:Button as="a" variant="outline" href="{{ path('vehicle_import') }}" class="w-full sm:w-auto">{{ 'home.import'|trans(domain='dashboard') }}</twig:Button>
         {% endif %}
     </div>
 
@@ -17,7 +17,7 @@
                     <twig:Card:Title><h2>{{ vehicle.name }}</h2></twig:Card:Title>
                     <twig:Card:Description>{{ vehicle.vin.value }}</twig:Card:Description>
                 </twig:Card:Header>
-                <twig:Card:Content class="flex flex-wrap gap-2">
+                <twig:Card:Content class="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                     <twig:Button as="a" href="{{ path('dashboard_show', {id: vehicle.id.toBase32()}) }}">{{ 'home.dashboard'|trans(domain='dashboard') }}</twig:Button>
                     <twig:Button as="a" variant="outline" href="{{ path('reading_history', {id: vehicle.id.toBase32()}) }}">{{ 'home.readings'|trans(domain='dashboard') }}</twig:Button>
                     <twig:Button as="a" variant="outline" href="{{ path('lease_settings', {id: vehicle.id.toBase32()}) }}">{{ 'home.lease'|trans(domain='dashboard') }}</twig:Button>

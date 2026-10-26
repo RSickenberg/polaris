@@ -7,10 +7,10 @@
 {% block title %}{{ 'page.title'|trans(domain='dashboard') }} | {{ vehicle.name }}{% endblock %}
 
 {% block main %}
-    <div class="flex items-start justify-between gap-4">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.title'|trans(domain='dashboard') }} <span class="font-normal text-muted-foreground">| {{ vehicle.name }}</span></h1>
         {% if state not in ['no_lease', 'no_reading', 'draft', 'ended'] %}
-            <twig:Fetching:OdometerRefreshButton :vehicleId="vehicle.id.toRfc4122()" class="flex max-w-xs shrink-0 flex-col items-end gap-1.5 text-right" />
+            <twig:Fetching:OdometerRefreshButton :vehicleId="vehicle.id.toRfc4122()" class="flex w-full shrink-0 flex-col sm:w-auto" />
         {% endif %}
     </div>
 

@@ -46,6 +46,13 @@ final class OdometerReadingControllerTest extends WebTestCase
         self::assertSelectorExists('input[name="odometer_reading[readAt]"][type=datetime-local]');
     }
 
+    public function testTheSubmitButtonIsABlockOnAPhoneAndAsWideAsItsLabelFromTheSmallBreakpoint(): void
+    {
+        $this->client->request('GET', $this->url());
+
+        self::assertSelectorExists('form button[type=submit].w-full.sm\\:w-auto');
+    }
+
     public function testUnknownVehicleIsNotFound(): void
     {
         $this->client->request('GET', '/vehicles/01JZZZZZZZZZZZZZZZZZZZZZZZ/readings');
