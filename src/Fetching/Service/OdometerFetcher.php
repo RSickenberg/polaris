@@ -195,9 +195,9 @@ final readonly class OdometerFetcher
         }
 
         if (null === $result->reading) {
-            if (null !== $attempt &&
-                NoReadingReason::Asleep === $result->reason &&
-                $message->asksForWake()
+            if (null !== $attempt
+                && NoReadingReason::Asleep === $result->reason
+                && $message->asksForWake()
             ) {
                 return $this->wake($message, $vehicle, $app, $attempt, $now);
             }
