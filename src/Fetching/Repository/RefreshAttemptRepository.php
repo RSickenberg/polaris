@@ -50,7 +50,7 @@ class RefreshAttemptRepository extends ServiceEntityRepository
             ->select('a.wokeAt')
             ->where('a.vehicle = :vehicle')
             ->andWhere('a.wokeAt > :since')
-            ->orderBy('a.wokeAt', 'DESC')
+            ->orderBy('a.wokeAt', \SortDirection::Descending)
             ->setParameter('vehicle', $vehicle->getId(), UlidType::NAME)
             ->setParameter('since', $since, Types::DATETIME_IMMUTABLE)
             ->getQuery()
