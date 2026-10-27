@@ -23,10 +23,10 @@
             {% for section in sections %}
                 <li class="flex gap-3" data-storage="{{ section.key }}">
                     <twig:ux:icon :name="'lucide:' ~ section.icon" aria-hidden="true" class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                    <p class="text-sm text-pretty">
-                        <span class="font-medium">{{ ('storage.' ~ section.key ~ '.title')|trans(domain='tesla') }}</span>
-                        <span class="text-muted-foreground">{{ ('storage.' ~ section.key ~ '.text')|trans(domain='tesla') }}</span>
-                    </p>
+                    <div class="text-sm">
+                        <p class="font-medium">{{ ('storage.' ~ section.key ~ '.title')|trans(domain='tesla') }}</p>
+                        <p class="text-pretty text-muted-foreground">{{ ('storage.' ~ section.key ~ '.text')|trans(domain='tesla') }}</p>
+                    </div>
                 </li>
             {% endfor %}
             <li class="flex gap-3" data-storage="audit">

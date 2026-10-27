@@ -195,7 +195,10 @@ final readonly class OdometerFetcher
         }
 
         if (null === $result->reading) {
-            if (null !== $attempt && $message->asksForWake() && NoReadingReason::Asleep === $result->reason) {
+            if (null !== $attempt &&
+                NoReadingReason::Asleep === $result->reason &&
+                $message->asksForWake()
+            ) {
                 return $this->wake($message, $vehicle, $app, $attempt, $now);
             }
 
@@ -237,7 +240,7 @@ final readonly class OdometerFetcher
         );
 
         // Tesla answered, so the worker and the API work: this is the moment to tidy the slots of the vehicle that no
-        // window refers to any more. After the flush of finish(), so no slot is written once it is deleted.
+        // window refers to anymore. After the flush of finish(), so no slot is written once it is deleted.
         $this->ledger->purgeOld($vehicle, $now);
 
         return $status;
