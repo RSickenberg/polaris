@@ -201,6 +201,7 @@ final class TeslaConnectionControllerTest extends WebTestCase
         $this->client->followRedirect();
         self::assertSelectorTextContains('[data-slot=alert]', 'Tesla is connected.');
         self::assertSelectorExists('[data-connection-status=connected]');
+        self::assertSelectorExists('form[name=disconnect].w-full.sm\\:w-auto button.w-full', 'The disconnect button is a block on a phone.');
         $this->entityManager->clear();
         $token = $this->storedToken();
         self::assertSame('cb-access', self::getContainer()->get(SecretEncrypter::class)->decrypt($token->getEncryptedAccessToken()));
