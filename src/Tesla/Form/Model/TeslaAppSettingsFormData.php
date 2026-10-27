@@ -38,6 +38,8 @@ final class TeslaAppSettingsFormData
     #[Assert\Range(min: 0, max: TeslaApp::MAX_DAILY_WAKE_CAP, notInRangeMessage: 'tesla.wake_cap.range')]
     public ?int $dailyWakeCap = TeslaApp::DEFAULT_DAILY_WAKE_CAP;
 
+    public bool $keepVehicleData = false;
+
     private bool $secretStored = false;
 
     public static function fromApp(TeslaApp $app): self
@@ -47,6 +49,7 @@ final class TeslaAppSettingsFormData
         $data->domain = $app->getDomain()?->toString();
         $data->regions = $app->getEnabledRegions();
         $data->dailyWakeCap = $app->getDailyWakeCap();
+        $data->keepVehicleData = $app->keepsVehicleData();
         $data->secretStored = null !== $app->getEncryptedClientSecret();
 
         return $data;
@@ -64,7 +67,8 @@ final class TeslaAppSettingsFormData
             $this->clientSecret,
             (string) $this->domain,
             $this->regions,
-            $this->dailyWakeCap ?? TeslaApp::DEFAULT_DAILY_WAKE_CAP
+            $this->dailyWakeCap ?? TeslaApp::DEFAULT_DAILY_WAKE_CAP,
+            $this->keepVehicleData
         );
     }
 

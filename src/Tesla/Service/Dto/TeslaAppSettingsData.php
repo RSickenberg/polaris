@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Polaris\Tesla\Service\Dto;
 
 use Polaris\Tesla\Domain\FleetRegion;
-use Polaris\Tesla\Entity\TeslaApp;
 
 /**
  * What the user enters about the Tesla app. A null client secret keeps the stored one.
@@ -14,6 +13,8 @@ final readonly class TeslaAppSettingsData
 {
     /**
      * @param list<FleetRegion> $regions
+     * @param int|null          $dailyWakeCap    null keeps the stored cap
+     * @param bool|null         $keepVehicleData null keeps the stored choice
      */
     public function __construct(
         public string $clientId,
@@ -25,7 +26,9 @@ final readonly class TeslaAppSettingsData
 
         public array $regions,
 
-        public int $dailyWakeCap = TeslaApp::DEFAULT_DAILY_WAKE_CAP,
+        public ?int $dailyWakeCap = null,
+
+        public ?bool $keepVehicleData = null,
     ) {
     }
 
@@ -39,6 +42,7 @@ final readonly class TeslaAppSettingsData
             'domain' => $this->domain,
             'regions' => $this->regions,
             'dailyWakeCap' => $this->dailyWakeCap,
+            'keepVehicleData' => $this->keepVehicleData,
         ];
     }
 }

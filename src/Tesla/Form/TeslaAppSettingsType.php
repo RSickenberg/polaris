@@ -8,6 +8,7 @@ use Polaris\Tesla\Domain\FleetRegion;
 use Polaris\Tesla\Entity\TeslaApp;
 use Polaris\Tesla\Form\Model\TeslaAppSettingsFormData;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -58,6 +59,11 @@ final class TeslaAppSettingsType extends AbstractType
                 'label' => 'form.wake_cap.label',
                 'help' => 'form.wake_cap.help',
                 'attr' => ['min' => 0, 'max' => TeslaApp::MAX_DAILY_WAKE_CAP, 'inputmode' => 'numeric'],
+            ])
+            ->add('keepVehicleData', CheckboxType::class, [
+                'label' => 'form.keep_vehicle_data.label',
+                'help' => 'form.keep_vehicle_data.help',
+                'required' => false,
             ])
             ->add('save', SubmitType::class, ['label' => 'form.submit']);
     }

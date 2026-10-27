@@ -17,6 +17,7 @@ use Polaris\Fetching\Service\OdometerFetcher;
 use Polaris\Reading\Domain\ReadingSource;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Reading\Entity\VehicleDataSnapshot;
+use Polaris\Tesla\Entity\TeslaApp;
 use Polaris\Tesla\Service\Exception\FleetApiError;
 use Polaris\Tests\Support\FleetApiResponses;
 use Polaris\Tests\Support\SignsIn;
@@ -45,6 +46,8 @@ final class OdometerFetcherTest extends KernelTestCase
     private const string SLOT = '2026-10-25 19:00:00';
 
     private Vehicle $vehicle;
+
+    private TeslaApp $app;
 
     private ToggledRefreshPolicy $hourlyLimit;
 
@@ -75,6 +78,7 @@ final class OdometerFetcherTest extends KernelTestCase
         self::mockTime(self::SLOT . ' UTC');
         $owner = self::createUser();
         $app = self::createConfiguredApp($owner);
+        $this->app = $app;
         self::createToken($app, CarbonImmutable::parse(self::SLOT, 'UTC')->addHours(8));
         self::getContainer()->set('http_client', new MockHttpClient($this->respond(...)));
         $this->hourlyLimit = new ToggledRefreshPolicy();
@@ -109,8 +113,20 @@ final class OdometerFetcherTest extends KernelTestCase
         self::assertSame([], $this->queued());
     }
 
+    public function testWhatTheCarAnsweredIsNotKeptUnlessTheUserAllowedIt(): void
+    {
+        $this->answerWith('online', 100.0);
+
+        $this->fetch(0);
+
+        self::assertSame([], $this->entityManager()->getRepository(VehicleDataSnapshot::class)->findAll());
+        self::assertCount(1, $this->entityManager()->getRepository(OdometerReading::class)->findAll(), 'The odometer is stored all the same.');
+    }
+
     public function testWhatTheCarAnsweredIsKeptWithoutItsLocationOnceForEachInstant(): void
     {
+        $this->app->changeKeepVehicleData(true);
+        $this->entityManager()->flush();
         $this->answerWith('online', 100.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS);
         $this->fetch(0);
         $this->answerWith('online', 100.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS);

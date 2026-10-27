@@ -202,8 +202,8 @@ final readonly class OdometerFetcher
             $wakeable = [NoReadingReason::Asleep, NoReadingReason::Offline];
 
             if (null !== $attempt
-                && $message->asksForWake()
                 && null !== $result->reason
+                && $message->asksForWake()
                 && \in_array($result->reason, $wakeable, true)
             ) {
                 return $this->wake($message, $vehicle, $app, $attempt, $now, $result->reason);
@@ -212,8 +212,11 @@ final readonly class OdometerFetcher
             return $this->notOnline($message, $run, $attempt, $result->reason ?? NoReadingReason::Unavailable, $attempts, $now);
         }
 
-        // What the car answered is kept whatever happens to the odometer value (stored, unchanged or rejected).
-        $this->snapshots->record($vehicle, $result->reading->readAt, $now, $result->reading->payload);
+        // What the car answered is kept, if the user allowed it, whatever happens to the odometer value (stored,
+        // unchanged or rejected).
+        if ($app->keepsVehicleData()) {
+            $this->snapshots->record($vehicle, $result->reading->readAt, $now, $result->reading->payload);
+        }
 
         $recording = $this->readings->recordFromApi($vehicle, $result->reading->readAt, $result->reading->odometer);
 

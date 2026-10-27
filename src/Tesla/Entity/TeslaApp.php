@@ -73,6 +73,13 @@ class TeslaApp
     #[ORM\Column(type: Types::SMALLINT, options: ['default' => self::DEFAULT_DAILY_WAKE_CAP])]
     private int $dailyWakeCap = self::DEFAULT_DAILY_WAKE_CAP;
 
+    /**
+     * Whether the user allows Polaris to keep what each live `vehicle_data` call answered (without location) for
+     * later use. Off until they say so.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $keepVehicleData = false;
+
     public function __construct(User $owner, string $publicKey, string $encryptedPrivateKey, CarbonImmutable $generatedAt)
     {
         $this->id = new Ulid();
@@ -126,6 +133,16 @@ class TeslaApp
         }
 
         $this->dailyWakeCap = $cap;
+    }
+
+    public function keepsVehicleData(): bool
+    {
+        return $this->keepVehicleData;
+    }
+
+    public function changeKeepVehicleData(bool $keep): void
+    {
+        $this->keepVehicleData = $keep;
     }
 
     public function getClientId(): ?string

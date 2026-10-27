@@ -76,6 +76,22 @@ final class ConfigureCommandTest extends KernelTestCase
         self::assertStringNotContainsString((string) $app->getEncryptedClientSecret(), $display);
     }
 
+    public function testTheConsoleKeepsTheChoicesMadeOnTheSettingsPage(): void
+    {
+        $this->createApp();
+        $app = $this->app();
+        $app->changeDailyWakeCap(7);
+        $app->changeKeepVehicleData(true);
+        self::getContainer()->get(EntityManagerInterface::class)->flush();
+        $tester = $this->tester();
+        $tester->setInputs([self::SECRET]);
+
+        $tester->execute(['--client-id' => 'client-id', '--domain' => 'polaris.example.com', '--region' => ['eu']], ['interactive' => false]);
+
+        self::assertSame(7, $this->app()->getDailyWakeCap(), 'Configuring the credentials does not reset the wake cap.');
+        self::assertTrue($this->app()->keepsVehicleData());
+    }
+
     public function testAPipedSecretIsReadEvenWhenTheCommandIsNotMarkedNonInteractive(): void
     {
         $this->createApp();
