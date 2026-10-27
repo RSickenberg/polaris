@@ -108,7 +108,7 @@ final readonly class OdometerFetcher
         $vehicle = $this->entityManager->find(Vehicle::class, Ulid::fromString($message->vehicleId));
 
         if (!$vehicle instanceof Vehicle) {
-            $this->logger->warning('Odometer fetch dropped: the vehicle does not exist any more.', ['vehicle' => $message->vehicleId]);
+            $this->logger->warning('Odometer fetch dropped: the vehicle does not exist anymore.', ['vehicle' => $message->vehicleId]);
 
             return SlotRunStatus::Skipped;
         }

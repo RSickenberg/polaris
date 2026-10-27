@@ -404,7 +404,7 @@
       </trans-unit>
       <trans-unit id="form.keep_vehicle_data.help">
         <source>form.keep_vehicle_data.help</source>
-        <target>Saves the full answer of each live read (battery, charge, climate, doors and so on, never the location) in your database for later features. Off by default. Turning it off stops new copies; it does not delete the ones already saved.</target>
+        <target>Saves the full answer of each live read (battery, charge, climate, doors and so on, never the location) in your database for later features. Turning it off stops new copies; it does not delete the ones already saved.</target>
       </trans-unit>
     </body>
   </file>

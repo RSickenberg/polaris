@@ -75,10 +75,10 @@ class TeslaApp
 
     /**
      * Whether the user allows Polaris to keep what each live `vehicle_data` call answered (without location) for
-     * later use. Off until they say so.
+     * later use. On by default, the user can turn it off on the settings page.
      */
-    #[ORM\Column(options: ['default' => false])]
-    private bool $keepVehicleData = false;
+    #[ORM\Column(options: ['default' => true])]
+    private bool $keepVehicleData = true;
 
     public function __construct(User $owner, string $publicKey, string $encryptedPrivateKey, CarbonImmutable $generatedAt)
     {

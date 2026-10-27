@@ -113,8 +113,10 @@ final class OdometerFetcherTest extends KernelTestCase
         self::assertSame([], $this->queued());
     }
 
-    public function testWhatTheCarAnsweredIsNotKeptUnlessTheUserAllowedIt(): void
+    public function testWhatTheCarAnsweredIsNotKeptWhenTheUserTurnedItOff(): void
     {
+        $this->app->changeKeepVehicleData(false);
+        $this->entityManager()->flush();
         $this->answerWith('online', 100.0);
 
         $this->fetch(0);
@@ -125,8 +127,7 @@ final class OdometerFetcherTest extends KernelTestCase
 
     public function testWhatTheCarAnsweredIsKeptWithoutItsLocationOnceForEachInstant(): void
     {
-        $this->app->changeKeepVehicleData(true);
-        $this->entityManager()->flush();
+        self::assertTrue($this->app->keepsVehicleData(), 'On by default.');
         $this->answerWith('online', 100.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS);
         $this->fetch(0);
         $this->answerWith('online', 100.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS);

@@ -400,11 +400,11 @@
       </trans-unit>
       <trans-unit id="form.keep_vehicle_data.label">
         <source>form.keep_vehicle_data.label</source>
-        <target>Conserver ce que la voiture indique</target>
+        <target>Conserver toutes les données du véhicule</target>
       </trans-unit>
       <trans-unit id="form.keep_vehicle_data.help">
         <source>form.keep_vehicle_data.help</source>
-        <target>Enregistre la réponse complète de chaque lecture en direct (batterie, charge, climatisation, ouvrants, etc., jamais la position) dans votre base de données pour de futures fonctions. Désactivé par défaut. Le désactiver arrête les nouvelles copies ; cela ne supprime pas celles déjà enregistrées.</target>
+        <target>Enregistre la réponse complète de chaque lecture en direct (batterie, charge, climatisation, ouvrants, etc., jamais la position) dans votre base de données pour de futures fonctions. Le désactiver arrête les nouvelles copies ; cela ne supprime pas celles déjà enregistrées.</target>
       </trans-unit>
     </body>
   </file>

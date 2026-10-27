@@ -38,7 +38,7 @@ final class TeslaAppSettingsFormData
     #[Assert\Range(min: 0, max: TeslaApp::MAX_DAILY_WAKE_CAP, notInRangeMessage: 'tesla.wake_cap.range')]
     public ?int $dailyWakeCap = TeslaApp::DEFAULT_DAILY_WAKE_CAP;
 
-    public bool $keepVehicleData = false;
+    public bool $keepVehicleData = true;
 
     private bool $secretStored = false;
 

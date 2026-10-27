@@ -170,26 +170,26 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertSame(0, $this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->getDailyWakeCap());
     }
 
-    public function testKeepingTheVehicleDataIsOffByDefaultAndTheUserSwitchesItOnAndOff(): void
+    public function testKeepingTheVehicleDataIsOnByDefaultAndTheUserSwitchesItOffAndOn(): void
     {
         $this->createApp(self::signIn($this->client));
         $this->client->request('GET', '/settings/tesla');
-        self::assertSelectorExists('input[type=checkbox][name="' . self::FORM . '[keepVehicleData]"]:not([checked])');
-        self::assertSelectorTextContains('label[for=' . self::FORM . '_keepVehicleData]', 'Keep what the car reports');
-        self::assertSelectorTextContains('#tesla_app_settings_keepVehicleData_help, [id$=keepVehicleData_help]', 'never the location');
-
-        $this->submit(['clientSecret' => self::SECRET, 'keepVehicleData' => '1']);
-        self::assertResponseRedirects('/settings/tesla');
-        $this->entityManager->clear();
-        self::assertTrue($this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->keepsVehicleData());
-
-        $this->client->request('GET', '/settings/tesla');
         self::assertSelectorExists('input[type=checkbox][name="' . self::FORM . '[keepVehicleData]"][checked]');
+        self::assertSelectorTextContains('label[for=' . self::FORM . '_keepVehicleData]', 'Keep what the car reports');
+        self::assertSelectorTextContains('[id$=keepVehicleData_help]', 'never the location');
 
-        $this->submit(['keepVehicleData' => false]);
+        $this->submit(['clientSecret' => self::SECRET, 'keepVehicleData' => false]);
         self::assertResponseRedirects('/settings/tesla');
         $this->entityManager->clear();
         self::assertFalse($this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->keepsVehicleData());
+
+        $this->client->request('GET', '/settings/tesla');
+        self::assertSelectorExists('input[type=checkbox][name="' . self::FORM . '[keepVehicleData]"]:not([checked])');
+
+        $this->submit(['keepVehicleData' => '1']);
+        self::assertResponseRedirects('/settings/tesla');
+        $this->entityManager->clear();
+        self::assertTrue($this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->keepsVehicleData());
     }
 
     public function testAnEmptySecretKeepsTheStoredOne(): void
