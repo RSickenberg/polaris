@@ -114,7 +114,9 @@ final readonly class OdometerFetcher
         }
 
         try {
-            if (!$message->isPollingWake() && $this->attempts->hasPendingWake($vehicle, WakeWindow::pendingSince(CarbonImmutable::instance($this->clock->now())))) {
+            $pendingSince = WakeWindow::pendingSince(CarbonImmutable::instance($this->clock->now()));
+
+            if (!$message->isPollingWake() && $this->attempts->hasPendingWake($vehicle, $pendingSince)) {
                 return $this->busy($message, $attempt);
             }
 
@@ -173,7 +175,7 @@ final readonly class OdometerFetcher
         }
 
         if (null === $result->reading) {
-            if ($message->allowWake && !$message->isPollingWake() && null === $message->slotTimestamp && null !== $attempt && NoReadingReason::Asleep === $result->reason) {
+            if (null !== $attempt && $message->asksForWake() && NoReadingReason::Asleep === $result->reason) {
                 return $this->wake($message, $vehicle, $app, $attempt, $now);
             }
 
@@ -248,9 +250,19 @@ final readonly class OdometerFetcher
         try {
             $this->waker->wake($app, $vehicle->getVin());
         } catch (TeslaNotConnected $notConnected) {
-            return $this->notConnected(null, $attempt, $message->attempt + 1, $now, $vehicle, $notConnected->getMessage());
+            return $this->notConnected(
+                null,
+                $attempt,
+                $message->attempt + 1,
+                $now,
+                $vehicle,
+                $notConnected->getMessage()
+            );
         } catch (WakeScopeMissing) {
-            $this->logger->warning('Wake refused by Tesla: the vehicle_cmds scope is missing or was revoked.', ['vehicle' => $message->vehicleId]);
+            $this->logger->warning(
+                'Wake refused by Tesla: the vehicle_cmds scope is missing or was revoked.',
+                ['vehicle' => $message->vehicleId]
+            );
 
             return $this->endWake($attempt, RefreshOutcome::WakeScopeMissing, $now);
         } catch (FleetApiError $failure) {
@@ -296,7 +308,14 @@ final readonly class OdometerFetcher
                 return null;
             }
         } catch (TeslaNotConnected $notConnected) {
-            return $this->notConnected(null, $attempt, $message->attempt + 1, $now, $vehicle, $notConnected->getMessage());
+            return $this->notConnected(
+                null,
+                $attempt,
+                $message->attempt + 1,
+                $now,
+                $vehicle,
+                $notConnected->getMessage()
+            );
         } catch (FleetApiError $failure) {
             $attempt->settle(RefreshOutcome::Failed, $now);
             $this->entityManager->flush();

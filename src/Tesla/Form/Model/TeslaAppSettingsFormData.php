@@ -59,7 +59,13 @@ final class TeslaAppSettingsFormData
 
     public function toSettingsData(): TeslaAppSettingsData
     {
-        return new TeslaAppSettingsData((string) $this->clientId, $this->clientSecret, (string) $this->domain, $this->regions, $this->dailyWakeCap ?? TeslaApp::DEFAULT_DAILY_WAKE_CAP);
+        return new TeslaAppSettingsData(
+            (string) $this->clientId,
+            $this->clientSecret,
+            (string) $this->domain,
+            $this->regions,
+            $this->dailyWakeCap ?? TeslaApp::DEFAULT_DAILY_WAKE_CAP
+        );
     }
 
     #[Assert\Callback]

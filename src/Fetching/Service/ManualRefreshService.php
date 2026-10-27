@@ -79,9 +79,15 @@ final readonly class ManualRefreshService
      */
     public function wakeOffer(Vehicle $vehicle, string $attemptId): WakeRequestResult
     {
+        $attempt = $this->attempts->findOf($vehicle, $attemptId);
+
+        if (null === $attempt) {
+            return WakeRequestResult::refused(WakeRequestStatus::NothingToWake);
+        }
+
         return $this->evaluateWake(
             $vehicle,
-            $this->attempts->findOf($vehicle, $attemptId),
+            $attempt,
             CarbonImmutable::instance($this->clock->now())
         );
     }
@@ -95,30 +101,42 @@ final readonly class ManualRefreshService
      */
     public function requestWake(Vehicle $vehicle, string $attemptId): WakeRequestResult
     {
-        $now = CarbonImmutable::instance($this->clock->now());
         $attempt = $this->attempts->findOf($vehicle, $attemptId);
+
+        if (null === $attempt) {
+            return WakeRequestResult::refused(WakeRequestStatus::NothingToWake);
+        }
+
+        $now = CarbonImmutable::instance($this->clock->now());
         $result = $this->evaluateWake($vehicle, $attempt, $now);
 
-        if (!$result->isAccepted() || null === $attempt) {
+        if (!$result->isAccepted()) {
             return $result;
         }
 
         $attempt->requeue($now);
         $this->entityManager->flush();
 
-        $this->bus->dispatch(new FetchOdometerMessage($vehicle->getId()->toRfc4122(), null, 0, $attempt->getId()->toRfc4122(), true));
+        $this->bus->dispatch(new FetchOdometerMessage(
+            $vehicle->getId()->toRfc4122(),
+            null,
+            0,
+            $attempt->getId()->toRfc4122(),
+            true
+        ));
 
         return $result;
     }
 
-    private function evaluateWake(Vehicle $vehicle, ?RefreshAttempt $attempt, CarbonImmutable $now): WakeRequestResult
+    private function evaluateWake(Vehicle $vehicle, RefreshAttempt $attempt, CarbonImmutable $now): WakeRequestResult
     {
-        if (
-            null === $attempt
-            || RefreshOutcome::Asleep !== $attempt->getOutcome()
-            || $attempt->getUpdatedAt()->addSeconds(WakeWindow::CONFIRM_SECONDS) < $now
-            || $this->attempts->hasPendingWake($vehicle, WakeWindow::pendingSince($now))
-        ) {
+        $expired = $attempt->getUpdatedAt()->addSeconds(WakeWindow::CONFIRM_SECONDS) < $now;
+
+        if (RefreshOutcome::Asleep !== $attempt->getOutcome() || $expired) {
+            return WakeRequestResult::refused(WakeRequestStatus::NothingToWake);
+        }
+
+        if ($this->attempts->hasPendingWake($vehicle, WakeWindow::pendingSince($now))) {
             return WakeRequestResult::refused(WakeRequestStatus::NothingToWake);
         }
 

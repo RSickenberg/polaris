@@ -31,7 +31,14 @@ final readonly class FetchOdometerMessage
 
     public function nextAttempt(): self
     {
-        return new self($this->vehicleId, $this->slotTimestamp, $this->attempt + 1, $this->refreshId, $this->allowWake, $this->wakeDeadline);
+        return new self(
+            $this->vehicleId,
+            $this->slotTimestamp,
+            $this->attempt + 1,
+            $this->refreshId,
+            $this->allowWake,
+            $this->wakeDeadline
+        );
     }
 
     /**
@@ -39,7 +46,23 @@ final readonly class FetchOdometerMessage
      */
     public function wokenUntil(int $deadline): self
     {
-        return new self($this->vehicleId, $this->slotTimestamp, $this->attempt, $this->refreshId, $this->allowWake, $deadline);
+        return new self(
+            $this->vehicleId,
+            $this->slotTimestamp,
+            $this->attempt,
+            $this->refreshId,
+            $this->allowWake,
+            $deadline
+        );
+    }
+
+    /**
+     * Whether this fetch may send wake_up: a confirmed manual refresh that has not woken the car yet. A scheduled
+     * fetch (it has a slot) never does.
+     */
+    public function asksForWake(): bool
+    {
+        return $this->allowWake && !$this->isPollingWake() && null === $this->slotTimestamp;
     }
 
     public function isPollingWake(): bool

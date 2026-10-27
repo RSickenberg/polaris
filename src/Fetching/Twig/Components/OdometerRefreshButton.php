@@ -157,7 +157,11 @@ final class OdometerRefreshButton
      */
     public function wakeOffer(): ?WakeRequestResult
     {
-        if (null === $this->attemptId || RefreshOutcome::Asleep !== $this->outcome() || $this->declinedAttemptId === $this->attemptId) {
+        if (null === $this->attemptId) {
+            return null;
+        }
+
+        if (RefreshOutcome::Asleep !== $this->outcome() || $this->declinedAttemptId === $this->attemptId) {
             return null;
         }
 
