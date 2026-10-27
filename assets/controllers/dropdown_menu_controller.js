@@ -36,7 +36,7 @@ export default class extends Controller {
             // Wait two frames: `visibility` is transitioned, so the content is
             // `visibility: hidden` (its items not focusable) on the first frame.
             requestAnimationFrame(() =>
-                requestAnimationFrame(() => (focus === 'last' ? this._focusLastItem() : this._focusFirstItem()))
+                requestAnimationFrame(() => (focus === 'last' ? this._focusLastItem() : this._focusInitialItem()))
             );
         }
     }
@@ -186,6 +186,13 @@ export default class extends Controller {
 
     _focusFirstItem() {
         this._enabledItems()[0]?.focus();
+    }
+
+    // When the menu opens: the item of the page the user is on, else the first one.
+    _focusInitialItem() {
+        const items = this._enabledItems();
+
+        (items.find((item) => item.getAttribute('aria-current') === 'page') ?? items[0])?.focus();
     }
 
     _focusLastItem() {

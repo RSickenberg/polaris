@@ -49,6 +49,24 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertSelectorNotExists('form');
     }
 
+    public function testTheAccountMenuMarksTheTeslaSettingsAndTheCardsUseTheWidthOfTheDashboard(): void
+    {
+        $this->createApp(self::signIn($this->client));
+
+        $crawler = $this->client->request('GET', '/settings/tesla');
+
+        self::assertSelectorExists('a[href="/settings/tesla"][role=menuitem][aria-current=page]');
+        self::assertSelectorNotExists('a[href="/settings"][role=menuitem][aria-current]');
+        self::assertSelectorNotExists('main .max-w-3xl, #main-content .max-w-3xl');
+        self::assertCount(0, $crawler->filter('[class*="max-w-3xl"]'));
+
+        $this->client->request('GET', '/settings');
+
+        self::assertSelectorExists('a[href="/settings"][role=menuitem][aria-current=page]');
+        self::assertSelectorNotExists('a[href="/settings/tesla"][role=menuitem][aria-current]');
+        self::assertSelectorNotExists('[class*="max-w-3xl"]');
+    }
+
     public function testThePageShowsTheFormAndNeverTheSecret(): void
     {
         $user = self::signIn($this->client);

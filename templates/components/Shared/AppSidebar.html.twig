@@ -1,5 +1,7 @@
 {%- props vehicle = null -%}
 {% set route = app.request.attributes.get('_route') %}
+{# The pages of the Tesla settings: the account menu marks the one the user is on. #}
+{% set teslaRoutes = ['tesla_settings', 'tesla_consent', 'tesla_connect'] %}
 <twig:Sidebar collapsible="offcanvas">
     <twig:Sidebar:Header>
         <div class="flex h-8 items-center gap-2 px-2 font-semibold">
@@ -64,11 +66,11 @@
                     </twig:Sidebar:MenuButton>
                 </twig:DropdownMenu:Trigger>
                 <twig:DropdownMenu:Content class="w-56">
-                    <twig:DropdownMenu:Item as="a" href="{{ path('account_settings') }}">
+                    <twig:DropdownMenu:Item as="a" href="{{ path('account_settings') }}" {{ ...('account_settings' == route ? {'aria-current': 'page'} : {}) }}>
                         <twig:ux:icon name="lucide:settings" aria-hidden="true" />
                         {{ 'account.settings'|trans(domain='shared') }}
                     </twig:DropdownMenu:Item>
-                    <twig:DropdownMenu:Item as="a" href="{{ path('tesla_settings') }}">
+                    <twig:DropdownMenu:Item as="a" href="{{ path('tesla_settings') }}" {{ ...(route in teslaRoutes ? {'aria-current': 'page'} : {}) }}>
                         <twig:ux:icon name="lucide:key-round" aria-hidden="true" />
                         {{ 'account.tesla'|trans(domain='shared') }}
                     </twig:DropdownMenu:Item>
