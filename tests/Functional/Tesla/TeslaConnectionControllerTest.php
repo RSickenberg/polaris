@@ -155,9 +155,36 @@ final class TeslaConnectionControllerTest extends WebTestCase
         $query = self::queryOf($location);
         self::assertSame('code', $query['response_type']);
         self::assertSame('fake-client-id', $query['client_id']);
-        self::assertSame('openid offline_access vehicle_device_data', $query['scope']);
+        self::assertSame('openid offline_access vehicle_device_data vehicle_cmds', $query['scope']);
         self::assertSame($this->redirectUri(), $query['redirect_uri']);
         self::assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $query['state']);
+    }
+
+    public function testReconnectingAsksTeslaOnlyForTheMissingScopesAndKeepsAState(): void
+    {
+        self::createConfiguredApp(self::signIn($this->client));
+
+        $this->client->request('GET', '/settings/tesla/connect/reauthorize');
+
+        $location = (string) $this->client->getResponse()->headers->get('Location');
+        self::assertStringStartsWith('https://auth.tesla.com/oauth2/v3/authorize?', $location);
+        $query = self::queryOf($location);
+        self::assertSame('true', $query['prompt_missing_scopes']);
+        self::assertSame('openid offline_access vehicle_device_data vehicle_cmds', $query['scope']);
+        self::assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $query['state']);
+
+        $this->responses = [$this->tokens('cb-access', 'cb-refresh'), new MockResponse(self::EU_REGION)];
+        $this->client->request('GET', '/tesla/callback?code=fake-code&state=' . $query['state']);
+        self::assertResponseRedirects('/settings/tesla');
+    }
+
+    public function testReconnectingWithoutConsentGoesToTheConsent(): void
+    {
+        self::createConfiguredApp(self::signIn($this->client), false);
+
+        $this->client->request('GET', '/settings/tesla/connect/reauthorize');
+
+        self::assertResponseRedirects('/settings/tesla/consent');
     }
 
     public function testTheCallbackConnectsWhenTheStateMatches(): void

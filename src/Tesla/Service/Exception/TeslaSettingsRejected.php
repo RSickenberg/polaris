@@ -18,6 +18,11 @@ final class TeslaSettingsRejected extends \RuntimeException
         return new self(\sprintf('The %s is required.', $what));
     }
 
+    public static function wakeCapOutOfRange(int $max): self
+    {
+        return new self(\sprintf('The daily wake cap must be between 0 and %d.', $max));
+    }
+
     public static function regionNotSupported(FleetRegion $region): self
     {
         return new self(\sprintf(

@@ -36,7 +36,7 @@ trait TeslaFixtures
         return $app;
     }
 
-    private static function createToken(TeslaApp $app, CarbonImmutable $expiresAt, string $access = 'stored-access', string $refresh = 'stored-refresh'): OAuthToken
+    private static function createToken(TeslaApp $app, CarbonImmutable $expiresAt, string $access = 'stored-access', string $refresh = 'stored-refresh', string $scopes = 'openid offline_access vehicle_device_data'): OAuthToken
     {
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $encrypter = self::getContainer()->get(SecretEncrypter::class);
@@ -46,7 +46,7 @@ trait TeslaFixtures
             $encrypter->encrypt($access),
             $encrypter->encrypt($refresh),
             $expiresAt,
-            'openid offline_access vehicle_device_data',
+            $scopes,
             ConnectionMethod::OAuth,
             FleetRegion::EuropeMiddleEastAfrica->baseUrl(),
             CarbonImmutable::parse('2026-10-24 09:00:00 UTC'),

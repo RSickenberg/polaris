@@ -11,13 +11,13 @@ use Polaris\Fetching\Domain\RefreshOutcome;
 #[CoversClass(RefreshOutcome::class)]
 final class RefreshOutcomeTest extends TestCase
 {
-    public function testEveryOutcomeHasAToastVariantAndOnlyQueuedIsNotSettled(): void
+    public function testEveryOutcomeHasAToastVariantAndOnlyQueuedAndWakingAreNotSettled(): void
     {
         $variants = ['success', 'warning', 'info', 'danger'];
 
         foreach (RefreshOutcome::cases() as $outcome) {
             self::assertContains($outcome->toastVariant(), $variants);
-            self::assertSame(RefreshOutcome::Queued !== $outcome, $outcome->isSettled());
+            self::assertSame(!\in_array($outcome, [RefreshOutcome::Queued, RefreshOutcome::Waking], true), $outcome->isSettled());
         }
     }
 

@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Polaris\Tesla\Domain\ConnectionMethod;
 use Polaris\Tesla\Domain\ConnectionStatus;
+use Polaris\Tesla\Domain\TeslaScopes;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\Ulid;
 
@@ -122,6 +123,14 @@ class OAuthToken
     public function isConnected(): bool
     {
         return ConnectionStatus::Connected === $this->status;
+    }
+
+    /**
+     * Whether the user granted the scope that wake_up needs. A connection made before the wake existed lacks it.
+     */
+    public function canWake(): bool
+    {
+        return TeslaScopes::allowsWake($this->scopes);
     }
 
     public function getMethod(): ConnectionMethod

@@ -11,11 +11,14 @@ use Polaris\Account\Entity\User;
 use Polaris\Fetching\Domain\RefreshOutcome;
 use Polaris\Fetching\Entity\RefreshAttempt;
 use Polaris\Fetching\Repository\RefreshAttemptRepository;
+use Polaris\Fetching\Service\Dto\WakeRequestResult;
+use Polaris\Fetching\Service\Enum\WakeRequestStatus;
 use Polaris\Fetching\Service\ManualRefreshService;
 use Polaris\Vehicle\Entity\Vehicle;
 use Polaris\Vehicle\Service\Enum\VehiclePermission;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Uid\Ulid;
@@ -59,6 +62,24 @@ final class OdometerRefreshButton
     public ?int $limitedUntil = null;
 
     /**
+     * The attempt whose wake offer the user turned down ("Use last reading"), so the dialog does not come back.
+     */
+    #[LiveProp]
+    public ?string $declinedAttemptId = null;
+
+    /**
+     * What the last confirmed wake got when it was refused, a {@see WakeRequestStatus} value; null otherwise.
+     */
+    #[LiveProp]
+    public ?string $wakeRefusal = null;
+
+    /**
+     * The UTC timestamp from which another wake is allowed, set with a refused wake because of the cap.
+     */
+    #[LiveProp]
+    public ?int $wakeAvailableAt = null;
+
+    /**
      * How many times the button was clicked in this page: it makes the toast of each click a new element.
      */
     #[LiveProp]
@@ -66,10 +87,20 @@ final class OdometerRefreshButton
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+
         private readonly RefreshAttemptRepository $attempts,
+
         private readonly ManualRefreshService $refreshes,
+
         private readonly Security $security,
+
         private readonly ClockInterface $clock,
+
+        #[Autowire(param: 'polaris.tesla.wake_cost')]
+        private readonly float $wakeCost,
+
+        #[Autowire(param: 'polaris.tesla.wake_currency')]
+        private readonly string $wakeCurrency,
     ) {
     }
 
@@ -85,6 +116,67 @@ final class OdometerRefreshButton
 
         $this->attemptId = $result->attemptId?->toRfc4122();
         $this->limitedUntil = $result->retryAfter?->getTimestamp();
+        $this->declinedAttemptId = null;
+        $this->wakeRefusal = null;
+        $this->wakeAvailableAt = null;
+    }
+
+    /**
+     * The user confirmed waking the car in the dialog.
+     *
+     * @throws ORMException
+     * @throws ExceptionInterface
+     */
+    #[LiveAction]
+    public function wake(): void
+    {
+        ++$this->clicks;
+
+        if (null === $this->attemptId) {
+            return;
+        }
+
+        $result = $this->refreshes->requestWake($this->vehicle(), $this->attemptId);
+
+        $this->wakeRefusal = $result->isAccepted() ? null : $result->status->value;
+        $this->wakeAvailableAt = $result->availableAt?->getTimestamp();
+    }
+
+    /**
+     * "Use last reading": the dialog is closed and stays closed for this refresh.
+     */
+    #[LiveAction]
+    public function declineWake(): void
+    {
+        $this->declinedAttemptId = $this->attemptId;
+    }
+
+    /**
+     * What the dashboard offers for a car the last refresh found asleep, null when it offers nothing (the car
+     * is not asleep, the offer was declined or a wake is running).
+     */
+    public function wakeOffer(): ?WakeRequestResult
+    {
+        if (null === $this->attemptId || RefreshOutcome::Asleep !== $this->outcome() || $this->declinedAttemptId === $this->attemptId) {
+            return null;
+        }
+
+        return $this->refreshes->wakeOffer($this->vehicle(), $this->attemptId);
+    }
+
+    public function wakeAvailableAt(): ?CarbonImmutable
+    {
+        return null === $this->wakeAvailableAt ? null : CarbonImmutable::createFromTimestampUTC($this->wakeAvailableAt);
+    }
+
+    public function wakeCost(): float
+    {
+        return $this->wakeCost;
+    }
+
+    public function wakeCurrency(): string
+    {
+        return $this->wakeCurrency;
     }
 
     public function retryAt(): ?CarbonImmutable
@@ -98,14 +190,15 @@ final class OdometerRefreshButton
     }
 
     /**
-     * Whether the fetch is queued and recent enough to wait for.
+     * Whether the fetch is queued or waiting for a woken car, and recent enough to wait for.
      */
     public function isPolling(): bool
     {
         $attempt = $this->attempt();
 
-        return RefreshOutcome::Queued === $attempt?->getOutcome()
-            && $attempt->getRequestedAt()->addSeconds(self::POLL_SECONDS) > CarbonImmutable::instance($this->clock->now());
+        return null !== $attempt
+            && !$attempt->getOutcome()->isSettled()
+            && $attempt->getUpdatedAt()->addSeconds(self::POLL_SECONDS) > CarbonImmutable::instance($this->clock->now());
     }
 
     public function timeZone(): string

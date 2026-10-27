@@ -95,14 +95,14 @@ final readonly class TeslaConnectionService
      * @throws ConnectionRejected
      * @throws RandomException
      */
-    public function startAuthorization(TeslaApp $app): AuthorizationRequest
+    public function startAuthorization(TeslaApp $app, bool $promptMissingScopes = false): AuthorizationRequest
     {
         $this->requireReady($app);
 
         $state = OAuthState::generate();
 
         return new AuthorizationRequest(
-            $this->client->authorizationUrl((string) $app->getClientId(), $this->redirectUri->get(), $state),
+            $this->client->authorizationUrl((string) $app->getClientId(), $this->redirectUri->get(), $state, $promptMissingScopes),
             $state,
         );
     }

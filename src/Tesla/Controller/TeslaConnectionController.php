@@ -110,6 +110,26 @@ final class TeslaConnectionController extends AbstractController
         return new RedirectResponse($authorization->url);
     }
 
+    /**
+     * Sends the user to Tesla again, asking only for the scopes that are missing (a connection made before
+     * `vehicle_cmds` was requested). A plain link: it changes nothing here, the `state` is the protection.
+     *
+     * @throws RandomException
+     */
+    #[Route('/settings/tesla/connect/reauthorize', name: 'tesla_reauthorize', methods: ['GET'])]
+    public function reauthorize(Request $request, #[CurrentUser] User $user): Response
+    {
+        try {
+            $authorization = $this->connection->startAuthorization($this->app($user), true);
+        } catch (ConnectionRejected $rejected) {
+            return $this->reject($rejected);
+        }
+
+        $request->getSession()->set(self::STATE_KEY, $authorization->state);
+
+        return new RedirectResponse($authorization->url);
+    }
+
     #[Route(RedirectUriProvider::CALLBACK_PATH, name: 'tesla_callback', methods: ['GET'])]
     /**
      * @throws \SodiumException

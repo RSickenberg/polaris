@@ -12,7 +12,9 @@ use Polaris\Fetching\Domain\RefreshOutcome;
 use Polaris\Fetching\Entity\RefreshAttempt;
 use Polaris\Fetching\Message\FetchOdometerMessage;
 use Polaris\Fetching\Twig\Components\OdometerRefreshButton;
+use Polaris\Tesla\Entity\TeslaApp;
 use Polaris\Tests\Support\SignsIn;
+use Polaris\Tests\Support\TeslaFixtures;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -27,6 +29,7 @@ final class OdometerRefreshButtonTest extends WebTestCase
 {
     use InteractsWithLiveComponents;
     use SignsIn;
+    use TeslaFixtures;
 
     private const string NAME = 'Fetching:OdometerRefreshButton';
 
@@ -76,7 +79,7 @@ final class OdometerRefreshButtonTest extends WebTestCase
         self::assertStringNotContainsString('data-poll', $html);
         self::assertStringContainsString('data-toast-announce-variant-value="warning"', $html, 'A car that is asleep is a warning, not an error.');
         self::assertDoesNotMatchRegularExpression('/<button[^>]*\sdisabled(?=[\s=>])/', $html);
-        self::assertStringContainsString('The car is asleep. Polaris does not wake it', $html);
+        self::assertStringContainsString('The car is asleep: the last reading is kept', $html);
         self::assertCount(1, $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(), 'Rendering never starts another refresh.');
     }
 
@@ -119,6 +122,149 @@ final class OdometerRefreshButtonTest extends WebTestCase
         $html = (string) $this->createLiveComponent(self::NAME, ['vehicleId' => $this->mine->getId()->toRfc4122(), 'attemptId' => $attempt->getId()->toRfc4122()], $this->client)->render();
 
         self::assertStringNotContainsString('New reading stored.', $html);
+    }
+
+    public function testACarFoundAsleepOffersAWakeWithItsCostAndTheConfirmationQueuesIt(): void
+    {
+        $this->connect();
+        $component = $this->component($this->mine);
+        $component->call('refresh');
+        $this->settle(RefreshOutcome::Asleep);
+
+        $html = (string) $component->refresh()->render();
+
+        self::assertStringContainsString('data-wake-dialog', $html);
+        self::assertStringContainsString('Your car is asleep. Wake it to get the current mileage?', $html);
+        self::assertStringContainsString('$0.02', $html, 'The cost per wake comes from the configuration, formatted for the locale.');
+        self::assertStringContainsString('Use last reading', $html);
+        self::assertStringContainsString('Wake and refresh', $html);
+        self::assertStringContainsString('data-dialog-open-value="true"', $html);
+        self::assertStringNotContainsString('data-toast-announce', $html, 'The dialog replaces the asleep toast.');
+        self::assertStringNotContainsString('data-wake-reconnect', $html);
+
+        $html = (string) $component->call('wake')->render();
+
+        // Each request boots the kernel again, so only what the confirmation sent is in the transport.
+        $queued = $this->queued();
+        self::assertCount(1, $queued, 'Showing the offer sent nothing; the confirmation sent one message.');
+        $message = $queued[0]->getMessage();
+        self::assertInstanceOf(FetchOdometerMessage::class, $message);
+        self::assertTrue($message->allowWake);
+        self::assertNull($message->slotTimestamp);
+        self::assertSame($this->attemptId(), $message->refreshId);
+        self::assertStringNotContainsString('data-wake-dialog', $html);
+        self::assertStringContainsString('data-poll', $html, 'The component polls while the wake runs.');
+        self::assertCount(1, $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(), 'A wake is not a new refresh.');
+    }
+
+    public function testDecliningTheWakeKeepsTheLastReadingAndTheDialogStaysClosed(): void
+    {
+        $this->connect();
+        $component = $this->component($this->mine);
+        $component->call('refresh');
+        $this->settle(RefreshOutcome::Asleep);
+
+        $html = (string) $component->call('declineWake')->render();
+
+        self::assertStringNotContainsString('data-wake-dialog', $html);
+        self::assertStringContainsString('The car is asleep: the last reading is kept.', $html);
+        self::assertSame([], $this->queued(), 'Declining sends nothing.');
+    }
+
+    public function testWithoutTheScopeThereIsNoWakeButALinkToReconnect(): void
+    {
+        $this->connect('openid offline_access vehicle_device_data');
+        $component = $this->component($this->mine);
+        $component->call('refresh');
+        $this->settle(RefreshOutcome::Asleep);
+
+        $html = (string) $component->refresh()->render();
+
+        self::assertStringNotContainsString('data-wake-dialog', $html);
+        self::assertStringNotContainsString('Wake and refresh', $html);
+        self::assertStringContainsString('data-wake-reconnect', $html);
+        self::assertStringContainsString('href="/settings/tesla/connect/reauthorize"', $html);
+        self::assertStringContainsString('Reconnect to allow waking', $html);
+    }
+
+    public function testWhenTheCapIsReachedThereIsNoDialogAndTheToastSaysWhenToTryAgain(): void
+    {
+        $this->connect()->changeDailyWakeCap(1);
+        $earlier = new RefreshAttempt($this->mine, CarbonImmutable::now('UTC')->subHours(2));
+        $earlier->markWoken(CarbonImmutable::now('UTC')->subHours(2));
+        $earlier->settle(RefreshOutcome::Stored, CarbonImmutable::now('UTC')->subHours(2));
+        $this->entityManager()->persist($earlier);
+        $this->entityManager()->flush();
+        $component = $this->component($this->mine);
+        $component->call('refresh');
+        $this->settle(RefreshOutcome::Asleep);
+
+        $html = (string) $component->refresh()->render();
+
+        self::assertStringNotContainsString('data-wake-dialog', $html);
+        self::assertStringContainsString('was already woken as often as allowed in 24 hours', $html);
+        self::assertMatchesRegularExpression('/You can wake it again at [^(]+\(UTC\)\./', $html);
+        self::assertStringContainsString('data-toast-announce-variant-value="warning"', $html);
+    }
+
+    public function testWhenWakingIsTurnedOffTheToastSaysSo(): void
+    {
+        $this->connect()->changeDailyWakeCap(0);
+        $this->entityManager()->flush();
+        $component = $this->component($this->mine);
+        $component->call('refresh');
+        $this->settle(RefreshOutcome::Asleep);
+
+        $html = (string) $component->refresh()->render();
+
+        self::assertStringNotContainsString('data-wake-dialog', $html);
+        self::assertStringContainsString('waking is turned off in the Tesla settings', $html);
+    }
+
+    /**
+     * @return iterable<string, array{RefreshOutcome, string, string}>
+     */
+    public static function wakeEndings(): iterable
+    {
+        yield 'timeout' => [RefreshOutcome::WakeTimeout, 'warning', 'did not come online within 90 seconds'];
+        yield 'scope refused' => [RefreshOutcome::WakeScopeMissing, 'danger', 'Tesla refused the wake'];
+        yield 'cap' => [RefreshOutcome::WakeCapReached, 'warning', 'already woken as often as allowed'];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('wakeEndings')]
+    public function testHowAWakeEndedIsToldToTheUser(RefreshOutcome $outcome, string $variant, string $message): void
+    {
+        $this->connect();
+        $component = $this->component($this->mine);
+        $component->call('refresh');
+        $this->settle($outcome);
+
+        $html = (string) $component->refresh()->render();
+
+        self::assertStringContainsString($message, $html);
+        self::assertStringContainsString('data-toast-announce-variant-value="' . $variant . '"', $html);
+        self::assertStringNotContainsString('data-poll', $html);
+    }
+
+    private function connect(string $scopes = 'openid offline_access vehicle_device_data vehicle_cmds'): TeslaApp
+    {
+        $app = self::createConfiguredApp($this->me);
+        self::createToken($app, CarbonImmutable::now('UTC')->addHours(8), scopes: $scopes);
+
+        return $app;
+    }
+
+    private function attemptId(): string
+    {
+        return $this->entityManager()->getRepository(RefreshAttempt::class)->findOneBy([])?->getId()->toRfc4122() ?? '';
+    }
+
+    private function settle(RefreshOutcome $outcome): void
+    {
+        $attempt = $this->entityManager()->getRepository(RefreshAttempt::class)->findOneBy([], ['requestedAt' => 'DESC']);
+        self::assertInstanceOf(RefreshAttempt::class, $attempt);
+        $attempt->settle($outcome, CarbonImmutable::now('UTC'));
+        $this->entityManager()->flush();
     }
 
     private function component(Vehicle $vehicle): \Symfony\UX\LiveComponent\Test\TestLiveComponent

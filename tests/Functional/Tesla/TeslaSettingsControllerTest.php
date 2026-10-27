@@ -125,6 +125,28 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertSame(self::SECRET, self::getContainer()->get(SecretEncrypter::class)->decrypt($ciphertext));
     }
 
+    public function testTheWakeCapDefaultsToThreeAndIsSavedAndBounded(): void
+    {
+        $this->createApp(self::signIn($this->client));
+        $this->client->request('GET', '/settings/tesla');
+        self::assertInputValueSame(self::FORM . '[dailyWakeCap]', '3');
+
+        $this->submit(['clientSecret' => self::SECRET, 'dailyWakeCap' => '5']);
+        self::assertResponseRedirects('/settings/tesla');
+        $this->entityManager->clear();
+        self::assertSame(5, $this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->getDailyWakeCap());
+
+        $this->submit(['dailyWakeCap' => '0']);
+        self::assertResponseRedirects('/settings/tesla');
+        $this->entityManager->clear();
+        self::assertSame(0, $this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->getDailyWakeCap(), '0 turns waking off.');
+
+        $this->submit(['dailyWakeCap' => '21']);
+        self::assertResponseStatusCodeSame(422);
+        $this->entityManager->clear();
+        self::assertSame(0, $this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->getDailyWakeCap());
+    }
+
     public function testAnEmptySecretKeepsTheStoredOne(): void
     {
         $user = self::signIn($this->client);

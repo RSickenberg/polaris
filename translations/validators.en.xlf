@@ -54,6 +54,10 @@
         <source>vehicle.import.none_selected</source>
         <target>Tick at least one vehicle.</target>
       </trans-unit>
+      <trans-unit id="tesla.wake_cap.range">
+        <source>tesla.wake_cap.range</source>
+        <target>The wake cap must be between 0 and 20.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

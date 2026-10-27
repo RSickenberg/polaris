@@ -37,6 +37,12 @@ class RefreshAttempt
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private CarbonImmutable $updatedAt;
 
+    /**
+     * When wake_up was sent for this refresh, which is what Tesla bills and what the daily cap counts.
+     */
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?CarbonImmutable $wokeAt = null;
+
     public function __construct(Vehicle $vehicle, CarbonImmutable $now)
     {
         $this->id = new Ulid();
@@ -69,6 +75,30 @@ class RefreshAttempt
     public function getUpdatedAt(): CarbonImmutable
     {
         return $this->updatedAt;
+    }
+
+    public function getWokeAt(): ?CarbonImmutable
+    {
+        return $this->wokeAt;
+    }
+
+    /**
+     * The user confirmed a wake: the fetch is queued again, as for a new refresh.
+     */
+    public function requeue(CarbonImmutable $now): void
+    {
+        $this->outcome = RefreshOutcome::Queued;
+        $this->updatedAt = $now;
+    }
+
+    /**
+     * wake_up was sent.
+     */
+    public function markWoken(CarbonImmutable $now): void
+    {
+        $this->wokeAt = $now;
+        $this->outcome = RefreshOutcome::Waking;
+        $this->updatedAt = $now;
     }
 
     public function settle(RefreshOutcome $outcome, CarbonImmutable $now): void

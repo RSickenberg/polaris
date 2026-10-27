@@ -306,6 +306,14 @@
         <source>error.connect.tesla_failed</source>
         <target>Tesla could not be reached or failed to answer. Try again later.</target>
       </trans-unit>
+      <trans-unit id="form.wake_cap.label">
+        <source>form.wake_cap.label</source>
+        <target>Wakes allowed per vehicle and 24 hours</target>
+      </trans-unit>
+      <trans-unit id="form.wake_cap.help">
+        <source>form.wake_cap.help</source>
+        <target>How many times Polaris may wake one of your cars when you confirm it on a manual refresh. Each wake is billed by Tesla. 0 turns waking off.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

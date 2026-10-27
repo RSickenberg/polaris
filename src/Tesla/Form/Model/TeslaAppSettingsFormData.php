@@ -34,6 +34,10 @@ final class TeslaAppSettingsFormData
     #[Assert\Count(min: 1, minMessage: 'tesla.regions.required')]
     public array $regions = [];
 
+    #[Assert\NotNull]
+    #[Assert\Range(min: 0, max: TeslaApp::MAX_DAILY_WAKE_CAP, notInRangeMessage: 'tesla.wake_cap.range')]
+    public ?int $dailyWakeCap = TeslaApp::DEFAULT_DAILY_WAKE_CAP;
+
     private bool $secretStored = false;
 
     public static function fromApp(TeslaApp $app): self
@@ -42,6 +46,7 @@ final class TeslaAppSettingsFormData
         $data->clientId = $app->getClientId();
         $data->domain = $app->getDomain()?->toString();
         $data->regions = $app->getEnabledRegions();
+        $data->dailyWakeCap = $app->getDailyWakeCap();
         $data->secretStored = null !== $app->getEncryptedClientSecret();
 
         return $data;
@@ -54,7 +59,7 @@ final class TeslaAppSettingsFormData
 
     public function toSettingsData(): TeslaAppSettingsData
     {
-        return new TeslaAppSettingsData((string) $this->clientId, $this->clientSecret, (string) $this->domain, $this->regions);
+        return new TeslaAppSettingsData((string) $this->clientId, $this->clientSecret, (string) $this->domain, $this->regions, $this->dailyWakeCap ?? TeslaApp::DEFAULT_DAILY_WAKE_CAP);
     }
 
     #[Assert\Callback]

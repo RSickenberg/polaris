@@ -15,7 +15,7 @@ A single shared app for every Polaris user would put all users' tokens, API bill
 - Two ways to connect, the user picks one: the in-app OAuth flow (authorize, callback, code exchange with the user's client ID and secret), or pasting a refresh token obtained outside Polaris, which Polaris then only refreshes.
 - Polaris can generate the secp256r1 key pair and call the register endpoint (`polaris:tesla:keygen`, `polaris:tesla:register`). The private key never leaves the server.
 - Self-hosted: the user hosts the public key on a domain they own. Hosted platform: the platform serves each user's public key on a per-user subdomain, if Tesla accepts it (open question in the architecture doc).
-- Scopes requested: `openid`, `offline_access`, `vehicle_device_data`; `vehicle_cmds` only if the optional wake ships.
+- Scopes requested: `openid`, `offline_access`, `vehicle_device_data`; `vehicle_cmds`, used only for the `wake_up` of a manual refresh the user confirmed (#32). Never `vehicle_location`.
 - Client secret, private key and tokens are encrypted at rest with a key from Symfony secrets.
 
 ## Consequences

@@ -306,6 +306,14 @@
         <source>error.connect.tesla_failed</source>
         <target>Tesla est injoignable ou n'a pas répondu correctement. Réessayez plus tard.</target>
       </trans-unit>
+      <trans-unit id="form.wake_cap.label">
+        <source>form.wake_cap.label</source>
+        <target>Réveils autorisés par véhicule et par 24 heures</target>
+      </trans-unit>
+      <trans-unit id="form.wake_cap.help">
+        <source>form.wake_cap.help</source>
+        <target>Combien de fois Polaris peut réveiller une de vos voitures quand vous le confirmez lors d’une actualisation manuelle. Chaque réveil est facturé par Tesla. 0 désactive le réveil.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

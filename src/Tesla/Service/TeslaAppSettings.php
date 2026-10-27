@@ -63,6 +63,10 @@ final readonly class TeslaAppSettings
             }
         }
 
+        if ($data->dailyWakeCap < 0 || $data->dailyWakeCap > TeslaApp::MAX_DAILY_WAKE_CAP) {
+            throw TeslaSettingsRejected::wakeCapOutOfRange(TeslaApp::MAX_DAILY_WAKE_CAP);
+        }
+
         $encryptedSecret = '' === ($data->clientSecret ?? '')
             ? $app->getEncryptedClientSecret()
             : $this->encrypter->encrypt((string) $data->clientSecret);
@@ -72,6 +76,7 @@ final readonly class TeslaAppSettings
         }
 
         $app->configure($clientId, $encryptedSecret, $domain, $data->regions);
+        $app->changeDailyWakeCap($data->dailyWakeCap);
         $this->entityManager->flush();
 
         return $app;

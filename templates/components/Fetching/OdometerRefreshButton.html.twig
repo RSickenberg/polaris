@@ -1,12 +1,22 @@
 {% set outcome = this.outcome %}
 {% set until = this.retryAt %}
 {% set polling = this.polling %}
+{% set offer = this.wakeOffer %}
+{% set refusal = this.wakeRefusal %}
+{% set offerStatus = offer is null ? null : offer.status.value %}
+{# Inside a child component tag, `this` is the child: anything taken from this component is set before. #}
+{% set wakeCost = this.wakeCost|format_currency(this.wakeCurrency) %}
+{% set availableAt = refusal is not null ? this.wakeAvailableAt : (offer is null ? null : offer.availableAt) %}
 {# The toast: one element per click and result, so that a poll that shows the same result does not announce it again. #}
 {% set toast = null %}
-{% if until is not null %}
+{% if refusal is not null or offerStatus == 'cap_reached' %}
+    {% set capKey = availableAt is null ? 'wake.disabled' : 'wake.cap_reached' %}
+    {% set key = (refusal ?? offerStatus) == 'cap_reached' ? capKey : 'wake.' ~ (refusal ?? offerStatus) %}
+    {% set toast = {id: 'wake-' ~ this.clicks, variant: 'warning', message: key|trans(availableAt is null ? {} : {time: availableAt|format_time('short', timezone=this.timeZone), zone: availableAt|format_datetime(pattern: 'zzz', timezone: this.timeZone)}, 'fetching')} %}
+{% elseif until is not null %}
     {% set toast = {id: 'limited-' ~ this.clicks, variant: 'warning', message: 'limited.message'|trans({time: until|format_time('short', timezone=this.timeZone), zone: until|format_datetime(pattern: 'zzz', timezone: this.timeZone)}, 'fetching')} %}
-{% elseif outcome is not null and (outcome.value != 'queued' or not polling) %}
-    {% set key = outcome.value == 'queued' ? 'queued_late' : outcome.value %}
+{% elseif outcome is not null and (outcome.settled or not polling) and offerStatus != 'accepted' %}
+    {% set key = outcome.settled ? outcome.value : 'queued_late' %}
     {% set toast = {id: 'result-' ~ this.clicks, variant: outcome.toastVariant, message: ('outcome.' ~ key)|trans(domain='fetching')} %}
 {% endif %}
 <div
@@ -25,8 +35,34 @@
         {{ 'button.label'|trans(domain='fetching') }}
     </twig:Button>
     <p class="sr-only" role="status">
-        {%- if polling -%}{{- 'outcome.queued'|trans(domain='fetching') -}}{%- endif -%}
+        {%- if polling -%}{{- ('outcome.' ~ (outcome is null ? 'queued' : outcome.value))|trans(domain='fetching') -}}{%- endif -%}
     </p>
+    {% if offerStatus == 'scope_missing' %}
+        <a
+            href="{{ path('tesla_reauthorize') }}"
+            data-turbo="false"
+            data-wake-reconnect
+            class="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+        >{{ 'wake.reconnect'|trans(domain='fetching') }}</a>
+    {% endif %}
+    {% if offerStatus == 'accepted' %}
+        <twig:Dialog id="wake-{{ this.vehicleId }}" :open="true" data-wake-dialog>
+            <twig:Dialog:Content :showCloseButton="false">
+                <twig:Dialog:Header>
+                    <twig:Dialog:Title>{{ 'wake.dialog.title'|trans(domain='fetching') }}</twig:Dialog:Title>
+                    <twig:Dialog:Description>{{ 'wake.dialog.description'|trans({cost: wakeCost}, 'fetching') }}</twig:Dialog:Description>
+                </twig:Dialog:Header>
+                <twig:Dialog:Footer>
+                    <twig:Button type="button" variant="outline" data-action="live#action" data-live-action-param="declineWake">
+                        {{ 'wake.dialog.decline'|trans(domain='fetching') }}
+                    </twig:Button>
+                    <twig:Button type="button" data-action="live#action" data-live-action-param="wake">
+                        {{ 'wake.dialog.confirm'|trans(domain='fetching') }}
+                    </twig:Button>
+                </twig:Dialog:Footer>
+            </twig:Dialog:Content>
+        </twig:Dialog>
+    {% endif %}
     {% if toast is not null %}
         <twig:Shared:ToastAnnounce :id="toast.id" :variant="toast.variant" :message="toast.message" />
     {% endif %}
