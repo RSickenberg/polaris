@@ -17,15 +17,15 @@
 {%- set alertVariant = 'danger' == variant ? 'destructive' : 'default' -%}
 <twig:Alert
     variant="{{ alertVariant }}"
-    class="pointer-events-auto pe-10 shadow-lg {{ tone }}"
+    class="pointer-events-auto items-center gap-x-3 rounded-xl px-4 py-4 pe-12 shadow-lg *:[svg]:row-span-1 *:[svg]:translate-y-0 *:[svg]:self-center {{ tone }}"
     data-flash="{{ variant }}"
     data-controller="toast"
     data-toast-delay-value="{{ delay }}"
     data-action="mouseenter->toast#pause mouseleave->toast#resume focusin->toast#pause focusout->toast#resume"
 >
-    <twig:ux:icon name="{{ icon }}" aria-hidden="true" />
-    <twig:Alert:Title data-toast-message>{{ message }}</twig:Alert:Title>
-    <twig:Alert:Action>
+    <twig:ux:icon name="{{ icon }}" aria-hidden="true" class="size-5" />
+    <twig:Alert:Title data-toast-message class="col-start-2 text-sm leading-snug">{{ message }}</twig:Alert:Title>
+    <twig:Alert:Action class="absolute end-3 top-1/2 -translate-y-1/2">
         <twig:Button variant="ghost" size="icon-xs" data-action="toast#dismiss" aria-label="{{ 'toast.dismiss'|trans(domain='shared') }}">
             <twig:ux:icon name="lucide:x" aria-hidden="true" />
         </twig:Button>
