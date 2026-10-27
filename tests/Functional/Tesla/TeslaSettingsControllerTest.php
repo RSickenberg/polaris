@@ -88,7 +88,7 @@ final class TeslaSettingsControllerTest extends WebTestCase
 
         self::assertSelectorTextContains('#token-storage h2', 'How your Tesla tokens are stored');
         self::assertSelectorTextContains('#token-storage', 'libsodium');
-        self::assertSelectorTextContains('#token-storage', 'copy of the database alone is of no use');
+        self::assertSelectorTextContains('#token-storage', 'a copy of the database alone is useless');
         self::assertStringNotContainsString('POLARIS_ENCRYPTION_KEY', (string) $this->client->getResponse()->getContent(), 'How the key is kept is for the installation guide, not for the page.');
         foreach (['encrypted', 'key', 'rotation', 'hidden', 'scopes', 'disconnect', 'audit'] as $section) {
             self::assertSelectorExists('#token-storage [data-storage=' . $section . '] svg[aria-hidden=true]', 'Each paragraph has a glyph: ' . $section);

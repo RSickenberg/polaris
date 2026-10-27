@@ -22,10 +22,10 @@ Requirements: Docker with Compose v2.24 or later.
    openssl rand -base64 32     # for POLARIS_ENCRYPTION_KEY (back it up: without it, stored Tesla secrets are unreadable)
    ```
 
-   **The encryption key.** `POLARIS_ENCRYPTION_KEY` encrypts everything secret that Polaris stores: the tokens of your Tesla account, your Tesla client secret and the private key of your app (libsodium, [ADR 0007](docs/adr/0007-secrets-encrypted-at-rest.md)). Treat it like a password:
-   - Keep it out of the database, out of Git and out of the logs. It lives in `.env.local` (never committed), or in the Symfony vault instead: `make sf ARGS="secrets:set POLARIS_ENCRYPTION_KEY"` (and remove it from `.env.local`).
-   - Back it up with your database backups, but not in the same place: a database dump is useless to anyone without the key, so the two should not travel together.
-   - Do not change it once Tesla is connected. Without the right key the stored values cannot be read, and you would enter your Tesla credentials again, generate a new key pair and register with Tesla again.
+   **The encryption key.** `POLARIS_ENCRYPTION_KEY` encrypts everything secret that Polaris stores (Tesla tokens, client secret, app private key; libsodium, [ADR 0007](docs/adr/0007-secrets-encrypted-at-rest.md)). Treat it like a password:
+   - Keep it in `.env.local` (never committed) or in the Symfony vault (`make sf ARGS="secrets:set POLARIS_ENCRYPTION_KEY"`), never in the database or the logs.
+   - Back it up, but apart from your database dumps.
+   - Do not change it once Tesla is connected: the stored values become unreadable, and you must enter your Tesla credentials, generate a new key pair and register again.
 
 2. Build and start everything, then create your user (the password is asked twice, hidden, and needs 12 characters):
 
