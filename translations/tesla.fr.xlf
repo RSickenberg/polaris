@@ -336,7 +336,7 @@
       </trans-unit>
       <trans-unit id="storage.key.text">
         <source>storage.key.text</source>
-        <target>La clé de chiffrement vient de la variable d’environnement POLARIS_ENCRYPTION_KEY ou du coffre Symfony. Sans elle, personne ne peut lire les valeurs stockées : sauvegardez-la avec votre base.</target>
+        <target>La clé qui les déverrouille est gardée à part des données : une copie de la base seule ne sert à rien. Le guide d’installation explique comment la protéger.</target>
       </trans-unit>
       <trans-unit id="storage.rotation.title">
         <source>storage.rotation.title</source>

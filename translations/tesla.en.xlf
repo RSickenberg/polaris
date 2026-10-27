@@ -336,7 +336,7 @@
       </trans-unit>
       <trans-unit id="storage.key.text">
         <source>storage.key.text</source>
-        <target>The encryption key comes from the POLARIS_ENCRYPTION_KEY environment variable or the Symfony vault. Without it nobody can read the stored values, so back it up with your database.</target>
+        <target>The key that unlocks them is kept apart from the data, so a copy of the database alone is of no use. The installation guide says how to keep it safe.</target>
       </trans-unit>
       <trans-unit id="storage.rotation.title">
         <source>storage.rotation.title</source>
