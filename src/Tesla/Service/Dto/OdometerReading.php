@@ -13,9 +13,13 @@ use Polaris\Shared\Domain\Distance;
  */
 final readonly class OdometerReading
 {
+    /**
+     * @param array<array-key, mixed> $payload the `response` of the answer without its location, kept for later use
+     */
     public function __construct(
         public Distance $odometer,
         public CarbonImmutable $readAt,
+        public array $payload = [],
     ) {
     }
 }

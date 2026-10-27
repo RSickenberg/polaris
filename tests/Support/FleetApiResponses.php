@@ -81,6 +81,8 @@ final class FleetApiResponses
             'response' => [
                 'state' => 'online',
                 'charge_state' => ['battery_level' => 76, 'timestamp' => self::VEHICLE_DATA_TIMESTAMP_MS],
+                // Fake coordinates: an answer can carry them even though Polaris never asks for the location.
+                'drive_state' => ['latitude' => 12.3456, 'longitude' => 65.4321, 'heading' => 90, 'shift_state' => null],
                 'vehicle_state' => $vehicleState,
             ],
         ]);

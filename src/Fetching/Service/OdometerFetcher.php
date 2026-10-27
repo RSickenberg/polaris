@@ -18,6 +18,7 @@ use Polaris\Fetching\Repository\FetchSlotRunRepository;
 use Polaris\Fetching\Repository\RefreshAttemptRepository;
 use Polaris\Reading\Service\Enum\RecordOutcome;
 use Polaris\Reading\Service\OdometerReadingService;
+use Polaris\Reading\Service\VehicleDataRecorder;
 use Polaris\Tesla\Entity\TeslaApp;
 use Polaris\Tesla\Service\Enum\NoReadingReason;
 use Polaris\Tesla\Service\Enum\VehicleState;
@@ -84,6 +85,7 @@ final readonly class OdometerFetcher
         private ManualRefreshLimit $limit,
         private WakeCap $wakeCap,
         private OdometerReadingService $readings,
+        private VehicleDataRecorder $snapshots,
         private MessageBusInterface $bus,
         private ClockInterface $clock,
         private LoggerInterface $logger,
@@ -204,6 +206,9 @@ final readonly class OdometerFetcher
 
             return $this->notOnline($message, $run, $attempt, $result->reason ?? NoReadingReason::Unavailable, $attempts, $now);
         }
+
+        // What the car answered is kept whatever happens to the odometer value (stored, unchanged or rejected).
+        $this->snapshots->record($vehicle, $result->reading->readAt, $now, $result->reading->payload);
 
         $recording = $this->readings->recordFromApi($vehicle, $result->reading->readAt, $result->reading->odometer);
 

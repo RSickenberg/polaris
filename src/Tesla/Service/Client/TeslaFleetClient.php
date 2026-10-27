@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Polaris\Shared\Domain\Distance;
 use Polaris\Tesla\Domain\FleetRegion;
+use Polaris\Tesla\Domain\VehicleDataRedactor;
 use Polaris\Tesla\Entity\OAuthToken;
 use Polaris\Tesla\Entity\TeslaApp;
 use Polaris\Tesla\Service\Dto\OdometerReading;
@@ -135,7 +136,7 @@ final readonly class TeslaFleetClient implements VehicleClient
             ? CarbonImmutable::createFromTimestampMsUTC($timestamp)
             : CarbonImmutable::instance($this->clock->now())->utc();
 
-        return new OdometerReading($odometer, $readAt);
+        return new OdometerReading($odometer, $readAt, VehicleDataRedactor::withoutLocation($response));
     }
 
     /**

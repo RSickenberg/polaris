@@ -16,6 +16,7 @@ use Polaris\Fetching\Service\ManualRefreshLimit;
 use Polaris\Fetching\Service\OdometerFetcher;
 use Polaris\Reading\Domain\ReadingSource;
 use Polaris\Reading\Entity\OdometerReading;
+use Polaris\Reading\Entity\VehicleDataSnapshot;
 use Polaris\Tesla\Service\Exception\FleetApiError;
 use Polaris\Tests\Support\FleetApiResponses;
 use Polaris\Tests\Support\SignsIn;
@@ -106,6 +107,38 @@ final class OdometerFetcherTest extends KernelTestCase
         self::assertSame(SlotRunStatus::Stored, $this->slotRun()->getStatus());
         self::assertSame(1, $this->slotRun()->getAttempts());
         self::assertSame([], $this->queued());
+    }
+
+    public function testWhatTheCarAnsweredIsKeptWithoutItsLocationOnceForEachInstant(): void
+    {
+        $this->answerWith('online', 100.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS);
+        $this->fetch(0);
+        $this->answerWith('online', 100.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS);
+        $this->fetch(0, 1);
+        $this->answerWith('online', 100.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS + 3_600_000);
+        $this->fetch(0, 2);
+
+        $this->entityManager()->clear();
+        $snapshots = $this->entityManager()->getRepository(VehicleDataSnapshot::class)->findBy([], ['capturedAt' => 'ASC']);
+        self::assertCount(2, $snapshots, 'The same instant twice is one row; an unchanged odometer at a new instant is a new one.');
+        self::assertSame('2026-10-24T17:53:45+00:00', $snapshots[0]->getCapturedAt()->toIso8601String());
+        $payload = $snapshots[0]->getPayload();
+        $charge = $payload['charge_state'] ?? null;
+        $vehicle = $payload['vehicle_state'] ?? null;
+        self::assertIsArray($charge);
+        self::assertIsArray($vehicle);
+        self::assertSame(76, $charge['battery_level'] ?? null);
+        self::assertEquals(100, $vehicle['odometer'] ?? null, 'JSON does not tell 100 from 100.0.');
+        self::assertSame(['shift_state' => null], $payload['drive_state'] ?? null);
+        self::assertStringNotContainsString('12.3456', json_encode($payload, \JSON_THROW_ON_ERROR));
+    }
+
+    public function testNothingIsKeptWhenTheCarIsNotRead(): void
+    {
+        $this->answerWith('asleep');
+        $this->fetch(0);
+
+        self::assertSame([], $this->entityManager()->getRepository(VehicleDataSnapshot::class)->findAll());
     }
 
     public function testAnOnlineCarWithTheSameValueIsNotStoredAgain(): void
