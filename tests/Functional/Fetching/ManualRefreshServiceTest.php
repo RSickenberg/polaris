@@ -20,6 +20,7 @@ use Polaris\Fetching\Service\ManualRefreshLimit;
 use Polaris\Fetching\Service\ManualRefreshService;
 use Polaris\Fetching\Service\WakeCap;
 use Polaris\Tesla\Entity\TeslaApp;
+use Polaris\Tesla\Service\Enum\NoReadingReason;
 use Polaris\Tesla\Service\TeslaAppSettings;
 use Polaris\Tesla\Service\TeslaVehicleWaker;
 use Polaris\Tests\Support\SignsIn;
@@ -186,6 +187,31 @@ final class ManualRefreshServiceTest extends KernelTestCase
         self::assertFalse($service->request($vehicle)->isAccepted(), 'The hourly limit still applies after a wake.');
     }
 
+    public function testAnOfflineCarCanBeWokenToo(): void
+    {
+        $this->connect();
+        $service = $this->service();
+        $attempt = $this->asleepAttempt($service);
+        $attempt->settle(RefreshOutcome::Offline, $this->now());
+        $this->entityManager()->flush();
+
+        $result = $service->requestWake($this->vehicle, $attempt->getId()->toRfc4122());
+
+        self::assertTrue($result->isAccepted());
+        self::assertSame(RefreshOutcome::Queued, $this->entityManager()->find(RefreshAttempt::class, $attempt->getId())?->getOutcome());
+    }
+
+    public function testAWakeThatTeslaCouldNotDeliverIsNotOfferedAgain(): void
+    {
+        $this->connect();
+        $service = $this->service();
+        $attempt = $this->asleepAttempt($service);
+        $attempt->settle(RefreshOutcome::WakeFailed, $this->now());
+        $this->entityManager()->flush();
+
+        self::assertSame(WakeRequestStatus::NothingToWake, $service->requestWake($this->vehicle, $attempt->getId()->toRfc4122())->status);
+    }
+
     public function testAWakeIsRefusedUnlessTheRefreshFoundTheCarAsleepAndRecently(): void
     {
         $this->connect();
@@ -229,7 +255,7 @@ final class ManualRefreshServiceTest extends KernelTestCase
         $app = $this->connect();
         $app->changeDailyWakeCap(1);
         $earlier = new RefreshAttempt($this->vehicle, CarbonImmutable::parse('2026-10-26 02:00:00', 'UTC'));
-        $earlier->markWoken(CarbonImmutable::parse('2026-10-26 02:00:00', 'UTC'));
+        $earlier->markWoken(CarbonImmutable::parse('2026-10-26 02:00:00', 'UTC'), NoReadingReason::Asleep);
         $earlier->settle(RefreshOutcome::Stored, CarbonImmutable::parse('2026-10-26 02:01:00', 'UTC'));
         $this->entityManager()->persist($earlier);
         $this->entityManager()->flush();
@@ -265,7 +291,7 @@ final class ManualRefreshServiceTest extends KernelTestCase
         $this->connect();
         $service = $this->service();
         $waking = new RefreshAttempt($this->vehicle, $this->now()->subSeconds(20));
-        $waking->markWoken($this->now()->subSeconds(20));
+        $waking->markWoken($this->now()->subSeconds(20), NoReadingReason::Asleep);
         $this->entityManager()->persist($waking);
         $this->entityManager()->flush();
         $attempt = $this->asleepAttempt($service);

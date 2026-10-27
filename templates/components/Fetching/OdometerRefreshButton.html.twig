@@ -5,6 +5,7 @@
 {% set refusal = this.wakeRefusal %}
 {% set offerStatus = offer is null ? null : offer.status.value %}
 {# Inside a child component tag, `this` is the child: anything taken from this component is set before. #}
+{% set dialogKey = outcome is not null and outcome.value == 'offline' ? 'wake.dialog_offline' : 'wake.dialog' %}
 {% set wakeCost = this.wakeCost|format_currency(this.wakeCurrency) %}
 {% set availableAt = refusal is not null ? this.wakeAvailableAt : (offer is null ? null : offer.availableAt) %}
 {# The toast: one element per click and result, so that a poll that shows the same result does not announce it again. #}
@@ -49,8 +50,8 @@
         <twig:Dialog id="wake-{{ this.vehicleId }}" :open="true" data-wake-dialog>
             <twig:Dialog:Content :showCloseButton="false">
                 <twig:Dialog:Header>
-                    <twig:Dialog:Title>{{ 'wake.dialog.title'|trans(domain='fetching') }}</twig:Dialog:Title>
-                    <twig:Dialog:Description>{{ 'wake.dialog.description'|trans({cost: wakeCost}, 'fetching') }}</twig:Dialog:Description>
+                    <twig:Dialog:Title>{{ (dialogKey ~ '.title')|trans(domain='fetching') }}</twig:Dialog:Title>
+                    <twig:Dialog:Description>{{ (dialogKey ~ '.description')|trans({cost: wakeCost}, 'fetching') }}</twig:Dialog:Description>
                 </twig:Dialog:Header>
                 <twig:Dialog:Footer>
                     <twig:Button type="button" variant="outline" data-action="live#action" data-live-action-param="declineWake">

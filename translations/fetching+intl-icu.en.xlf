@@ -118,6 +118,18 @@
         <source>wake.rate_limited</source>
         <target>The car is asleep. The car was read less than an hour ago, so a wake would not be followed by a read. You can refresh and wake it again at {time} ({zone}).</target>
       </trans-unit>
+      <trans-unit id="wake.dialog_offline.title">
+        <source>wake.dialog_offline.title</source>
+        <target>Your car is offline</target>
+      </trans-unit>
+      <trans-unit id="wake.dialog_offline.description">
+        <source>wake.dialog_offline.description</source>
+        <target>Your car is offline. Tesla may be able to wake it, but this is not guaranteed. Try to wake it to get the current mileage? Tesla bills each wake about {cost}, even if the car does not answer.</target>
+      </trans-unit>
+      <trans-unit id="outcome.wake_failed">
+        <source>outcome.wake_failed</source>
+        <target>Tesla could not reach the car to wake it: the last reading is kept.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

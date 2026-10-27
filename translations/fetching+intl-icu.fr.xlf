@@ -118,6 +118,18 @@
         <source>wake.rate_limited</source>
         <target>La voiture dort. Elle a été lue il y a moins d’une heure, un réveil ne serait donc pas suivi d’une lecture. Vous pourrez actualiser et la réveiller à nouveau à {time} ({zone}).</target>
       </trans-unit>
+      <trans-unit id="wake.dialog_offline.title">
+        <source>wake.dialog_offline.title</source>
+        <target>Votre voiture est hors ligne</target>
+      </trans-unit>
+      <trans-unit id="wake.dialog_offline.description">
+        <source>wake.dialog_offline.description</source>
+        <target>Votre voiture est hors ligne. Tesla peut peut-être la réveiller, sans garantie. Essayer de la réveiller pour obtenir le kilométrage actuel ? Tesla facture chaque réveil environ {cost}, même si la voiture ne répond pas.</target>
+      </trans-unit>
+      <trans-unit id="outcome.wake_failed">
+        <source>outcome.wake_failed</source>
+        <target>Tesla n’a pas pu joindre la voiture pour la réveiller : le dernier relevé est conservé.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

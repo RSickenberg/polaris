@@ -14,6 +14,7 @@ use Polaris\Fetching\Message\FetchOdometerMessage;
 use Polaris\Fetching\Service\ManualRefreshLimit;
 use Polaris\Fetching\Twig\Components\OdometerRefreshButton;
 use Polaris\Tesla\Entity\TeslaApp;
+use Polaris\Tesla\Service\Enum\NoReadingReason;
 use Polaris\Tests\Support\SignsIn;
 use Polaris\Tests\Support\TeslaFixtures;
 use Polaris\Vehicle\Domain\Vin;
@@ -159,6 +160,23 @@ final class OdometerRefreshButtonTest extends WebTestCase
         self::assertCount(1, $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(), 'A wake is not a new refresh.');
     }
 
+    public function testAnOfflineCarIsOfferedTheWakeWithoutAPromise(): void
+    {
+        $this->connect();
+        $component = $this->component($this->mine);
+        $component->call('refresh');
+        $this->settle(RefreshOutcome::Offline);
+
+        $html = (string) $component->refresh()->render();
+
+        self::assertStringContainsString('data-wake-dialog', $html);
+        self::assertStringContainsString('Your car is offline', $html);
+        self::assertStringContainsString('not guaranteed', $html);
+        self::assertStringContainsString('$0.02', $html);
+        self::assertStringContainsString('Wake and refresh', $html);
+        self::assertStringNotContainsString('Your car is asleep', $html);
+    }
+
     public function testDecliningTheWakeKeepsTheLastReadingAndTheDialogStaysClosed(): void
     {
         $this->connect();
@@ -193,7 +211,7 @@ final class OdometerRefreshButtonTest extends WebTestCase
     {
         $this->connect()->changeDailyWakeCap(1);
         $earlier = new RefreshAttempt($this->mine, CarbonImmutable::now('UTC')->subHours(2));
-        $earlier->markWoken(CarbonImmutable::now('UTC')->subHours(2));
+        $earlier->markWoken(CarbonImmutable::now('UTC')->subHours(2), NoReadingReason::Asleep);
         $earlier->settle(RefreshOutcome::Stored, CarbonImmutable::now('UTC')->subHours(2));
         $this->entityManager()->persist($earlier);
         $this->entityManager()->flush();
@@ -231,6 +249,7 @@ final class OdometerRefreshButtonTest extends WebTestCase
         yield 'timeout' => [RefreshOutcome::WakeTimeout, 'warning', 'did not come online within 90 seconds'];
         yield 'scope refused' => [RefreshOutcome::WakeScopeMissing, 'danger', 'Tesla refused the wake'];
         yield 'cap' => [RefreshOutcome::WakeCapReached, 'warning', 'already woken as often as allowed'];
+        yield 'wake failed' => [RefreshOutcome::WakeFailed, 'warning', 'Tesla could not reach the car to wake it'];
         yield 'limited' => [RefreshOutcome::Limited, 'warning', 'Another refresh read the car first'];
     }
 

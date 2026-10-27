@@ -73,6 +73,11 @@ enum RefreshOutcome: string
     case Waking = 'waking';
 
     /**
+     * Tesla could not reach the car to send the wake (HTTP 408): nothing was counted and the last reading stays.
+     */
+    case WakeFailed = 'wake_failed';
+
+    /**
      * The car did not come online in time after a wake: the last reading stays.
      */
     case WakeTimeout = 'wake_timeout';
@@ -98,7 +103,7 @@ enum RefreshOutcome: string
         return match ($this) {
             self::Stored => 'success',
             self::Queued, self::Waking, self::Unchanged => 'info',
-            self::Asleep, self::Offline, self::Unavailable, self::Busy, self::Limited, self::WakeTimeout, self::WakeCapReached => 'warning',
+            self::Asleep, self::Offline, self::Unavailable, self::Busy, self::Limited, self::WakeTimeout, self::WakeFailed, self::WakeCapReached => 'warning',
             self::NotConnected, self::Rejected, self::Failed, self::WakeScopeMissing => 'danger',
         };
     }

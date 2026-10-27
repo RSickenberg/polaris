@@ -90,7 +90,7 @@ final readonly class ManualRefreshService
     }
 
     /**
-     * The user confirmed waking the car a refresh found asleep. The cap is checked here for a quick answer and again
+     * The user confirmed waking the car a refresh found asleep or offline. The cap is checked here for a quick answer and again
      * by the fetch, which counts a wake when wake_up is actually sent.
      *
      * @throws ORMException
@@ -129,7 +129,7 @@ final readonly class ManualRefreshService
     {
         $expired = $attempt->getUpdatedAt()->addSeconds(WakeWindow::CONFIRM_SECONDS) < $now;
 
-        if ($expired || RefreshOutcome::Asleep !== $attempt->getOutcome()) {
+        if ($expired || !\in_array($attempt->getOutcome(), [RefreshOutcome::Asleep, RefreshOutcome::Offline], true)) {
             return WakeRequestResult::refused(WakeRequestStatus::NothingToWake);
         }
 

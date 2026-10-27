@@ -16,6 +16,7 @@ use Polaris\Fetching\Service\OdometerFetcher;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Tesla\Entity\OAuthToken;
 use Polaris\Tesla\Entity\TeslaApp;
+use Polaris\Tesla\Service\Enum\NoReadingReason;
 use Polaris\Tests\Support\FleetApiResponses;
 use Polaris\Tests\Support\SignsIn;
 use Polaris\Tests\Support\TeslaFixtures;
@@ -154,14 +155,46 @@ final class WakeFetchTest extends KernelTestCase
         self::assertSame(RefreshOutcome::Stored, $this->outcomeOf($attempt));
     }
 
-    public function testACarThatTeslaCannotReachForTheWakeIsOfflineAndTheWakeIsNotCounted(): void
+    public function testAnOfflineCarIsWokenTooAndWhatItWasBeforeIsRecorded(): void
+    {
+        $this->state = 'offline';
+        $attempt = $this->newAttempt();
+
+        self::assertSame(SlotRunStatus::Retrying, $this->fetch($attempt, true));
+
+        self::assertSame(RefreshOutcome::Waking, $this->outcomeOf($attempt));
+        self::assertSame(NoReadingReason::Offline, $attempt->getWokeFrom());
+        self::assertContains('POST https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . FleetApiResponses::VIN . '/wake_up', $this->requests);
+
+        // The wake works: the car is online ten seconds later.
+        $this->state = 'online';
+        self::mockTime('2026-10-27 20:00:10 UTC');
+        self::assertSame(SlotRunStatus::Stored, $this->process($this->lastQueued()));
+        self::assertSame(RefreshOutcome::Stored, $this->outcomeOf($attempt));
+        self::assertSame(NoReadingReason::Offline, $attempt->getWokeFrom(), 'The state before the wake stays, so the result can be read against it.');
+    }
+
+    public function testAnOfflineCarThatDoesNotAnswerTheWakeEndsInATimeoutWithItsStateRecorded(): void
+    {
+        $this->state = 'offline';
+        $attempt = $this->newAttempt();
+        $this->fetch($attempt, true);
+        self::mockTime('2026-10-27 20:01:30 UTC');
+
+        self::assertSame(SlotRunStatus::Skipped, $this->process($this->lastQueued()));
+
+        self::assertSame(RefreshOutcome::WakeTimeout, $this->outcomeOf($attempt));
+        self::assertSame(NoReadingReason::Offline, $attempt->getWokeFrom());
+    }
+
+    public function testACarThatTeslaCannotReachForTheWakeFailsTheWakeAndIsNotCounted(): void
     {
         $this->wakeStatus = 408;
         $attempt = $this->newAttempt();
 
         self::assertSame(SlotRunStatus::Skipped, $this->fetch($attempt, true));
 
-        self::assertSame(RefreshOutcome::Offline, $this->outcomeOf($attempt));
+        self::assertSame(RefreshOutcome::WakeFailed, $this->outcomeOf($attempt));
         self::assertNull($attempt->getWokeAt());
         self::assertSame([], $this->queued());
     }
@@ -268,12 +301,25 @@ final class WakeFetchTest extends KernelTestCase
         }
     }
 
+    public function testAScheduledFetchNeverWakesAnOfflineCarEither(): void
+    {
+        $this->state = 'offline';
+        $slot = CarbonImmutable::parse(self::NOW, 'UTC');
+        $this->entityManager()->persist(new FetchSlotRun($this->vehicle, $slot, $slot));
+        $this->entityManager()->flush();
+
+        self::getContainer()->get(OdometerFetcher::class)->fetch(new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), $slot->getTimestamp(), 0, null, true));
+
+        self::assertCount(1, $this->requests);
+        self::assertStringStartsWith('GET ', $this->requests[0]);
+    }
+
     public function testAScheduledFetchWaitsWhileAWakeIsPendingThenRunsAgain(): void
     {
         $slot = CarbonImmutable::parse(self::NOW, 'UTC');
         $this->entityManager()->persist(new FetchSlotRun($this->vehicle, $slot, $slot));
         $attempt = $this->newAttempt();
-        $attempt->markWoken(CarbonImmutable::parse(self::NOW, 'UTC')->subSeconds(30));
+        $attempt->markWoken(CarbonImmutable::parse(self::NOW, 'UTC')->subSeconds(30), NoReadingReason::Asleep);
         $this->entityManager()->flush();
         $fetcher = self::getContainer()->get(OdometerFetcher::class);
         $message = new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), $slot->getTimestamp(), 2);
@@ -299,7 +345,7 @@ final class WakeFetchTest extends KernelTestCase
     public function testAManualRefreshWhileAWakeIsPendingIsBusy(): void
     {
         $waking = $this->newAttempt();
-        $waking->markWoken(CarbonImmutable::parse(self::NOW, 'UTC')->subSeconds(30));
+        $waking->markWoken(CarbonImmutable::parse(self::NOW, 'UTC')->subSeconds(30), NoReadingReason::Asleep);
         $this->entityManager()->flush();
         $other = $this->newAttempt();
 
@@ -334,7 +380,7 @@ final class WakeFetchTest extends KernelTestCase
     private function wokeAgo(int $seconds): void
     {
         $earlier = new RefreshAttempt($this->vehicle, CarbonImmutable::parse(self::NOW, 'UTC')->subSeconds($seconds));
-        $earlier->markWoken(CarbonImmutable::parse(self::NOW, 'UTC')->subSeconds($seconds));
+        $earlier->markWoken(CarbonImmutable::parse(self::NOW, 'UTC')->subSeconds($seconds), NoReadingReason::Asleep);
         $earlier->settle(RefreshOutcome::Stored, CarbonImmutable::parse(self::NOW, 'UTC')->subSeconds($seconds));
         $this->entityManager()->persist($earlier);
         $this->entityManager()->flush();

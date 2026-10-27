@@ -197,11 +197,16 @@ final readonly class OdometerFetcher
         }
 
         if (null === $result->reading) {
+            // An offline car is offered the wake too: whether Tesla can wake it is not documented, so what
+            // happens is recorded on the attempt (see RefreshAttempt::$wokeFrom).
+            $wakeable = [NoReadingReason::Asleep, NoReadingReason::Offline];
+
             if (null !== $attempt
-                && NoReadingReason::Asleep === $result->reason
                 && $message->asksForWake()
+                && null !== $result->reason
+                && \in_array($result->reason, $wakeable, true)
             ) {
-                return $this->wake($message, $vehicle, $app, $attempt, $now);
+                return $this->wake($message, $vehicle, $app, $attempt, $now, $result->reason);
             }
 
             return $this->notOnline($message, $run, $attempt, $result->reason ?? NoReadingReason::Unavailable, $attempts, $now);
@@ -259,7 +264,7 @@ final readonly class OdometerFetcher
      * @throws ORMException
      * @throws ExceptionInterface
      */
-    private function wake(FetchOdometerMessage $message, Vehicle $vehicle, TeslaApp $app, RefreshAttempt $attempt, CarbonImmutable $now): SlotRunStatus
+    private function wake(FetchOdometerMessage $message, Vehicle $vehicle, TeslaApp $app, RefreshAttempt $attempt, CarbonImmutable $now, NoReadingReason $from): SlotRunStatus
     {
         if (WakeAccess::ScopeMissing === $this->waker->access($app)) {
             $this->logger->info('Wake not sent: the connection lacks the vehicle_cmds scope.', ['vehicle' => $message->vehicleId]);
@@ -301,7 +306,12 @@ final readonly class OdometerFetcher
             return $this->stop($attempt, RefreshOutcome::WakeScopeMissing, $now);
         } catch (FleetApiError $failure) {
             if ($failure->isVehicleNotOnline()) {
-                return $this->stop($attempt, RefreshOutcome::Offline, $now);
+                $this->logger->info('Wake not delivered: Tesla could not reach the car.', [
+                    'vehicle' => $message->vehicleId,
+                    'state_before' => $from->value,
+                ]);
+
+                return $this->stop($attempt, RefreshOutcome::WakeFailed, $now);
             }
 
             $attempt->settle(RefreshOutcome::Failed, $now);
@@ -310,8 +320,14 @@ final readonly class OdometerFetcher
             throw $failure;
         }
 
-        $attempt->markWoken($now);
+        $attempt->markWoken($now, $from);
         $this->entityManager->flush();
+
+        $this->logger->info('Wake sent.', [
+            'vehicle' => $message->vehicleId,
+            'state_before' => $from->value,
+            'woken_today' => $cap->used + 1,
+        ]);
 
         $this->bus->dispatch(
             $message->wokenUntil(WakeWindow::deadline($now)->getTimestamp()),
@@ -339,6 +355,12 @@ final readonly class OdometerFetcher
 
         try {
             if ($this->waker->isOnline($app, $vehicle->getVin())) {
+                $this->logger->info('The car came online after the wake.', [
+                    'vehicle' => $message->vehicleId,
+                    'state_before' => $attempt->getWokeFrom()?->value,
+                    'seconds_after_wake' => $this->secondsSinceWake($attempt, $now),
+                ]);
+
                 return null;
             }
         } catch (TeslaNotConnected $notConnected) {
@@ -358,7 +380,11 @@ final readonly class OdometerFetcher
         }
 
         if (WakeWindow::isOver((int) $message->wakeDeadline, $now)) {
-            $this->logger->info('The car did not come online after the wake.', ['vehicle' => $message->vehicleId]);
+            $this->logger->info('The car did not come online after the wake.', [
+                'vehicle' => $message->vehicleId,
+                'state_before' => $attempt->getWokeFrom()?->value,
+                'seconds_after_wake' => $this->secondsSinceWake($attempt, $now),
+            ]);
 
             return $this->stop($attempt, RefreshOutcome::WakeTimeout, $now);
         }
@@ -366,6 +392,13 @@ final readonly class OdometerFetcher
         $this->bus->dispatch($message, [new DelayStamp(WakeWindow::POLL_INTERVAL_SECONDS * 1000)]);
 
         return SlotRunStatus::Retrying;
+    }
+
+    private function secondsSinceWake(RefreshAttempt $attempt, CarbonImmutable $now): ?int
+    {
+        $wokeAt = $attempt->getWokeAt();
+
+        return null === $wokeAt ? null : $now->getTimestamp() - $wokeAt->getTimestamp();
     }
 
     /**
