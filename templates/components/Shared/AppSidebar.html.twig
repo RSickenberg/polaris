@@ -65,18 +65,18 @@
                         <twig:ux:icon name="lucide:chevrons-up-down" class="ms-auto size-4" aria-hidden="true" />
                     </twig:Sidebar:MenuButton>
                 </twig:DropdownMenu:Trigger>
-                <twig:DropdownMenu:Content class="w-56">
-                    <twig:DropdownMenu:Item as="a" href="{{ path('account_settings') }}" {{ ...('account_settings' == route ? {'aria-current': 'page'} : {}) }}>
+                <twig:DropdownMenu:Content class="flex w-56 flex-col gap-1 p-1.5">
+                    <twig:DropdownMenu:Item as="a" class="py-2" href="{{ path('account_settings') }}" {{ ...('account_settings' == route ? {'aria-current': 'page'} : {}) }}>
                         <twig:ux:icon name="lucide:settings" aria-hidden="true" />
                         {{ 'account.settings'|trans(domain='shared') }}
                     </twig:DropdownMenu:Item>
-                    <twig:DropdownMenu:Item as="a" href="{{ path('tesla_settings') }}" {{ ...(route in teslaRoutes ? {'aria-current': 'page'} : {}) }}>
+                    <twig:DropdownMenu:Item as="a" class="py-2" href="{{ path('tesla_settings') }}" {{ ...(route in teslaRoutes ? {'aria-current': 'page'} : {}) }}>
                         <twig:ux:icon name="lucide:key-round" aria-hidden="true" />
                         {{ 'account.tesla'|trans(domain='shared') }}
                     </twig:DropdownMenu:Item>
                     <twig:DropdownMenu:Separator />
                     {# A full page load, so that the session ends and the next page is the login. #}
-                    <twig:DropdownMenu:Item as="a" href="{{ logout_path() }}" data-turbo="false">
+                    <twig:DropdownMenu:Item as="a" class="py-2" href="{{ logout_path() }}" data-turbo="false">
                         <twig:ux:icon name="lucide:log-out" aria-hidden="true" />
                         {{ 'account.logout'|trans(domain='shared') }}
                     </twig:DropdownMenu:Item>

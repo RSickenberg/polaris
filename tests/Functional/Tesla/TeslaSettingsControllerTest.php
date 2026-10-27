@@ -57,6 +57,8 @@ final class TeslaSettingsControllerTest extends WebTestCase
 
         self::assertSelectorExists('a[href="/settings/tesla"][role=menuitem][aria-current=page]');
         self::assertSelectorNotExists('a[href="/settings"][role=menuitem][aria-current]');
+        self::assertSelectorExists('[data-slot=dropdown-menu-content].flex.flex-col.gap-1', 'The items of the account menu are spaced.');
+        self::assertSelectorExists('[data-slot=dropdown-menu-content] a[href="/settings/tesla"].py-2');
         self::assertSelectorNotExists('main .max-w-3xl, #main-content .max-w-3xl');
         self::assertCount(0, $crawler->filter('[class*="max-w-3xl"]'));
 
