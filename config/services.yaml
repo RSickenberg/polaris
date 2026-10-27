@@ -12,6 +12,9 @@ parameters:
     # each retry. Tests set it to 0.
     polaris.tesla.retry_delay_ms: 500
 
+    # Where the source of Polaris can be read, linked from the page that explains how the Tesla tokens are stored.
+    polaris.source_url: 'https://github.com/RSickenberg/polaris'
+
     # What Tesla bills for one wake_up (50 requests per USD, so 0.02), shown in the confirmation dialog.
     # Not a rule of the app: Tesla sets the price (https://developer.tesla.com/docs/fleet-api/billing-and-limits).
     polaris.tesla.wake_cost: 0.02

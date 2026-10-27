@@ -5,6 +5,8 @@ twig:
     globals:
         # The language switcher lists them.
         enabled_locales: '%kernel.enabled_locales%'
+        # The pages that explain how secrets are handled link to the code.
+        polaris_source_url: '%polaris.source_url%'
 
 when@test:
     twig:

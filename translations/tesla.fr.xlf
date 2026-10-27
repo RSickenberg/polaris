@@ -314,6 +314,90 @@
         <source>form.wake_cap.help</source>
         <target>Combien de fois Polaris peut réveiller une de vos voitures quand vous le confirmez lors d’une actualisation manuelle. Chaque réveil est facturé par Tesla. 0 désactive le réveil.</target>
       </trans-unit>
+      <trans-unit id="storage.title">
+        <source>storage.title</source>
+        <target>Comment vos jetons Tesla sont stockés</target>
+      </trans-unit>
+      <trans-unit id="storage.description">
+        <source>storage.description</source>
+        <target>Polaris conserve des secrets de votre compte Tesla. Voici ce qu’il en advient, et où le vérifier dans le code.</target>
+      </trans-unit>
+      <trans-unit id="storage.encrypted.title">
+        <source>storage.encrypted.title</source>
+        <target>Chiffrés avant d’être enregistrés.</target>
+      </trans-unit>
+      <trans-unit id="storage.encrypted.text">
+        <source>storage.encrypted.text</source>
+        <target>Le jeton d’accès, le jeton d’actualisation, le secret client et la clé privée de votre application sont chiffrés avec libsodium (XSalsa20-Poly1305, un nonce aléatoire par valeur) avant d’atteindre la base de données. Une copie de la base seule ne montre que du texte chiffré illisible.</target>
+      </trans-unit>
+      <trans-unit id="storage.key.title">
+        <source>storage.key.title</source>
+        <target>La clé n’est pas dans la base de données.</target>
+      </trans-unit>
+      <trans-unit id="storage.key.text">
+        <source>storage.key.text</source>
+        <target>La clé de chiffrement vient de la variable d’environnement POLARIS_ENCRYPTION_KEY ou du coffre Symfony. Sans elle, personne ne peut lire les valeurs stockées : sauvegardez-la avec votre base.</target>
+      </trans-unit>
+      <trans-unit id="storage.rotation.title">
+        <source>storage.rotation.title</source>
+        <target>Un jeton d’actualisation ne sert qu’une fois.</target>
+      </trans-unit>
+      <trans-unit id="storage.rotation.text">
+        <source>storage.rotation.text</source>
+        <target>Tesla le remplace à chaque usage. Polaris enregistre la nouvelle paire sous verrou avant d’utiliser le nouveau jeton d’accès : deux requêtes ne peuvent jamais dépenser le même.</target>
+      </trans-unit>
+      <trans-unit id="storage.hidden.title">
+        <source>storage.hidden.title</source>
+        <target>Jamais affichés, jamais journalisés.</target>
+      </trans-unit>
+      <trans-unit id="storage.hidden.text">
+        <source>storage.hidden.text</source>
+        <target>Les jetons n’apparaissent dans aucune page, sont exclus des sessions et de la sérialisation, et sont masqués dans les messages d’erreur.</target>
+      </trans-unit>
+      <trans-unit id="storage.scopes.title">
+        <source>storage.scopes.title</source>
+        <target>Seulement le nécessaire.</target>
+      </trans-unit>
+      <trans-unit id="storage.scopes.text">
+        <source>storage.scopes.text</source>
+        <target>Polaris demande la portée des données du véhicule, et celle des commandes uniquement pour réveiller votre voiture quand vous le confirmez. Il ne demande jamais votre position.</target>
+      </trans-unit>
+      <trans-unit id="storage.disconnect.title">
+        <source>storage.disconnect.title</source>
+        <target>Vous pouvez les supprimer.</target>
+      </trans-unit>
+      <trans-unit id="storage.disconnect.text">
+        <source>storage.disconnect.text</source>
+        <target>Se déconnecter supprime les deux jetons de la base de données. Révoquez Polaris dans votre compte Tesla pour les annuler aussi côté Tesla.</target>
+      </trans-unit>
+      <trans-unit id="storage.audit.title">
+        <source>storage.audit.title</source>
+        <target>Ne nous croyez pas sur parole.</target>
+      </trans-unit>
+      <trans-unit id="storage.audit.text">
+        <source>storage.audit.text</source>
+        <target>Polaris est open source. Lisez le code qui manipule vos jetons :</target>
+      </trans-unit>
+      <trans-unit id="storage.source.encryption">
+        <source>storage.source.encryption</source>
+        <target>Chiffrement (SecretEncrypter)</target>
+      </trans-unit>
+      <trans-unit id="storage.source.refresh">
+        <source>storage.source.refresh</source>
+        <target>Actualisation et verrou (LockedTokenProvider)</target>
+      </trans-unit>
+      <trans-unit id="storage.source.entity">
+        <source>storage.source.entity</source>
+        <target>Ce qui est stocké (OAuthToken)</target>
+      </trans-unit>
+      <trans-unit id="storage.source.adr">
+        <source>storage.source.adr</source>
+        <target>Décision d’architecture (ADR 0007)</target>
+      </trans-unit>
+      <trans-unit id="storage.source.repository">
+        <source>storage.source.repository</source>
+        <target>Tout le code source sur GitHub</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

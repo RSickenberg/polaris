@@ -80,6 +80,26 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertStringNotContainsString('v1:', $html);
     }
 
+    public function testTheSettingsExplainHowTokensAreStoredWithLinksToTheSource(): void
+    {
+        $this->createApp(self::signIn($this->client));
+
+        $crawler = $this->client->request('GET', '/settings/tesla');
+
+        self::assertSelectorTextContains('#token-storage h2', 'How your Tesla tokens are stored');
+        self::assertSelectorTextContains('#token-storage', 'libsodium');
+        self::assertSelectorTextContains('#token-storage', 'POLARIS_ENCRYPTION_KEY');
+        foreach (['encrypted', 'key', 'rotation', 'hidden', 'scopes', 'disconnect', 'audit'] as $section) {
+            self::assertSelectorExists('#token-storage [data-storage=' . $section . '] svg[aria-hidden=true]', 'Each paragraph has a glyph: ' . $section);
+        }
+        $links = $crawler->filter('#token-storage a')->each(static fn ($link): string => (string) $link->attr('href'));
+        self::assertContains('https://github.com/RSickenberg/polaris', $links);
+        self::assertContains('https://github.com/RSickenberg/polaris/blob/main/src/Shared/Service/SecretEncrypter.php', $links);
+        self::assertContains('https://github.com/RSickenberg/polaris/blob/main/src/Tesla/Service/LockedTokenProvider.php', $links);
+        self::assertContains('https://github.com/RSickenberg/polaris/blob/main/docs/adr/0007-secrets-encrypted-at-rest.md', $links);
+        self::assertSelectorExists('#token-storage a[href^="https://github.com"][rel="noopener noreferrer"][target=_blank]');
+    }
+
     public function testWithoutAStoredSecretThereAreNoDots(): void
     {
         $this->createApp(self::signIn($this->client));
