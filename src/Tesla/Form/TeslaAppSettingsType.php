@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Polaris\Tesla\Form;
 
 use Polaris\Tesla\Domain\FleetRegion;
+use Polaris\Tesla\Entity\TeslaApp;
 use Polaris\Tesla\Form\Model\TeslaAppSettingsFormData;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -51,6 +54,16 @@ final class TeslaAppSettingsType extends AbstractType
                 'choice_label' => static fn (FleetRegion $region): string => 'region.' . $region->value,
                 // China is listed so that the choice is visible, but it cannot be enabled.
                 'choice_attr' => static fn (FleetRegion $region): array => $region->isSupported() ? [] : ['disabled' => 'disabled'],
+            ])
+            ->add('dailyWakeCap', IntegerType::class, [
+                'label' => 'form.wake_cap.label',
+                'help' => 'form.wake_cap.help',
+                'attr' => ['min' => 0, 'max' => TeslaApp::MAX_DAILY_WAKE_CAP, 'inputmode' => 'numeric'],
+            ])
+            ->add('keepVehicleData', CheckboxType::class, [
+                'label' => 'form.keep_vehicle_data.label',
+                'help' => 'form.keep_vehicle_data.help',
+                'required' => false,
             ])
             ->add('save', SubmitType::class, ['label' => 'form.submit']);
     }

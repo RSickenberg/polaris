@@ -34,7 +34,7 @@ final class OAuthClientTest extends TestCase
                 'response_type' => 'code',
                 'client_id' => 'client-id',
                 'redirect_uri' => self::REDIRECT,
-                'scope' => 'openid offline_access vehicle_device_data',
+                'scope' => 'openid offline_access vehicle_device_data vehicle_cmds',
                 'state' => 'fake-state',
             ],
             $query,
@@ -100,7 +100,7 @@ final class OAuthClientTest extends TestCase
 
         $tokens = new OAuthClient($client)->refresh(FleetRegion::EuropeMiddleEastAfrica, 'client-id', self::REFRESH);
 
-        self::assertSame('openid offline_access vehicle_device_data', $tokens->scopes);
+        self::assertSame('openid offline_access vehicle_device_data vehicle_cmds', $tokens->scopes);
     }
 
     public function testARefusedRefreshTokenIsRecognisedWhateverTheTeslaWording(): void

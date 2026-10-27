@@ -6,9 +6,9 @@
 -%}
 {# The colors of the alerts of the dashboard (Dashboard/RiskAlert, and the blue of the empty states): green, amber, blue, and red through the destructive Alert. #}
 {%- set tone = {
-    success: 'border-green-600/50 bg-green-50 text-green-900 dark:border-green-400/40 dark:bg-green-950/40 dark:text-green-200',
-    warning: 'border-amber-500/60 bg-amber-50 text-amber-900 dark:border-amber-400/40 dark:bg-amber-950/40 dark:text-amber-200',
-    info: 'border-blue-600/50 bg-blue-50 text-blue-900 dark:border-blue-400/40 dark:bg-blue-950/40 dark:text-blue-200',
+    success: 'border-green-600/50 bg-green-50 text-green-900 dark:border-green-400/40 dark:bg-green-950 dark:text-green-200',
+    warning: 'border-amber-500/60 bg-amber-50 text-amber-900 dark:border-amber-400/40 dark:bg-amber-950 dark:text-amber-200',
+    info: 'border-blue-600/50 bg-blue-50 text-blue-900 dark:border-blue-400/40 dark:bg-blue-950 dark:text-blue-200',
     danger: '',
 }[variant] -%}
 {# Set here: inside the Alert tag, `variant` is the one of the Alert. #}
@@ -17,15 +17,15 @@
 {%- set alertVariant = 'danger' == variant ? 'destructive' : 'default' -%}
 <twig:Alert
     variant="{{ alertVariant }}"
-    class="pointer-events-auto pe-10 shadow-lg {{ tone }}"
+    class="pointer-events-auto items-center gap-x-3 rounded-xl px-4 py-4 pe-12 shadow-lg *:[svg]:row-span-1 *:[svg]:translate-y-0 *:[svg]:self-center {{ tone }}"
     data-flash="{{ variant }}"
     data-controller="toast"
     data-toast-delay-value="{{ delay }}"
     data-action="mouseenter->toast#pause mouseleave->toast#resume focusin->toast#pause focusout->toast#resume"
 >
-    <twig:ux:icon name="{{ icon }}" aria-hidden="true" />
-    <twig:Alert:Title data-toast-message>{{ message }}</twig:Alert:Title>
-    <twig:Alert:Action>
+    <twig:ux:icon name="{{ icon }}" aria-hidden="true" class="size-5" />
+    <twig:Alert:Title data-toast-message class="col-start-2 text-sm leading-snug">{{ message }}</twig:Alert:Title>
+    <twig:Alert:Action class="absolute end-3 top-1/2 -translate-y-1/2">
         <twig:Button variant="ghost" size="icon-xs" data-action="toast#dismiss" aria-label="{{ 'toast.dismiss'|trans(domain='shared') }}">
             <twig:ux:icon name="lucide:x" aria-hidden="true" />
         </twig:Button>

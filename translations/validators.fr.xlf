@@ -54,6 +54,10 @@
         <source>vehicle.import.none_selected</source>
         <target>Cochez au moins un véhicule.</target>
       </trans-unit>
+      <trans-unit id="tesla.wake_cap.range">
+        <source>tesla.wake_cap.range</source>
+        <target>Le plafond de réveils doit être compris entre 0 et 20.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

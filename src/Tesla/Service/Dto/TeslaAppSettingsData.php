@@ -13,6 +13,8 @@ final readonly class TeslaAppSettingsData
 {
     /**
      * @param list<FleetRegion> $regions
+     * @param int|null          $dailyWakeCap    null keeps the stored cap
+     * @param bool|null         $keepVehicleData null keeps the stored choice
      */
     public function __construct(
         public string $clientId,
@@ -23,6 +25,10 @@ final readonly class TeslaAppSettingsData
         public string $domain,
 
         public array $regions,
+
+        public ?int $dailyWakeCap = null,
+
+        public ?bool $keepVehicleData = null,
     ) {
     }
 
@@ -35,6 +41,8 @@ final readonly class TeslaAppSettingsData
             'clientId' => $this->clientId,
             'domain' => $this->domain,
             'regions' => $this->regions,
+            'dailyWakeCap' => $this->dailyWakeCap,
+            'keepVehicleData' => $this->keepVehicleData,
         ];
     }
 }

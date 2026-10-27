@@ -77,6 +77,20 @@ final class TeslaFleetClientTest extends TestCase
         self::assertSame(FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS, (int) $reading->readAt->format('Uv'));
     }
 
+    public function testTheAnswerIsKeptWithoutItsLocation(): void
+    {
+        $reading = $this->client([new MockResponse(FleetApiResponses::vehicleData(980.388329))])->vehicleData($this->app(), new Vin(FleetApiResponses::VIN));
+
+        $charge = $reading->payload['charge_state'] ?? null;
+        $vehicle = $reading->payload['vehicle_state'] ?? null;
+        self::assertIsArray($charge);
+        self::assertIsArray($vehicle);
+        self::assertSame(76, $charge['battery_level'] ?? null);
+        self::assertSame(980.388329, $vehicle['odometer'] ?? null);
+        self::assertSame(['shift_state' => null], $reading->payload['drive_state'] ?? null, 'No coordinates, no heading.');
+        self::assertStringNotContainsString('12.3456', json_encode($reading->payload, \JSON_THROW_ON_ERROR));
+    }
+
     public function testWithoutATimestampTheClockIsTheReadTime(): void
     {
         $reading = $this->client([new MockResponse(FleetApiResponses::vehicleData(12345.678, null))])->vehicleData($this->app(), new Vin(FleetApiResponses::VIN));

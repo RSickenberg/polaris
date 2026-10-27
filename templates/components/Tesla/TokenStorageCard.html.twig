@@ -1,0 +1,61 @@
+{# What happens to the Tesla secrets, and where to read the code that does it. Only the source repository is configured. #}
+{% set sections = [
+    {icon: 'lock-keyhole', key: 'encrypted'},
+    {icon: 'key-round', key: 'key'},
+    {icon: 'refresh-cw', key: 'rotation'},
+    {icon: 'eye-off', key: 'hidden'},
+    {icon: 'shield-check', key: 'scopes'},
+    {icon: 'trash-2', key: 'disconnect'},
+] %}
+{% set sources = [
+    {key: 'encryption', path: 'src/Shared/Service/SecretEncrypter.php'},
+    {key: 'refresh', path: 'src/Tesla/Service/LockedTokenProvider.php'},
+    {key: 'entity', path: 'src/Tesla/Entity/OAuthToken.php'},
+    {key: 'adr', path: 'docs/adr/0007-secrets-encrypted-at-rest.md'},
+] %}
+<twig:Card id="token-storage">
+    <twig:Card:Header>
+        <twig:Card:Title><h2>{{ 'storage.title'|trans(domain='tesla') }}</h2></twig:Card:Title>
+        <twig:Card:Description>{{ 'storage.description'|trans(domain='tesla') }}</twig:Card:Description>
+    </twig:Card:Header>
+    <twig:Card:Content>
+        <ul class="flex flex-col gap-4">
+            {% for section in sections %}
+                <li class="flex gap-3" data-storage="{{ section.key }}">
+                    <twig:ux:icon :name="'lucide:' ~ section.icon" aria-hidden="true" class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                    <div class="text-sm">
+                        <p class="font-medium">{{ ('storage.' ~ section.key ~ '.title')|trans(domain='tesla') }}</p>
+                        <p class="text-pretty text-muted-foreground">{{ ('storage.' ~ section.key ~ '.text')|trans(domain='tesla') }}</p>
+                    </div>
+                </li>
+            {% endfor %}
+            <li class="flex gap-3" data-storage="audit">
+                <twig:ux:icon name="lucide:code-xml" aria-hidden="true" class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                <div class="text-sm">
+                    <p class="font-medium text-pretty">{{ 'storage.audit.title'|trans(domain='tesla') }}</p>
+                    <p class="text-pretty text-muted-foreground">{{ 'storage.audit.text'|trans(domain='tesla') }}</p>
+                    <ul class="mt-2 flex flex-col gap-1">
+                        {% for source in sources %}
+                            <li>
+                                <a
+                                    href="{{ polaris_source_url }}/blob/main/{{ source.path }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="underline underline-offset-4 hover:text-foreground"
+                                >{{ ('storage.source.' ~ source.key)|trans(domain='tesla') }}</a>
+                            </li>
+                        {% endfor %}
+                        <li>
+                            <a
+                                href="{{ polaris_source_url }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="font-medium underline underline-offset-4 hover:text-foreground"
+                            >{{ 'storage.source.repository'|trans(domain='tesla') }}</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </twig:Card:Content>
+</twig:Card>

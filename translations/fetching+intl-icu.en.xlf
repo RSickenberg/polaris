@@ -28,7 +28,7 @@
       </trans-unit>
       <trans-unit id="outcome.asleep">
         <source>outcome.asleep</source>
-        <target>The car is asleep. Polaris does not wake it: the last reading is kept. Wake it from the Tesla app and refresh again.</target>
+        <target>The car is asleep: the last reading is kept. Wake it from the Tesla app and refresh again.</target>
       </trans-unit>
       <trans-unit id="outcome.offline">
         <source>outcome.offline</source>
@@ -53,6 +53,84 @@
       <trans-unit id="outcome.failed">
         <source>outcome.failed</source>
         <target>Tesla returned an error. The refresh will not be repeated automatically.</target>
+      </trans-unit>
+      <trans-unit id="outcome.waking">
+        <source>outcome.waking</source>
+        <target>Waking the car…</target>
+      </trans-unit>
+      <trans-unit id="outcome.wake_timeout">
+        <source>outcome.wake_timeout</source>
+        <target>The car did not come online within 90 seconds of the wake: the last reading is kept.</target>
+      </trans-unit>
+      <trans-unit id="outcome.wake_cap">
+        <source>outcome.wake_cap</source>
+        <target>The wake was not sent: this vehicle was already woken as often as allowed in 24 hours. The last reading is kept.</target>
+      </trans-unit>
+      <trans-unit id="outcome.wake_scope">
+        <source>outcome.wake_scope</source>
+        <target>Tesla refused the wake: Polaris is not allowed to wake your car. Connect to Tesla again in the Tesla settings.</target>
+      </trans-unit>
+      <trans-unit id="wake.dialog.title">
+        <source>wake.dialog.title</source>
+        <target>Your car is asleep</target>
+      </trans-unit>
+      <trans-unit id="wake.dialog.description">
+        <source>wake.dialog.description</source>
+        <target>Your car is asleep. Wake it to get the current mileage?
+Tesla bills each wake about {cost}.</target>
+      </trans-unit>
+      <trans-unit id="wake.dialog.decline">
+        <source>wake.dialog.decline</source>
+        <target>Use last reading</target>
+      </trans-unit>
+      <trans-unit id="wake.dialog.confirm">
+        <source>wake.dialog.confirm</source>
+        <target>Wake and refresh</target>
+      </trans-unit>
+      <trans-unit id="wake.reconnect">
+        <source>wake.reconnect</source>
+        <target>Reconnect to allow waking</target>
+      </trans-unit>
+      <trans-unit id="wake.cap_reached">
+        <source>wake.cap_reached</source>
+        <target>The car is asleep and was already woken as often as allowed in 24 hours. You can wake it again at {time} ({zone}). The last reading is kept.</target>
+      </trans-unit>
+      <trans-unit id="wake.disabled">
+        <source>wake.disabled</source>
+        <target>The car is asleep and waking is turned off in the Tesla settings. The last reading is kept.</target>
+      </trans-unit>
+      <trans-unit id="wake.scope_missing">
+        <source>wake.scope_missing</source>
+        <target>Polaris is not allowed to wake your car. Reconnect to Tesla to allow it.</target>
+      </trans-unit>
+      <trans-unit id="wake.not_connected">
+        <source>wake.not_connected</source>
+        <target>Polaris is not connected to Tesla. Connect it in the Tesla settings.</target>
+      </trans-unit>
+      <trans-unit id="wake.nothing_to_wake">
+        <source>wake.nothing_to_wake</source>
+        <target>This refresh can no longer wake the car. Refresh again.</target>
+      </trans-unit>
+      <trans-unit id="outcome.limited">
+        <source>outcome.limited</source>
+        <target>Another refresh read the car first, so this one was not made: the last reading is kept.</target>
+      </trans-unit>
+      <trans-unit id="wake.rate_limited">
+        <source>wake.rate_limited</source>
+        <target>The car is asleep. The car was read less than an hour ago, so a wake would not be followed by a read. You can refresh and wake it again at {time} ({zone}).</target>
+      </trans-unit>
+      <trans-unit id="wake.dialog_offline.title">
+        <source>wake.dialog_offline.title</source>
+        <target>Your car is offline</target>
+      </trans-unit>
+      <trans-unit id="wake.dialog_offline.description">
+        <source>wake.dialog_offline.description</source>
+        <target>Your car is offline. Tesla may be able to wake it, but this is not guaranteed. Try to wake it to get the current mileage?
+Tesla bills each wake about {cost}, even if the car does not answer.</target>
+      </trans-unit>
+      <trans-unit id="outcome.wake_failed">
+        <source>outcome.wake_failed</source>
+        <target>Tesla could not reach the car to wake it: the last reading is kept.</target>
       </trans-unit>
     </body>
   </file>

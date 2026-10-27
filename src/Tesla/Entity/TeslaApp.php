@@ -24,6 +24,9 @@ use Symfony\Component\Uid\Ulid;
 #[ORM\Entity]
 class TeslaApp
 {
+    public const int DEFAULT_DAILY_WAKE_CAP = 3;
+    public const int MAX_DAILY_WAKE_CAP = 20;
+
     #[ORM\Id]
     #[ORM\Column(type: UlidType::NAME)]
     private Ulid $id;
@@ -64,6 +67,19 @@ class TeslaApp
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?CarbonImmutable $consentGivenAt = null;
 
+    /**
+     * How many times a vehicle of the owner may be woken in any 24 hours. 0 turns waking off.
+     */
+    #[ORM\Column(type: Types::SMALLINT, options: ['default' => self::DEFAULT_DAILY_WAKE_CAP])]
+    private int $dailyWakeCap = self::DEFAULT_DAILY_WAKE_CAP;
+
+    /**
+     * Whether the user allows Polaris to keep what each live `vehicle_data` call answered (without location) for
+     * later use. On by default, the user can turn it off on the settings page.
+     */
+    #[ORM\Column(options: ['default' => true])]
+    private bool $keepVehicleData = true;
+
     public function __construct(User $owner, string $publicKey, string $encryptedPrivateKey, CarbonImmutable $generatedAt)
     {
         $this->id = new Ulid();
@@ -103,6 +119,30 @@ class TeslaApp
         $this->publicKey = $publicKey;
         $this->encryptedPrivateKey = $encryptedPrivateKey;
         $this->keyGeneratedAt = $generatedAt->utc();
+    }
+
+    public function getDailyWakeCap(): int
+    {
+        return $this->dailyWakeCap;
+    }
+
+    public function changeDailyWakeCap(int $cap): void
+    {
+        if ($cap < 0 || $cap > self::MAX_DAILY_WAKE_CAP) {
+            throw new \InvalidArgumentException(\sprintf('The wake cap must be between 0 and %d.', self::MAX_DAILY_WAKE_CAP));
+        }
+
+        $this->dailyWakeCap = $cap;
+    }
+
+    public function keepsVehicleData(): bool
+    {
+        return $this->keepVehicleData;
+    }
+
+    public function changeKeepVehicleData(bool $keep): void
+    {
+        $this->keepVehicleData = $keep;
     }
 
     public function getClientId(): ?string

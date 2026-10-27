@@ -70,7 +70,7 @@ final class TeslaConnectionServiceTest extends KernelTestCase
         self::assertSame(self::REDIRECT, $query['redirect_uri']);
         self::assertSame($first->state, $query['state']);
         self::assertSame('fake-client-id', $query['client_id']);
-        self::assertSame('openid offline_access vehicle_device_data', $query['scope']);
+        self::assertSame('openid offline_access vehicle_device_data vehicle_cmds', $query['scope']);
         self::assertNotSame($first->state, $second->state);
         self::assertSame([], $this->calls);
     }
@@ -140,7 +140,7 @@ final class TeslaConnectionServiceTest extends KernelTestCase
         self::assertEquals(CarbonImmutable::parse(self::NOW)->addSeconds(28800), $token->getExpiresAt());
         self::assertSame(ConnectionMethod::OAuth, $token->getMethod());
         self::assertSame('https://fleet-api.prd.eu.vn.cloud.tesla.com', $token->getFleetApiBaseUrl());
-        self::assertSame('openid offline_access vehicle_device_data', $token->getScopes());
+        self::assertSame('openid offline_access vehicle_device_data vehicle_cmds', $token->getScopes());
     }
 
     public function testAWrongOrMissingStateIsRefusedBeforeTeslaIsCalled(): void
@@ -354,7 +354,7 @@ final class TeslaConnectionServiceTest extends KernelTestCase
             'refresh_token' => $refresh,
             'expires_in' => 28800,
             'token_type' => 'Bearer',
-            'scope' => 'openid offline_access vehicle_device_data',
+            'scope' => 'openid offline_access vehicle_device_data vehicle_cmds',
         ]));
     }
 

@@ -22,6 +22,11 @@ Requirements: Docker with Compose v2.24 or later.
    openssl rand -base64 32     # for POLARIS_ENCRYPTION_KEY (back it up: without it, stored Tesla secrets are unreadable)
    ```
 
+   **The encryption key.** `POLARIS_ENCRYPTION_KEY` encrypts everything secret that Polaris stores (Tesla tokens, client secret, app private key; libsodium, [ADR 0007](docs/adr/0007-secrets-encrypted-at-rest.md)). Treat it like a password:
+   - Keep it in `.env.local` (never committed) or in the Symfony vault (`make sf ARGS="secrets:set POLARIS_ENCRYPTION_KEY"`), never in the database or the logs.
+   - Back it up, but apart from your database dumps.
+   - Do not change it once Tesla is connected: the stored values become unreadable, and you must enter your Tesla credentials, generate a new key pair and register again.
+
 2. Build and start everything, then create your user (the password is asked twice, hidden, and needs 12 characters):
 
    ```bash
@@ -102,7 +107,7 @@ Run the steps in order. Every command runs in the container through `make sf`.
 
 6. **Connect your Tesla account**, under Tesla app in the account menu (`/settings/tesla`), button Connect Tesla. You first give an explicit opt-in consent (what is read, how it is stored, how to disconnect), then pick one way:
 
-   - **Sign in with Tesla.** Polaris sends you to Tesla with the scopes `openid offline_access vehicle_device_data` and takes you back to `/tesla/callback`. Add that address to the allowed redirect URIs of your Tesla app. It is `DEFAULT_URI` followed by `/tesla/callback` (the default port is dropped), or the value of `POLARIS_TESLA_REDIRECT_URI` in `.env.local` when set; the connect page shows the exact value, which is sent unchanged to Tesla.
+   - **Sign in with Tesla.** Polaris sends you to Tesla with the scopes `openid offline_access vehicle_device_data vehicle_cmds` (the last one only so that you can wake your car from a refresh) and takes you back to `/tesla/callback`. Add that address to the allowed redirect URIs of your Tesla app. It is `DEFAULT_URI` followed by `/tesla/callback` (the default port is dropped), or the value of `POLARIS_TESLA_REDIRECT_URI` in `.env.local` when set; the connect page shows the exact value, which is sent unchanged to Tesla.
 
      The Tesla developer portal refuses `https://localhost` and any `http` address on port 80, so for a local install register `http://localhost:8000/tesla/callback` and serve the HTTP port of Docker Compose on 8000. Compose reads `.env`, not `.env.local`, so pass the port on the command line (the Caddy server answers it with a redirect to `https://localhost`, which keeps the code and the state):
 
@@ -116,7 +121,7 @@ Run the steps in order. Every command runs in the container through `make sf`.
 
    Tokens are stored encrypted. Polaris refreshes the access token `POLARIS_TESLA_REFRESH_MARGIN` seconds (600 by default) before it expires, under a lock (`LOCK_DSN`, Redis in Docker Compose), and keeps the new refresh token before using the access token. If Tesla refuses the refresh token (expired after 3 months, replaced, or your Tesla password was reset), the connection is shown as expired on `/settings/tesla` and you connect again. Disconnect there deletes the tokens and withdraws your consent; also revoke the access in your Tesla account.
 
-   The dashboard has a **Refresh now** button that reads the odometer once, without waking the car (an asleep car keeps its last reading). Tesla bills every read, so Polaris allows one refresh per vehicle and hour. Set `POLARIS_MANUAL_REFRESH_LIMIT=0` in `.env.local` to lift the limit on your own install.
+   The dashboard has a **Refresh now** button that reads the odometer once. A scheduled read never wakes the car, and neither does a refresh until you say so: if the car is asleep (or offline, where Tesla gives no guarantee), a dialog shows what Tesla bills per wake (about $0.02) and asks whether to wake it ("Wake and refresh") or to keep the last reading. After a wake Polaris checks every 10 seconds, for up to 90 seconds, whether the car is online, then reads it. Wakes are capped per vehicle over any 24 hours (3 by default, 0 turns waking off) on the Tesla settings page; a wake does not bypass the one refresh per hour. Waking needs the `vehicle_cmds` scope: if your connection predates it, the dashboard offers "Reconnect to allow waking". Tesla bills every read, so Polaris allows one refresh per vehicle and hour. Set `POLARIS_MANUAL_REFRESH_LIMIT=0` in `.env.local` to lift the limit on your own install.
 
    To check the connection by hand, refresh the tokens from the console. It never prints a token, only the new expiry. Without `--force` it sends nothing to Tesla unless the token is within the refresh margin; a refresh token is single use, so do not force it needlessly:
 

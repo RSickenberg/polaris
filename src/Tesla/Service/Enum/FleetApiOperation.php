@@ -15,6 +15,7 @@ enum FleetApiOperation: string
     case ListVehicles = 'list_vehicles';
     case VehicleState = 'vehicle_state';
     case VehicleData = 'vehicle_data';
+    case WakeUp = 'wake_up';
 
     public function describe(): string
     {
@@ -28,6 +29,7 @@ enum FleetApiOperation: string
             self::ListVehicles => 'Listing the vehicles',
             self::VehicleState => 'Reading the state of the vehicle',
             self::VehicleData => 'Reading the vehicle data',
+            self::WakeUp => 'Waking the vehicle',
         };
     }
 }

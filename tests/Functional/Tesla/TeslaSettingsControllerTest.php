@@ -49,6 +49,26 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertSelectorNotExists('form');
     }
 
+    public function testTheAccountMenuMarksTheTeslaSettingsAndTheCardsUseTheWidthOfTheDashboard(): void
+    {
+        $this->createApp(self::signIn($this->client));
+
+        $crawler = $this->client->request('GET', '/settings/tesla');
+
+        self::assertSelectorExists('a[href="/settings/tesla"][role=menuitem][aria-current=page]');
+        self::assertSelectorNotExists('a[href="/settings"][role=menuitem][aria-current]');
+        self::assertSelectorExists('[data-slot=dropdown-menu-content].flex.flex-col.gap-1', 'The items of the account menu are spaced.');
+        self::assertSelectorExists('[data-slot=dropdown-menu-content] a[href="/settings/tesla"].py-2');
+        self::assertSelectorNotExists('main .max-w-3xl, #main-content .max-w-3xl');
+        self::assertCount(0, $crawler->filter('[class*="max-w-3xl"]'));
+
+        $this->client->request('GET', '/settings');
+
+        self::assertSelectorExists('a[href="/settings"][role=menuitem][aria-current=page]');
+        self::assertSelectorNotExists('a[href="/settings/tesla"][role=menuitem][aria-current]');
+        self::assertSelectorNotExists('[class*="max-w-3xl"]');
+    }
+
     public function testThePageShowsTheFormAndNeverTheSecret(): void
     {
         $user = self::signIn($this->client);
@@ -78,6 +98,29 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertStringNotContainsString(self::SECRET, $html);
         self::assertStringNotContainsString((string) $app->getEncryptedClientSecret(), $html);
         self::assertStringNotContainsString('v1:', $html);
+    }
+
+    public function testTheSettingsExplainHowTokensAreStoredWithLinksToTheSource(): void
+    {
+        $this->createApp(self::signIn($this->client));
+
+        $crawler = $this->client->request('GET', '/settings/tesla');
+
+        self::assertSelectorTextContains('#token-storage h2', 'How your Tesla tokens are stored');
+        self::assertSelectorTextContains('#token-storage', 'libsodium');
+        self::assertSelectorTextContains('#token-storage', 'a copy of the database alone is useless');
+        self::assertStringNotContainsString('POLARIS_ENCRYPTION_KEY', (string) $this->client->getResponse()->getContent(), 'How the key is kept is for the installation guide, not for the page.');
+        foreach (['encrypted', 'key', 'rotation', 'hidden', 'scopes', 'disconnect', 'audit'] as $section) {
+            self::assertSelectorExists('#token-storage [data-storage=' . $section . '] svg[aria-hidden=true]', 'Each paragraph has a glyph: ' . $section);
+        }
+        $links = $crawler->filter('#token-storage a')->each(static fn ($link): string => (string) $link->attr('href'));
+        self::assertContains('https://github.com/RSickenberg/polaris', $links);
+        self::assertContains('https://github.com/RSickenberg/polaris/blob/main/src/Shared/Service/SecretEncrypter.php', $links);
+        self::assertContains('https://github.com/RSickenberg/polaris/blob/main/src/Tesla/Service/LockedTokenProvider.php', $links);
+        self::assertContains('https://github.com/RSickenberg/polaris/blob/main/docs/adr/0007-secrets-encrypted-at-rest.md', $links);
+        self::assertSelectorExists('#token-storage a[href^="https://github.com"][rel="noopener noreferrer"][target=_blank]');
+        self::assertSelectorExists('#status ~ #token-storage', 'The card is the last one of the page.');
+        self::assertSelectorNotExists('#token-storage ~ [data-slot=card]');
     }
 
     public function testWithoutAStoredSecretThereAreNoDots(): void
@@ -123,6 +166,51 @@ final class TeslaSettingsControllerTest extends WebTestCase
         $ciphertext = (string) $app->getEncryptedClientSecret();
         self::assertStringStartsWith('v1:', $ciphertext);
         self::assertSame(self::SECRET, self::getContainer()->get(SecretEncrypter::class)->decrypt($ciphertext));
+    }
+
+    public function testTheWakeCapDefaultsToThreeAndIsSavedAndBounded(): void
+    {
+        $this->createApp(self::signIn($this->client));
+        $this->client->request('GET', '/settings/tesla');
+        self::assertInputValueSame(self::FORM . '[dailyWakeCap]', '3');
+
+        $this->submit(['clientSecret' => self::SECRET, 'dailyWakeCap' => '5']);
+        self::assertResponseRedirects('/settings/tesla');
+        $this->entityManager->clear();
+        self::assertSame(5, $this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->getDailyWakeCap());
+
+        $this->submit(['dailyWakeCap' => '0']);
+        self::assertResponseRedirects('/settings/tesla');
+        $this->entityManager->clear();
+        self::assertSame(0, $this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->getDailyWakeCap(), '0 turns waking off.');
+
+        $this->submit(['dailyWakeCap' => '21']);
+        self::assertResponseStatusCodeSame(422);
+        $this->entityManager->clear();
+        self::assertSame(0, $this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->getDailyWakeCap());
+    }
+
+    public function testKeepingTheVehicleDataIsOnByDefaultAndTheUserSwitchesItOffAndOn(): void
+    {
+        $this->createApp(self::signIn($this->client));
+        $this->client->request('GET', '/settings/tesla');
+        self::assertSelectorExists('input[type=checkbox][name="' . self::FORM . '[keepVehicleData]"][checked]');
+        self::assertSelectorTextContains('label[for=' . self::FORM . '_keepVehicleData]', 'Keep what the car reports');
+        self::assertSelectorTextContains('[id$=keepVehicleData_help]', 'never the location');
+        self::assertSelectorExists('[id$=keepVehicleData_help] br', 'The last sentence of the help is on its own line.');
+
+        $this->submit(['clientSecret' => self::SECRET, 'keepVehicleData' => false]);
+        self::assertResponseRedirects('/settings/tesla');
+        $this->entityManager->clear();
+        self::assertFalse($this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->keepsVehicleData());
+
+        $this->client->request('GET', '/settings/tesla');
+        self::assertSelectorExists('input[type=checkbox][name="' . self::FORM . '[keepVehicleData]"]:not([checked])');
+
+        $this->submit(['keepVehicleData' => '1']);
+        self::assertResponseRedirects('/settings/tesla');
+        $this->entityManager->clear();
+        self::assertTrue($this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->keepsVehicleData());
     }
 
     public function testAnEmptySecretKeepsTheStoredOne(): void
@@ -235,6 +323,8 @@ final class TeslaSettingsControllerTest extends WebTestCase
             ['clientId' => 'client-id', 'domain' => 'polaris.example.com', 'regions' => ['eu'], 'clientSecret' => ''],
             $values,
         );
+        // An unticked box is not posted at all: a value of false removes the field.
+        $posted[self::FORM] = array_filter((array) $posted[self::FORM], static fn (mixed $value): bool => false !== $value);
         $this->client->request('POST', '/settings/tesla', $posted);
     }
 

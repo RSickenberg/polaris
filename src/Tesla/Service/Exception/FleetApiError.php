@@ -106,6 +106,15 @@ final class FleetApiError extends \RuntimeException
         return Response::HTTP_REQUEST_TIMEOUT === $this->httpStatus;
     }
 
+    /**
+     * HTTP 401 or 403: Tesla refused the call itself, for a command usually because the `vehicle_cmds` scope is
+     * missing or was revoked.
+     */
+    public function isAccessRefused(): bool
+    {
+        return \in_array($this->httpStatus, [Response::HTTP_UNAUTHORIZED, Response::HTTP_FORBIDDEN], true);
+    }
+
     private static function oauthErrorCode(string $body): ?string
     {
         $data = json_decode($body, true);

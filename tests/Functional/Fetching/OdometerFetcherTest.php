@@ -12,13 +12,17 @@ use Polaris\Fetching\Domain\SlotRunStatus;
 use Polaris\Fetching\Entity\FetchSlotRun;
 use Polaris\Fetching\Entity\RefreshAttempt;
 use Polaris\Fetching\Message\FetchOdometerMessage;
+use Polaris\Fetching\Service\ManualRefreshLimit;
 use Polaris\Fetching\Service\OdometerFetcher;
 use Polaris\Reading\Domain\ReadingSource;
 use Polaris\Reading\Entity\OdometerReading;
+use Polaris\Reading\Entity\VehicleDataSnapshot;
+use Polaris\Tesla\Entity\TeslaApp;
 use Polaris\Tesla\Service\Exception\FleetApiError;
 use Polaris\Tests\Support\FleetApiResponses;
 use Polaris\Tests\Support\SignsIn;
 use Polaris\Tests\Support\TeslaFixtures;
+use Polaris\Tests\Support\ToggledRefreshPolicy;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -29,6 +33,8 @@ use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\Storage\InMemoryStorage;
 
 #[CoversClass(OdometerFetcher::class)]
 final class OdometerFetcherTest extends KernelTestCase
@@ -40,6 +46,10 @@ final class OdometerFetcherTest extends KernelTestCase
     private const string SLOT = '2026-10-25 19:00:00';
 
     private Vehicle $vehicle;
+
+    private TeslaApp $app;
+
+    private ToggledRefreshPolicy $hourlyLimit;
 
     /**
      * @var list<string> "METHOD url" of every request sent to Tesla
@@ -68,8 +78,17 @@ final class OdometerFetcherTest extends KernelTestCase
         self::mockTime(self::SLOT . ' UTC');
         $owner = self::createUser();
         $app = self::createConfiguredApp($owner);
+        $this->app = $app;
         self::createToken($app, CarbonImmutable::parse(self::SLOT, 'UTC')->addHours(8));
         self::getContainer()->set('http_client', new MockHttpClient($this->respond(...)));
+        $this->hourlyLimit = new ToggledRefreshPolicy();
+        self::getContainer()->set(
+            ManualRefreshLimit::class,
+            new ManualRefreshLimit(
+                $this->hourlyLimit,
+                new RateLimiterFactory(['id' => 'manual_refresh', 'policy' => 'fixed_window', 'limit' => 1, 'interval' => '1 hour'], new InMemoryStorage()),
+            ),
+        );
         $this->vehicle = new Vehicle(new Vin(FleetApiResponses::VIN), 'Model 3', $owner);
         $this->entityManager()->persist($this->vehicle);
         $this->entityManager()->persist(new FetchSlotRun($this->vehicle, self::slot(), self::slot()));
@@ -92,6 +111,51 @@ final class OdometerFetcherTest extends KernelTestCase
         self::assertSame(SlotRunStatus::Stored, $this->slotRun()->getStatus());
         self::assertSame(1, $this->slotRun()->getAttempts());
         self::assertSame([], $this->queued());
+    }
+
+    public function testWhatTheCarAnsweredIsNotKeptWhenTheUserTurnedItOff(): void
+    {
+        $this->app->changeKeepVehicleData(false);
+        $this->entityManager()->flush();
+        $this->answerWith('online', 100.0);
+
+        $this->fetch(0);
+
+        self::assertSame([], $this->entityManager()->getRepository(VehicleDataSnapshot::class)->findAll());
+        self::assertCount(1, $this->entityManager()->getRepository(OdometerReading::class)->findAll(), 'The odometer is stored all the same.');
+    }
+
+    public function testWhatTheCarAnsweredIsKeptWithoutItsLocationOnceForEachInstant(): void
+    {
+        self::assertTrue($this->app->keepsVehicleData(), 'On by default.');
+        $this->answerWith('online', 100.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS);
+        $this->fetch(0);
+        $this->answerWith('online', 100.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS);
+        $this->fetch(0, 1);
+        $this->answerWith('online', 100.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS + 3_600_000);
+        $this->fetch(0, 2);
+
+        $this->entityManager()->clear();
+        $snapshots = $this->entityManager()->getRepository(VehicleDataSnapshot::class)->findBy([], ['capturedAt' => 'ASC']);
+        self::assertCount(2, $snapshots, 'The same instant twice is one row; an unchanged odometer at a new instant is a new one.');
+        self::assertSame('2026-10-24T17:53:45+00:00', $snapshots[0]->getCapturedAt()->toIso8601String());
+        $payload = $snapshots[0]->getPayload();
+        $charge = $payload['charge_state'] ?? null;
+        $vehicle = $payload['vehicle_state'] ?? null;
+        self::assertIsArray($charge);
+        self::assertIsArray($vehicle);
+        self::assertSame(76, $charge['battery_level'] ?? null);
+        self::assertEquals(100, $vehicle['odometer'] ?? null, 'JSON does not tell 100 from 100.0.');
+        self::assertSame(['shift_state' => null], $payload['drive_state'] ?? null);
+        self::assertStringNotContainsString('12.3456', json_encode($payload, \JSON_THROW_ON_ERROR));
+    }
+
+    public function testNothingIsKeptWhenTheCarIsNotRead(): void
+    {
+        $this->answerWith('asleep');
+        $this->fetch(0);
+
+        self::assertSame([], $this->entityManager()->getRepository(VehicleDataSnapshot::class)->findAll());
     }
 
     public function testAnOnlineCarWithTheSameValueIsNotStoredAgain(): void
@@ -309,6 +373,50 @@ final class OdometerFetcherTest extends KernelTestCase
         self::assertSame(160_934, $readings[0]->getOdometer()->metres());
     }
 
+    public function testACarFoundAsleepDoesNotSpendTheHourAndTheNextRefreshOfAnOnlineCarDoes(): void
+    {
+        $this->useHourlyLimit(true);
+        $this->answerWith('asleep');
+        self::assertSame(RefreshOutcome::Asleep, $this->refresh()[1]);
+        self::assertSame(RefreshOutcome::Asleep, $this->refresh()[1], 'Looking at a sleeping car is free, as often as asked.');
+
+        $this->answerWith('online', 100.0);
+        $this->forgetRequests();
+
+        self::assertSame(RefreshOutcome::Stored, $this->refresh()[1]);
+        self::assertCount(2, $this->requests, 'The state, then the billed live read.');
+    }
+
+    public function testASecondReadWithinTheHourIsRefusedBeforeTheCarIsAskedForItsData(): void
+    {
+        $this->useHourlyLimit(true);
+        $this->answerWith('online', 100.0);
+        $this->refresh();
+        $this->requests = [];
+        $this->answerWith('online', 120.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS + 60_000);
+
+        [$status, $outcome] = $this->refresh();
+
+        self::assertSame(SlotRunStatus::Skipped, $status);
+        self::assertSame(RefreshOutcome::Limited, $outcome);
+        self::assertCount(1, $this->requests, 'Only the free state check was sent.');
+        self::assertStringEndsNotWith('/vehicle_data', $this->requests[0]);
+        self::assertCount(1, $this->entityManager()->getRepository(OdometerReading::class)->findAll());
+    }
+
+    public function testAScheduledReadIsNeitherHeldByNorSpendsTheManualHour(): void
+    {
+        $this->useHourlyLimit(true);
+        $this->answerWith('online', 100.0);
+        $this->refresh();
+        $this->answerWith('online', 120.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS + 3_600_000);
+
+        self::assertSame(SlotRunStatus::Stored, $this->fetch(0, 1), 'The scheduled read of a later slot goes through.');
+
+        $this->answerWith('online', 130.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS + 7_200_000);
+        self::assertSame(RefreshOutcome::Limited, $this->refresh()[1], 'It did not give the manual refresh a new hour.');
+    }
+
     public function testAManualRefreshOfAnOfflineCarSaysSo(): void
     {
         $this->answerWith('offline');
@@ -435,6 +543,19 @@ final class OdometerFetcherTest extends KernelTestCase
         $this->entityManager()->refresh($attempt);
 
         return $attempt->getOutcome();
+    }
+
+    /**
+     * Turns the hourly limit of the manual refresh on (it is off by default, so that a test can refresh twice).
+     */
+    private function useHourlyLimit(bool $limited): void
+    {
+        $this->hourlyLimit->limited = $limited;
+    }
+
+    private function forgetRequests(): void
+    {
+        $this->requests = [];
     }
 
     private function holdLock(): \Symfony\Component\Lock\SharedLockInterface

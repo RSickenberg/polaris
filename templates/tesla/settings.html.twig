@@ -6,7 +6,7 @@
     <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.title'|trans(domain='tesla') }}</h1>
 
 
-    <div class="mt-6 flex max-w-3xl flex-col gap-6">
+    <div class="mt-6 flex flex-col gap-6">
         {% if teslaApp is null %}
             <twig:Alert id="no-key-pair">
                 <twig:Alert:Title>{{ 'page.no_key.title'|trans(domain='tesla') }}</twig:Alert:Title>
@@ -52,7 +52,8 @@
                             <twig:Button as="a" href="{{ path('tesla_connect') }}" class="w-full sm:w-auto">{{ (token is null ? 'connection.connect' : 'connection.reconnect')|trans(domain='tesla') }}</twig:Button>
                         {% endif %}
                         {% if disconnectForm is not null %}
-                            {{ form(disconnectForm) }}
+                            {# The form is the flex item: it must be as wide as the line on a phone for its button to be a block. #}
+                            {{ form(disconnectForm, {attr: {class: 'w-full sm:w-auto'}}) }}
                         {% endif %}
                     </div>
                 </twig:Card:Content>
@@ -79,6 +80,8 @@
                     <p class="mt-4 text-sm text-muted-foreground">{{ 'page.status.next_steps'|trans(domain='tesla') }}</p>
                 </twig:Card:Content>
             </twig:Card>
+
+            <twig:Tesla:TokenStorageCard />
         {% endif %}
     </div>
 {% endblock %}

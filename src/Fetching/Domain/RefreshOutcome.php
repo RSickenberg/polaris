@@ -56,9 +56,41 @@ enum RefreshOutcome: string
     case Busy = 'busy';
 
     /**
+     * The car is online but the hourly limit of the manual refresh was spent in the meantime (another refresh
+     * read it first): it was not read.
+     */
+    case Limited = 'limited';
+
+    /**
      * Tesla answered with an error: the message went to the failure transport.
      */
     case Failed = 'failed';
+
+    /**
+     * The user confirmed a wake and wake_up was sent: the state of the car is polled until it is online or the
+     * time is up.
+     */
+    case Waking = 'waking';
+
+    /**
+     * Tesla could not reach the car to send the wake (HTTP 408): nothing was counted and the last reading stays.
+     */
+    case WakeFailed = 'wake_failed';
+
+    /**
+     * The car did not come online in time after a wake: the last reading stays.
+     */
+    case WakeTimeout = 'wake_timeout';
+
+    /**
+     * No wake was sent: the user already woke the vehicle as often as the cap allows.
+     */
+    case WakeCapReached = 'wake_cap';
+
+    /**
+     * No wake was sent, or Tesla refused it: the `vehicle_cmds` scope is missing or was revoked.
+     */
+    case WakeScopeMissing = 'wake_scope';
 
     /**
      * How to tell the user: a new reading is good news, a car that is not reachable is a warning, and what
@@ -70,14 +102,14 @@ enum RefreshOutcome: string
     {
         return match ($this) {
             self::Stored => 'success',
-            self::Queued, self::Unchanged => 'info',
-            self::Asleep, self::Offline, self::Unavailable, self::Busy => 'warning',
-            self::NotConnected, self::Rejected, self::Failed => 'danger',
+            self::Queued, self::Waking, self::Unchanged => 'info',
+            self::Asleep, self::Offline, self::Unavailable, self::Busy, self::Limited, self::WakeTimeout, self::WakeFailed, self::WakeCapReached => 'warning',
+            self::NotConnected, self::Rejected, self::Failed, self::WakeScopeMissing => 'danger',
         };
     }
 
     public function isSettled(): bool
     {
-        return self::Queued !== $this;
+        return self::Queued !== $this && self::Waking !== $this;
     }
 }

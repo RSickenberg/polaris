@@ -33,7 +33,10 @@ final readonly class OAuthClient
     {
     }
 
-    public function authorizationUrl(string $clientId, string $redirectUri, string $state): string
+    /**
+     * @param bool $promptMissingScopes asks Tesla to show the consent again for the scopes the user has not granted yet
+     */
+    public function authorizationUrl(string $clientId, string $redirectUri, string $state, bool $promptMissingScopes = false): string
     {
         return self::AUTHORIZE_URL . '?' . http_build_query(
             [
@@ -42,7 +45,7 @@ final readonly class OAuthClient
                 'redirect_uri' => $redirectUri,
                 'scope' => TeslaScopes::REQUESTED,
                 'state' => $state,
-            ],
+            ] + ($promptMissingScopes ? ['prompt_missing_scopes' => 'true'] : []),
             '',
             '&',
             \PHP_QUERY_RFC3986,
