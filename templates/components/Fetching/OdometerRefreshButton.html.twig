@@ -51,7 +51,7 @@
             <twig:Dialog:Content :showCloseButton="false">
                 <twig:Dialog:Header>
                     <twig:Dialog:Title>{{ (dialogKey ~ '.title')|trans(domain='fetching') }}</twig:Dialog:Title>
-                    <twig:Dialog:Description>{{ (dialogKey ~ '.description')|trans({cost: wakeCost}, 'fetching') }}</twig:Dialog:Description>
+                    <twig:Dialog:Description>{{ (dialogKey ~ '.description')|trans({cost: wakeCost}, 'fetching')|nl2br }}</twig:Dialog:Description>
                 </twig:Dialog:Header>
                 <twig:Dialog:Footer>
                     <twig:Button type="button" variant="outline" data-action="live#action" data-live-action-param="declineWake">

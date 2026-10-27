@@ -172,6 +172,7 @@ final class OdometerRefreshButtonTest extends WebTestCase
         self::assertStringContainsString('data-wake-dialog', $html);
         self::assertStringContainsString('Your car is offline', $html);
         self::assertStringContainsString('not guaranteed', $html);
+        self::assertMatchesRegularExpression('/current mileage\?<br \/>\s*Tesla bills each wake/', $html, 'The price is on its own line.');
         self::assertStringContainsString('$0.02', $html);
         self::assertStringContainsString('Wake and refresh', $html);
         self::assertStringNotContainsString('Your car is asleep', $html);

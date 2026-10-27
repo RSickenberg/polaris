@@ -46,7 +46,8 @@ final readonly class TeslaWakeClient implements VehicleCommandClient
             FleetRegion::fromBaseUrl($baseUrl) ?? FleetRegion::EuropeMiddleEastAfrica,
             'POST',
             $baseUrl . '/api/1/vehicles/' . rawurlencode($vin->value()) . '/wake_up',
-            ['auth_bearer' => $accessToken],
+            // Tesla refuses a POST that is not JSON (406 not_a_JSON_request), even one with nothing to say.
+            ['auth_bearer' => $accessToken, 'json' => new \stdClass()],
             [$accessToken],
         );
     }

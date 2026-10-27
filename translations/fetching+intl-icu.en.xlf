@@ -76,7 +76,8 @@
       </trans-unit>
       <trans-unit id="wake.dialog.description">
         <source>wake.dialog.description</source>
-        <target>Your car is asleep. Wake it to get the current mileage? Tesla bills each wake about {cost}.</target>
+        <target>Your car is asleep. Wake it to get the current mileage?
+Tesla bills each wake about {cost}.</target>
       </trans-unit>
       <trans-unit id="wake.dialog.decline">
         <source>wake.dialog.decline</source>
@@ -124,7 +125,8 @@
       </trans-unit>
       <trans-unit id="wake.dialog_offline.description">
         <source>wake.dialog_offline.description</source>
-        <target>Your car is offline. Tesla may be able to wake it, but this is not guaranteed. Try to wake it to get the current mileage? Tesla bills each wake about {cost}, even if the car does not answer.</target>
+        <target>Your car is offline. Tesla may be able to wake it, but this is not guaranteed. Try to wake it to get the current mileage?
+Tesla bills each wake about {cost}, even if the car does not answer.</target>
       </trans-unit>
       <trans-unit id="outcome.wake_failed">
         <source>outcome.wake_failed</source>

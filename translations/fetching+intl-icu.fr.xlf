@@ -76,7 +76,8 @@
       </trans-unit>
       <trans-unit id="wake.dialog.description">
         <source>wake.dialog.description</source>
-        <target>Votre voiture dort. La réveiller pour obtenir le kilométrage actuel ? Tesla facture chaque réveil environ {cost}.</target>
+        <target>Votre voiture dort. La réveiller pour obtenir le kilométrage actuel ?
+Tesla facture chaque réveil environ {cost}.</target>
       </trans-unit>
       <trans-unit id="wake.dialog.decline">
         <source>wake.dialog.decline</source>
@@ -124,7 +125,8 @@
       </trans-unit>
       <trans-unit id="wake.dialog_offline.description">
         <source>wake.dialog_offline.description</source>
-        <target>Votre voiture est hors ligne. Tesla peut peut-être la réveiller, sans garantie. Essayer de la réveiller pour obtenir le kilométrage actuel ? Tesla facture chaque réveil environ {cost}, même si la voiture ne répond pas.</target>
+        <target>Votre voiture est hors ligne. Tesla peut peut-être la réveiller, sans garantie. Essayer de la réveiller pour obtenir le kilométrage actuel ?
+Tesla facture chaque réveil environ {cost}, même si la voiture ne répond pas.</target>
       </trans-unit>
       <trans-unit id="outcome.wake_failed">
         <source>outcome.wake_failed</source>

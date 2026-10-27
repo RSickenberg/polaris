@@ -393,11 +393,23 @@ final class WakeFetchTest extends KernelTestCase
         return $attempt->getOutcome();
     }
 
-    private function respond(string $method, string $url): MockResponse
+    /**
+     * @param array<string, mixed> $options
+     */
+    private function respond(string $method, string $url, array $options = []): MockResponse
     {
         $this->requests[] = $method . ' ' . $url;
 
         if (str_ends_with($url, '/wake_up')) {
+            // Like Tesla: a POST that is not JSON is refused.
+            /** @var list<string> $lines */
+            $lines = $options['headers'] ?? [];
+            $headers = strtolower(implode("\n", $lines));
+
+            if (!str_contains($headers, 'content-type: application/json') || '{}' !== ($options['body'] ?? null)) {
+                return new MockResponse('{"error":"not_a_JSON_request"}', ['http_code' => 406]);
+            }
+
             return new MockResponse(200 === $this->wakeStatus ? FleetApiResponses::vehicle('asleep') : '{}', ['http_code' => $this->wakeStatus]);
         }
 
