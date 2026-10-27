@@ -76,6 +76,8 @@ final class TeslaConnectionControllerTest extends WebTestCase
         self::assertSelectorTextContains('#consent', 'odometer');
         self::assertSelectorTextContains('#consent', 'encrypted');
         self::assertSelectorTextContains('#consent', 'Disconnect');
+        self::assertSelectorExists('#consent ~ #token-storage', 'How the tokens are stored comes with the consent that stores them.');
+        self::assertSelectorExists('#token-storage a[href="https://github.com/RSickenberg/polaris"]');
     }
 
     public function testTheConsentIsRefusedWhenTheBoxIsNotTicked(): void

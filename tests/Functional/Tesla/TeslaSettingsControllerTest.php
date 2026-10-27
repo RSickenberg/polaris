@@ -98,6 +98,8 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertContains('https://github.com/RSickenberg/polaris/blob/main/src/Tesla/Service/LockedTokenProvider.php', $links);
         self::assertContains('https://github.com/RSickenberg/polaris/blob/main/docs/adr/0007-secrets-encrypted-at-rest.md', $links);
         self::assertSelectorExists('#token-storage a[href^="https://github.com"][rel="noopener noreferrer"][target=_blank]');
+        self::assertSelectorExists('#status ~ #token-storage', 'The card is the last one of the page.');
+        self::assertSelectorNotExists('#token-storage ~ [data-slot=card]');
     }
 
     public function testWithoutAStoredSecretThereAreNoDots(): void
