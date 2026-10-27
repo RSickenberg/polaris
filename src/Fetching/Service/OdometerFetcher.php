@@ -20,6 +20,7 @@ use Polaris\Reading\Service\Enum\RecordOutcome;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Tesla\Entity\TeslaApp;
 use Polaris\Tesla\Service\Enum\NoReadingReason;
+use Polaris\Tesla\Service\Enum\VehicleState;
 use Polaris\Tesla\Service\Enum\WakeAccess;
 use Polaris\Tesla\Service\Exception\FleetApiError;
 use Polaris\Tesla\Service\Exception\TeslaNotConnected;
@@ -44,6 +45,9 @@ use Symfony\Component\Uid\Ulid;
  * the odometer, stores it when it changed, and, when the car is not online, checks again an hour later
  * until the window of the slot closes. The checks stay on the hours after the slot, not an hour after the previous one. Messenger's own retry is off for this message: a billed call is
  * never repeated by it, only by the hourly rule here.
+ *
+ * The manual hourly limit ({@see ManualRefreshLimit}) is spent here, right before the billed live read of an online
+ * car: the state check comes first and is free, so a car found asleep costs nothing against the limit.
  *
  * One fetch runs per vehicle at a time, scheduled or manual, under a lock. A manual refresh that finds it held
  * ends as {@see RefreshOutcome::Busy}; a scheduled check is queued again shortly, without using up a state check.
@@ -77,6 +81,7 @@ final readonly class OdometerFetcher
         private TeslaAppSettings $teslaApps,
         private TeslaOdometerReader $reader,
         private TeslaVehicleWaker $waker,
+        private ManualRefreshLimit $limit,
         private WakeCap $wakeCap,
         private OdometerReadingService $readings,
         private MessageBusInterface $bus,
@@ -164,7 +169,22 @@ final readonly class OdometerFetcher
         }
 
         try {
-            $result = $this->reader->read($app, $vehicle->getVin());
+            // The check comes first and is free; the hour is spent only when the car is really read. After a wake
+            // the list of vehicles already said the car is online, so its state is not asked again.
+            $state = $message->isPollingWake() ? VehicleState::Online : $this->reader->state($app, $vehicle->getVin());
+
+            if (VehicleState::Online !== $state) {
+                $result = $this->reader->noReading($state);
+            } else {
+                // A scheduled read is not a manual refresh and is not held by its hourly limit.
+                $retryAfter = null === $message->slotTimestamp ? $this->limit->consume($vehicle) : null;
+
+                if (null !== $retryAfter) {
+                    return $this->limited($message, $attempt, $now);
+                }
+
+                $result = $this->reader->readOnline($app, $vehicle->getVin());
+            }
         } catch (TeslaNotConnected $notConnected) {
             return $this->notConnected($run, $attempt, $attempts, $now, $vehicle, $notConnected->getMessage());
         } catch (FleetApiError $failure) {
@@ -236,7 +256,13 @@ final readonly class OdometerFetcher
         if (WakeAccess::ScopeMissing === $this->waker->access($app)) {
             $this->logger->info('Wake not sent: the connection lacks the vehicle_cmds scope.', ['vehicle' => $message->vehicleId]);
 
-            return $this->endWake($attempt, RefreshOutcome::WakeScopeMissing, $now);
+            return $this->stop($attempt, RefreshOutcome::WakeScopeMissing, $now);
+        }
+
+        if (null !== $this->limit->retryAfter($vehicle)) {
+            $this->logger->info('Wake not sent: the hourly limit of the refresh is spent.', ['vehicle' => $message->vehicleId]);
+
+            return $this->stop($attempt, RefreshOutcome::Limited, $now);
         }
 
         $cap = $this->wakeCap->status($vehicle, $app, $now);
@@ -244,7 +270,7 @@ final readonly class OdometerFetcher
         if ($cap->isReached()) {
             $this->logger->info('Wake not sent: the daily cap is reached.', ['vehicle' => $message->vehicleId, 'cap' => $cap->cap]);
 
-            return $this->endWake($attempt, RefreshOutcome::WakeCapReached, $now);
+            return $this->stop($attempt, RefreshOutcome::WakeCapReached, $now);
         }
 
         try {
@@ -264,10 +290,10 @@ final readonly class OdometerFetcher
                 ['vehicle' => $message->vehicleId]
             );
 
-            return $this->endWake($attempt, RefreshOutcome::WakeScopeMissing, $now);
+            return $this->stop($attempt, RefreshOutcome::WakeScopeMissing, $now);
         } catch (FleetApiError $failure) {
             if ($failure->isVehicleNotOnline()) {
-                return $this->endWake($attempt, RefreshOutcome::Offline, $now);
+                return $this->stop($attempt, RefreshOutcome::Offline, $now);
             }
 
             $attempt->settle(RefreshOutcome::Failed, $now);
@@ -326,7 +352,7 @@ final readonly class OdometerFetcher
         if (WakeWindow::isOver((int) $message->wakeDeadline, $now)) {
             $this->logger->info('The car did not come online after the wake.', ['vehicle' => $message->vehicleId]);
 
-            return $this->endWake($attempt, RefreshOutcome::WakeTimeout, $now);
+            return $this->stop($attempt, RefreshOutcome::WakeTimeout, $now);
         }
 
         $this->bus->dispatch($message, [new DelayStamp(WakeWindow::POLL_INTERVAL_SECONDS * 1000)]);
@@ -337,12 +363,24 @@ final readonly class OdometerFetcher
     /**
      * @throws ORMException
      */
-    private function endWake(RefreshAttempt $attempt, RefreshOutcome $outcome, CarbonImmutable $now): SlotRunStatus
+    private function stop(?RefreshAttempt $attempt, RefreshOutcome $outcome, CarbonImmutable $now): SlotRunStatus
     {
-        $attempt->settle($outcome, $now);
+        $attempt?->settle($outcome, $now);
         $this->entityManager->flush();
 
         return SlotRunStatus::Skipped;
+    }
+
+    /**
+     * The car is online but another manual refresh spent the hour first.
+     *
+     * @throws ORMException
+     */
+    private function limited(FetchOdometerMessage $message, ?RefreshAttempt $attempt, CarbonImmutable $now): SlotRunStatus
+    {
+        $this->logger->info('Odometer fetch not run: the hourly limit of the manual refresh is spent.', ['vehicle' => $message->vehicleId]);
+
+        return $this->stop($attempt, RefreshOutcome::Limited, $now);
     }
 
     /**

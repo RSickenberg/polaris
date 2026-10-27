@@ -28,6 +28,14 @@ final readonly class WakeRequestResult
         return new self(WakeRequestStatus::CapReached, $availableAt);
     }
 
+    /**
+     * @param CarbonImmutable $availableAt when the hourly limit of the refresh frees up
+     */
+    public static function rateLimited(CarbonImmutable $availableAt): self
+    {
+        return new self(WakeRequestStatus::RateLimited, $availableAt);
+    }
+
     public static function refused(WakeRequestStatus $status): self
     {
         return new self($status);

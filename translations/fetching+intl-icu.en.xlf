@@ -110,6 +110,14 @@
         <source>wake.nothing_to_wake</source>
         <target>This refresh can no longer wake the car. Refresh again.</target>
       </trans-unit>
+      <trans-unit id="outcome.limited">
+        <source>outcome.limited</source>
+        <target>Another refresh read the car first, so this one was not made: the last reading is kept.</target>
+      </trans-unit>
+      <trans-unit id="wake.rate_limited">
+        <source>wake.rate_limited</source>
+        <target>The car is asleep. The car was read less than an hour ago, so a wake would not be followed by a read. You can refresh and wake it again at {time} ({zone}).</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

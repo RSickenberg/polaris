@@ -102,10 +102,10 @@ final class WakeFetchTest extends KernelTestCase
         self::assertSame(
             [
                 'GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles',
-                'GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . FleetApiResponses::VIN,
                 'GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . FleetApiResponses::VIN . '/vehicle_data',
             ],
             $this->requests,
+            'The list already said the car is online, so its state is not asked again before the live read.',
         );
         self::assertCount(1, $this->entityManager()->getRepository(OdometerReading::class)->findAll());
         self::assertCount(1, $this->queued(), 'Nothing is queued once the car is read.');

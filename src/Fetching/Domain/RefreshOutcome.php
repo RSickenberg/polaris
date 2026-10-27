@@ -56,6 +56,12 @@ enum RefreshOutcome: string
     case Busy = 'busy';
 
     /**
+     * The car is online but the hourly limit of the manual refresh was spent in the meantime (another refresh
+     * read it first): it was not read.
+     */
+    case Limited = 'limited';
+
+    /**
      * Tesla answered with an error: the message went to the failure transport.
      */
     case Failed = 'failed';
@@ -92,7 +98,7 @@ enum RefreshOutcome: string
         return match ($this) {
             self::Stored => 'success',
             self::Queued, self::Waking, self::Unchanged => 'info',
-            self::Asleep, self::Offline, self::Unavailable, self::Busy, self::WakeTimeout, self::WakeCapReached => 'warning',
+            self::Asleep, self::Offline, self::Unavailable, self::Busy, self::Limited, self::WakeTimeout, self::WakeCapReached => 'warning',
             self::NotConnected, self::Rejected, self::Failed, self::WakeScopeMissing => 'danger',
         };
     }

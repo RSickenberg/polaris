@@ -45,6 +45,7 @@ final readonly class TeslaVehicleWaker
      * @throws TeslaNotConnected
      * @throws WakeScopeMissing  when Tesla answers 401 or 403
      * @throws FleetApiError     any other failure, 408 included
+     * @throws \Exception
      */
     public function wake(TeslaApp $app, Vin $vin): void
     {

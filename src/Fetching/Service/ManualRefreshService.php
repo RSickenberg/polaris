@@ -7,7 +7,6 @@ namespace Polaris\Fetching\Service;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
-use Polaris\Extension\ManualRefreshPolicy;
 use Polaris\Fetching\Domain\RefreshOutcome;
 use Polaris\Fetching\Domain\WakeWindow;
 use Polaris\Fetching\Entity\RefreshAttempt;
@@ -23,11 +22,12 @@ use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 
 /**
- * Asks for the odometer of a vehicle now. The hourly limit is decided and consumed here, not in the UI, so
- * every caller (the dashboard, a later API) gets the same rule. An accepted request queues the same
+ * Asks for the odometer of a vehicle now. The hourly limit is decided here, not in the UI, so every caller (the
+ * dashboard, a later API) gets the same rule: a request is refused while the hour is spent, but the hour is only
+ * spent by the fetch, when it reads an online car ({@see ManualRefreshLimit}); a car found asleep costs nothing
+ * against it. An accepted request queues the same
  * {@see FetchOdometerMessage} as a scheduled slot, with no slot, and does not wake the car; the worker settles the
  * {@see RefreshAttempt} it carries. A car found asleep can then be woken once the user confirmed it with
  * {@see self::requestWake()}, which continues that same refresh: it spends the daily wake cap, not a second
@@ -37,8 +37,7 @@ final readonly class ManualRefreshService
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private ManualRefreshPolicy $policy,
-        private RateLimiterFactoryInterface $manualRefreshLimiter,
+        private ManualRefreshLimit $limit,
         private MessageBusInterface $bus,
         private ClockInterface $clock,
         private RefreshAttemptRepository $attempts,
@@ -56,12 +55,10 @@ final readonly class ManualRefreshService
     {
         $vehicleId = $vehicle->getId()->toRfc4122();
 
-        if ($this->policy->isLimited($vehicle)) {
-            $limit = $this->manualRefreshLimiter->create($vehicleId)->consume();
+        $retryAfter = $this->limit->retryAfter($vehicle);
 
-            if (!$limit->isAccepted()) {
-                return RefreshRequestResult::rateLimited(CarbonImmutable::instance($limit->getRetryAfter())->utc());
-            }
+        if (null !== $retryAfter) {
+            return RefreshRequestResult::rateLimited($retryAfter);
         }
 
         $attempt = new RefreshAttempt($vehicle, CarbonImmutable::instance($this->clock->now()));
@@ -132,7 +129,7 @@ final readonly class ManualRefreshService
     {
         $expired = $attempt->getUpdatedAt()->addSeconds(WakeWindow::CONFIRM_SECONDS) < $now;
 
-        if (RefreshOutcome::Asleep !== $attempt->getOutcome() || $expired) {
+        if ($expired || RefreshOutcome::Asleep !== $attempt->getOutcome()) {
             return WakeRequestResult::refused(WakeRequestStatus::NothingToWake);
         }
 
@@ -154,6 +151,13 @@ final readonly class ManualRefreshService
 
         if (null !== $refusal) {
             return WakeRequestResult::refused($refusal);
+        }
+
+        // The read that follows the wake spends the hour: a wake that could not be read would be paid for nothing.
+        $retryAfter = $this->limit->retryAfter($vehicle);
+
+        if (null !== $retryAfter) {
+            return WakeRequestResult::rateLimited($retryAfter);
         }
 
         $cap = $this->wakeCap->status($vehicle, $app, $now);

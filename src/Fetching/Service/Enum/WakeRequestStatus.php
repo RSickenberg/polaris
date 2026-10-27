@@ -17,6 +17,11 @@ enum WakeRequestStatus: string
     case CapReached = 'cap_reached';
 
     /**
+     * The hourly limit of the manual refresh is spent: the read that follows a wake would be refused.
+     */
+    case RateLimited = 'rate_limited';
+
+    /**
      * The `vehicle_cmds` scope was never granted: the user must connect to Tesla again.
      */
     case ScopeMissing = 'scope_missing';

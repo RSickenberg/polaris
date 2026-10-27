@@ -11,6 +11,7 @@ use Polaris\Account\Entity\User;
 use Polaris\Fetching\Domain\RefreshOutcome;
 use Polaris\Fetching\Entity\RefreshAttempt;
 use Polaris\Fetching\Message\FetchOdometerMessage;
+use Polaris\Fetching\Service\ManualRefreshLimit;
 use Polaris\Fetching\Twig\Components\OdometerRefreshButton;
 use Polaris\Tesla\Entity\TeslaApp;
 use Polaris\Tests\Support\SignsIn;
@@ -85,17 +86,18 @@ final class OdometerRefreshButtonTest extends WebTestCase
 
     public function testASecondClickWithinTheHourShowsWhenToTryAgainAndQueuesNothing(): void
     {
+        // A refresh that read the car spent the hour (the fetch does it, the click only looks).
+        self::assertNull(self::getContainer()->get(ManualRefreshLimit::class)->consume($this->mine));
         $component = $this->component($this->mine);
-        $component->call('refresh');
 
         $html = (string) $component->call('refresh')->render();
 
         self::assertStringContainsString('You can refresh again at', $html);
         self::assertStringContainsString('data-toast-announce-variant-value="warning"', $html);
         self::assertMatchesRegularExpression('/You can refresh again at [^(]+\(UTC\)\./', $html, 'The time says its zone.');
-        self::assertStringContainsString('id="limited-2"', $html, 'Each click is a new toast.');
+        self::assertStringContainsString('id="limited-1"', $html);
         self::assertStringNotContainsString('data-poll', $html);
-        self::assertCount(1, $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(), 'The limited click starts nothing.');
+        self::assertSame([], $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(), 'The limited click starts nothing.');
     }
 
     public function testAnotherUsersVehicleIsRefusedOnEveryRequest(): void
@@ -229,6 +231,7 @@ final class OdometerRefreshButtonTest extends WebTestCase
         yield 'timeout' => [RefreshOutcome::WakeTimeout, 'warning', 'did not come online within 90 seconds'];
         yield 'scope refused' => [RefreshOutcome::WakeScopeMissing, 'danger', 'Tesla refused the wake'];
         yield 'cap' => [RefreshOutcome::WakeCapReached, 'warning', 'already woken as often as allowed'];
+        yield 'limited' => [RefreshOutcome::Limited, 'warning', 'Another refresh read the car first'];
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('wakeEndings')]

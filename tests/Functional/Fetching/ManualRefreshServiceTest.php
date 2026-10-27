@@ -16,6 +16,7 @@ use Polaris\Fetching\Message\FetchOdometerMessage;
 use Polaris\Fetching\Repository\RefreshAttemptRepository;
 use Polaris\Fetching\Service\Enum\RefreshRequestStatus;
 use Polaris\Fetching\Service\Enum\WakeRequestStatus;
+use Polaris\Fetching\Service\ManualRefreshLimit;
 use Polaris\Fetching\Service\ManualRefreshService;
 use Polaris\Fetching\Service\WakeCap;
 use Polaris\Tesla\Entity\TeslaApp;
@@ -81,9 +82,21 @@ final class ManualRefreshServiceTest extends KernelTestCase
         self::assertSame('2026-10-26T12:00:00+00:00', $attempt->getRequestedAt()->toIso8601String());
     }
 
-    public function testASecondRequestWithinTheHourIsLimitedAndQueuesNothing(): void
+    public function testARequestDoesNotSpendTheHourUntilTheCarIsRead(): void
+    {
+        self::assertTrue($this->service()->request($this->vehicle)->isAccepted());
+        self::assertTrue($this->service()->request($this->vehicle)->isAccepted(), 'A car found asleep costs nothing against the limit.');
+        self::assertCount(2, $this->queued());
+
+        self::assertNull($this->limit()->consume($this->vehicle), 'The fetch spends the hour when it reads the car.');
+        self::assertNotNull($this->limit()->consume($this->vehicle), 'A second read within the hour is refused.');
+        self::assertNotNull($this->limit()->retryAfter($this->vehicle));
+    }
+
+    public function testASecondRequestWithinTheHourOfARealReadIsLimitedAndQueuesNothing(): void
     {
         $this->service()->request($this->vehicle);
+        $this->limit()->consume($this->vehicle);
 
         $result = $this->service()->request($this->vehicle);
 
@@ -101,32 +114,36 @@ final class ManualRefreshServiceTest extends KernelTestCase
 
     public function testTwoVehiclesHaveSeparateLimits(): void
     {
-        self::assertTrue($this->service()->request($this->vehicle)->isAccepted());
+        $this->limit()->consume($this->vehicle);
 
         self::assertTrue($this->service()->request($this->other)->isAccepted());
+        $this->limit()->consume($this->other);
         self::assertFalse($this->service()->request($this->vehicle)->isAccepted());
         self::assertFalse($this->service()->request($this->other)->isAccepted());
     }
 
     public function testARequestIsAcceptedAgainOnceTheHourIsOver(): void
     {
-        $this->service()->request($this->vehicle);
+        $this->limit()->consume($this->vehicle);
         // The limiter reads the wall clock, which the test cannot freeze: its stored window is aged instead.
         $this->storage->save(self::agedWindow($this->vehicle));
 
         self::assertTrue($this->service()->request($this->vehicle)->isAccepted());
-        self::assertCount(2, $this->queued());
+        self::assertCount(1, $this->queued());
     }
 
     public function testWithoutALimitEveryRequestIsAccepted(): void
     {
-        $service = $this->service(new class implements ManualRefreshPolicy {
+        $policy = new class implements ManualRefreshPolicy {
             public function isLimited(Vehicle $vehicle): bool
             {
                 return false;
             }
-        });
+        };
+        $service = $this->service($policy);
 
+        self::assertNull($this->limit($policy)->consume($this->vehicle));
+        self::assertNull($this->limit($policy)->consume($this->vehicle));
         self::assertTrue($service->request($this->vehicle)->isAccepted());
         self::assertTrue($service->request($this->vehicle)->isAccepted());
         self::assertCount(2, $this->queued());
@@ -165,6 +182,7 @@ final class ManualRefreshServiceTest extends KernelTestCase
         $stored = $this->entityManager()->find(RefreshAttempt::class, $attempt->getId());
         self::assertSame(RefreshOutcome::Queued, $stored?->getOutcome());
         self::assertCount(2, $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(), 'The wake did not create a refresh.');
+        $this->limit()->consume($vehicle);
         self::assertFalse($service->request($vehicle)->isAccepted(), 'The hourly limit still applies after a wake.');
     }
 
@@ -228,6 +246,20 @@ final class ManualRefreshServiceTest extends KernelTestCase
         self::assertTrue($service->requestWake($this->other, $other->getId()->toRfc4122())->isAccepted(), 'The cap is per vehicle.');
     }
 
+    public function testAWakeIsRefusedWhileTheHourIsSpentBecauseNoReadCouldFollow(): void
+    {
+        $this->connect();
+        $service = $this->service();
+        $attempt = $this->asleepAttempt($service);
+        $this->limit()->consume($this->vehicle);
+
+        $result = $service->requestWake($this->vehicle, $attempt->getId()->toRfc4122());
+
+        self::assertSame(WakeRequestStatus::RateLimited, $result->status);
+        self::assertNotNull($result->availableAt);
+        self::assertSame(RefreshOutcome::Asleep, $this->entityManager()->find(RefreshAttempt::class, $attempt->getId())?->getOutcome());
+    }
+
     public function testAWakeIsRefusedWhileAnotherIsRunning(): void
     {
         $this->connect();
@@ -273,14 +305,21 @@ final class ManualRefreshServiceTest extends KernelTestCase
     {
         return new ManualRefreshService(
             $this->entityManager(),
-            $policy ?? self::getContainer()->get(ManualRefreshPolicy::class),
-            new RateLimiterFactory(['id' => 'manual_refresh', 'policy' => 'fixed_window', 'limit' => 1, 'interval' => '1 hour'], $this->storage),
+            $this->limit($policy),
             self::getContainer()->get(MessageBusInterface::class),
             self::getContainer()->get(ClockInterface::class),
             self::getContainer()->get(RefreshAttemptRepository::class),
             self::getContainer()->get(TeslaAppSettings::class),
             self::getContainer()->get(TeslaVehicleWaker::class),
             self::getContainer()->get(WakeCap::class),
+        );
+    }
+
+    private function limit(?ManualRefreshPolicy $policy = null): ManualRefreshLimit
+    {
+        return new ManualRefreshLimit(
+            $policy ?? self::getContainer()->get(ManualRefreshPolicy::class),
+            new RateLimiterFactory(['id' => 'manual_refresh', 'policy' => 'fixed_window', 'limit' => 1, 'interval' => '1 hour'], $this->storage),
         );
     }
 

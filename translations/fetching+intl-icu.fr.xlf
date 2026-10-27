@@ -110,6 +110,14 @@
         <source>wake.nothing_to_wake</source>
         <target>Cette actualisation ne peut plus réveiller la voiture. Actualisez à nouveau.</target>
       </trans-unit>
+      <trans-unit id="outcome.limited">
+        <source>outcome.limited</source>
+        <target>Une autre actualisation a lu la voiture avant : celle-ci n’a pas été faite, le dernier relevé est conservé.</target>
+      </trans-unit>
+      <trans-unit id="wake.rate_limited">
+        <source>wake.rate_limited</source>
+        <target>La voiture dort. Elle a été lue il y a moins d’une heure, un réveil ne serait donc pas suivi d’une lecture. Vous pourrez actualiser et la réveiller à nouveau à {time} ({zone}).</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

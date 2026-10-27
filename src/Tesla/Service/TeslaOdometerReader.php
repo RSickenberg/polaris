@@ -31,12 +31,38 @@ final readonly class TeslaOdometerReader
      */
     public function read(TeslaApp $app, Vin $vin): OdometerReadResult
     {
-        $state = $this->vehicles->vehicleState($app, $vin);
+        $state = $this->state($app, $vin);
 
-        if (VehicleState::Online !== $state) {
-            return OdometerReadResult::none(VehicleState::Asleep === $state ? NoReadingReason::Asleep : NoReadingReason::Offline);
-        }
+        return VehicleState::Online === $state ? $this->readOnline($app, $vin) : $this->noReading($state);
+    }
 
+    /**
+     * The free step: the state of the car, which says whether the billed live read is worth asking for.
+     *
+     * @throws TeslaNotConnected
+     * @throws FleetApiError
+     */
+    public function state(TeslaApp $app, Vin $vin): VehicleState
+    {
+        return $this->vehicles->vehicleState($app, $vin);
+    }
+
+    /**
+     * Why a car that is not online gives no reading, without asking it.
+     */
+    public function noReading(VehicleState $state): OdometerReadResult
+    {
+        return OdometerReadResult::none(VehicleState::Asleep === $state ? NoReadingReason::Asleep : NoReadingReason::Offline);
+    }
+
+    /**
+     * The billed live read of a car known to be online. A 408 (it fell asleep meanwhile) is no reading, not an error.
+     *
+     * @throws TeslaNotConnected
+     * @throws FleetApiError
+     */
+    public function readOnline(TeslaApp $app, Vin $vin): OdometerReadResult
+    {
         try {
             return OdometerReadResult::read($this->vehicles->vehicleData($app, $vin));
         } catch (FleetApiError $failure) {
