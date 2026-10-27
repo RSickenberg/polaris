@@ -7,6 +7,7 @@ namespace Polaris\Fetching\Service;
 use Carbon\CarbonImmutable;
 use Polaris\Extension\ManualRefreshPolicy;
 use Polaris\Vehicle\Entity\Vehicle;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 
 /**
@@ -18,6 +19,8 @@ final readonly class ManualRefreshLimit
 {
     public function __construct(
         private ManualRefreshPolicy $policy,
+
+        #[Autowire(service: 'limiter.manual_refresh')]
         private RateLimiterFactoryInterface $manualRefreshLimiter,
     ) {
     }
