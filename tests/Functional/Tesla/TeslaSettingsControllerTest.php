@@ -177,6 +177,7 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertSelectorExists('input[type=checkbox][name="' . self::FORM . '[keepVehicleData]"][checked]');
         self::assertSelectorTextContains('label[for=' . self::FORM . '_keepVehicleData]', 'Keep what the car reports');
         self::assertSelectorTextContains('[id$=keepVehicleData_help]', 'never the location');
+        self::assertSelectorExists('[id$=keepVehicleData_help] br', 'The last sentence of the help is on its own line.');
 
         $this->submit(['clientSecret' => self::SECRET, 'keepVehicleData' => false]);
         self::assertResponseRedirects('/settings/tesla');

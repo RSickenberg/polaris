@@ -92,7 +92,7 @@
 {% block form_help %}
     {%- if help -%}
         {%- set help_content -%}{{- block('form_help_content') -}}{%- endset -%}
-        <twig:Field:Description {{ ...help_attr|merge({id: id ~ '_help'}) }}>{{ help_content }}</twig:Field:Description>
+        <twig:Field:Description {{ ...help_attr|merge({id: id ~ '_help'}) }}>{{ help_content|nl2br }}</twig:Field:Description>
     {%- endif -%}
 {% endblock %}
 
