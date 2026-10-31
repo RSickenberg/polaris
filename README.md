@@ -2,13 +2,13 @@
 
 Polaris tracks your Tesla's odometer against your lease allowance, projects the mileage at the end of the lease and warns you before you go over.
 
-> **Status:** early design. Nothing is usable end to end yet.
+> **Status:** pre-1.0 (0.x). Expect changes between releases; read the release notes before you upgrade.
 
 - Reads the odometer from the official Tesla Fleet API, once or twice a day, without waking the car, plus a manual refresh at most once per hour.
 - Compares the kilometres driven with the lease allowance and projects the total at lease end.
 - Gives a remaining budget per day, week and month, and alerts when the projection crosses the limit.
 
-Each user connects their own Tesla developer app, so Tesla API usage is billed to their own Tesla developer account. This repository is the open-source, self-hostable edition, published as a Docker image on GitHub Container Registry.
+Each user connects their own Tesla developer app, so Tesla API usage is billed to their own Tesla developer account. This repository is the source-available, self-hostable edition (personal, noncommercial use, see [ADR 0008](docs/adr/0008-polyform-noncommercial-license.md)), published as a Docker image on GitHub Container Registry.
 
 ## Quick start
 
@@ -41,6 +41,29 @@ A self-hosted Polaris has a single user and no sign-up page. Options: `--locale=
 `make seed` loads sample vehicles for `dev@example.test` (random password printed once) if you only want to look around.
 
 Forgotten password: use "Forgot your password?" on the login page. It needs a mailer: set `MAILER_DSN`, `MAILER_FROM` and `DEFAULT_URI` (the public address of the app) in `.env.local`. In development, mails go to Mailpit at http://localhost:8025.
+
+## Run the published image
+
+Instead of building it, run the image published on GitHub Container Registry for each release (`linux/amd64` and `linux/arm64`). The tag is the version without the `v` (`0.1.0`); `latest` is the newest stable release. Pin a version rather than following `latest`, and read the release notes before you change it.
+
+1. Get the Compose files of the same release (the image carries the application, not the Compose setup) and your settings file, then fill it as in the Quick start:
+
+   ```bash
+   git clone --branch v0.1.0 --depth 1 https://github.com/RSickenberg/polaris.git
+   cd polaris
+   cp .env.example .env.local
+   ```
+
+2. Pull and start it, then create your user:
+
+   ```bash
+   export POLARIS_VERSION=0.1.0
+   docker compose -f compose.yaml -f compose.image.yaml pull
+   docker compose -f compose.yaml -f compose.image.yaml up -d --wait
+   docker compose -f compose.yaml -f compose.image.yaml exec php bin/console polaris:user:create you@example.com
+   ```
+
+The commands of the next sections use `make sf ARGS="..."`, which runs the development image. With the published image, run `docker compose -f compose.yaml -f compose.image.yaml exec php bin/console ...` instead. The image runs the migrations on start.
 
 ## Connect your Tesla
 
