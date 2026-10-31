@@ -1,6 +1,11 @@
 framework:
     secret: '%env(APP_SECRET)%'
     session: true
+    # Addresses (comma-separated, or REMOTE_ADDR) of the reverse proxy in front of the app. Empty: no proxy is trusted.
+    # Without it, behind a proxy every client shares the proxy address (one rate limit bucket for all) and the
+    # request looks like plain HTTP (cookies without Secure).
+    trusted_proxies: '%env(default::TRUSTED_PROXIES)%'
+    trusted_headers: ['x-forwarded-for', 'x-forwarded-proto', 'x-forwarded-port', 'x-forwarded-host']
 
 when@test:
     framework:
