@@ -11,6 +11,8 @@ use Doctrine\ORM\Exception\ORMException;
 use Polaris\Reading\Domain\ReadingOrder;
 use Polaris\Reading\Domain\ReadingRejection;
 use Polaris\Reading\Entity\OdometerReading;
+use Polaris\Reading\Event\ReadingConfirmed;
+use Polaris\Reading\Event\ReadingStored;
 use Polaris\Reading\Form\Model\OdometerReadingData;
 use Polaris\Reading\Repository\OdometerReadingRepository;
 use Polaris\Reading\Service\Dto\ApiRecording;
@@ -19,6 +21,7 @@ use Polaris\Shared\Domain\Distance;
 use Polaris\Shared\Domain\DistanceUnit;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Records odometer readings (typed by the user or read from the car) and lists the history. The only place the rules live:
@@ -31,6 +34,7 @@ final readonly class OdometerReadingService
         private OdometerReadingRepository $readings,
         private ReadingOrder $order,
         private ClockInterface $clock,
+        private EventDispatcherInterface $events,
     ) {
     }
 
@@ -78,6 +82,8 @@ final readonly class OdometerReadingService
             throw new ReadingRejected(ReadingRejection::DuplicateInstant);
         }
 
+        $this->events->dispatch(new ReadingStored($vehicle));
+
         return $reading;
     }
 
@@ -114,6 +120,7 @@ final readonly class OdometerReadingService
             if (null === $next) {
                 $previous->confirm($readAt->min(CarbonImmutable::instance($this->clock->now())->utc()));
                 $this->entityManager->flush();
+                $this->events->dispatch(new ReadingConfirmed($vehicle));
             }
 
             return ApiRecording::unchanged();
@@ -134,6 +141,8 @@ final readonly class OdometerReadingService
             // Another writer stored a reading at the same instant after the check above.
             return ApiRecording::unchanged();
         }
+
+        $this->events->dispatch(new ReadingStored($vehicle));
 
         return ApiRecording::stored($reading);
     }

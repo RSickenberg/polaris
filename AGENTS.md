@@ -136,6 +136,14 @@ These win over the generic guidance above.
 
 - The projection is measured from the latest instant the car is known to be at an odometer, not from the clock. A value read from the car that equals the latest reading is not stored again: `OdometerReadingService::recordFromApi()` notes it as `OdometerReading::confirm()` (`confirmed_at`, forward only, never past the clock, only on the latest reading). `LeaseTermsService::samples()` adds a sample with the same odometer at `confirmed_at`, so a day without driving moves the allowance to date and grows the margin; a confirmation a later reading contradicts is dropped. A car that cannot be read (asleep, offline) confirms nothing, so the figures stay as of the last answer.
 
+### Risk level changes (Alert module, #29)
+
+- The self-hosted app sends no alert: it detects that a vehicle's risk level got worse and tells `Extension\RiskAlertNotifier`, which the hosted layer replaces (service decoration or alias). The default `NullRiskAlertNotifier` does nothing and returns null.
+- Triggers are events from the modules that move the projection, never calls into Alert: `Reading\Event\ReadingStored` (manual or API reading stored), `Reading\Event\ReadingConfirmed` (the car had not moved), `Lease\Event\LeaseTermsSaved`. `Alert\EventListener\QueueRiskLevelCheck` turns each into a `CheckRiskLevel` message on the `async` transport, so the check never delays a reading or a fetch. A new writer of readings or terms must dispatch the matching event.
+- `Alert\Service\RiskLevelWatcher::check()` runs under a `symfony/lock` lock per vehicle (`risk_alert_<vehicle base32>`, non-blocking, TTL 60 s): a scheduled fetch and a manual reading landing together are serialised, and the second check reads the row of the first. A busy check ends `RiskCheckOutcome::Busy`; `CheckRiskLevelHandler` queues it once more 30 s later.
+- The known level is the newest `AlertLog` row of the vehicle (table `alert_log`: `sent_at`, `type`, `risk_level`, nullable `channel`). A row is written whatever the extension does; `channel` is what `notify()` returned, null when nothing was sent. `Alert\Domain\RiskChangeRule` decides from ranks (Ok 0, Watch 1, Over 2; a Domain does not use another module's Domain): same level does nothing; a first assessment or a lower level is logged as `baseline` without a call; a higher level calls `notify()` with a `RiskLevelChange` (vehicle, previous, current, `LeaseAssessment`) and is logged as `risk_increased`. If `notify()` throws, no row is written and the message is retried by Messenger.
+- No contract, no readings, and a lease that is a draft or has ended are not assessed and write nothing.
+
 ### Code organization (ADR 0001)
 
 - `src/` is organized by feature module as namespaces (no bundles): `Shared`, `Account`, `Vehicle`, `Lease`, `Reading`, `Tesla`, `Fetching`, `Alert`, `Dashboard`, `Extension`.

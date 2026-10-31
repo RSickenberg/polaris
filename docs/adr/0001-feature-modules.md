@@ -26,7 +26,7 @@ We accept a slightly higher setup cost to get boundaries that stay clear over ye
 | `Reading` | Odometer readings, manual entry, history |
 | `Tesla` | Fleet API integration: client, key pair, partner registration, OAuth tokens |
 | `Fetching` | Scheduled and manual odometer fetches, rate limits, wake rules |
-| `Alert` | Emails and push notifications |
+| `Alert` | Risk level change detection and the extension point alerts go through |
 | `Dashboard` | Pages that compose other modules for display |
 | `Extension` | The contract with the hosted layer: interfaces and their self-hosted defaults |
 

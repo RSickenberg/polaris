@@ -10,6 +10,7 @@ use Polaris\Lease\Domain\LeaseAssessment;
 use Polaris\Lease\Domain\LeaseAssessor;
 use Polaris\Lease\Domain\NoData;
 use Polaris\Lease\Entity\LeaseContract;
+use Polaris\Lease\Event\LeaseTermsSaved;
 use Polaris\Lease\Form\Model\LeaseContractData;
 use Polaris\Lease\Repository\LeaseContractRepository;
 use Polaris\Lease\Service\Dto\LeaseTerms;
@@ -17,6 +18,7 @@ use Polaris\Lease\Service\Exception\LeaseTermsRejected;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Shared\Domain\OdometerSample;
 use Polaris\Vehicle\Entity\Vehicle;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Creates or edits the lease contract of a vehicle and recomputes the projection with the
@@ -34,6 +36,7 @@ final readonly class LeaseTermsService
         private LeaseContractFactory $factory,
         private LeaseAssessor $assessor,
         private OdometerReadingService $readings,
+        private EventDispatcherInterface $events,
     ) {
     }
 
@@ -81,6 +84,7 @@ final readonly class LeaseTermsService
         }
 
         $this->entityManager->flush();
+        $this->events->dispatch(new LeaseTermsSaved($vehicle));
 
         return $assessment;
     }
