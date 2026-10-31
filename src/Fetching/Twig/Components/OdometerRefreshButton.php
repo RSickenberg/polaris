@@ -161,7 +161,7 @@ final class OdometerRefreshButton
             return null;
         }
 
-        if (!\in_array($this->outcome(), [RefreshOutcome::Asleep, RefreshOutcome::Offline], true) || $this->declinedAttemptId === $this->attemptId) {
+        if ($this->declinedAttemptId === $this->attemptId || !\in_array($this->outcome(), [RefreshOutcome::Asleep, RefreshOutcome::Offline], true)) {
             return null;
         }
 
