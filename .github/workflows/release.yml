@@ -2,13 +2,33 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      increment:
+        description: Version or bump for release-it (0.1.0, patch, minor, major). Empty lets the commits decide.
+        required: false
+        type: string
+        default: ''
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
+  # The "Protect main" ruleset requires pull requests and github-actions[bot] cannot
+  # bypass it, so this job tags the tip of main without committing anything to it. The
+  # changelog goes into the GitHub release notes; CHANGELOG.md and package.json are not
+  # updated on main.
   release:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+      prerelease: ${{ steps.tag.outputs.prerelease }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -23,6 +43,28 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Release
-        run: npx release-it --ci
+        run: npx release-it ${{ inputs.increment }} --ci --no-git.commit
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Read the tag release-it created
+        id: tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="$(git describe --tags --exact-match HEAD)"
+          {
+            echo "tag=$tag"
+            echo "prerelease=$(gh release view "$tag" --json isPrerelease --jq .isPrerelease)"
+          } >> "$GITHUB_OUTPUT"
+
+  # A release created with GITHUB_TOKEN does not start the "release: published" run of
+  # docker.yml, so the image is built by calling it here.
+  image:
+    needs: release
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/docker.yml
+    with:
+      tag: ${{ needs.release.outputs.tag }}
+      prerelease: ${{ needs.release.outputs.prerelease == 'true' }}

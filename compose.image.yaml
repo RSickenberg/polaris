@@ -1,0 +1,9 @@
+# Run the published image instead of building it:
+#   POLARIS_VERSION=0.1.0 docker compose -f compose.yaml -f compose.image.yaml up -d --wait
+# Compose reads POLARIS_VERSION from the shell or from .env, not from .env.local.
+services:
+  php:
+    image: ghcr.io/rsickenberg/polaris:${POLARIS_VERSION:-latest}
+
+  worker:
+    image: ghcr.io/rsickenberg/polaris:${POLARIS_VERSION:-latest}
