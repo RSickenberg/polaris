@@ -162,6 +162,39 @@
         <source>email.reset.ignore</source>
         <target>Si ce n'était pas vous, ignorez cet e-mail : votre mot de passe reste inchangé.</target>
       </trans-unit>
+      <trans-unit id="page.settings.reporting">
+        <source>page.settings.reporting</source>
+        <target>Rapports d’erreurs</target>
+      </trans-unit>
+      <trans-unit id="page.settings.reporting_description">
+        <source>page.settings.reporting_description</source>
+        <target>Polaris n’envoie rien à Sentry sauf si le propriétaire de cette instance a activé les rapports d’erreurs. Voici votre part de ce choix.</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting.label">
+        <source>form.error_reporting.label</source>
+        <target>Autoriser le rapport des erreurs de mon compte</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting.help">
+        <source>form.error_reporting.help</source>
+        <target>Quand les rapports d’erreurs sont activés, une erreur survenue pendant que Polaris travaille pour vous est envoyée à Sentry, sans votre email, mot de passe, jetons ni VIN.
+Désactivez-le et rien sur votre activité n’est jamais envoyé.</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting_details.label">
+        <source>form.error_reporting_details.label</source>
+        <target>Inclure ce que la voiture indique</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting_details.help">
+        <source>form.error_reporting_details.help</source>
+        <target>Ajoute la réponse de la voiture (batterie, charge, climatisation, ouvertures, etc., jamais la position) à un rapport. Il faut avoir autorisé les rapports ci-dessus.</target>
+      </trans-unit>
+      <trans-unit id="form.reporting_save">
+        <source>form.reporting_save</source>
+        <target>Enregistrer les rapports d’erreurs</target>
+      </trans-unit>
+      <trans-unit id="flash.reporting_saved">
+        <source>flash.reporting_saved</source>
+        <target>Votre choix pour les rapports d’erreurs a été enregistré.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -40,6 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       sha: ${{ steps.ref.outputs.sha }}
+      version: ${{ steps.ref.outputs.version }}
       tags: ${{ steps.meta.outputs.tags }}
       labels: ${{ steps.meta.outputs.labels }}
       annotations: ${{ steps.meta.outputs.annotations }}
@@ -133,6 +134,8 @@ jobs:
           target: frankenphp_prod
           platforms: ${{ matrix.platform }}
           labels: ${{ needs.prepare.outputs.labels }}
+          # Read at run time as SENTRY_RELEASE, so error reports name the release (see "Error reporting" in the README).
+          build-args: POLARIS_VERSION=${{ needs.prepare.outputs.version }}
           provenance: false
           sbom: false
           outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true

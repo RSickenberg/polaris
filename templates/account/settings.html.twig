@@ -26,5 +26,15 @@
                 {{ form(passwordForm) }}
             </twig:Card:Content>
         </twig:Card>
+
+        <twig:Card>
+            <twig:Card:Header>
+                <twig:Card:Title><h2>{{ 'page.settings.reporting'|trans(domain='account') }}</h2></twig:Card:Title>
+                <twig:Card:Description>{{ 'page.settings.reporting_description'|trans(domain='account') }}</twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content>
+                {{ form(reportingForm) }}
+            </twig:Card:Content>
+        </twig:Card>
     </div>
 {% endblock %}

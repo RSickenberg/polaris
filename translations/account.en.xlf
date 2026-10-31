@@ -162,6 +162,39 @@
         <source>email.reset.ignore</source>
         <target>If it was not you, ignore this email: your password stays the same.</target>
       </trans-unit>
+      <trans-unit id="page.settings.reporting">
+        <source>page.settings.reporting</source>
+        <target>Error reporting</target>
+      </trans-unit>
+      <trans-unit id="page.settings.reporting_description">
+        <source>page.settings.reporting_description</source>
+        <target>Polaris sends nothing to Sentry unless the owner of this instance turned error reporting on. This is your part of that choice.</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting.label">
+        <source>form.error_reporting.label</source>
+        <target>Let errors about my account be reported</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting.help">
+        <source>form.error_reporting.help</source>
+        <target>When error reporting is on, an error that happens while Polaris works for you is sent to Sentry, without your email, password, tokens or VIN.
+Turn it off and nothing about your activity is ever sent.</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting_details.label">
+        <source>form.error_reporting_details.label</source>
+        <target>Include what the car reports</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting_details.help">
+        <source>form.error_reporting_details.help</source>
+        <target>Adds the answer of the car (battery, charge, climate, doors and so on, never the location) to a report. It needs the reports above.</target>
+      </trans-unit>
+      <trans-unit id="form.reporting_save">
+        <source>form.reporting_save</source>
+        <target>Save error reporting</target>
+      </trans-unit>
+      <trans-unit id="flash.reporting_saved">
+        <source>flash.reporting_saved</source>
+        <target>Your error reporting choice was saved.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

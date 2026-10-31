@@ -188,6 +188,36 @@ With A the total allowance:
 - **Excess cost:** (P - A) x the excess cost per km, rounded half up once to the minor unit; 0 while P stays within A.
 - **No data / lease ended:** without a reading after the lease start nothing is projected; once the lease has ended, budgets are zero and the excess cost keeps growing with every reading.
 
+## Error reporting (optional)
+
+Polaris can report its errors to [Sentry](https://sentry.io) so that bugs get fixed. It is **off by default**: a fresh install, and any install that does not set the variable below, sends nothing and opens no connection to Sentry.
+
+**Where it goes.** Pick one in `.env.local` (see `.env.example`):
+
+| `POLARIS_ERROR_REPORTING` | Reports go to |
+|---|---|
+| `off` or empty (default) | nowhere |
+| `maintainer` | the Sentry project of the Polaris maintainer. Its address ships with the image, so it can change with a release without you editing anything |
+| `custom` | your own Sentry project: set `SENTRY_DSN` to its DSN |
+
+`SENTRY_TRACES_SAMPLE_RATE` (0 to 1, default `0.05`) is the share of requests and background jobs traced for performance; `0` sends no trace. Reporting only exists in the production image (`APP_ENV=prod`), and the image carries its version as the release, so a report names the version you run.
+
+**What is sent**, once you opted in and the user did not opt out:
+
+- errors (exception type and message, stack trace without function arguments or variables), and `warning` and `error` log lines written by Polaris;
+- performance traces: the duration of requests, jobs, database queries (SQL text, never the values) and calls to Tesla (URL without the VIN);
+- your user ID (a random ULID, no email, name or address), the environment (`prod`) and the release;
+- odometer values and lease figures that appear in an error or a log line (for example the two values of a reading that was refused);
+- the answer of the car (battery, charge, climate, doors and so on) only if the user ticked "Include what the car reports" in Settings. It never contains the location.
+
+**What is never sent**: email addresses, passwords, Tesla tokens, client secrets, private keys, `POLARIS_ENCRYPTION_KEY`, VINs, locations, IP addresses, cookies, request or response bodies, request headers, query strings, database query parameters, function arguments and variables of the stack trace. A scrubber removes VINs, tokens, keys and emails from every message, URL and span before it leaves, and no trace header (`sentry-trace`, `baggage`) is ever added to a request to Tesla or to any other host. No profiling, session replay or cron monitoring.
+
+**Opting out.**
+
+- Instance: unset `POLARIS_ERROR_REPORTING` (or set it to `off`) and restart.
+- User: *Settings* > *Error reporting*, untick "Let errors about my account be reported". Nothing about that user's activity is sent from the next report on, in requests and in background jobs. An error that cannot be tied to a known user is dropped, not sent. Errors with no user at all (the app failing to boot, the scheduler tick) follow the instance switch only.
+- Accounts created before this feature existed start opted out; new accounts start opted in, which only matters once the instance owner turned reporting on.
+
 ## Development
 
 The setup is based on [dunglas/symfony-docker](https://github.com/dunglas/symfony-docker) and runs on [FrankenPHP](https://frankenphp.dev) with PHP 8.5. Every PHP command runs in the `php` container through the `Makefile` (`make` alone lists the targets).

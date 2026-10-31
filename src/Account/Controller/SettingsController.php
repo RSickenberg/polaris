@@ -6,6 +6,8 @@ namespace Polaris\Account\Controller;
 
 use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
+use Polaris\Account\Form\ErrorReportingType;
+use Polaris\Account\Form\Model\ErrorReportingData;
 use Polaris\Account\Form\Model\PasswordChangeData;
 use Polaris\Account\Form\Model\ProfileData;
 use Polaris\Account\Form\PasswordChangeType;
@@ -47,8 +49,10 @@ final class SettingsController extends AbstractController
     {
         $profile = $this->forms->createNamed('profile', ProfileType::class, ProfileData::fromUser($user));
         $password = $this->forms->createNamed('password', PasswordChangeType::class, new PasswordChangeData());
+        $reporting = $this->forms->createNamed('reporting', ErrorReportingType::class, ErrorReportingData::fromUser($user));
         $profile->handleRequest($request);
         $password->handleRequest($request);
+        $reporting->handleRequest($request);
 
         if ($profile->isSubmitted() && $profile->isValid()) {
             /** @var ProfileData $data */
@@ -70,10 +74,20 @@ final class SettingsController extends AbstractController
             return $this->savedAndSignedInAgain($user, 'flash.password_saved');
         }
 
+        if ($reporting->isSubmitted() && $reporting->isValid()) {
+            /** @var ErrorReportingData $data */
+            $data = $reporting->getData();
+            $this->settings->changeErrorReporting($user, $data->enabled, $data->details);
+            $this->addFlash('success', $this->translator->trans('flash.reporting_saved', domain: 'account'));
+
+            return $this->redirectToRoute('account_settings');
+        }
+
         return $this->render('account/settings.html.twig', [
             'profileForm' => $profile,
             'passwordForm' => $password,
-        ], new Response(status: $profile->isSubmitted() || $password->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
+            'reportingForm' => $reporting,
+        ], new Response(status: $profile->isSubmitted() || $password->isSubmitted() || $reporting->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
     }
 
     /**
