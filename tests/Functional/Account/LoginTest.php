@@ -137,7 +137,8 @@ final class LoginTest extends WebTestCase
         $this->login('throttle@example.test', self::PASSWORD);
         self::assertResponseRedirects('/login');
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[role=alert]', 'Too many failed login attempts, please try again in 15 minutes.');
+        // The limiter rounds the wait up, so a test straddling a second boundary reads 16.
+        self::assertMatchesRegularExpression('/Too many failed login attempts, please try again in 1[56] minutes\./', $this->client->getCrawler()->filter('[role=alert]')->text());
     }
 
     public function testThrottlingIsPerEmail(): void

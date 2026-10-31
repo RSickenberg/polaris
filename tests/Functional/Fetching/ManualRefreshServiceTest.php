@@ -108,7 +108,8 @@ final class ManualRefreshServiceTest extends KernelTestCase
         self::assertSame(0, $result->retryAfter->getOffset(), 'The retry instant is UTC.');
         $secondsLeft = $result->retryAfter->getTimestamp() - time();
         self::assertGreaterThan(0, $secondsLeft);
-        self::assertLessThanOrEqual(3_600, $secondsLeft);
+        // The limiter rounds the wait up to a whole second.
+        self::assertLessThanOrEqual(3_601, $secondsLeft);
         self::assertCount(1, $this->queued());
         self::assertCount(1, $this->entityManager()->getRepository(RefreshAttempt::class)->findAll());
     }
