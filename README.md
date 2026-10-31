@@ -197,7 +197,7 @@ Polaris can report its errors to [Sentry](https://sentry.io) so that bugs get fi
 | `POLARIS_ERROR_REPORTING` | Reports go to |
 |---|---|
 | `off` or empty (default) | nowhere |
-| `maintainer` | the Sentry project of the Polaris maintainer. Its address ships with the image, so it can change with a release without you editing anything |
+| `maintainer` | the Sentry project of the Polaris maintainer. Its address is built into the released image (not into a source install), so it can change with a release without you editing anything |
 | `custom` | your own Sentry project: set `SENTRY_DSN` to its DSN |
 
 `SENTRY_TRACES_SAMPLE_RATE` (0 to 1, default `0.05`) is the share of requests and background jobs traced for performance; `0` sends no trace. Reporting only exists in the production image (`APP_ENV=prod`), and the image carries its version as the release, so a report names the version you run.

@@ -16,8 +16,10 @@ parameters:
     polaris.source_url: 'https://github.com/RSickenberg/polaris'
 
     # The Sentry project that receives the reports of an instance whose owner set POLARIS_ERROR_REPORTING=maintainer
-    # (DSNs are write-only and public by design). Empty: the maintainer option sends nothing.
-    polaris.sentry.maintainer_dsn: ''
+    # (a DSN is write-only and public by design). The released image sets POLARIS_MAINTAINER_DSN at build time (the
+    # POLARIS_MAINTAINER_DSN variable of the repository, see .github/workflows/docker.yml); empty elsewhere, so a
+    # source install or a fork sends nothing with "maintainer".
+    polaris.sentry.maintainer_dsn: '%env(string:default::POLARIS_MAINTAINER_DSN)%'
 
     # Share of the requests and messages traced when SENTRY_TRACES_SAMPLE_RATE is empty or unset.
     polaris.sentry.traces_sample_rate: 0.05

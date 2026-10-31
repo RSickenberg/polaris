@@ -135,7 +135,9 @@ jobs:
           platforms: ${{ matrix.platform }}
           labels: ${{ needs.prepare.outputs.labels }}
           # Read at run time as SENTRY_RELEASE, so error reports name the release (see "Error reporting" in the README).
-          build-args: POLARIS_VERSION=${{ needs.prepare.outputs.version }}
+          build-args: |
+            POLARIS_VERSION=${{ needs.prepare.outputs.version }}
+            POLARIS_MAINTAINER_DSN=${{ vars.POLARIS_MAINTAINER_DSN }}
           provenance: false
           sbom: false
           outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true

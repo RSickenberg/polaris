@@ -125,9 +125,12 @@ SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
 # The release the image was built from (empty for a local build): error reports carry it as their release.
 ARG POLARIS_VERSION=
+# The Sentry project of the maintainer, for instances that choose POLARIS_ERROR_REPORTING=maintainer (empty: none).
+ARG POLARIS_MAINTAINER_DSN=
 
 ENV APP_ENV=prod
 ENV SENTRY_RELEASE=${POLARIS_VERSION}
+ENV POLARIS_MAINTAINER_DSN=${POLARIS_MAINTAINER_DSN}
 ENV TZ=UTC
 ENV PHP_INI_SCAN_DIR=":/usr/local/etc/php/app.conf.d"
 

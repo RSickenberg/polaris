@@ -122,6 +122,13 @@ final class SentryWiringTest extends KernelTestCase
         self::assertNull($this->hub()->getClient()?->getOptions()->getDsn());
     }
 
+    public function testTheMaintainerOptionUsesTheDsnTheImageWasBuiltWith(): void
+    {
+        $this->bootWith(['POLARIS_ERROR_REPORTING' => 'maintainer', 'POLARIS_MAINTAINER_DSN' => 'https://maintainer@o1.ingest.sentry.io/1', 'SENTRY_DSN' => self::DSN]);
+
+        self::assertSame('https://maintainer@o1.ingest.sentry.io/1', (string) $this->hub()->getClient()?->getOptions()->getDsn());
+    }
+
     public function testTheOwnersOwnDsnIsUsedWithTheCustomOption(): void
     {
         $this->bootWith(['POLARIS_ERROR_REPORTING' => 'custom', 'SENTRY_DSN' => self::DSN, 'SENTRY_RELEASE' => '0.1.0']);
