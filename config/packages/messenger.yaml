@@ -5,7 +5,7 @@ framework:
         failure_transport: failed
 
         transports:
-            # General background work (nothing is routed here yet).
+            # General background work: the risk level checks of the Alert module.
             async:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 options:
@@ -31,6 +31,7 @@ framework:
 
         routing:
             Polaris\Fetching\Message\FetchOdometerMessage: tesla
+            Polaris\Alert\Message\CheckRiskLevel: async
 
 when@test:
     framework:
