@@ -162,6 +162,38 @@
         <source>email.reset.ignore</source>
         <target>If it was not you, ignore this email: your password stays the same.</target>
       </trans-unit>
+      <trans-unit id="page.settings.reporting">
+        <source>page.settings.reporting</source>
+        <target>Error reporting</target>
+      </trans-unit>
+      <trans-unit id="page.settings.reporting_description">
+        <source>page.settings.reporting_description</source>
+        <target>Polaris sends nothing to Sentry unless the owner of this instance turned error reporting on. This is your part of that choice.</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting.label">
+        <source>form.error_reporting.label</source>
+        <target>Allow error collection</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting.help">
+        <source>form.error_reporting.help</source>
+        <target>If the instance turned it on, your errors are sent to Sentry, without sensitive data.</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting_details.label">
+        <source>form.error_reporting_details.label</source>
+        <target>Include Tesla data (anonymized)</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting_details.help">
+        <source>form.error_reporting_details.help</source>
+        <target>Attaches the car’s answer (never the location) to reports. Needs the reports above.</target>
+      </trans-unit>
+      <trans-unit id="form.reporting_save">
+        <source>form.reporting_save</source>
+        <target>Save error reporting</target>
+      </trans-unit>
+      <trans-unit id="flash.reporting_saved">
+        <source>flash.reporting_saved</source>
+        <target>Your error reporting choice was saved.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

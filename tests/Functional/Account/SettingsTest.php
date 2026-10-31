@@ -130,6 +130,31 @@ final class SettingsTest extends WebTestCase
         self::assertTrue(self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid($this->stored(), self::PASSWORD));
     }
 
+    public function testANewUserStartsOptedInBecauseTheSelfHostedPolicySaysSo(): void
+    {
+        self::assertTrue($this->stored()->sendsErrorReports());
+        self::assertFalse($this->stored()->sendsErrorReportDetails());
+    }
+
+    public function testTheErrorReportingChoiceIsSavedAndTheDetailsNeedTheReports(): void
+    {
+        $this->client->request('GET', '/settings');
+        self::assertCheckboxChecked('reporting[enabled]');
+        self::assertCheckboxNotChecked('reporting[details]');
+
+        $this->client->submitForm('Save error reporting', ['reporting[enabled]' => false, 'reporting[details]' => true]);
+
+        self::assertResponseRedirects('/settings');
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('[data-slot=alert]', 'Your error reporting choice was saved.');
+        self::assertFalse($this->stored()->sendsErrorReports());
+        self::assertFalse($this->stored()->sendsErrorReportDetails());
+
+        $this->client->submitForm('Save error reporting', ['reporting[enabled]' => true, 'reporting[details]' => true]);
+        self::assertTrue($this->stored()->sendsErrorReports());
+        self::assertTrue($this->stored()->sendsErrorReportDetails());
+    }
+
     public function testTheSidebarShowsTheInitialsAndAMenuWithSettingsAndSignOut(): void
     {
         $this->client->request('GET', '/settings');

@@ -51,6 +51,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private CarbonImmutable $createdAt;
 
+    /**
+     * Whether error reports about this user's activity may be sent to Sentry, when the owner of the instance turned error
+     * reporting on. Off until the user (or the sign-up policy of the instance) says otherwise.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $errorReporting = false;
+
+    /**
+     * Whether vehicle data (the answer of the car) may be part of an error report. Always off until the user opts in.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $errorReportingDetails = false;
+
     public function __construct(string $email, #[\SensitiveParameter] string $passwordHash, CarbonImmutable $createdAt)
     {
         $this->id = new Ulid();
@@ -78,6 +91,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getId(): Ulid
     {
         return $this->id;
+    }
+
+    public function sendsErrorReports(): bool
+    {
+        return $this->errorReporting;
+    }
+
+    public function sendsErrorReportDetails(): bool
+    {
+        return $this->errorReporting && $this->errorReportingDetails;
+    }
+
+    /**
+     * Turning the reports off turns the details off too.
+     */
+    public function changeErrorReporting(bool $enabled, bool $details): void
+    {
+        $this->errorReporting = $enabled;
+        $this->errorReportingDetails = $enabled && $details;
     }
 
     public function getEmail(): string

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Polaris\Fetching\Message;
 
+use Polaris\Shared\Reporting\ReportsForVehicle;
+
 /**
  * Reads the odometer of one vehicle. Sent by the scheduler for a slot (and again an hour later while the
  * car is not online). Scalars only, so a message queued by an older version still deserializes: new
  * fields are added at the end with a default.
  */
-final readonly class FetchOdometerMessage
+final readonly class FetchOdometerMessage implements ReportsForVehicle
 {
     /**
      * @param string      $vehicleId     the ULID (RFC 4122 form) of the vehicle
@@ -27,6 +29,11 @@ final readonly class FetchOdometerMessage
         public bool $allowWake = false,
         public ?int $wakeDeadline = null,
     ) {
+    }
+
+    public function reportingVehicleId(): string
+    {
+        return $this->vehicleId;
     }
 
     public function nextAttempt(): self

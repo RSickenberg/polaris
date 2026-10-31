@@ -15,6 +15,15 @@ parameters:
     # Where the source of Polaris can be read, linked from the page that explains how the Tesla tokens are stored.
     polaris.source_url: 'https://github.com/RSickenberg/polaris'
 
+    # The Sentry project that receives the reports of an instance whose owner set POLARIS_ERROR_REPORTING=maintainer
+    # (a DSN is write-only and public by design). The released image sets POLARIS_MAINTAINER_DSN at build time (the
+    # POLARIS_MAINTAINER_DSN variable of the repository, see .github/workflows/docker.yml); empty elsewhere, so a
+    # source install or a fork sends nothing with "maintainer".
+    polaris.sentry.maintainer_dsn: '%env(string:default::POLARIS_MAINTAINER_DSN)%'
+
+    # Share of the requests and messages traced when SENTRY_TRACES_SAMPLE_RATE is empty or unset.
+    polaris.sentry.traces_sample_rate: 0.05
+
     # What Tesla bills for one wake_up (50 requests per USD, so 0.02), shown in the confirmation dialog.
     # Not a rule of the app: Tesla sets the price (https://developer.tesla.com/docs/fleet-api/billing-and-limits).
     polaris.tesla.wake_cost: 0.02
@@ -38,6 +47,14 @@ services:
                 class: Polaris\Lease\Domain\RecentPaceWeight
                 factory: ['Polaris\Lease\Domain\RecentPaceWeight', 'fromBasisPoints']
                 arguments: ['%polaris.lease.recent_pace_weight%']
+
+when@prod:
+    services:
+        # Warnings and errors of Monolog, sent as Sentry logs (a no-op without a DSN). See config/packages/monolog.yaml.
+        sentry.monolog.logs_handler:
+            class: Sentry\SentryBundle\Monolog\LogsHandler
+            arguments:
+                $level: warning
 
 when@dev:
     parameters:

@@ -10,6 +10,7 @@ use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
 use Polaris\Account\Service\Dto\NewUser;
 use Polaris\Account\Service\Exception\UserCreationRejected;
+use Polaris\Extension\ErrorReportingPolicy;
 use Polaris\Extension\SignUpPolicy;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -30,6 +31,8 @@ readonly class UserCreator
         private EntityManagerInterface $entityManager,
 
         private SignUpPolicy $signUpPolicy,
+
+        private ErrorReportingPolicy $errorReportingPolicy,
 
         private UserPasswordHasherInterface $hasher,
 
@@ -68,6 +71,7 @@ readonly class UserCreator
             $user->changeLocale($newUser->locale);
         }
         $user->changeTimeZone($newUser->timeZone);
+        $user->changeErrorReporting($this->errorReportingPolicy->defaultForNewUser(), false);
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();

@@ -71,6 +71,18 @@ final readonly class UserSettings
     }
 
     /**
+     * Whether error reports about the activity of the user may be sent (when the owner of the instance turned error
+     * reporting on), and whether the answer of the car may be part of them. The details need the reports.
+     *
+     * @throws ORMException
+     */
+    public function changeErrorReporting(User $user, bool $enabled, bool $details): void
+    {
+        $user->changeErrorReporting($enabled, $details);
+        $this->entityManager->flush();
+    }
+
+    /**
      * @throws \InvalidArgumentException when the password is too short or too long
      * @throws ORMException
      */

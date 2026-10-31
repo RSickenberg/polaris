@@ -162,6 +162,38 @@
         <source>email.reset.ignore</source>
         <target>Si ce n'était pas vous, ignorez cet e-mail : votre mot de passe reste inchangé.</target>
       </trans-unit>
+      <trans-unit id="page.settings.reporting">
+        <source>page.settings.reporting</source>
+        <target>Rapports d’erreurs</target>
+      </trans-unit>
+      <trans-unit id="page.settings.reporting_description">
+        <source>page.settings.reporting_description</source>
+        <target>Polaris n’envoie rien à Sentry sauf si le propriétaire de cette instance a activé les rapports d’erreurs. Voici votre part de ce choix.</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting.label">
+        <source>form.error_reporting.label</source>
+        <target>Autoriser la collecte d’erreurs</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting.help">
+        <source>form.error_reporting.help</source>
+        <target>Si l’instance l’a activé, vos erreurs sont envoyées à Sentry, sans données confidentielles.</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting_details.label">
+        <source>form.error_reporting_details.label</source>
+        <target>Inclure les données de Tesla (anonymisées)</target>
+      </trans-unit>
+      <trans-unit id="form.error_reporting_details.help">
+        <source>form.error_reporting_details.help</source>
+        <target>Joint la réponse de la voiture (jamais la position) aux rapports. Nécessite les rapports ci-dessus.</target>
+      </trans-unit>
+      <trans-unit id="form.reporting_save">
+        <source>form.reporting_save</source>
+        <target>Enregistrer les rapports d’erreurs</target>
+      </trans-unit>
+      <trans-unit id="flash.reporting_saved">
+        <source>flash.reporting_saved</source>
+        <target>Votre choix pour les rapports d’erreurs a été enregistré.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
