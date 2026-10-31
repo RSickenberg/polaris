@@ -178,6 +178,18 @@ final class ReportingGateTest extends KernelTestCase
         self::assertNull($this->context->userId());
     }
 
+    public function testAStatelessRequestNeverReadsTheToken(): void
+    {
+        $this->context->enterUser((string) new \Symfony\Component\Uid\Ulid());
+        $request = new Request();
+        $request->attributes->set('_stateless', true);
+
+        $this->bindRequestUser->onController(new ControllerEvent($this->appKernel, static fn (): null => null, $request, HttpKernelInterface::MAIN_REQUEST));
+
+        self::assertNull($this->context->userId());
+        self::assertFalse($this->context->isUnresolved());
+    }
+
     public function testAMessageAboutAVehicleOfAnOptedOutUserIsNeverSent(): void
     {
         $vehicle = $this->vehicleOf($this->user('driver@example.test', false, false), 'A');

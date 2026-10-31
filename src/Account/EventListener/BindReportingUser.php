@@ -26,6 +26,13 @@ final readonly class BindReportingUser
     #[AsEventListener(event: KernelEvents::CONTROLLER)]
     public function onController(ControllerEvent $event): void
     {
+        // A stateless route (the public key) must not touch the session, which reading the lazy token would do.
+        if ($event->getRequest()->attributes->getBoolean('_stateless')) {
+            $this->context->leave();
+
+            return;
+        }
+
         $user = $this->tokens->getToken()?->getUser();
 
         if ($user instanceof User) {
