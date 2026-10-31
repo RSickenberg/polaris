@@ -176,8 +176,7 @@
       </trans-unit>
       <trans-unit id="form.error_reporting.help">
         <source>form.error_reporting.help</source>
-        <target>When error reporting is on, an error that happens while Polaris works for you is sent to Sentry, without your email, password, tokens or VIN.
-Turn it off and nothing about your activity is ever sent.</target>
+        <target>If the instance turned it on, your errors are sent to Sentry, without sensitive data.</target>
       </trans-unit>
       <trans-unit id="form.error_reporting_details.label">
         <source>form.error_reporting_details.label</source>
@@ -185,7 +184,7 @@ Turn it off and nothing about your activity is ever sent.</target>
       </trans-unit>
       <trans-unit id="form.error_reporting_details.help">
         <source>form.error_reporting_details.help</source>
-        <target>Adds the answer of the car (battery, charge, climate, doors and so on, never the location) to a report. It needs the reports above.</target>
+        <target>Attaches the car’s answer (never the location) to reports. Needs the reports above.</target>
       </trans-unit>
       <trans-unit id="form.reporting_save">
         <source>form.reporting_save</source>
