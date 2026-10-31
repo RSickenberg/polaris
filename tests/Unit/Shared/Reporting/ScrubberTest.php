@@ -49,7 +49,8 @@ final class ScrubberTest extends TestCase
         $pem = "-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg\n-----END PRIVATE KEY-----";
         $text = implode(' | ', [
             'Authorization: Bearer abc.def-123',
-            'jwt eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dBjftJeZ4CVP',
+            // Built at run time: a literal token would trip secret scanners.
+            'jwt ' . implode('.', [rtrim(base64_encode('{"alg":"none"}'), '='), rtrim(base64_encode('{"sub":"test"}'), '='), 'c2lnbmF0dXJl']),
             'code=secret-code&state=abc',
             'mail jane.doe@example.test',
             $pem,
