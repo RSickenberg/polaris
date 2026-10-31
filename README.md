@@ -208,14 +208,14 @@ Polaris can report its errors to [Sentry](https://sentry.io) so that bugs get fi
 - performance traces: the duration of requests, jobs, database queries (SQL text, never the values) and calls to Tesla (URL without the VIN);
 - your user ID (a random ULID, no email, name or address), the environment (`prod`) and the release;
 - odometer values and lease figures that appear in an error or a log line (for example the two values of a reading that was refused);
-- the answer of the car (battery, charge, climate, doors and so on) only if the user ticked "Include what the car reports" in Settings. It never contains the location.
+- the answer of the car (battery, charge, climate, doors and so on) only if the user ticked "Include Tesla data (anonymized)" in Settings. It never contains the location.
 
 **What is never sent**: email addresses, passwords, Tesla tokens, client secrets, private keys, `POLARIS_ENCRYPTION_KEY`, VINs, locations, IP addresses, cookies, request or response bodies, request headers, query strings, database query parameters, function arguments and variables of the stack trace. A scrubber removes VINs, tokens, keys and emails from every message, URL and span before it leaves, and no trace header (`sentry-trace`, `baggage`) is ever added to a request to Tesla or to any other host. No profiling, session replay or cron monitoring.
 
 **Opting out.**
 
 - Instance: unset `POLARIS_ERROR_REPORTING` (or set it to `off`) and restart.
-- User: *Settings* > *Error reporting*, untick "Let errors about my account be reported". Nothing about that user's activity is sent from the next report on, in requests and in background jobs. An error that cannot be tied to a known user is dropped, not sent. Errors with no user at all (the app failing to boot, the scheduler tick) follow the instance switch only.
+- User: *Settings* > *Error reporting*, untick "Allow error collection". Nothing about that user's activity is sent from the next report on, in requests and in background jobs. An error that cannot be tied to a known user is dropped, not sent. Errors with no user at all (the app failing to boot, the scheduler tick) follow the instance switch only.
 - Accounts created before this feature existed start opted out; new accounts start opted in, which only matters once the instance owner turned reporting on.
 
 ## Development

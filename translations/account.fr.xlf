@@ -172,7 +172,7 @@
       </trans-unit>
       <trans-unit id="form.error_reporting.label">
         <source>form.error_reporting.label</source>
-        <target>Autoriser le rapport des erreurs de mon compte</target>
+        <target>Autoriser la collecte d’erreurs</target>
       </trans-unit>
       <trans-unit id="form.error_reporting.help">
         <source>form.error_reporting.help</source>
@@ -180,7 +180,7 @@
       </trans-unit>
       <trans-unit id="form.error_reporting_details.label">
         <source>form.error_reporting_details.label</source>
-        <target>Inclure ce que la voiture indique</target>
+        <target>Inclure les données de Tesla (anonymisées)</target>
       </trans-unit>
       <trans-unit id="form.error_reporting_details.help">
         <source>form.error_reporting_details.help</source>
