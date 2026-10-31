@@ -228,6 +228,18 @@ final class RiskLevelWatcherTest extends KernelTestCase
         }
     }
 
+    public function testTheQueuedAgainCheckStillRuns(): void
+    {
+        $this->leases->save($this->vehicle, self::data(15_000));
+        $handler = self::getContainer()->get(CheckRiskLevelHandler::class);
+
+        $handler(new CheckRiskLevel($this->vehicle->getId()->toRfc4122(), 1));
+
+        $logs = $this->logs();
+        self::assertCount(1, $logs);
+        self::assertSame(AlertType::Baseline, $logs[0]->getType());
+    }
+
     public function testAVehicleThatNoLongerExistsIsIgnored(): void
     {
         $handler = self::getContainer()->get(CheckRiskLevelHandler::class);
