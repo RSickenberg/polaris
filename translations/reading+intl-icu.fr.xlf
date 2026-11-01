@@ -18,6 +18,10 @@
         <source>rejected.in_future</source>
         <target>Le relevé ne peut pas être daté dans le futur.</target>
       </trans-unit>
+      <trans-unit id="flash.reading_added_after_return">
+        <source>flash.reading_added_after_return</source>
+        <target>Le relevé a été enregistré. Le leasing a pris fin avec la restitution du {on, date, long} : Polaris ne le projette plus, ce relevé n’est donc pas pris en compte.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

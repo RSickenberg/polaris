@@ -4,20 +4,25 @@ declare(strict_types=1);
 
 namespace Polaris\Lease\Service;
 
+use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Polaris\Lease\Domain\LeaseAssessment;
 use Polaris\Lease\Domain\LeaseAssessor;
 use Polaris\Lease\Domain\NoData;
 use Polaris\Lease\Entity\LeaseContract;
+use Polaris\Lease\Event\LeaseReturned;
+use Polaris\Lease\Event\LeaseReturnUndone;
 use Polaris\Lease\Event\LeaseTermsSaved;
 use Polaris\Lease\Form\Model\LeaseContractData;
 use Polaris\Lease\Repository\LeaseContractRepository;
 use Polaris\Lease\Service\Dto\LeaseTerms;
+use Polaris\Lease\Service\Exception\LeaseReturnRejected;
 use Polaris\Lease\Service\Exception\LeaseTermsRejected;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Shared\Domain\OdometerSample;
 use Polaris\Vehicle\Entity\Vehicle;
+use Psr\Clock\ClockInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -37,6 +42,7 @@ final readonly class LeaseTermsService
         private LeaseAssessor $assessor,
         private OdometerReadingService $readings,
         private EventDispatcherInterface $events,
+        private ClockInterface $clock,
     ) {
     }
 
@@ -60,9 +66,16 @@ final readonly class LeaseTermsService
         $terms = $this->factory->terms($data);
 
         // Assessed before anything is written, so terms that contradict the readings are refused whole.
-        $assessment = $this->assessTerms($terms, $this->samples($vehicle));
+        $returnedAt = $this->contracts->findForVehicle($vehicle)?->getReturnedAt();
+        $assessment = $this->assessTerms($terms, $this->samples($vehicle, $returnedAt), $returnedAt);
 
         $contract = $this->contracts->findForVehicle($vehicle);
+
+        // The return is kept by an edit, so a start on or after it would leave no time under the lease.
+        if (null !== $contract?->getReturnedAt() && $terms->term->start()->getTimestamp() >= $contract->getReturnedAt()->getTimestamp()) {
+            throw new LeaseTermsRejected(LeaseTermsRejected::START_AFTER_RETURN);
+        }
+
         if (null === $contract) {
             $contract = new LeaseContract(
                 $vehicle,
@@ -108,14 +121,103 @@ final readonly class LeaseTermsService
                 $contract->getExcessCostPerKm(),
                 $contract->getTolerance()
             ),
-            $this->samples($vehicle)
+            $this->samples($vehicle, $contract->getReturnedAt()),
+            $contract->getReturnedAt()
         );
+    }
+
+    /**
+     * Whether the user gave the car back. Cheap: no assessment is made.
+     */
+    public function isReturned(Vehicle $vehicle): bool
+    {
+        return null !== $this->contracts->findForVehicle($vehicle)?->getReturnedAt();
+    }
+
+    /**
+     * The instant the car counts as returned from (inclusive: nothing after it counts), null while the lease runs.
+     */
+    public function returnedAt(Vehicle $vehicle): ?CarbonImmutable
+    {
+        return $this->contracts->findForVehicle($vehicle)?->getReturnedAt();
+    }
+
+    /**
+     * The calendar date (midnight UTC) the user gave as the day the car went back, or null while the lease runs.
+     * It is the day before the stored instant, read in the owner's time zone.
+     */
+    public function returnedOn(Vehicle $vehicle): ?CarbonImmutable
+    {
+        $returnedAt = $this->contracts->findForVehicle($vehicle)?->getReturnedAt();
+
+        if (null === $returnedAt) {
+            return null;
+        }
+
+        $day = $returnedAt->setTimezone($vehicle->getOwner()->getTimeZone())->subDay();
+        $date = CarbonImmutable::createFromFormat('!Y-m-d', $day->format('Y-m-d'), 'UTC');
+        \assert($date instanceof CarbonImmutable);
+
+        return $date;
+    }
+
+    /**
+     * Marks the car as returned on a calendar date of the owner's time zone, or moves that date. The car counts as
+     * returned from the end of that day: readings of the day itself still count. Readings after it stay stored and
+     * come back if the return is undone.
+     *
+     * @throws LeaseReturnRejected when there is no contract, or the date is before the lease start or after today
+     * @throws ORMException
+     */
+    public function markReturned(Vehicle $vehicle, \DateTimeInterface $returnedOn): void
+    {
+        $contract = $this->contracts->findForVehicle($vehicle);
+
+        if (null === $contract) {
+            throw new LeaseReturnRejected(LeaseReturnRejected::NO_CONTRACT);
+        }
+
+        $timeZone = $vehicle->getOwner()->getTimeZone();
+        $date = $returnedOn->format('Y-m-d');
+
+        if ($date < $contract->getTerm()->start()->format('Y-m-d')) {
+            throw new LeaseReturnRejected(LeaseReturnRejected::BEFORE_START);
+        }
+
+        if ($date > CarbonImmutable::instance($this->clock->now())->setTimezone($timeZone)->format('Y-m-d')) {
+            throw new LeaseReturnRejected(LeaseReturnRejected::IN_FUTURE);
+        }
+
+        $endOfDay = CarbonImmutable::createFromFormat('!Y-m-d', $date, $timeZone);
+        \assert($endOfDay instanceof CarbonImmutable);
+
+        $contract->markReturned($endOfDay->addDay()->setTimezone('UTC'));
+        $this->entityManager->flush();
+        $this->events->dispatch(new LeaseReturned($vehicle));
+    }
+
+    /**
+     * The lease is assessed again from the next check; nothing else changes.
+     *
+     * @throws ORMException
+     */
+    public function undoReturn(Vehicle $vehicle): void
+    {
+        $contract = $this->contracts->findForVehicle($vehicle);
+
+        if (null === $contract?->getReturnedAt()) {
+            return;
+        }
+
+        $contract->undoReturn();
+        $this->entityManager->flush();
+        $this->events->dispatch(new LeaseReturnUndone($vehicle));
     }
 
     /**
      * @param list<OdometerSample> $samples
      */
-    private function assessTerms(LeaseTerms $terms, array $samples): LeaseAssessment|NoData
+    private function assessTerms(LeaseTerms $terms, array $samples, ?CarbonImmutable $returnedAt): LeaseAssessment|NoData
     {
         try {
             return $this->assessor->assess(
@@ -124,7 +226,8 @@ final readonly class LeaseTermsService
                 $terms->startOdometer,
                 $terms->excessCostPerKm,
                 $terms->tolerance,
-                $samples
+                $samples,
+                $returnedAt
             );
         } catch (\InvalidArgumentException $e) {
             throw new LeaseTermsRejected(previous: $e);
@@ -136,20 +239,27 @@ final readonly class LeaseTermsService
      * sample with the same odometer at that instant, so the projection goes on from there. A confirmation is dropped
      * when a later reading comes first (it would contradict it).
      *
+     * Nothing counts after $returnedAt (inclusive): a later reading is left out, and a confirmation that runs past it
+     * is cut there, as the car still had that odometer at the return.
+     *
      * @return list<OdometerSample>
      */
-    private function samples(Vehicle $vehicle): array
+    private function samples(Vehicle $vehicle, ?CarbonImmutable $returnedAt = null): array
     {
         $readings = array_reverse($this->readings->history($vehicle));
         $samples = [];
 
         foreach ($readings as $index => $reading) {
+            if (null !== $returnedAt && $reading->getReadAt()->greaterThan($returnedAt)) {
+                break;
+            }
+
             $samples[] = $reading->toSample();
             $confirmedAt = $reading->getConfirmedAt();
             $next = $readings[$index + 1] ?? null;
 
             if (null !== $confirmedAt && (null === $next || $confirmedAt->lessThan($next->getReadAt()))) {
-                $samples[] = new OdometerSample($confirmedAt, $reading->getOdometer());
+                $samples[] = new OdometerSample(null !== $returnedAt && $confirmedAt->greaterThan($returnedAt) ? $returnedAt : $confirmedAt, $reading->getOdometer());
             }
         }
 

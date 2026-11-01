@@ -18,6 +18,10 @@
         <source>rejected.in_future</source>
         <target>The reading cannot be dated in the future.</target>
       </trans-unit>
+      <trans-unit id="flash.reading_added_after_return">
+        <source>flash.reading_added_after_return</source>
+        <target>The reading was saved. The lease was returned on {on, date, long} and is over: Polaris does not project it any more, so this reading is not counted.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

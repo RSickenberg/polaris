@@ -47,11 +47,13 @@ final readonly class DashboardService
         }
 
         $allowance = $contract->getAllowance()->total();
+        $returnedAt = $contract->getReturnedAt();
         $projection = $assessment->projection;
         $state = match ($assessment->status) {
             LeaseStatus::Draft => DashboardState::Draft,
             LeaseStatus::Active => DashboardState::Active,
             LeaseStatus::Ended => DashboardState::Ended,
+            LeaseStatus::Returned => DashboardState::Returned,
         };
 
         return new DashboardView(
@@ -68,7 +70,13 @@ final readonly class DashboardService
                     $allowance,
                     array_map(
                         static fn (OdometerReading $reading) => $reading->toSample(),
-                        $this->readings->history($vehicle),
+                        // Readings after the return are stored but not part of the lease any more.
+                        null === $returnedAt
+                            ? $this->readings->history($vehicle)
+                            : array_values(array_filter(
+                                $this->readings->history($vehicle),
+                                static fn (OdometerReading $reading): bool => $reading->getReadAt()->lessThanOrEqualTo($returnedAt),
+                            )),
                     ),
                     DashboardState::Active === $state
                         ? new MileageForecast($projection->asOf, $projection->driven, $projection->projectedAtEnd)
@@ -84,6 +92,7 @@ final readonly class DashboardService
                 ),
             $contract->getStartOdometer(),
             Budget::evenPace($allowance, $contract->getTerm()),
+            $this->leaseTerms->returnedOn($vehicle),
         );
     }
 }

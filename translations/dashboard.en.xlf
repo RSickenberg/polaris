@@ -178,6 +178,10 @@
         <source>pace.month</source>
         <target>km / month</target>
       </trans-unit>
+      <trans-unit id="returned.cta">
+        <source>returned.cta</source>
+        <target>Review the return</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

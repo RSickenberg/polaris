@@ -132,6 +132,14 @@ Tesla facture chaque réveil environ {cost}, même si la voiture ne répond pas.
         <source>outcome.wake_failed</source>
         <target>Tesla n’a pas pu joindre la voiture pour la réveiller : le dernier relevé est conservé.</target>
       </trans-unit>
+      <trans-unit id="outcome.returned">
+        <source>outcome.returned</source>
+        <target>Le véhicule a été rendu à la banque : son compteur n’est plus relevé.</target>
+      </trans-unit>
+      <trans-unit id="wake.returned">
+        <source>wake.returned</source>
+        <target>Le véhicule a été rendu à la banque : il n’est plus réveillé.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

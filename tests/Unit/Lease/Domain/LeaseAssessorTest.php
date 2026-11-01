@@ -166,6 +166,85 @@ final class LeaseAssessorTest extends TestCase
         self::assertSame(LeaseStatus::Ended, self::assess('2027-01-01 00:00:00', $samples)->status);
     }
 
+    public function testAReturnedLeaseIgnoresTheSamplesAfterTheReturn(): void
+    {
+        // Returned on 2027-01-20 after the end: the sample of 2027-02-11 (48,000,000) is left out.
+        // Driven 37,500,000, excess 1,000,000 m = 1,000 km x 0.45 = 450.00 CHF, nothing to forecast or budget.
+        $assessment = self::assess('2027-03-01 00:00', [['2027-01-11 00:00', 47_500_000], ['2027-02-11 00:00', 48_000_000]], returnedAt: '2027-01-20 00:00');
+
+        self::assertSame(LeaseStatus::Returned, $assessment->status);
+        self::assertSame(RiskLevel::Over, $assessment->riskLevel);
+        self::assertSame('2027-01-11T00:00:00+00:00', $assessment->projection->asOf->toIso8601String());
+        self::assertSame(37_500_000, $assessment->projection->driven->metres());
+        self::assertSame(37_500_000, $assessment->projection->projectedAtEnd->metres());
+        self::assertSame(1_000_000, $assessment->projectedExcess->metres());
+        self::assertSame(45_000, $assessment->projectedExcessCost->minorAmount());
+        self::assertSame(0, $assessment->budget->perDay->metres());
+        self::assertSame(0, $assessment->currentPace->perDay->metres());
+        self::assertNull($assessment->weeklyCut);
+    }
+
+    public function testASampleExactlyAtTheReturnCounts(): void
+    {
+        $assessment = self::assess('2027-03-01 00:00', [['2027-01-11 00:00', 47_500_000], ['2027-01-20 00:00', 47_800_000]], returnedAt: '2027-01-20 00:00');
+
+        self::assertSame(37_800_000, $assessment->projection->driven->metres());
+        self::assertSame(1_300_000, $assessment->projectedExcess->metres());
+    }
+
+    public function testAnEarlyReturnIsMeasuredAgainstTheWholeAllowance(): void
+    {
+        // Returned on day 101, 264 days before the end: no forecast, the 9,000 km driven are far below the
+        // 36,500 km allowance, so there is no excess whatever the pace was.
+        $assessment = self::assess('2026-04-11 12:00', [['2026-03-12 00:00', 15_400_000], ['2026-04-11 00:00', 19_000_000]], returnedAt: '2026-04-12 00:00');
+
+        self::assertSame(LeaseStatus::Returned, $assessment->status);
+        self::assertSame(RiskLevel::Ok, $assessment->riskLevel);
+        self::assertSame(9_000_000, $assessment->projection->projectedAtEnd->metres());
+        self::assertSame(0, $assessment->projectedExcess->metres());
+        self::assertSame(0, $assessment->projectedExcessCost->minorAmount());
+        self::assertSame(27_500_000, $assessment->remaining->metres());
+        self::assertSame(0, $assessment->budget->perWeek->metres());
+        self::assertNull($assessment->weeklyCut);
+    }
+
+    public function testAnEarlyReturnOverTheWholeAllowanceCostsTheExcess(): void
+    {
+        // 40,000 km driven by day 200, returned then: 3,500 km over the whole allowance, not a prorated one.
+        $assessment = self::assess('2026-07-30 00:00', [['2026-07-19 00:00', 50_000_000]], returnedAt: '2026-07-20 00:00');
+
+        self::assertSame(RiskLevel::Over, $assessment->riskLevel);
+        self::assertSame(3_500_000, $assessment->projectedExcess->metres());
+        self::assertSame(157_500, $assessment->projectedExcessCost->minorAmount());
+    }
+
+    public function testAReturnedLeaseStaysReturnedWhateverTheClockSays(): void
+    {
+        $samples = [['2026-04-11 00:00', 19_000_000]];
+
+        foreach (['2026-04-12 00:00', '2026-12-31 23:59:59', '2027-01-01 00:00', '2035-01-01 00:00'] as $now) {
+            self::assertSame(LeaseStatus::Returned, self::assess($now, $samples, returnedAt: '2026-04-12 00:00')->status, $now);
+        }
+    }
+
+    public function testUndoingTheReturnRestoresTheProjection(): void
+    {
+        $samples = [['2026-03-12 00:00', 15_400_000], ['2026-04-11 00:00', 19_000_000]];
+
+        $active = self::assess('2026-04-11 12:00', $samples);
+        $returned = self::assess('2026-04-11 12:00', $samples, returnedAt: '2026-04-12 00:00');
+
+        self::assertSame(LeaseStatus::Active, $active->status);
+        self::assertSame(1_120_000, $active->projectedExcess->metres());
+        self::assertSame(0, $returned->projectedExcess->metres());
+        self::assertNotNull($active->weeklyCut);
+    }
+
+    public function testAReturnBeforeAnyReadingGivesNoData(): void
+    {
+        self::assertInstanceOf(NoData::class, self::assessOrNoData('2027-03-01 00:00', [['2026-04-11 00:00', 19_000_000]], returnedAt: '2026-03-01 00:00'));
+    }
+
     public function testNoSampleGivesNoData(): void
     {
         self::assertInstanceOf(NoData::class, self::assessOrNoData('2026-04-11 12:00', []));
@@ -179,9 +258,9 @@ final class LeaseAssessorTest extends TestCase
     /**
      * @param list<array{string, int}> $samples
      */
-    private static function assess(string $now, array $samples, int $toleranceBasisPoints = 0): LeaseAssessment
+    private static function assess(string $now, array $samples, int $toleranceBasisPoints = 0, ?string $returnedAt = null): LeaseAssessment
     {
-        $assessment = self::assessOrNoData($now, $samples, $toleranceBasisPoints);
+        $assessment = self::assessOrNoData($now, $samples, $toleranceBasisPoints, $returnedAt);
         self::assertInstanceOf(LeaseAssessment::class, $assessment);
 
         return $assessment;
@@ -190,7 +269,7 @@ final class LeaseAssessorTest extends TestCase
     /**
      * @param list<array{string, int}> $samples
      */
-    private static function assessOrNoData(string $now, array $samples, int $toleranceBasisPoints = 0): LeaseAssessment|NoData
+    private static function assessOrNoData(string $now, array $samples, int $toleranceBasisPoints = 0, ?string $returnedAt = null): LeaseAssessment|NoData
     {
         $clock = new MockClock(new \DateTimeImmutable($now, new \DateTimeZone('UTC')));
 
@@ -204,6 +283,7 @@ final class LeaseAssessorTest extends TestCase
                 static fn (array $sample): OdometerSample => new OdometerSample(new CarbonImmutable($sample[0], 'UTC'), Distance::fromMetres($sample[1])),
                 $samples,
             ),
+            null === $returnedAt ? null : new CarbonImmutable($returnedAt, 'UTC'),
         );
     }
 }

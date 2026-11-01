@@ -61,6 +61,13 @@ class LeaseContract
     #[ORM\Column(type: Types::SMALLINT)]
     private int $toleranceBasisPoints;
 
+    /**
+     * The UTC instant the car went back to the bank (the start of the day after the date the user gave, in their
+     * time zone), or null while the lease runs. Editing the terms never touches it.
+     */
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?CarbonImmutable $returnedAt = null;
+
     public function __construct(
         Vehicle $vehicle,
         LeaseTerm $term,
@@ -96,6 +103,28 @@ class LeaseContract
         $this->excessCostPerKmMinor = $excessCostPerKm->minorAmount();
         $this->currency = $excessCostPerKm->currency();
         $this->toleranceBasisPoints = $tolerance->basisPoints();
+    }
+
+    /**
+     * @throws \InvalidArgumentException when the instant is not in UTC
+     */
+    public function markReturned(CarbonImmutable $returnedAt): void
+    {
+        if (0 !== $returnedAt->getOffset()) {
+            throw new \InvalidArgumentException(\sprintf('A return must be stored at a UTC instant, got %s.', $returnedAt->toIso8601String()));
+        }
+
+        $this->returnedAt = $returnedAt;
+    }
+
+    public function undoReturn(): void
+    {
+        $this->returnedAt = null;
+    }
+
+    public function getReturnedAt(): ?CarbonImmutable
+    {
+        return $this->returnedAt;
     }
 
     public function getId(): Ulid

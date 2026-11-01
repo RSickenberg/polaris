@@ -93,6 +93,11 @@ enum RefreshOutcome: string
     case WakeScopeMissing = 'wake_scope';
 
     /**
+     * The user gave the car back to the bank before the worker ran the fetch: nothing was asked of Tesla.
+     */
+    case Returned = 'returned';
+
+    /**
      * How to tell the user: a new reading is good news, a car that is not reachable is a warning, and what
      * needs an action of theirs or went wrong is danger.
      *
@@ -102,7 +107,7 @@ enum RefreshOutcome: string
     {
         return match ($this) {
             self::Stored => 'success',
-            self::Queued, self::Waking, self::Unchanged => 'info',
+            self::Queued, self::Waking, self::Unchanged, self::Returned => 'info',
             self::Asleep, self::Offline, self::Unavailable, self::Busy, self::Limited, self::WakeTimeout, self::WakeFailed, self::WakeCapReached => 'warning',
             self::NotConnected, self::Rejected, self::Failed, self::WakeScopeMissing => 'danger',
         };

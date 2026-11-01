@@ -9,7 +9,7 @@
 {% block main %}
     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.title'|trans(domain='dashboard') }} <span class="font-normal text-muted-foreground">| {{ vehicle.name }}</span></h1>
-        {% if state not in ['no_lease', 'no_reading', 'draft', 'ended'] %}
+        {% if state not in ['no_lease', 'no_reading', 'draft', 'ended', 'returned'] %}
             <twig:Fetching:OdometerRefreshButton :vehicleId="vehicle.id.toRfc4122()" class="flex w-full shrink-0 flex-col sm:w-auto" />
         {% endif %}
     </div>
@@ -26,17 +26,26 @@
             {% set projection = assessment.projection %}
             {% set progress = dashboard.progress %}
             {% set unit = 'unit.km'|trans(domain='shared') %}
-            {% set ended = 'ended' == state %}
+            {% set returned = 'returned' == state %}
+            {% set ended = 'ended' == state or returned %}
             {% set excess = assessment.projectedExcess.metres / 1000 %}
             {% set cost = assessment.projectedExcessCost.toDecimal()|format_currency(assessment.projectedExcessCost.currency.value) %}
             {% set cut = assessment.weeklyCut %}
 
-            {% if ended %}
+            {% if returned %}
+                {{ include('dashboard/_empty.html.twig', {text: 'returned.text'|trans({on: dashboard.returnedOn}, 'dashboard'), cta: 'returned.cta'|trans(domain='dashboard'), href: path('lease_settings', {id: id})}) }}
+            {% elseif ended %}
                 {{ include('dashboard/_empty.html.twig', {text: 'ended.text'|trans(domain='dashboard'), cta: 'ended.cta'|trans(domain='dashboard'), href: path('lease_settings', {id: id})}) }}
             {% endif %}
 
             <twig:Dashboard:RiskAlert :level="assessment.riskLevel.value">
-                {%- if ended -%}
+                {%- if returned -%}
+                    {%- if 'over' == assessment.riskLevel.value -%}
+                        {{- 'risk.message.returned_over'|trans({excess: excess, unit: unit, cost: cost}, 'dashboard') -}}
+                    {%- else -%}
+                        {{- 'risk.message.returned_ok'|trans({allowance: dashboard.allowance.metres / 1000, unit: unit}, 'dashboard') -}}
+                    {%- endif -%}
+                {%- elseif ended -%}
                     {%- if 'over' == assessment.riskLevel.value -%}
                         {{- 'risk.message.ended_over'|trans({excess: excess, unit: unit, cost: cost}, 'dashboard') -}}
                     {%- else -%}

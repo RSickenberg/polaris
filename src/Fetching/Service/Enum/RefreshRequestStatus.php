@@ -12,4 +12,9 @@ enum RefreshRequestStatus: string
 {
     case Accepted = 'accepted';
     case RateLimited = 'rate_limited';
+
+    /**
+     * The user gave the car back to the bank: nothing is fetched for it any more. A later API maps it to 409.
+     */
+    case Returned = 'returned';
 }

@@ -132,6 +132,14 @@ Tesla bills each wake about {cost}, even if the car does not answer.</target>
         <source>outcome.wake_failed</source>
         <target>Tesla could not reach the car to wake it: the last reading is kept.</target>
       </trans-unit>
+      <trans-unit id="outcome.returned">
+        <source>outcome.returned</source>
+        <target>The car was returned to the bank: its odometer is no longer read.</target>
+      </trans-unit>
+      <trans-unit id="wake.returned">
+        <source>wake.returned</source>
+        <target>The car was returned to the bank: it is no longer woken.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

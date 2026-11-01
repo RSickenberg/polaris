@@ -42,6 +42,18 @@
         <source>kpi.driven.hint</source>
         <target>Compteur {odometer, number, ::precision-integer} {unit} moins {start, number, ::precision-integer} {unit} au début du leasing</target>
       </trans-unit>
+      <trans-unit id="returned.text">
+        <source>returned.text</source>
+        <target>Le véhicule a été rendu le {on, date, long}. Voici les chiffres définitifs.</target>
+      </trans-unit>
+      <trans-unit id="risk.message.returned_ok">
+        <source>risk.message.returned_ok</source>
+        <target>Rendu dans la limite de {allowance, number, ::precision-integer} {unit}.</target>
+      </trans-unit>
+      <trans-unit id="risk.message.returned_over">
+        <source>risk.message.returned_over</source>
+        <target>Rendu avec {excess, number, ::precision-integer} {unit} de dépassement : {cost} de coût définitif.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

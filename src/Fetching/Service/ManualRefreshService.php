@@ -15,6 +15,7 @@ use Polaris\Fetching\Repository\RefreshAttemptRepository;
 use Polaris\Fetching\Service\Dto\RefreshRequestResult;
 use Polaris\Fetching\Service\Dto\WakeRequestResult;
 use Polaris\Fetching\Service\Enum\WakeRequestStatus;
+use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Tesla\Service\Enum\WakeAccess;
 use Polaris\Tesla\Service\TeslaAppSettings;
 use Polaris\Tesla\Service\TeslaVehicleWaker;
@@ -31,7 +32,8 @@ use Symfony\Component\Messenger\MessageBusInterface;
  * {@see FetchOdometerMessage} as a scheduled slot, with no slot, and does not wake the car; the worker settles the
  * {@see RefreshAttempt} it carries. A car found asleep can then be woken once the user confirmed it with
  * {@see self::requestWake()}, which continues that same refresh: it spends the daily wake cap, not a second
- * hourly refresh. The caller checks that the user may manage the vehicle.
+ * hourly refresh. A vehicle whose lease is returned is refused both ways ({@see RefreshRequestStatus::Returned}). The
+ * caller checks that the user may manage the vehicle.
  */
 final readonly class ManualRefreshService
 {
@@ -44,6 +46,7 @@ final readonly class ManualRefreshService
         private TeslaAppSettings $teslaApps,
         private TeslaVehicleWaker $waker,
         private WakeCap $wakeCap,
+        private LeaseTermsService $leases,
     ) {
     }
 
@@ -54,6 +57,10 @@ final readonly class ManualRefreshService
     public function request(Vehicle $vehicle): RefreshRequestResult
     {
         $vehicleId = $vehicle->getId()->toRfc4122();
+
+        if ($this->leases->isReturned($vehicle)) {
+            return RefreshRequestResult::returned();
+        }
 
         $retryAfter = $this->limit->retryAfter($vehicle);
 
@@ -76,6 +83,10 @@ final readonly class ManualRefreshService
      */
     public function wakeOffer(Vehicle $vehicle, string $attemptId): WakeRequestResult
     {
+        if ($this->leases->isReturned($vehicle)) {
+            return WakeRequestResult::refused(WakeRequestStatus::Returned);
+        }
+
         $attempt = $this->attempts->findOf($vehicle, $attemptId);
 
         if (null === $attempt) {
@@ -98,6 +109,10 @@ final readonly class ManualRefreshService
      */
     public function requestWake(Vehicle $vehicle, string $attemptId): WakeRequestResult
     {
+        if ($this->leases->isReturned($vehicle)) {
+            return WakeRequestResult::refused(WakeRequestStatus::Returned);
+        }
+
         $attempt = $this->attempts->findOf($vehicle, $attemptId);
 
         if (null === $attempt) {
