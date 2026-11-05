@@ -225,6 +225,17 @@ final class DashboardControllerTest extends WebTestCase
         self::assertSelectorExists('body > [data-controller=toast-region][aria-live=polite]', 'The toast region is in the layout.');
     }
 
+    public function testTheDashboardMorphsInPlaceWhenItRefreshes(): void
+    {
+        $this->lease('2026-01-01', 12, 15_000, 0);
+        $this->reading('2026-07-02 11:00:00', 10_000);
+
+        $this->client->request('GET', $this->url());
+
+        self::assertSelectorExists('head meta[name="turbo-refresh-method"][content="morph"]');
+        self::assertSelectorExists('head meta[name="turbo-refresh-scroll"][content="preserve"]');
+    }
+
     public function testTheRefreshButtonIsTranslatedToFrench(): void
     {
         $this->lease('2026-01-01', 12, 15_000, 0);

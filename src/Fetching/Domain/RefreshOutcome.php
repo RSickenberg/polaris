@@ -113,6 +113,15 @@ enum RefreshOutcome: string
         };
     }
 
+    /**
+     * Whether the fetch moved the figures of the dashboard: a new reading, or the same value seen again, which
+     * moves the projection (see "Readings and the projection").
+     */
+    public function movesFigures(): bool
+    {
+        return self::Stored === $this || self::Unchanged === $this;
+    }
+
     public function isSettled(): bool
     {
         return self::Queued !== $this && self::Waking !== $this;

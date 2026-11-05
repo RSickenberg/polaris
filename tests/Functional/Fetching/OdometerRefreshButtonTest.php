@@ -85,6 +85,34 @@ final class OdometerRefreshButtonTest extends WebTestCase
         self::assertCount(1, $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(), 'Rendering never starts another refresh.');
     }
 
+    public function testANewReadingAsksTheDashboardToRefreshItselfOnce(): void
+    {
+        $component = $this->component($this->mine);
+        $component->call('refresh');
+        $queued = $this->queued();
+        $message = $queued[0]->getMessage();
+        self::assertInstanceOf(FetchOdometerMessage::class, $message);
+        self::assertStringNotContainsString('data-controller="dashboard-refresh"', (string) $component->render(), 'Nothing while the fetch is queued.');
+
+        $attempt = $this->entityManager()->find(RefreshAttempt::class, $message->refreshId);
+        self::assertInstanceOf(RefreshAttempt::class, $attempt);
+        $attempt->settle(RefreshOutcome::Stored, CarbonImmutable::now('UTC'));
+        $this->entityManager()->flush();
+
+        $html = (string) $component->refresh()->render();
+        self::assertStringContainsString('id="figures-1" data-controller="dashboard-refresh"', $html);
+        self::assertSame($html, (string) $component->refresh()->render(), 'A poll shows the same element, so it is not connected again.');
+    }
+
+    public function testACarThatDidNotAnswerLeavesTheDashboardAlone(): void
+    {
+        $component = $this->component($this->mine);
+        $component->call('refresh');
+        $this->settle(RefreshOutcome::Asleep);
+
+        self::assertStringNotContainsString('dashboard-refresh', (string) $component->refresh()->render());
+    }
+
     public function testASecondClickWithinTheHourShowsWhenToTryAgainAndQueuesNothing(): void
     {
         // A refresh that read the car spent the hour (the fetch does it, the click only looks).

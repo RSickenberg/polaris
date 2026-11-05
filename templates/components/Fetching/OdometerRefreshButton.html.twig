@@ -66,6 +66,10 @@
             </twig:Dialog:Content>
         </twig:Dialog>
     {% endif %}
+    {% if outcome is not null and outcome.movesFigures %}
+        {# New figures: the dashboard refreshes itself once, one element per click so that a poll showing the same result does not do it again. #}
+        <div hidden id="figures-{{ this.clicks }}" data-controller="dashboard-refresh"></div>
+    {% endif %}
     {% if toast is not null %}
         <twig:Shared:ToastAnnounce :id="toast.id" :variant="toast.variant" :message="toast.message" />
     {% endif %}

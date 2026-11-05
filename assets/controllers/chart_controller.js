@@ -14,6 +14,9 @@ const TOKEN = /^var\((--[\w-]+)\)$/;
  * Datetime x axes and numeric y axes are formatted in the browser with Intl, for `locale`
  * and `timeZone`; series times are Unix milliseconds (UTC instants).
  *
+ * When the `series` or `options` values change (a morphed page), the chart is updated in place, keeping the
+ * zoom of the last range button.
+ *
  * The chart is destroyed when the element disconnects and before Turbo caches the page, so
  * a snapshot never holds chart markup and a restored page never shows two charts.
  *
@@ -62,6 +65,15 @@ export default class extends Controller {
         document.addEventListener('turbo:before-cache', this._onBeforeCache);
     }
 
+    /** The series and options change when Turbo morphs the page after a fetch: the chart follows without a reload. */
+    seriesValueChanged() {
+        this._refresh();
+    }
+
+    optionsValueChanged() {
+        this._refresh();
+    }
+
     disconnect() {
         document.removeEventListener('turbo:before-cache', this._onBeforeCache);
         this._observer?.disconnect();
@@ -81,6 +93,11 @@ export default class extends Controller {
         }
 
         this._chart.updateOptions({ xaxis: { min, max } }, false, false);
+    }
+
+    _refresh() {
+        // Stimulus also calls the value callbacks before connect(), when there is no chart yet.
+        this._chart?.updateOptions(this._config(), false, false);
     }
 
     _onThemeChange() {

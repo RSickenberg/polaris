@@ -4,6 +4,12 @@
 {% set state = dashboard.state.value %}
 {% set km = enum('Polaris\\Shared\\Domain\\DistanceUnit').Kilometre %}
 
+{# A refresh after a fetch morphs the page in place and keeps the scroll, see dashboard_refresh_controller.js. #}
+{% block head_meta %}
+    <meta name="turbo-refresh-method" content="morph">
+    <meta name="turbo-refresh-scroll" content="preserve">
+{% endblock %}
+
 {% block title %}{{ 'page.title'|trans(domain='dashboard') }} | {{ vehicle.name }}{% endblock %}
 
 {% block main %}

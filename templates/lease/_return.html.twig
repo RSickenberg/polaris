@@ -1,7 +1,7 @@
 {# The car went back to the bank. Two dialogs confirm: the first takes the day, the second undoes the return. #}
 {% set returnFailed = returnForm.vars.submitted and not returnForm.vars.valid %}
 
-<twig:Card class="mt-8" id="lease-return">
+<twig:Card class="mt-6" id="lease-return">
     <twig:Card:Content class="flex flex-col gap-4">
         <h2 class="text-lg font-semibold">{{ 'return.title'|trans(domain='lease') }}</h2>
 

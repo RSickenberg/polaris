@@ -10,10 +10,6 @@
     <div class="my-4 grid items-start gap-8 lg:grid-cols-[minmax(0,48rem)_20rem]">
         <div>
             {{ form(form) }}
-
-            {% if hasContract %}
-                {{ include('lease/_return.html.twig') }}
-            {% endif %}
         </div>
 
         <aside class="lg:sticky lg:top-4">
@@ -38,6 +34,11 @@
                     </twig:Card:Content>
                 </twig:Card>
             {% endif %}
-</aside>
+
+            {# Under the projection, in the same sticky column. #}
+            {% if hasContract %}
+                {{ include('lease/_return.html.twig') }}
+            {% endif %}
+        </aside>
     </div>
 {% endblock %}
