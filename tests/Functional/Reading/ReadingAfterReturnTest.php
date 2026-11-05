@@ -64,8 +64,8 @@ final class ReadingAfterReturnTest extends WebTestCase
 
         self::assertResponseRedirects();
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[data-flash=warning]', 'The lease was returned on June 30, 2026');
-        self::assertSelectorTextContains('[data-flash=warning]', 'this reading is not counted');
+        self::assertSelectorTextContains('[data-flash=warning]', 'the car was returned on June 30, 2026');
+        self::assertSelectorTextContains('[data-flash=warning]', 'not counted');
         self::assertCount(2, self::getContainer()->get(EntityManagerInterface::class)->getRepository(OdometerReading::class)->findAll());
     }
 

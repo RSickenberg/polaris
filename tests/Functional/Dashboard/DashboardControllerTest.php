@@ -108,7 +108,7 @@ final class DashboardControllerTest extends WebTestCase
         $color = ['ok' => 'green', 'watch' => 'amber', 'over' => 'red'][$level];
         self::assertSelectorExists($alert . '.bg-' . $color . '-50');
         self::assertSelectorTextContains($alert . ' [data-slot=alert-title]', ['ok' => 'OK', 'watch' => 'Watch', 'over' => 'Over the allowance'][$level]);
-        self::assertSelectorTextContains($alert . ' [data-slot=alert-description]', 'Projected');
+        self::assertSelectorTextContains($alert . ' [data-slot=alert-description]', 'at lease end');
     }
 
     public function testTheFiguresMatchTheAssessment(): void
@@ -124,7 +124,7 @@ final class DashboardControllerTest extends WebTestCase
         $text = $this->text();
         $km = static fn (int $metres): string => self::kilometres($metres);
         self::assertStringContainsString('Driven ' . $km($assessment->projection->driven->metres()), $text);
-        self::assertStringContainsString('minus 0 km at the lease start', $text);
+        self::assertStringContainsString(', minus 0 km at the start', $text);
         self::assertStringContainsString('Current pace', $text);
         self::assertStringContainsString('From now on', $text);
         self::assertStringContainsString('Normal pace', $text);
@@ -149,7 +149,7 @@ final class DashboardControllerTest extends WebTestCase
         // Projected excess and its cost, in the lease currency (0.12 CHF per km).
         $excess = $assessment->projectedExcess->metres() / 1000;
         self::assertGreaterThan(0, $excess);
-        self::assertStringContainsString('Projected ' . $km($assessment->projectedExcess->metres()) . ' over at lease end', $text);
+        self::assertStringContainsString($km($assessment->projectedExcess->metres()) . ' over at lease end', $text);
         $cost = new \NumberFormatter('en', \NumberFormatter::CURRENCY)->formatCurrency((float) $assessment->projectedExcessCost->toDecimal(), 'CHF');
         self::assertStringContainsString('about ' . self::normalize($cost), $text);
     }

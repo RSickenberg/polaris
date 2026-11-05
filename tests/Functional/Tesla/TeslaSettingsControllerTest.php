@@ -155,7 +155,7 @@ final class TeslaSettingsControllerTest extends WebTestCase
 
         self::assertResponseRedirects('/settings/tesla');
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[data-slot=alert]', 'The Tesla app settings are saved.');
+        self::assertSelectorTextContains('[data-slot=alert]', 'Tesla app settings saved.');
 
         $this->entityManager->clear();
         $app = $this->entityManager->getRepository(TeslaApp::class)->findOneBy([]);
@@ -251,7 +251,7 @@ final class TeslaSettingsControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(422);
         $errors = $this->client->getCrawler()->filter('[data-slot=field-error]')->each(static fn ($node): string => trim($node->text()));
-        self::assertContains('Enter the domain only, for example polaris.example.com, without https:// or a path.', $errors);
+        self::assertContains('Enter the domain only, e.g. polaris.example.com, without https:// or a path.', $errors);
         self::assertContains('Enable at least one region.', $errors);
     }
 

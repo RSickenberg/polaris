@@ -8,7 +8,7 @@
       </trans-unit>
       <trans-unit id="page.login.description">
         <source>page.login.description</source>
-        <target>Saisissez votre e-mail et votre mot de passe pour ouvrir votre tableau de bord.</target>
+        <target>Connectez-vous avec votre e-mail et votre mot de passe.</target>
       </trans-unit>
       <trans-unit id="form.email.label">
         <source>form.email.label</source>
@@ -32,7 +32,7 @@
       </trans-unit>
       <trans-unit id="page.settings.profile_description">
         <source>page.settings.profile_description</source>
-        <target>Votre e-mail, votre langue et le fuseau horaire dans lequel les dates sont affichées.</target>
+        <target>Votre e-mail, langue et fuseau horaire.</target>
       </trans-unit>
       <trans-unit id="page.settings.password">
         <source>page.settings.password</source>
@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="page.settings.password_description">
         <source>page.settings.password_description</source>
-        <target>Choisissez un nouveau mot de passe. Vous restez connecté sur cet appareil.</target>
+        <target>Vous restez connecté sur cet appareil.</target>
       </trans-unit>
       <trans-unit id="form.locale.label">
         <source>form.locale.label</source>
@@ -52,7 +52,7 @@
       </trans-unit>
       <trans-unit id="form.time_zone.help">
         <source>form.time_zone.help</source>
-        <target>Les dates sont stockées en UTC, puis affichées et saisies dans ce fuseau horaire.</target>
+        <target>Dates stockées en UTC, affichées et saisies dans ce fuseau horaire.</target>
       </trans-unit>
       <trans-unit id="form.current_password.label">
         <source>form.current_password.label</source>
@@ -80,11 +80,11 @@
       </trans-unit>
       <trans-unit id="flash.profile_saved">
         <source>flash.profile_saved</source>
-        <target>Votre profil a été enregistré.</target>
+        <target>Profil enregistré.</target>
       </trans-unit>
       <trans-unit id="flash.password_saved">
         <source>flash.password_saved</source>
-        <target>Votre mot de passe a été modifié.</target>
+        <target>Mot de passe modifié.</target>
       </trans-unit>
       <trans-unit id="link.forgot">
         <source>link.forgot</source>
@@ -104,7 +104,7 @@
       </trans-unit>
       <trans-unit id="page.forgot.description">
         <source>page.forgot.description</source>
-        <target>Saisissez votre e-mail : nous vous envoyons un lien pour choisir un nouveau mot de passe.</target>
+        <target>Nous vous envoyons un lien par e-mail pour choisir un nouveau mot de passe.</target>
       </trans-unit>
       <trans-unit id="form.send_link">
         <source>form.send_link</source>
@@ -120,7 +120,7 @@
       </trans-unit>
       <trans-unit id="page.forgot_sent.description">
         <source>page.forgot_sent.description</source>
-        <target>Si cet e-mail correspond à un compte, un lien de réinitialisation est en route. Il ne fonctionne qu'une fois et expire dans une heure.</target>
+        <target>Si un compte existe pour cet e-mail, vous recevrez un lien. Il est valable une heure, une seule fois.</target>
       </trans-unit>
       <trans-unit id="page.reset.title">
         <source>page.reset.title</source>
@@ -128,7 +128,7 @@
       </trans-unit>
       <trans-unit id="page.reset.description">
         <source>page.reset.description</source>
-        <target>Saisissez deux fois le nouveau mot de passe. Tous les appareils sont déconnectés.</target>
+        <target>Saisissez-le deux fois. Tous les appareils seront déconnectés.</target>
       </trans-unit>
       <trans-unit id="page.reset_invalid.title">
         <source>page.reset_invalid.title</source>
@@ -136,11 +136,11 @@
       </trans-unit>
       <trans-unit id="page.reset_invalid.description">
         <source>page.reset_invalid.description</source>
-        <target>Il a expiré, il a déjà servi ou il est incomplet. Demandez-en un nouveau.</target>
+        <target>Expiré, déjà utilisé ou incomplet. Demandez-en un nouveau.</target>
       </trans-unit>
       <trans-unit id="flash.password_reset">
         <source>flash.password_reset</source>
-        <target>Votre mot de passe a été modifié.
+        <target>Mot de passe modifié.
 Connectez-vous avec le nouveau.</target>
       </trans-unit>
       <trans-unit id="email.reset.subject">
@@ -149,7 +149,7 @@ Connectez-vous avec le nouveau.</target>
       </trans-unit>
       <trans-unit id="email.reset.intro">
         <source>email.reset.intro</source>
-        <target>Quelqu'un a demandé la réinitialisation du mot de passe de votre compte Polaris.</target>
+        <target>Une réinitialisation du mot de passe a été demandée pour votre compte Polaris.</target>
       </trans-unit>
       <trans-unit id="email.reset.cta">
         <source>email.reset.cta</source>
@@ -157,11 +157,11 @@ Connectez-vous avec le nouveau.</target>
       </trans-unit>
       <trans-unit id="email.reset.expires">
         <source>email.reset.expires</source>
-        <target>Ce lien ne fonctionne qu'une fois et expire dans %hours% heure.</target>
+        <target>Valable une fois, pendant %hours% heure.</target>
       </trans-unit>
       <trans-unit id="email.reset.ignore">
         <source>email.reset.ignore</source>
-        <target>Si ce n'était pas vous, ignorez cet e-mail : votre mot de passe reste inchangé.</target>
+        <target>Ce n’était pas vous ? Ignorez cet e-mail, votre mot de passe reste inchangé.</target>
       </trans-unit>
       <trans-unit id="page.settings.reporting">
         <source>page.settings.reporting</source>
@@ -169,7 +169,7 @@ Connectez-vous avec le nouveau.</target>
       </trans-unit>
       <trans-unit id="page.settings.reporting_description">
         <source>page.settings.reporting_description</source>
-        <target>Polaris n’envoie rien à Sentry sauf si le propriétaire de cette instance a activé les rapports d’erreurs. Voici votre part de ce choix.</target>
+        <target>Rien n’est envoyé à Sentry sauf si le propriétaire de l’instance a activé les rapports d’erreurs.</target>
       </trans-unit>
       <trans-unit id="form.error_reporting.label">
         <source>form.error_reporting.label</source>
@@ -177,7 +177,7 @@ Connectez-vous avec le nouveau.</target>
       </trans-unit>
       <trans-unit id="form.error_reporting.help">
         <source>form.error_reporting.help</source>
-        <target>Si l’instance l’a activé, vos erreurs sont envoyées à Sentry, sans données confidentielles.</target>
+        <target>Si l’instance l’autorise, vos erreurs sont envoyées à Sentry, sans données sensibles.</target>
       </trans-unit>
       <trans-unit id="form.error_reporting_details.label">
         <source>form.error_reporting_details.label</source>
@@ -185,7 +185,7 @@ Connectez-vous avec le nouveau.</target>
       </trans-unit>
       <trans-unit id="form.error_reporting_details.help">
         <source>form.error_reporting_details.help</source>
-        <target>Joint la réponse de la voiture (jamais la position) aux rapports. Nécessite les rapports ci-dessus.</target>
+        <target>Ajoute la réponse de la voiture (jamais la position) aux rapports. Nécessite l’option ci-dessus.</target>
       </trans-unit>
       <trans-unit id="form.reporting_save">
         <source>form.reporting_save</source>
@@ -193,7 +193,7 @@ Connectez-vous avec le nouveau.</target>
       </trans-unit>
       <trans-unit id="flash.reporting_saved">
         <source>flash.reporting_saved</source>
-        <target>Votre choix pour les rapports d’erreurs a été enregistré.</target>
+        <target>Choix enregistré.</target>
       </trans-unit>
     </body>
   </file>

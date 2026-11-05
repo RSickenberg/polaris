@@ -59,7 +59,7 @@ final class SettingsTest extends WebTestCase
         $this->client->followRedirect();
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('html[lang=fr]');
-        self::assertSelectorTextContains('[data-slot=alert]', 'Votre profil a été enregistré.');
+        self::assertSelectorTextContains('[data-slot=alert]', 'Profil enregistré.');
         $stored = $this->stored();
         self::assertSame('new.name@example.test', $stored->getEmail());
         self::assertSame('fr', $stored->getLocale());
@@ -97,7 +97,7 @@ final class SettingsTest extends WebTestCase
         self::assertResponseRedirects('/settings');
         $this->client->followRedirect();
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('[data-slot=alert]', 'Your password was changed.');
+        self::assertSelectorTextContains('[data-slot=alert]', 'Password changed.');
         $hasher = self::getContainer()->get(UserPasswordHasherInterface::class);
         self::assertTrue($hasher->isPasswordValid($this->stored(), self::NEW_PASSWORD));
         self::assertFalse($hasher->isPasswordValid($this->stored(), self::PASSWORD));
@@ -146,7 +146,7 @@ final class SettingsTest extends WebTestCase
 
         self::assertResponseRedirects('/settings');
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[data-slot=alert]', 'Your error reporting choice was saved.');
+        self::assertSelectorTextContains('[data-slot=alert]', 'Choice saved.');
         self::assertFalse($this->stored()->sendsErrorReports());
         self::assertFalse($this->stored()->sendsErrorReportDetails());
 

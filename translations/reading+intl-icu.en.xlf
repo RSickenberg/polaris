@@ -4,11 +4,11 @@
     <body>
       <trans-unit id="rejected.lower_than_previous">
         <source>rejected.lower_than_previous</source>
-        <target>The odometer cannot be lower than the previous reading ({limit, number, ::.#} {unit} on {at, date, medium} at {at, time, short} UTC).</target>
+        <target>Lower than the previous reading ({limit, number, ::.#} {unit} on {at, date, medium} at {at, time, short} UTC).</target>
       </trans-unit>
       <trans-unit id="rejected.higher_than_next">
         <source>rejected.higher_than_next</source>
-        <target>The odometer cannot be higher than the next reading ({limit, number, ::.#} {unit} on {at, date, medium} at {at, time, short} UTC).</target>
+        <target>Higher than the next reading ({limit, number, ::.#} {unit} on {at, date, medium} at {at, time, short} UTC).</target>
       </trans-unit>
       <trans-unit id="rejected.duplicate_instant">
         <source>rejected.duplicate_instant</source>
@@ -16,12 +16,11 @@
       </trans-unit>
       <trans-unit id="rejected.in_future">
         <source>rejected.in_future</source>
-        <target>The reading cannot be dated in the future.</target>
+        <target>The date cannot be in the future.</target>
       </trans-unit>
       <trans-unit id="flash.reading_added_after_return">
         <source>flash.reading_added_after_return</source>
-        <target>The reading was saved.
-The lease was returned on {on, date, long} and is over: Polaris does not project it any more, so this reading is not counted.</target>
+        <target>Reading saved, but not counted: the car was returned on {on, date, long}.</target>
       </trans-unit>
     </body>
   </file>

@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="page.import.description">
         <source>page.import.description</source>
-        <target>Cochez les véhicules à ajouter à Polaris. Seule la liste de votre compte est lue : aucun véhicule n’est contacté et aucun ne se réveille.</target>
+        <target>Cochez les véhicules à ajouter. Seule la liste de votre compte est lue : aucune voiture n’est contactée ni réveillée.</target>
       </trans-unit>
       <trans-unit id="form.vehicles.label">
         <source>form.vehicles.label</source>
@@ -36,7 +36,7 @@
       </trans-unit>
       <trans-unit id="import.not_connected.description">
         <source>import.not_connected.description</source>
-        <target>Connectez d’abord votre compte Tesla, puis revenez importer vos véhicules.</target>
+        <target>Connectez d’abord votre compte Tesla, puis importez.</target>
       </trans-unit>
       <trans-unit id="import.not_connected.cta">
         <source>import.not_connected.cta</source>
@@ -48,7 +48,7 @@
       </trans-unit>
       <trans-unit id="import.error.description">
         <source>import.error.description</source>
-        <target>La liste de vos véhicules n’a pas pu être lue chez Tesla. Réessayez dans un instant.</target>
+        <target>Impossible de lire votre liste de véhicules chez Tesla. Réessayez dans un instant.</target>
       </trans-unit>
     </body>
   </file>

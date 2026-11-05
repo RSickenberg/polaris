@@ -68,7 +68,7 @@
       </trans-unit>
       <trans-unit id="ended.text">
         <source>ended.text</source>
-        <target>The lease has ended. These are the final figures.</target>
+        <target>The lease has ended. Final figures.</target>
       </trans-unit>
       <trans-unit id="ended.cta">
         <source>ended.cta</source>
@@ -100,7 +100,7 @@
       </trans-unit>
       <trans-unit id="chart.label">
         <source>chart.label</source>
-        <target>Line chart of the distance driven since the lease start, against the linear allowance and the projection to the lease end</target>
+        <target>Distance driven since the lease start, against the allowance and the projection to the lease end</target>
       </trans-unit>
       <trans-unit id="chart.series.actual">
         <source>chart.series.actual</source>

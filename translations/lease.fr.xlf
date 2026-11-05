@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="form.start_odometer.help">
         <source>form.start_odometer.help</source>
-        <target>Relevé du compteur le jour du début du bail, dans l’unité ci-dessus.</target>
+        <target>Compteur le jour du début du leasing, dans l’unité ci-dessus.</target>
       </trans-unit>
       <trans-unit id="form.excess_cost.label">
         <source>form.excess_cost.label</source>
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="form.tolerance.help">
         <source>form.tolerance.help</source>
-        <target>Marge de sécurité sous le forfait, de 0 à 50. Dès que la distance projetée entre dans cette marge, le niveau de risque passe à « À surveiller ». 0 signifie aucune marge.</target>
+        <target>Marge de sécurité sous le forfait, de 0 à 50. Dans cette marge, le niveau de risque est « À surveiller ». 0 : aucune marge.</target>
       </trans-unit>
       <trans-unit id="form.submit">
         <source>form.submit</source>
@@ -92,11 +92,11 @@
       </trans-unit>
       <trans-unit id="flash.lease_saved">
         <source>flash.lease_saved</source>
-        <target>Les conditions du leasing ont été enregistrées.</target>
+        <target>Conditions enregistrées.</target>
       </trans-unit>
       <trans-unit id="rejected.inconsistent_readings">
         <source>rejected.inconsistent_readings</source>
-        <target>Ces conditions ne correspondent pas aux relevés enregistrés, par exemple un compteur de départ supérieur à un relevé.</target>
+        <target>Ces conditions contredisent les relevés enregistrés, par exemple un compteur de départ supérieur à un relevé.</target>
       </trans-unit>
       <trans-unit id="assessment.no_contract">
         <source>assessment.no_contract</source>
@@ -140,11 +140,11 @@
       </trans-unit>
       <trans-unit id="return.help">
         <source>return.help</source>
-        <target>Vous avez rendu la voiture à la banque ? Marquez-la comme restituée pour figer les chiffres définitifs. Polaris cesse alors de lire le compteur de ce véhicule.</target>
+        <target>Voiture rendue ? Marquez-la comme restituée pour figer les chiffres et arrêter les relevés.</target>
       </trans-unit>
       <trans-unit id="return.status_help">
         <source>return.status_help</source>
-        <target>Les chiffres sont définitifs et ne bougent plus. Polaris ne lit plus le compteur de ce véhicule.</target>
+        <target>Les chiffres sont définitifs. Plus de relevés pour ce véhicule.</target>
       </trans-unit>
       <trans-unit id="return.open">
         <source>return.open</source>
@@ -168,7 +168,7 @@
       </trans-unit>
       <trans-unit id="return.dialog.description">
         <source>return.dialog.description</source>
-        <target>Polaris fige la projection, les budgets et le niveau de risque, et affiche le coût définitif du dépassement à partir du dernier relevé jusqu’à la fin du jour choisi. Les relevés programmés et manuels s’arrêtent pour ce véhicule. Vous pouvez annuler à tout moment.</target>
+        <target>Les chiffres sont figés au dernier relevé jusqu’à la fin de ce jour. Plus de relevés pour ce véhicule. Vous pouvez annuler.</target>
       </trans-unit>
       <trans-unit id="return.undo_dialog.title">
         <source>return.undo_dialog.title</source>
@@ -176,7 +176,7 @@
       </trans-unit>
       <trans-unit id="return.undo_dialog.description">
         <source>return.undo_dialog.description</source>
-        <target>Polaris suit de nouveau ce leasing et relit le compteur à la prochaine heure programmée. Les relevés pris après la restitution comptent de nouveau.</target>
+        <target>Le leasing est de nouveau suivi dès la prochaine lecture programmée. Les relevés pris après la restitution comptent de nouveau.</target>
       </trans-unit>
       <trans-unit id="return.undo_confirm">
         <source>return.undo_confirm</source>
@@ -196,17 +196,17 @@
       </trans-unit>
       <trans-unit id="flash.lease_returned">
         <source>flash.lease_returned</source>
-        <target>Le véhicule est marqué comme restitué.
+        <target>Véhicule marqué comme restitué.
 Les chiffres sont définitifs.</target>
       </trans-unit>
       <trans-unit id="flash.lease_return_undone">
         <source>flash.lease_return_undone</source>
-        <target>La restitution a été annulée.
+        <target>Restitution annulée.
 Le leasing est de nouveau suivi.</target>
       </trans-unit>
       <trans-unit id="rejected.return_no_contract">
         <source>rejected.return_no_contract</source>
-        <target>Enregistrez les conditions du leasing avant de marquer le véhicule comme restitué.</target>
+        <target>Enregistrez d’abord les conditions du leasing.</target>
       </trans-unit>
       <trans-unit id="rejected.return_before_start">
         <source>rejected.return_before_start</source>
@@ -214,11 +214,11 @@ Le leasing est de nouveau suivi.</target>
       </trans-unit>
       <trans-unit id="rejected.return_in_future">
         <source>rejected.return_in_future</source>
-        <target>Le véhicule ne peut pas être marqué comme restitué un jour qui n’est pas encore arrivé.</target>
+        <target>Ce jour n’est pas encore arrivé.</target>
       </trans-unit>
       <trans-unit id="rejected.start_after_return">
         <source>rejected.start_after_return</source>
-        <target>La date de début doit précéder le jour où le véhicule a été rendu. Annulez d’abord la restitution, ou choisissez un début plus tôt.</target>
+        <target>Le début doit précéder le jour où le véhicule a été rendu. Annulez la restitution ou choisissez un début plus tôt.</target>
       </trans-unit>
     </body>
   </file>

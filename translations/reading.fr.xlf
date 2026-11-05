@@ -56,7 +56,7 @@
       </trans-unit>
       <trans-unit id="flash.reading_added">
         <source>flash.reading_added</source>
-        <target>Le relevé a été ajouté.</target>
+        <target>Relevé ajouté.</target>
       </trans-unit>
     </body>
   </file>

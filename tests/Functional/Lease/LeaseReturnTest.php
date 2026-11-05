@@ -93,8 +93,8 @@ final class LeaseReturnTest extends WebTestCase
 
         self::assertResponseRedirects($this->url());
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[data-slot=alert]', 'The car is marked as returned.');
-        self::assertSelectorTextContains('#lease-return [data-returned]', 'returned to the bank on June 30, 2026');
+        self::assertSelectorTextContains('[data-slot=alert]', 'Car marked as returned.');
+        self::assertSelectorTextContains('#lease-return [data-returned]', 'Returned to the bank on June 30, 2026');
 
         // Zurich is UTC+2 on 2026-06-30: the end of that day is 22:00 UTC.
         self::assertSame('2026-06-30T22:00:00+00:00', $this->contract()->getReturnedAt()?->toIso8601String());
@@ -112,7 +112,7 @@ final class LeaseReturnTest extends WebTestCase
 
         self::assertResponseRedirects($this->url());
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[data-slot=alert]', 'The return was undone.');
+        self::assertSelectorTextContains('[data-slot=alert]', 'Return undone.');
         self::assertNull($this->contract()->getReturnedAt());
     }
 
@@ -121,8 +121,8 @@ final class LeaseReturnTest extends WebTestCase
      */
     public static function invalidDates(): iterable
     {
-        yield 'before the lease start' => ['2025-12-31', 'The car cannot go back before the lease started.'];
-        yield 'tomorrow' => ['2026-07-03', 'The car cannot be marked as returned on a day that has not come yet.'];
+        yield 'before the lease start' => ['2025-12-31', 'The car cannot be returned before the lease started.'];
+        yield 'tomorrow' => ['2026-07-03', 'That day has not come yet.'];
     }
 
     #[DataProvider('invalidDates')]
@@ -214,7 +214,7 @@ final class LeaseReturnTest extends WebTestCase
         $this->client->submitForm('Save lease terms', ['lease_contract[startDate]' => '2026-07-01', 'lease_contract[endDate]' => '2027-07-01']);
 
         self::assertResponseStatusCodeSame(422);
-        self::assertSelectorTextContains('body', 'The start date must be before the day the car went back.');
+        self::assertSelectorTextContains('body', 'The start must be before the day the car went back.');
         self::assertSame('2026-01-01', $this->contract()->getTerm()->start()->toDateString());
     }
 
@@ -226,7 +226,7 @@ final class LeaseReturnTest extends WebTestCase
         $this->client->request('GET', \sprintf('/vehicles/%s', $this->vehicle->getId()->toBase32()));
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('main', 'The car was returned on June 30, 2026. These are the final figures.');
+        self::assertSelectorTextContains('main', 'Returned on June 30, 2026. Final figures.');
         // 9,000 km driven of 15,000: the later 20,000 km reading is not counted.
         self::assertSelectorTextContains('[data-slot=alert]', 'Returned within the 15,000 km allowance.');
         self::assertSelectorNotExists('[data-live-name-value="Fetching:OdometerRefreshButton"]');

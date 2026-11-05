@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="return.status">
         <source>return.status</source>
-        <target>Le véhicule a été rendu à la banque le {on, date, long}.</target>
+        <target>Rendu à la banque le {on, date, long}.</target>
       </trans-unit>
     </body>
   </file>

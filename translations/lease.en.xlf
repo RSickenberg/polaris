@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="form.start_odometer.help">
         <source>form.start_odometer.help</source>
-        <target>Odometer reading on the day the lease started, in the unit above.</target>
+        <target>Odometer on the day the lease started, in the unit above.</target>
       </trans-unit>
       <trans-unit id="form.excess_cost.label">
         <source>form.excess_cost.label</source>
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="form.tolerance.help">
         <source>form.tolerance.help</source>
-        <target>Safety margin below the allowance, from 0 to 50. Once the projected distance enters this margin, the risk level turns to Watch. 0 means no margin.</target>
+        <target>Safety margin below the allowance, 0 to 50. Inside this margin the risk level is Watch. 0 means no margin.</target>
       </trans-unit>
       <trans-unit id="form.submit">
         <source>form.submit</source>
@@ -92,11 +92,11 @@
       </trans-unit>
       <trans-unit id="flash.lease_saved">
         <source>flash.lease_saved</source>
-        <target>The lease terms were saved.</target>
+        <target>Lease terms saved.</target>
       </trans-unit>
       <trans-unit id="rejected.inconsistent_readings">
         <source>rejected.inconsistent_readings</source>
-        <target>These terms do not fit the recorded readings, for example a start odometer above a reading.</target>
+        <target>These terms contradict the saved readings, for example a start odometer above a reading.</target>
       </trans-unit>
       <trans-unit id="assessment.no_contract">
         <source>assessment.no_contract</source>
@@ -140,11 +140,11 @@
       </trans-unit>
       <trans-unit id="return.help">
         <source>return.help</source>
-        <target>Gave the car back to the bank? Mark it as returned to freeze the final figures. Polaris then stops reading the odometer for this car.</target>
+        <target>Gave the car back? Mark it returned to freeze the final figures and stop odometer reads.</target>
       </trans-unit>
       <trans-unit id="return.status_help">
         <source>return.status_help</source>
-        <target>The figures are final and no longer move. Polaris no longer reads the odometer of this car.</target>
+        <target>Figures are final. No more odometer reads for this car.</target>
       </trans-unit>
       <trans-unit id="return.open">
         <source>return.open</source>
@@ -168,7 +168,7 @@
       </trans-unit>
       <trans-unit id="return.dialog.description">
         <source>return.dialog.description</source>
-        <target>Polaris freezes the projection, the budgets and the risk level, and shows the final excess cost from the last reading up to the end of the day you pick. Scheduled and manual readings stop for this car. You can undo this at any time.</target>
+        <target>The figures freeze at the last reading up to the end of that day. No more readings for this car. You can undo it.</target>
       </trans-unit>
       <trans-unit id="return.undo_dialog.title">
         <source>return.undo_dialog.title</source>
@@ -176,7 +176,7 @@
       </trans-unit>
       <trans-unit id="return.undo_dialog.description">
         <source>return.undo_dialog.description</source>
-        <target>Polaris tracks this lease again and reads the odometer from the next scheduled time. Readings taken after the return count again.</target>
+        <target>The lease is tracked again from the next scheduled read. Readings taken after the return count again.</target>
       </trans-unit>
       <trans-unit id="return.undo_confirm">
         <source>return.undo_confirm</source>
@@ -196,29 +196,29 @@
       </trans-unit>
       <trans-unit id="flash.lease_returned">
         <source>flash.lease_returned</source>
-        <target>The car is marked as returned.
+        <target>Car marked as returned.
 The figures are final.</target>
       </trans-unit>
       <trans-unit id="flash.lease_return_undone">
         <source>flash.lease_return_undone</source>
-        <target>The return was undone.
+        <target>Return undone.
 The lease is tracked again.</target>
       </trans-unit>
       <trans-unit id="rejected.return_no_contract">
         <source>rejected.return_no_contract</source>
-        <target>Save the lease terms before marking the car as returned.</target>
+        <target>Save the lease terms first.</target>
       </trans-unit>
       <trans-unit id="rejected.return_before_start">
         <source>rejected.return_before_start</source>
-        <target>The car cannot go back before the lease started.</target>
+        <target>The car cannot be returned before the lease started.</target>
       </trans-unit>
       <trans-unit id="rejected.return_in_future">
         <source>rejected.return_in_future</source>
-        <target>The car cannot be marked as returned on a day that has not come yet.</target>
+        <target>That day has not come yet.</target>
       </trans-unit>
       <trans-unit id="rejected.start_after_return">
         <source>rejected.start_after_return</source>
-        <target>The start date must be before the day the car went back. Undo the return first, or pick an earlier start.</target>
+        <target>The start must be before the day the car went back. Undo the return or pick an earlier start.</target>
       </trans-unit>
     </body>
   </file>

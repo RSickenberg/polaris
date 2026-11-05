@@ -148,7 +148,7 @@ final class PasswordResetTest extends WebTestCase
 
         self::assertResponseRedirects('/login');
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[data-slot=alert]', 'Your password was changed.');
+        self::assertSelectorTextContains('[data-slot=alert]', 'Password changed.');
         $hasher = self::getContainer()->get(UserPasswordHasherInterface::class);
         self::assertTrue($hasher->isPasswordValid($this->stored(), self::NEW_PASSWORD));
         self::assertFalse($hasher->isPasswordValid($this->stored(), self::PASSWORD));
