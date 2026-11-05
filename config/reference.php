@@ -1042,6 +1042,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         },
  *     },
  *     default_transport?: scalar|Param|null, // Default: "default"
+ *     mercure?: array{
+ *         ignore_cookie_domain_errors?: bool|Param, // Render nothing and log a warning, instead of failing, when the authorization cookie of a private stream source cannot be created because the page is served on another domain than the hub // Default: false
+ *     },
  * }
  * @psalm-type TwigComponentConfig = array{
  *     defaults?: array<string, Param|string|array{ // Default: []
@@ -1065,6 +1068,14 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     process_timeout?: int|Param, // Timeout in seconds for the Tailwind build process - use "0" to disable // Default: 60
  * }
  * @psalm-type UxToolkitConfig = array{
+ *     components?: array{ // Where "ux:install" installs the Twig components of recipes.
+ *         dir?: scalar|Param|null, // The directory TwigComponent loads anonymous components from, relative to the project directory. It must match your configuration: the Twig "default_path" followed by the TwigComponent "anonymous_template_directory". // Default: "templates/components"
+ *         subdirectory?: scalar|Param|null, // A subdirectory of "dir" to install the components in. Their names get it as a prefix, which the installer adds to the copied files, e.g. "<twig:ui:Button>" for "ui". // Default: null
+ *     },
+ *     controllers?: array{ // Where "ux:install" installs the Stimulus controllers of recipes.
+ *         dir?: scalar|Param|null, // The directory your Stimulus setup loads controllers from, relative to the project directory. It must match your configuration: an entry of "stimulus.controller_paths" with AssetMapper, the "controllersDir" option with Reprise, or the directory passed to "require.context()" with Webpack Encore. // Default: "assets/controllers"
+ *         subdirectory?: scalar|Param|null, // A subdirectory of "dir" to install the controllers in. Their identifiers get it as a prefix, which the installer adds to the copied files, e.g. "ui--dialog" for "ui". // Default: null
+ *     },
  *     preview?: bool|array{ // Wires the preview assets of kits into AssetMapper, Tailwind and the importmap.
  *         enabled?: bool|Param, // Default: false
  *         kits?: list<scalar|Param|null>,
