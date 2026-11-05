@@ -196,11 +196,13 @@
       </trans-unit>
       <trans-unit id="flash.lease_returned">
         <source>flash.lease_returned</source>
-        <target>The car is marked as returned. The figures are final.</target>
+        <target>The car is marked as returned.
+The figures are final.</target>
       </trans-unit>
       <trans-unit id="flash.lease_return_undone">
         <source>flash.lease_return_undone</source>
-        <target>The return was undone. The lease is tracked again.</target>
+        <target>The return was undone.
+The lease is tracked again.</target>
       </trans-unit>
       <trans-unit id="rejected.return_no_contract">
         <source>rejected.return_no_contract</source>

@@ -264,11 +264,13 @@
       </trans-unit>
       <trans-unit id="flash.region_differs">
         <source>flash.region_differs</source>
-        <target>Votre compte Tesla se trouve dans une autre région que celle activée dans les réglages de l'application. Activez cette région dans les réglages de l'application Tesla.</target>
+        <target>Votre compte Tesla se trouve dans une autre région que celle activée dans les réglages de l'application.
+Activez cette région dans les réglages de l'application Tesla.</target>
       </trans-unit>
       <trans-unit id="flash.disconnected">
         <source>flash.disconnected</source>
-        <target>Tesla est déconnecté et votre consentement est retiré. Révoquez aussi l'accès dans votre compte Tesla.</target>
+        <target>Tesla est déconnecté et votre consentement est retiré.
+Révoquez aussi l'accès dans votre compte Tesla.</target>
       </trans-unit>
       <trans-unit id="error.connect.no_app">
         <source>error.connect.no_app</source>

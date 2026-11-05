@@ -182,6 +182,10 @@
         <source>returned.cta</source>
         <target>Review the return</target>
       </trans-unit>
+      <trans-unit id="home.returned">
+        <source>home.returned</source>
+        <target>Returned</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

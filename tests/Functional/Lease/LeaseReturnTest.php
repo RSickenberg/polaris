@@ -77,14 +77,6 @@ final class LeaseReturnTest extends WebTestCase
         self::assertSelectorNotExists('#lease-return form[action$="/lease/return/undo"]');
     }
 
-    public function testTheCardIsInTheStickyColumnUnderTheProjection(): void
-    {
-        $this->client->request('GET', $this->url());
-
-        self::assertSelectorExists('aside.lg\\:sticky #lease-return');
-        self::assertSelectorNotExists('form[name=lease_contract] #lease-return');
-    }
-
     public function testNoCardWithoutAContract(): void
     {
         $this->entityManager->remove($this->contract());

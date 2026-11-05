@@ -196,11 +196,13 @@
       </trans-unit>
       <trans-unit id="flash.lease_returned">
         <source>flash.lease_returned</source>
-        <target>Le véhicule est marqué comme restitué. Les chiffres sont définitifs.</target>
+        <target>Le véhicule est marqué comme restitué.
+Les chiffres sont définitifs.</target>
       </trans-unit>
       <trans-unit id="flash.lease_return_undone">
         <source>flash.lease_return_undone</source>
-        <target>La restitution a été annulée. Le leasing est de nouveau suivi.</target>
+        <target>La restitution a été annulée.
+Le leasing est de nouveau suivi.</target>
       </trans-unit>
       <trans-unit id="rejected.return_no_contract">
         <source>rejected.return_no_contract</source>

@@ -16,7 +16,8 @@
       </trans-unit>
       <trans-unit id="outcome.queued_late">
         <source>outcome.queued_late</source>
-        <target>L’actualisation est en attente. Le résultat apparaîtra à la prochaine lecture.</target>
+        <target>L’actualisation est en attente.
+Le résultat apparaîtra à la prochaine lecture.</target>
       </trans-unit>
       <trans-unit id="outcome.stored">
         <source>outcome.stored</source>
@@ -28,7 +29,8 @@
       </trans-unit>
       <trans-unit id="outcome.asleep">
         <source>outcome.asleep</source>
-        <target>La voiture dort : le dernier relevé est conservé. Réveillez-la depuis l’application Tesla puis actualisez à nouveau.</target>
+        <target>La voiture dort : le dernier relevé est conservé.
+Réveillez-la depuis l’application Tesla puis actualisez à nouveau.</target>
       </trans-unit>
       <trans-unit id="outcome.offline">
         <source>outcome.offline</source>
@@ -40,7 +42,8 @@
       </trans-unit>
       <trans-unit id="outcome.not_connected">
         <source>outcome.not_connected</source>
-        <target>Polaris n’est pas connecté à Tesla. Connectez-le dans les réglages Tesla.</target>
+        <target>Polaris n’est pas connecté à Tesla.
+Connectez-le dans les réglages Tesla.</target>
       </trans-unit>
       <trans-unit id="outcome.rejected">
         <source>outcome.rejected</source>
@@ -48,11 +51,13 @@
       </trans-unit>
       <trans-unit id="outcome.busy">
         <source>outcome.busy</source>
-        <target>Une autre lecture de ce véhicule est en cours. Réessayez dans un instant.</target>
+        <target>Une autre lecture de ce véhicule est en cours.
+Réessayez dans un instant.</target>
       </trans-unit>
       <trans-unit id="outcome.failed">
         <source>outcome.failed</source>
-        <target>Tesla a renvoyé une erreur. L’actualisation ne sera pas relancée automatiquement.</target>
+        <target>Tesla a renvoyé une erreur.
+L’actualisation ne sera pas relancée automatiquement.</target>
       </trans-unit>
       <trans-unit id="outcome.waking">
         <source>outcome.waking</source>
@@ -64,11 +69,13 @@
       </trans-unit>
       <trans-unit id="outcome.wake_cap">
         <source>outcome.wake_cap</source>
-        <target>Le réveil n’a pas été envoyé : ce véhicule a déjà été réveillé autant de fois que permis en 24 heures. Le dernier relevé est conservé.</target>
+        <target>Le réveil n’a pas été envoyé : ce véhicule a déjà été réveillé autant de fois que permis en 24 heures.
+Le dernier relevé est conservé.</target>
       </trans-unit>
       <trans-unit id="outcome.wake_scope">
         <source>outcome.wake_scope</source>
-        <target>Tesla a refusé le réveil : Polaris n’est pas autorisé à réveiller votre voiture. Reconnectez-vous à Tesla dans les réglages Tesla.</target>
+        <target>Tesla a refusé le réveil : Polaris n’est pas autorisé à réveiller votre voiture.
+Reconnectez-vous à Tesla dans les réglages Tesla.</target>
       </trans-unit>
       <trans-unit id="wake.dialog.title">
         <source>wake.dialog.title</source>
@@ -93,23 +100,29 @@ Tesla facture chaque réveil environ {cost}.</target>
       </trans-unit>
       <trans-unit id="wake.cap_reached">
         <source>wake.cap_reached</source>
-        <target>La voiture dort et a déjà été réveillée autant de fois que permis en 24 heures. Vous pourrez la réveiller à nouveau à {time} ({zone}). Le dernier relevé est conservé.</target>
+        <target>La voiture dort et a déjà été réveillée autant de fois que permis en 24 heures.
+Vous pourrez la réveiller à nouveau à {time} ({zone}).
+Le dernier relevé est conservé.</target>
       </trans-unit>
       <trans-unit id="wake.disabled">
         <source>wake.disabled</source>
-        <target>La voiture dort et le réveil est désactivé dans les réglages Tesla. Le dernier relevé est conservé.</target>
+        <target>La voiture dort et le réveil est désactivé dans les réglages Tesla.
+Le dernier relevé est conservé.</target>
       </trans-unit>
       <trans-unit id="wake.scope_missing">
         <source>wake.scope_missing</source>
-        <target>Polaris n’est pas autorisé à réveiller votre voiture. Reconnectez-vous à Tesla pour l’autoriser.</target>
+        <target>Polaris n’est pas autorisé à réveiller votre voiture.
+Reconnectez-vous à Tesla pour l’autoriser.</target>
       </trans-unit>
       <trans-unit id="wake.not_connected">
         <source>wake.not_connected</source>
-        <target>Polaris n’est pas connecté à Tesla. Connectez-le dans les réglages Tesla.</target>
+        <target>Polaris n’est pas connecté à Tesla.
+Connectez-le dans les réglages Tesla.</target>
       </trans-unit>
       <trans-unit id="wake.nothing_to_wake">
         <source>wake.nothing_to_wake</source>
-        <target>Cette actualisation ne peut plus réveiller la voiture. Actualisez à nouveau.</target>
+        <target>Cette actualisation ne peut plus réveiller la voiture.
+Actualisez à nouveau.</target>
       </trans-unit>
       <trans-unit id="outcome.limited">
         <source>outcome.limited</source>
@@ -117,7 +130,9 @@ Tesla facture chaque réveil environ {cost}.</target>
       </trans-unit>
       <trans-unit id="wake.rate_limited">
         <source>wake.rate_limited</source>
-        <target>La voiture dort. Elle a été lue il y a moins d’une heure, un réveil ne serait donc pas suivi d’une lecture. Vous pourrez actualiser et la réveiller à nouveau à {time} ({zone}).</target>
+        <target>La voiture dort.
+Elle a été lue il y a moins d’une heure, un réveil ne serait donc pas suivi d’une lecture.
+Vous pourrez actualiser et la réveiller à nouveau à {time} ({zone}).</target>
       </trans-unit>
       <trans-unit id="wake.dialog_offline.title">
         <source>wake.dialog_offline.title</source>

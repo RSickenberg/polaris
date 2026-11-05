@@ -140,7 +140,8 @@
       </trans-unit>
       <trans-unit id="flash.password_reset">
         <source>flash.password_reset</source>
-        <target>Your password was changed. Sign in with the new one.</target>
+        <target>Your password was changed.
+Sign in with the new one.</target>
       </trans-unit>
       <trans-unit id="email.reset.subject">
         <source>email.reset.subject</source>

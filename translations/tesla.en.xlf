@@ -264,11 +264,13 @@
       </trans-unit>
       <trans-unit id="flash.region_differs">
         <source>flash.region_differs</source>
-        <target>Your Tesla account is in another region than the one enabled in the app settings. Enable that region in the Tesla app settings.</target>
+        <target>Your Tesla account is in another region than the one enabled in the app settings.
+Enable that region in the Tesla app settings.</target>
       </trans-unit>
       <trans-unit id="flash.disconnected">
         <source>flash.disconnected</source>
-        <target>Tesla is disconnected and your consent is withdrawn. Also revoke the access in your Tesla account.</target>
+        <target>Tesla is disconnected and your consent is withdrawn.
+Also revoke the access in your Tesla account.</target>
       </trans-unit>
       <trans-unit id="error.connect.no_app">
         <source>error.connect.no_app</source>
