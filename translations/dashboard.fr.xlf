@@ -68,7 +68,7 @@
       </trans-unit>
       <trans-unit id="ended.text">
         <source>ended.text</source>
-        <target>Le leasing est terminé. Voici les chiffres finaux.</target>
+        <target>Le leasing est terminé. Chiffres définitifs.</target>
       </trans-unit>
       <trans-unit id="ended.cta">
         <source>ended.cta</source>
@@ -96,11 +96,11 @@
       </trans-unit>
       <trans-unit id="chart.title">
         <source>chart.title</source>
-        <target>Kilométrage sur la durée du bail</target>
+        <target>Kilométrage sur la durée du leasing</target>
       </trans-unit>
       <trans-unit id="chart.label">
         <source>chart.label</source>
-        <target>Courbe de la distance parcourue depuis le début du bail, comparée au forfait linéaire et à la projection jusqu’à la fin du bail</target>
+        <target>Distance parcourue depuis le début du leasing, comparée au forfait et à la projection jusqu’à la fin</target>
       </trans-unit>
       <trans-unit id="chart.series.actual">
         <source>chart.series.actual</source>
@@ -177,6 +177,14 @@
       <trans-unit id="pace.month">
         <source>pace.month</source>
         <target>km / mois</target>
+      </trans-unit>
+      <trans-unit id="returned.cta">
+        <source>returned.cta</source>
+        <target>Revoir la restitution</target>
+      </trans-unit>
+      <trans-unit id="home.returned">
+        <source>home.returned</source>
+        <target>Rendu</target>
       </trans-unit>
     </body>
   </file>

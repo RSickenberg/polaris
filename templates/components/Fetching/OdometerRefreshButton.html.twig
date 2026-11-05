@@ -14,6 +14,8 @@
     {% set wakeStatus = refusal ?? offerStatus %}
     {% set key = wakeStatus == 'cap_reached' and availableAt is null ? 'wake.disabled' : 'wake.' ~ wakeStatus %}
     {% set toast = {id: 'wake-' ~ this.clicks, variant: 'warning', message: key|trans(availableAt is null ? {} : {time: availableAt|format_time('short', timezone=this.timeZone), zone: availableAt|format_datetime(pattern: 'zzz', timezone: this.timeZone)}, 'fetching')} %}
+{% elseif this.returned %}
+    {% set toast = {id: 'returned-' ~ this.clicks, variant: 'info', message: 'outcome.returned'|trans(domain='fetching')} %}
 {% elseif until is not null %}
     {% set toast = {id: 'limited-' ~ this.clicks, variant: 'warning', message: 'limited.message'|trans({time: until|format_time('short', timezone=this.timeZone), zone: until|format_datetime(pattern: 'zzz', timezone: this.timeZone)}, 'fetching')} %}
 {% elseif outcome is not null and (outcome.settled or not polling) and offerStatus != 'accepted' %}
@@ -63,6 +65,10 @@
                 </twig:Dialog:Footer>
             </twig:Dialog:Content>
         </twig:Dialog>
+    {% endif %}
+    {% if outcome is not null and outcome.movesFigures %}
+        {# New figures: the dashboard refreshes itself once, one element per click so that a poll showing the same result does not do it again. #}
+        <div hidden id="figures-{{ this.clicks }}" data-controller="dashboard-refresh"></div>
     {% endif %}
     {% if toast is not null %}
         <twig:Shared:ToastAnnounce :id="toast.id" :variant="toast.variant" :message="toast.message" />

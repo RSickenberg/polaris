@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Dashboard\Service\Dto;
 
+use Carbon\CarbonImmutable;
 use Polaris\Dashboard\Domain\AllowanceProgress;
 use Polaris\Dashboard\Domain\MileageRange;
 use Polaris\Dashboard\Domain\MileageSeries;
@@ -15,7 +16,7 @@ use Polaris\Shared\Domain\Distance;
 /**
  * Everything the dashboard page shows for one vehicle. The assessment, the allowance and
  * the progress are set from the Draft state onward, and are null for NoLease and NoReading.
- * The mileage curves are set for Active and Ended only.
+ * The mileage curves are set for Active, Ended and Returned.
  */
 final readonly class DashboardView
 {
@@ -36,6 +37,8 @@ final readonly class DashboardView
         public ?Distance $startOdometer = null,
         /** What the allowance is made for per day, week and month, whatever was driven so far. */
         public ?Budget $evenPace = null,
+        /** The calendar date (midnight UTC) the user gave the car back; set for Returned only. */
+        public ?CarbonImmutable $returnedOn = null,
     ) {
     }
 }

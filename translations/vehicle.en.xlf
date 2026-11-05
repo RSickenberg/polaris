@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="page.import.description">
         <source>page.import.description</source>
-        <target>Tick the vehicles to add to Polaris. Only the list of your account is read: no car is contacted and none wakes up.</target>
+        <target>Tick the vehicles to add. Only your account list is read: no car is contacted or woken.</target>
       </trans-unit>
       <trans-unit id="form.vehicles.label">
         <source>form.vehicles.label</source>
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="import.none.text">
         <source>import.none.text</source>
-        <target>Every vehicle of your Tesla account is already in Polaris.</target>
+        <target>All vehicles of your Tesla account are already in Polaris.</target>
       </trans-unit>
       <trans-unit id="import.back">
         <source>import.back</source>
@@ -36,7 +36,7 @@
       </trans-unit>
       <trans-unit id="import.not_connected.description">
         <source>import.not_connected.description</source>
-        <target>Connect your Tesla account first, then come back to import your vehicles.</target>
+        <target>Connect your Tesla account first, then import.</target>
       </trans-unit>
       <trans-unit id="import.not_connected.cta">
         <source>import.not_connected.cta</source>
@@ -48,7 +48,7 @@
       </trans-unit>
       <trans-unit id="import.error.description">
         <source>import.error.description</source>
-        <target>The list of your vehicles could not be read from Tesla. Try again in a moment.</target>
+        <target>Could not read your vehicle list from Tesla. Try again shortly.</target>
       </trans-unit>
     </body>
   </file>

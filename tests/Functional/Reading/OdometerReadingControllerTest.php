@@ -68,7 +68,7 @@ final class OdometerReadingControllerTest extends WebTestCase
         $this->client->followRedirect();
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('[data-slot=alert]', 'The reading was added.');
+        self::assertSelectorTextContains('[data-slot=alert]', 'Reading added.');
         $rows = $this->client->getCrawler()->filter('tbody tr')->each(static fn ($row): string => preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', trim($row->text()))) ?? '');
         self::assertCount(2, $rows);
         self::assertStringContainsString('Oct 2, 2026, 9:30 AM UTC', $rows[0]);
@@ -91,7 +91,7 @@ final class OdometerReadingControllerTest extends WebTestCase
         $this->submit('2026-10-02T08:00', '9000', 'km');
 
         self::assertResponseStatusCodeSame(422);
-        self::assertStringContainsString('The odometer cannot be lower than the previous reading (10,000 km on Oct 1, 2026 at 8:00 AM UTC).', preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', $this->client->getCrawler()->filter('body')->text())) ?? '');
+        self::assertStringContainsString('Lower than the previous reading (10,000 km on Oct 1, 2026 at 8:00 AM UTC).', preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', $this->client->getCrawler()->filter('body')->text())) ?? '');
         self::assertCount(1, $this->client->getCrawler()->filter('tbody tr'));
     }
 

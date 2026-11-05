@@ -8,7 +8,7 @@
       </trans-unit>
       <trans-unit id="lease.excess_cost.format">
         <source>lease.excess_cost.format</source>
-        <target>Saisissez un montant tel que 0.12, avec deux décimales au maximum.</target>
+        <target>Saisissez un montant comme 0.12, deux décimales au maximum.</target>
       </trans-unit>
       <trans-unit id="lease.term.whole_months">
         <source>lease.term.whole_months</source>
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="tesla.domain.invalid">
         <source>tesla.domain.invalid</source>
-        <target>Saisissez uniquement le domaine, par exemple polaris.example.com, sans https:// ni chemin.</target>
+        <target>Saisissez uniquement le domaine, par ex. polaris.example.com, sans https:// ni chemin.</target>
       </trans-unit>
       <trans-unit id="tesla.region.not_supported">
         <source>tesla.region.not_supported</source>
@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="tesla.consent.required">
         <source>tesla.consent.required</source>
-        <target>Cochez la case pour donner votre consentement.</target>
+        <target>Cochez la case pour donner votre accord.</target>
       </trans-unit>
       <trans-unit id="tesla.callback_url.required">
         <source>tesla.callback_url.required</source>
@@ -56,7 +56,7 @@
       </trans-unit>
       <trans-unit id="tesla.wake_cap.range">
         <source>tesla.wake_cap.range</source>
-        <target>Le plafond de réveils doit être compris entre 0 et 20.</target>
+        <target>La limite de réveils doit être comprise entre 0 et 20.</target>
       </trans-unit>
     </body>
   </file>

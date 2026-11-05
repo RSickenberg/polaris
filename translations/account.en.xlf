@@ -8,7 +8,7 @@
       </trans-unit>
       <trans-unit id="page.login.description">
         <source>page.login.description</source>
-        <target>Enter your email and password to open your dashboard.</target>
+        <target>Sign in with your email and password.</target>
       </trans-unit>
       <trans-unit id="form.email.label">
         <source>form.email.label</source>
@@ -32,7 +32,7 @@
       </trans-unit>
       <trans-unit id="page.settings.profile_description">
         <source>page.settings.profile_description</source>
-        <target>Your email, your language and the time zone dates are shown in.</target>
+        <target>Your email, language and time zone.</target>
       </trans-unit>
       <trans-unit id="page.settings.password">
         <source>page.settings.password</source>
@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="page.settings.password_description">
         <source>page.settings.password_description</source>
-        <target>Choose a new password. You stay signed in on this device.</target>
+        <target>You stay signed in on this device.</target>
       </trans-unit>
       <trans-unit id="form.locale.label">
         <source>form.locale.label</source>
@@ -52,7 +52,7 @@
       </trans-unit>
       <trans-unit id="form.time_zone.help">
         <source>form.time_zone.help</source>
-        <target>Dates are stored in UTC and shown, and entered, in this time zone.</target>
+        <target>Dates are stored in UTC, shown and entered in this time zone.</target>
       </trans-unit>
       <trans-unit id="form.current_password.label">
         <source>form.current_password.label</source>
@@ -80,11 +80,11 @@
       </trans-unit>
       <trans-unit id="flash.profile_saved">
         <source>flash.profile_saved</source>
-        <target>Your profile was saved.</target>
+        <target>Profile saved.</target>
       </trans-unit>
       <trans-unit id="flash.password_saved">
         <source>flash.password_saved</source>
-        <target>Your password was changed.</target>
+        <target>Password changed.</target>
       </trans-unit>
       <trans-unit id="link.forgot">
         <source>link.forgot</source>
@@ -104,7 +104,7 @@
       </trans-unit>
       <trans-unit id="page.forgot.description">
         <source>page.forgot.description</source>
-        <target>Enter your email and we send you a link to choose a new password.</target>
+        <target>We email you a link to choose a new password.</target>
       </trans-unit>
       <trans-unit id="form.send_link">
         <source>form.send_link</source>
@@ -120,7 +120,7 @@
       </trans-unit>
       <trans-unit id="page.forgot_sent.description">
         <source>page.forgot_sent.description</source>
-        <target>If this email belongs to an account, a link to reset the password is on its way. It works once and expires in one hour.</target>
+        <target>If an account exists for this email, you will get a reset link. It works once, for one hour.</target>
       </trans-unit>
       <trans-unit id="page.reset.title">
         <source>page.reset.title</source>
@@ -128,7 +128,7 @@
       </trans-unit>
       <trans-unit id="page.reset.description">
         <source>page.reset.description</source>
-        <target>Type the new password twice. Every device is signed out.</target>
+        <target>Type it twice. Every device is signed out.</target>
       </trans-unit>
       <trans-unit id="page.reset_invalid.title">
         <source>page.reset_invalid.title</source>
@@ -136,11 +136,12 @@
       </trans-unit>
       <trans-unit id="page.reset_invalid.description">
         <source>page.reset_invalid.description</source>
-        <target>It has expired, it was already used, or it is incomplete. Ask for a new one.</target>
+        <target>Expired, already used or incomplete. Ask for a new one.</target>
       </trans-unit>
       <trans-unit id="flash.password_reset">
         <source>flash.password_reset</source>
-        <target>Your password was changed. Sign in with the new one.</target>
+        <target>Password changed.
+Sign in with the new one.</target>
       </trans-unit>
       <trans-unit id="email.reset.subject">
         <source>email.reset.subject</source>
@@ -148,7 +149,7 @@
       </trans-unit>
       <trans-unit id="email.reset.intro">
         <source>email.reset.intro</source>
-        <target>Someone asked to reset the password of your Polaris account.</target>
+        <target>A password reset was requested for your Polaris account.</target>
       </trans-unit>
       <trans-unit id="email.reset.cta">
         <source>email.reset.cta</source>
@@ -156,11 +157,11 @@
       </trans-unit>
       <trans-unit id="email.reset.expires">
         <source>email.reset.expires</source>
-        <target>This link works once and expires in %hours% hour.</target>
+        <target>Valid once, for %hours% hour.</target>
       </trans-unit>
       <trans-unit id="email.reset.ignore">
         <source>email.reset.ignore</source>
-        <target>If it was not you, ignore this email: your password stays the same.</target>
+        <target>Not you? Ignore this email, your password stays the same.</target>
       </trans-unit>
       <trans-unit id="page.settings.reporting">
         <source>page.settings.reporting</source>
@@ -168,7 +169,7 @@
       </trans-unit>
       <trans-unit id="page.settings.reporting_description">
         <source>page.settings.reporting_description</source>
-        <target>Polaris sends nothing to Sentry unless the owner of this instance turned error reporting on. This is your part of that choice.</target>
+        <target>Nothing goes to Sentry unless the instance owner enabled error reporting. Your choice applies on top.</target>
       </trans-unit>
       <trans-unit id="form.error_reporting.label">
         <source>form.error_reporting.label</source>
@@ -176,7 +177,7 @@
       </trans-unit>
       <trans-unit id="form.error_reporting.help">
         <source>form.error_reporting.help</source>
-        <target>If the instance turned it on, your errors are sent to Sentry, without sensitive data.</target>
+        <target>If the instance allows it, your errors go to Sentry, without sensitive data.</target>
       </trans-unit>
       <trans-unit id="form.error_reporting_details.label">
         <source>form.error_reporting_details.label</source>
@@ -184,7 +185,7 @@
       </trans-unit>
       <trans-unit id="form.error_reporting_details.help">
         <source>form.error_reporting_details.help</source>
-        <target>Attaches the car’s answer (never the location) to reports. Needs the reports above.</target>
+        <target>Adds the car’s answer (never the location) to reports. Needs the option above.</target>
       </trans-unit>
       <trans-unit id="form.reporting_save">
         <source>form.reporting_save</source>
@@ -192,7 +193,7 @@
       </trans-unit>
       <trans-unit id="flash.reporting_saved">
         <source>flash.reporting_saved</source>
-        <target>Your error reporting choice was saved.</target>
+        <target>Choice saved.</target>
       </trans-unit>
     </body>
   </file>

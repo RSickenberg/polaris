@@ -30,6 +30,11 @@ final readonly class RefreshRequestResult
         return new self(RefreshRequestStatus::RateLimited, null, $retryAfter);
     }
 
+    public static function returned(): self
+    {
+        return new self(RefreshRequestStatus::Returned, null, null);
+    }
+
     public function isAccepted(): bool
     {
         return RefreshRequestStatus::Accepted === $this->status;

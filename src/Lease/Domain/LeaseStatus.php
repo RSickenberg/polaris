@@ -18,7 +18,14 @@ enum LeaseStatus: string
 
     /**
      * The lease end has passed: no time is left, so the budgets are zero and the excess
-     * keeps growing with every kilometre driven until the car is returned.
+     * keeps growing with every kilometre driven until the user says the car was returned
+     * ({@see self::Returned}).
      */
     case Ended = 'ended';
+
+    /**
+     * The user gave the car back: the figures are final, taken at the last reading before or at
+     * the return, whatever the clock says. No budget, no weekly cut, no forecast.
+     */
+    case Returned = 'returned';
 }

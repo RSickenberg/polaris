@@ -19,6 +19,7 @@ use Polaris\Fetching\Service\Enum\WakeRequestStatus;
 use Polaris\Fetching\Service\ManualRefreshLimit;
 use Polaris\Fetching\Service\ManualRefreshService;
 use Polaris\Fetching\Service\WakeCap;
+use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Tesla\Entity\TeslaApp;
 use Polaris\Tesla\Service\Enum\NoReadingReason;
 use Polaris\Tesla\Service\TeslaAppSettings;
@@ -339,6 +340,7 @@ final class ManualRefreshServiceTest extends KernelTestCase
             self::getContainer()->get(TeslaAppSettings::class),
             self::getContainer()->get(TeslaVehicleWaker::class),
             self::getContainer()->get(WakeCap::class),
+            self::getContainer()->get(LeaseTermsService::class),
         );
     }
 

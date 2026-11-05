@@ -12,9 +12,18 @@
 
     <div class="mt-6 flex flex-col gap-4">
         {% for vehicle in vehicles %}
-            <twig:Card>
+            {% set isReturned = returned[vehicle.id.toBase32()] %}
+            <twig:Card class="{{ isReturned ? 'border-dashed bg-muted/40 text-muted-foreground' }}" data-returned="{{ isReturned ? 'true' : 'false' }}">
                 <twig:Card:Header>
-                    <twig:Card:Title><h2>{{ vehicle.name }}</h2></twig:Card:Title>
+                    <twig:Card:Title class="flex flex-wrap items-center gap-2">
+                        <h2>{{ vehicle.name }}</h2>
+                        {% if isReturned %}
+                            <twig:Badge variant="outline" data-returned-badge>
+                                <twig:ux:icon name="lucide:undo-2" aria-hidden="true" data-icon="inline-start" />
+                                {{ 'home.returned'|trans(domain='dashboard') }}
+                            </twig:Badge>
+                        {% endif %}
+                    </twig:Card:Title>
                   <twig:Card:Description>
                     <div class="font-mono">
                       {{ vehicle.vin.value }}

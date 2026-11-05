@@ -87,7 +87,7 @@ final class TeslaConnectionControllerTest extends WebTestCase
         $this->submitConsent(false);
 
         self::assertResponseStatusCodeSame(422);
-        self::assertSelectorTextContains('[data-slot=field-error]', 'Tick the box to give your consent.');
+        self::assertSelectorTextContains('[data-slot=field-error]', 'Tick the box to consent.');
         $this->entityManager->clear();
         self::assertFalse($this->app()->hasConsent());
     }
@@ -199,7 +199,7 @@ final class TeslaConnectionControllerTest extends WebTestCase
 
         self::assertResponseRedirects('/settings/tesla');
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[data-slot=alert]', 'Tesla is connected.');
+        self::assertSelectorTextContains('[data-slot=alert]', 'Tesla connected.');
         self::assertSelectorExists('[data-connection-status=connected]');
         self::assertSelectorExists('form[name=disconnect].w-full.sm\\:w-auto button.w-full', 'The disconnect button is a block on a phone.');
         $this->entityManager->clear();
@@ -217,7 +217,7 @@ final class TeslaConnectionControllerTest extends WebTestCase
 
         self::assertResponseRedirects('/settings/tesla/connect');
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[data-slot=alert]', 'start again');
+        self::assertSelectorTextContains('[data-slot=alert]', 'Start again');
         self::assertSame([], $this->calls);
         self::assertSame([], $this->entityManager->getRepository(OAuthToken::class)->findAll());
     }
@@ -291,7 +291,7 @@ final class TeslaConnectionControllerTest extends WebTestCase
         $this->submitPaste('paste_callback', ['url' => 'https://polaris.local/tesla/callback?code=fake-code&state=wrong']);
 
         self::assertResponseStatusCodeSame(422);
-        self::assertSelectorTextContains('#paste-callback [data-slot=field-error]', 'start again');
+        self::assertSelectorTextContains('#paste-callback [data-slot=field-error]', 'Start again');
         self::assertSame([], $this->calls);
         self::assertSame([], $this->entityManager->getRepository(OAuthToken::class)->findAll());
     }
@@ -313,7 +313,7 @@ final class TeslaConnectionControllerTest extends WebTestCase
         $this->submitPaste('paste_callback', ['url' => 'hello']);
 
         self::assertResponseStatusCodeSame(422);
-        self::assertSelectorTextContains('#paste-callback [data-slot=field-error]', 'not a callback URL');
+        self::assertSelectorTextContains('#paste-callback [data-slot=field-error]', 'Not a callback URL');
     }
 
     public function testAPastedRefreshTokenConnects(): void

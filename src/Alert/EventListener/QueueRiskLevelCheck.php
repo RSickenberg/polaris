@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polaris\Alert\EventListener;
 
 use Polaris\Alert\Message\CheckRiskLevel;
+use Polaris\Lease\Event\LeaseReturnUndone;
 use Polaris\Lease\Event\LeaseTermsSaved;
 use Polaris\Reading\Event\ReadingConfirmed;
 use Polaris\Reading\Event\ReadingStored;
@@ -46,6 +47,18 @@ final readonly class QueueRiskLevelCheck
      */
     #[AsEventListener]
     public function onLeaseTermsSaved(LeaseTermsSaved $event): void
+    {
+        $this->queue($event->vehicle);
+    }
+
+    /**
+     * A returned lease is not assessed, so nothing is queued when it is marked returned; after an undo the lease is
+     * assessed again from the next check.
+     *
+     * @throws ExceptionInterface
+     */
+    #[AsEventListener]
+    public function onLeaseReturnUndone(LeaseReturnUndone $event): void
     {
         $this->queue($event->vehicle);
     }

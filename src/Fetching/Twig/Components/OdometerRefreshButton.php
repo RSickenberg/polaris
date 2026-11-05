@@ -12,6 +12,7 @@ use Polaris\Fetching\Domain\RefreshOutcome;
 use Polaris\Fetching\Entity\RefreshAttempt;
 use Polaris\Fetching\Repository\RefreshAttemptRepository;
 use Polaris\Fetching\Service\Dto\WakeRequestResult;
+use Polaris\Fetching\Service\Enum\RefreshRequestStatus;
 use Polaris\Fetching\Service\Enum\WakeRequestStatus;
 use Polaris\Fetching\Service\ManualRefreshService;
 use Polaris\Vehicle\Entity\Vehicle;
@@ -80,6 +81,12 @@ final class OdometerRefreshButton
     public ?int $wakeAvailableAt = null;
 
     /**
+     * Whether the last click found the lease returned (a return made in another tab since the page was drawn).
+     */
+    #[LiveProp]
+    public bool $returned = false;
+
+    /**
      * How many times the button was clicked in this page: it makes the toast of each click a new element.
      */
     #[LiveProp]
@@ -116,6 +123,7 @@ final class OdometerRefreshButton
 
         $this->attemptId = $result->attemptId?->toRfc4122();
         $this->limitedUntil = $result->retryAfter?->getTimestamp();
+        $this->returned = RefreshRequestStatus::Returned === $result->status;
         $this->declinedAttemptId = null;
         $this->wakeRefusal = null;
         $this->wakeAvailableAt = null;

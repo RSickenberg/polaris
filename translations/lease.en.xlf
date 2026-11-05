@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="form.start_odometer.help">
         <source>form.start_odometer.help</source>
-        <target>Odometer reading on the day the lease started, in the unit above.</target>
+        <target>Odometer on the day the lease started, in the unit above.</target>
       </trans-unit>
       <trans-unit id="form.excess_cost.label">
         <source>form.excess_cost.label</source>
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="form.tolerance.help">
         <source>form.tolerance.help</source>
-        <target>Safety margin below the allowance, from 0 to 50. Once the projected distance enters this margin, the risk level turns to Watch. 0 means no margin.</target>
+        <target>Safety margin below the allowance, 0 to 50. Inside this margin the risk level is Watch. 0 means no margin.</target>
       </trans-unit>
       <trans-unit id="form.submit">
         <source>form.submit</source>
@@ -92,11 +92,11 @@
       </trans-unit>
       <trans-unit id="flash.lease_saved">
         <source>flash.lease_saved</source>
-        <target>The lease terms were saved.</target>
+        <target>Lease terms saved.</target>
       </trans-unit>
       <trans-unit id="rejected.inconsistent_readings">
         <source>rejected.inconsistent_readings</source>
-        <target>These terms do not fit the recorded readings, for example a start odometer above a reading.</target>
+        <target>These terms contradict the saved readings, for example a start odometer above a reading.</target>
       </trans-unit>
       <trans-unit id="assessment.no_contract">
         <source>assessment.no_contract</source>
@@ -133,6 +133,92 @@
       <trans-unit id="assessment.projected_excess">
         <source>assessment.projected_excess</source>
         <target>Projected excess</target>
+      </trans-unit>
+      <trans-unit id="return.title">
+        <source>return.title</source>
+        <target>Return of the car</target>
+      </trans-unit>
+      <trans-unit id="return.help">
+        <source>return.help</source>
+        <target>Gave the car back? Mark it returned to freeze the final figures and stop odometer reads.</target>
+      </trans-unit>
+      <trans-unit id="return.status_help">
+        <source>return.status_help</source>
+        <target>Figures are final. No more odometer reads for this car.</target>
+      </trans-unit>
+      <trans-unit id="return.open">
+        <source>return.open</source>
+        <target>Mark as returned</target>
+      </trans-unit>
+      <trans-unit id="return.change">
+        <source>return.change</source>
+        <target>Change the day</target>
+      </trans-unit>
+      <trans-unit id="return.undo">
+        <source>return.undo</source>
+        <target>Undo the return</target>
+      </trans-unit>
+      <trans-unit id="return.cancel">
+        <source>return.cancel</source>
+        <target>Cancel</target>
+      </trans-unit>
+      <trans-unit id="return.dialog.title">
+        <source>return.dialog.title</source>
+        <target>Mark the car as returned?</target>
+      </trans-unit>
+      <trans-unit id="return.dialog.description">
+        <source>return.dialog.description</source>
+        <target>The figures freeze at the last reading up to the end of that day. No more readings for this car. You can undo it.</target>
+      </trans-unit>
+      <trans-unit id="return.undo_dialog.title">
+        <source>return.undo_dialog.title</source>
+        <target>Undo the return?</target>
+      </trans-unit>
+      <trans-unit id="return.undo_dialog.description">
+        <source>return.undo_dialog.description</source>
+        <target>The lease is tracked again from the next scheduled read. Readings taken after the return count again.</target>
+      </trans-unit>
+      <trans-unit id="return.undo_confirm">
+        <source>return.undo_confirm</source>
+        <target>Undo the return</target>
+      </trans-unit>
+      <trans-unit id="form.returned_on.label">
+        <source>form.returned_on.label</source>
+        <target>Day the car went back</target>
+      </trans-unit>
+      <trans-unit id="form.returned_on.help">
+        <source>form.returned_on.help</source>
+        <target>Readings taken that day still count.</target>
+      </trans-unit>
+      <trans-unit id="form.return_submit">
+        <source>form.return_submit</source>
+        <target>Confirm the return</target>
+      </trans-unit>
+      <trans-unit id="flash.lease_returned">
+        <source>flash.lease_returned</source>
+        <target>Car marked as returned.
+The figures are final.</target>
+      </trans-unit>
+      <trans-unit id="flash.lease_return_undone">
+        <source>flash.lease_return_undone</source>
+        <target>Return undone.
+The lease is tracked again.</target>
+      </trans-unit>
+      <trans-unit id="rejected.return_no_contract">
+        <source>rejected.return_no_contract</source>
+        <target>Save the lease terms first.</target>
+      </trans-unit>
+      <trans-unit id="rejected.return_before_start">
+        <source>rejected.return_before_start</source>
+        <target>The car cannot be returned before the lease started.</target>
+      </trans-unit>
+      <trans-unit id="rejected.return_in_future">
+        <source>rejected.return_in_future</source>
+        <target>That day has not come yet.</target>
+      </trans-unit>
+      <trans-unit id="rejected.start_after_return">
+        <source>rejected.start_after_return</source>
+        <target>The start must be before the day the car went back. Undo the return or pick an earlier start.</target>
       </trans-unit>
     </body>
   </file>

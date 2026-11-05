@@ -32,4 +32,9 @@ enum WakeRequestStatus: string
      * The refresh did not end with a sleeping car, or ended too long ago, or a wake is already running.
      */
     case NothingToWake = 'nothing_to_wake';
+
+    /**
+     * The user gave the car back to the bank: nothing is fetched for it any more, so it is never woken.
+     */
+    case Returned = 'returned';
 }

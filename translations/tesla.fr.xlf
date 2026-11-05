@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="page.no_key.description">
         <source>page.no_key.description</source>
-        <target>Générez d’abord la paire de clés avec la commande polaris:tesla:keygen, puis revenez saisir les identifiants de votre application Tesla.</target>
+        <target>Lancez d’abord polaris:tesla:keygen, puis revenez saisir les identifiants de votre application Tesla.</target>
       </trans-unit>
       <trans-unit id="page.credentials.title">
         <source>page.credentials.title</source>
@@ -20,7 +20,7 @@
       </trans-unit>
       <trans-unit id="page.credentials.description">
         <source>page.credentials.description</source>
-        <target>L’identifiant client et le secret de votre application développeur Tesla, le domaine qui sert votre clé publique et les régions où l’enregistrer.</target>
+        <target>Identifiant client et secret de votre application développeur Tesla, domaine qui sert votre clé publique, et régions.</target>
       </trans-unit>
       <trans-unit id="page.status.title">
         <source>page.status.title</source>
@@ -28,11 +28,11 @@
       </trans-unit>
       <trans-unit id="page.status.description">
         <source>page.status.description</source>
-        <target>L’enregistrement de l’application auprès de Tesla se fait depuis la console.</target>
+        <target>L’enregistrement se fait depuis la console.</target>
       </trans-unit>
       <trans-unit id="page.status.next_steps">
         <source>page.status.next_steps</source>
-        <target>Vérifiez la clé publique avec polaris:tesla:key:check, puis enregistrez l’application avec polaris:tesla:register.</target>
+        <target>Lancez polaris:tesla:key:check, puis polaris:tesla:register.</target>
       </trans-unit>
       <trans-unit id="status.key_generated">
         <source>status.key_generated</source>
@@ -60,11 +60,11 @@
       </trans-unit>
       <trans-unit id="form.client_secret.help_stored">
         <source>form.client_secret.help_stored</source>
-        <target>Un secret est enregistré et n’est jamais affiché. Laissez vide pour le garder, ou saisissez-en un nouveau pour le remplacer.</target>
+        <target>Un secret est enregistré et jamais affiché. Laissez vide pour le garder, ou saisissez-en un nouveau.</target>
       </trans-unit>
       <trans-unit id="form.client_secret.help_new">
         <source>form.client_secret.help_new</source>
-        <target>Enregistré chiffré et jamais affiché ensuite.</target>
+        <target>Chiffré à l’enregistrement, jamais réaffiché.</target>
       </trans-unit>
       <trans-unit id="form.domain.label">
         <source>form.domain.label</source>
@@ -72,7 +72,7 @@
       </trans-unit>
       <trans-unit id="form.domain.help">
         <source>form.domain.help</source>
-        <target>Le domaine qui sert votre clé publique, par exemple polaris.example.com, sans https://.</target>
+        <target>Domaine qui sert votre clé publique, par exemple polaris.example.com, sans https://.</target>
       </trans-unit>
       <trans-unit id="form.regions.label">
         <source>form.regions.label</source>
@@ -80,7 +80,7 @@
       </trans-unit>
       <trans-unit id="form.regions.help">
         <source>form.regions.help</source>
-        <target>L’application est enregistrée une fois dans chaque région activée. La Chine demande une application Tesla distincte et n’est pas encore disponible.</target>
+        <target>L’application est enregistrée dans chaque région activée. La Chine demande une application Tesla distincte, pas encore disponible.</target>
       </trans-unit>
       <trans-unit id="region.na">
         <source>region.na</source>
@@ -100,11 +100,11 @@
       </trans-unit>
       <trans-unit id="flash.saved">
         <source>flash.saved</source>
-        <target>Les paramètres de l’application Tesla sont enregistrés.</target>
+        <target>Réglages de l’application Tesla enregistrés.</target>
       </trans-unit>
       <trans-unit id="error.rejected">
         <source>error.rejected</source>
-        <target>Les paramètres n’ont pas pu être enregistrés. Vérifiez les valeurs et réessayez.</target>
+        <target>Réglages non enregistrés. Vérifiez les valeurs et réessayez.</target>
       </trans-unit>
       <trans-unit id="page.consent.title">
         <source>page.consent.title</source>
@@ -116,19 +116,19 @@
       </trans-unit>
       <trans-unit id="page.consent.description">
         <source>page.consent.description</source>
-        <target>Polaris a besoin de votre accord explicite avant de se connecter à votre compte Tesla.</target>
+        <target>Polaris a besoin de votre accord avant de se connecter à votre compte Tesla.</target>
       </trans-unit>
       <trans-unit id="page.consent.reads">
         <source>page.consent.reads</source>
-        <target>Ce qui est lu : le compteur kilométrique et les données du véhicule de votre compte Tesla (portée vehicle_device_data). Rien n'est modifié sur la voiture.</target>
+        <target>Lu : le compteur et les données du véhicule de votre compte Tesla (portée vehicle_device_data). Rien n’est modifié sur la voiture.</target>
       </trans-unit>
       <trans-unit id="page.consent.stored">
         <source>page.consent.stored</source>
-        <target>Comment c'est conservé : les jetons d'accès et d'actualisation Tesla sont chiffrés dans la base de données de Polaris et jamais affichés.</target>
+        <target>Conservé : les jetons d’accès et d’actualisation Tesla sont chiffrés dans la base de Polaris et jamais affichés.</target>
       </trans-unit>
       <trans-unit id="page.consent.disconnect">
         <source>page.consent.disconnect</source>
-        <target>Comment se déconnecter : utilisez le bouton Déconnecter de la page Application Tesla, qui supprime les jetons, puis révoquez l'accès dans votre compte Tesla.</target>
+        <target>Pour vous déconnecter : bouton Déconnecter de la page Application Tesla (il supprime les jetons), puis révoquez l’accès dans votre compte Tesla.</target>
       </trans-unit>
       <trans-unit id="form.consent.label">
         <source>form.consent.label</source>
@@ -148,7 +148,7 @@
       </trans-unit>
       <trans-unit id="page.authorize.description">
         <source>page.authorize.description</source>
-        <target>Vous êtes envoyé chez Tesla pour approuver l'accès, puis ramené dans Polaris.</target>
+        <target>Vous passez par Tesla pour approuver l’accès, puis revenez dans Polaris.</target>
       </trans-unit>
       <trans-unit id="page.connect.redirect_uri">
         <source>page.connect.redirect_uri</source>
@@ -164,7 +164,7 @@
       </trans-unit>
       <trans-unit id="page.callback.description">
         <source>page.callback.description</source>
-        <target>Si votre navigateur n'a pas pu ouvrir l'adresse de Polaris après l'approbation, copiez l'adresse complète de la barre du navigateur et collez-la ici.</target>
+        <target>Le navigateur n’a pas pu ouvrir Polaris après l’approbation ? Copiez l’adresse complète de la barre d’adresse et collez-la ici.</target>
       </trans-unit>
       <trans-unit id="form.callback_url.label">
         <source>form.callback_url.label</source>
@@ -172,7 +172,7 @@
       </trans-unit>
       <trans-unit id="form.callback_url.help">
         <source>form.callback_url.help</source>
-        <target>Commencez d'abord avec le bouton ci-dessus, dans cette même session de navigateur. L'adresse contient un code à usage unique, ne la partagez pas.</target>
+        <target>Commencez par le bouton ci-dessus, dans cette même session de navigateur. L’adresse contient un code à usage unique : ne la partagez pas.</target>
       </trans-unit>
       <trans-unit id="form.callback_url.submit">
         <source>form.callback_url.submit</source>
@@ -184,7 +184,7 @@
       </trans-unit>
       <trans-unit id="page.token.description">
         <source>page.token.description</source>
-        <target>Utilisez un jeton d'actualisation obtenu en dehors de Polaris. Il est utilisé une fois tout de suite pour le vérifier, et Polaris conserve les nouveaux jetons renvoyés par Tesla.</target>
+        <target>Utilisez un jeton d’actualisation obtenu hors de Polaris. Il est utilisé une fois pour le vérifier ; Polaris conserve les nouveaux jetons renvoyés par Tesla.</target>
       </trans-unit>
       <trans-unit id="form.refresh_token.label">
         <source>form.refresh_token.label</source>
@@ -192,7 +192,7 @@
       </trans-unit>
       <trans-unit id="form.refresh_token.help">
         <source>form.refresh_token.help</source>
-        <target>Conservé chiffré et jamais réaffiché. Le jeton collé cesse de fonctionner dès que Polaris l'a utilisé.</target>
+        <target>Chiffré à l’enregistrement, jamais réaffiché. Le jeton collé cesse de fonctionner dès que Polaris l’a utilisé.</target>
       </trans-unit>
       <trans-unit id="form.refresh_token.submit">
         <source>form.refresh_token.submit</source>
@@ -204,7 +204,7 @@
       </trans-unit>
       <trans-unit id="page.connection.description">
         <source>page.connection.description</source>
-        <target>Indique si Polaris peut lire votre compteur kilométrique depuis votre compte Tesla.</target>
+        <target>Indique si Polaris peut lire votre compteur.</target>
       </trans-unit>
       <trans-unit id="connection.none">
         <source>connection.none</source>
@@ -244,7 +244,7 @@
       </trans-unit>
       <trans-unit id="connection.expired.description">
         <source>connection.expired.description</source>
-        <target>Tesla a refusé le jeton d'actualisation conservé. Reconnectez-vous pour continuer à lire le compteur.</target>
+        <target>Tesla a refusé le jeton enregistré. Reconnectez-vous pour continuer à lire le compteur.</target>
       </trans-unit>
       <trans-unit id="connection.connect">
         <source>connection.connect</source>
@@ -260,15 +260,17 @@
       </trans-unit>
       <trans-unit id="flash.connected">
         <source>flash.connected</source>
-        <target>Tesla est connecté.</target>
+        <target>Tesla connecté.</target>
       </trans-unit>
       <trans-unit id="flash.region_differs">
         <source>flash.region_differs</source>
-        <target>Votre compte Tesla se trouve dans une autre région que celle activée dans les réglages de l'application. Activez cette région dans les réglages de l'application Tesla.</target>
+        <target>Votre compte Tesla est dans une autre région que celle activée.
+Activez cette région dans les réglages de l’application Tesla.</target>
       </trans-unit>
       <trans-unit id="flash.disconnected">
         <source>flash.disconnected</source>
-        <target>Tesla est déconnecté et votre consentement est retiré. Révoquez aussi l'accès dans votre compte Tesla.</target>
+        <target>Tesla déconnecté, consentement retiré.
+Révoquez aussi l’accès dans votre compte Tesla.</target>
       </trans-unit>
       <trans-unit id="error.connect.no_app">
         <source>error.connect.no_app</source>
@@ -276,7 +278,7 @@
       </trans-unit>
       <trans-unit id="error.connect.not_configured">
         <source>error.connect.not_configured</source>
-        <target>Saisissez d'abord l'identifiant client, le secret client et au moins une région dans les réglages de l'application Tesla.</target>
+        <target>Saisissez d’abord l’identifiant client, le secret client et au moins une région dans les réglages de l’application Tesla.</target>
       </trans-unit>
       <trans-unit id="error.connect.no_consent">
         <source>error.connect.no_consent</source>
@@ -284,11 +286,11 @@
       </trans-unit>
       <trans-unit id="error.connect.bad_state">
         <source>error.connect.bad_state</source>
-        <target>La demande n'a pas pu être vérifiée : recommencez avec le bouton, dans cette même session de navigateur.</target>
+        <target>La demande n’a pas pu être vérifiée. Recommencez depuis le bouton, dans cette même session de navigateur.</target>
       </trans-unit>
       <trans-unit id="error.connect.bad_url">
         <source>error.connect.bad_url</source>
-        <target>Ce n'est pas une URL de rappel : collez l'adresse complète, y compris la partie après le point d'interrogation.</target>
+        <target>Ce n’est pas une URL de rappel. Collez l’adresse complète, y compris ce qui suit le point d’interrogation.</target>
       </trans-unit>
       <trans-unit id="error.connect.no_code">
         <source>error.connect.no_code</source>
@@ -300,11 +302,11 @@
       </trans-unit>
       <trans-unit id="error.connect.token_refused">
         <source>error.connect.token_refused</source>
-        <target>Tesla l'a refusé : le code ou le jeton est expiré, déjà utilisé ou n'appartient pas à cette application Tesla. Recommencez.</target>
+        <target>Tesla l’a refusé : le code ou le jeton est expiré, déjà utilisé ou d’une autre application Tesla. Recommencez.</target>
       </trans-unit>
       <trans-unit id="error.connect.tesla_failed">
         <source>error.connect.tesla_failed</source>
-        <target>Tesla est injoignable ou n'a pas répondu correctement. Réessayez plus tard.</target>
+        <target>Tesla n’a pas répondu. Réessayez plus tard.</target>
       </trans-unit>
       <trans-unit id="form.wake_cap.label">
         <source>form.wake_cap.label</source>
@@ -312,7 +314,7 @@
       </trans-unit>
       <trans-unit id="form.wake_cap.help">
         <source>form.wake_cap.help</source>
-        <target>Combien de fois Polaris peut réveiller une de vos voitures quand vous le confirmez lors d’une actualisation manuelle. Chaque réveil est facturé par Tesla. 0 désactive le réveil.</target>
+        <target>Combien de fois Polaris peut réveiller une voiture quand vous le confirmez lors d’une actualisation manuelle. Tesla facture chaque réveil. 0 désactive le réveil.</target>
       </trans-unit>
       <trans-unit id="storage.title">
         <source>storage.title</source>
@@ -320,7 +322,7 @@
       </trans-unit>
       <trans-unit id="storage.description">
         <source>storage.description</source>
-        <target>Ce qu’il advient de vos secrets Tesla, et où le vérifier dans le code.</target>
+        <target>Comment vos secrets Tesla sont traités, et où le vérifier dans le code.</target>
       </trans-unit>
       <trans-unit id="storage.encrypted.title">
         <source>storage.encrypted.title</source>
@@ -368,7 +370,7 @@
       </trans-unit>
       <trans-unit id="storage.disconnect.text">
         <source>storage.disconnect.text</source>
-        <target>Se déconnecter supprime les jetons. Révoquez Polaris dans votre compte Tesla pour les annuler aussi chez Tesla.</target>
+        <target>Se déconnecter supprime les jetons. Révoquez aussi Polaris dans votre compte Tesla.</target>
       </trans-unit>
       <trans-unit id="storage.audit.title">
         <source>storage.audit.title</source>
@@ -404,8 +406,8 @@
       </trans-unit>
       <trans-unit id="form.keep_vehicle_data.help">
         <source>form.keep_vehicle_data.help</source>
-        <target>Enregistre la réponse complète de chaque lecture (excepté la position) dans la base de données pour de futures fonctions.
-Le désactiver arrête les nouvelles copies ; cela ne supprime pas celles déjà enregistrées.</target>
+        <target>Enregistre la réponse complète de chaque lecture (batterie, charge, climat, portes, jamais la position) pour de futures fonctions.
+Le désactiver arrête les nouvelles copies, rien n’est supprimé.</target>
       </trans-unit>
     </body>
   </file>

@@ -23,4 +23,7 @@ enum DashboardState: string
 
     /** The lease end has passed: figures so far, no budget. */
     case Ended = 'ended';
+
+    /** The user gave the car back: final figures at the last reading up to the return, no forecast, no refresh. */
+    case Returned = 'returned';
 }

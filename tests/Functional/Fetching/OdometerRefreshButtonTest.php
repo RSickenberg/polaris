@@ -81,8 +81,36 @@ final class OdometerRefreshButtonTest extends WebTestCase
         self::assertStringNotContainsString('data-poll', $html);
         self::assertStringContainsString('data-toast-announce-variant-value="warning"', $html, 'A car that is asleep is a warning, not an error.');
         self::assertDoesNotMatchRegularExpression('/<button[^>]*\sdisabled(?=[\s=>])/', $html);
-        self::assertStringContainsString('The car is asleep: the last reading is kept', $html);
+        self::assertStringContainsString('The car is asleep, last reading kept', $html);
         self::assertCount(1, $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(), 'Rendering never starts another refresh.');
+    }
+
+    public function testANewReadingAsksTheDashboardToRefreshItselfOnce(): void
+    {
+        $component = $this->component($this->mine);
+        $component->call('refresh');
+        $queued = $this->queued();
+        $message = $queued[0]->getMessage();
+        self::assertInstanceOf(FetchOdometerMessage::class, $message);
+        self::assertStringNotContainsString('data-controller="dashboard-refresh"', (string) $component->render(), 'Nothing while the fetch is queued.');
+
+        $attempt = $this->entityManager()->find(RefreshAttempt::class, $message->refreshId);
+        self::assertInstanceOf(RefreshAttempt::class, $attempt);
+        $attempt->settle(RefreshOutcome::Stored, CarbonImmutable::now('UTC'));
+        $this->entityManager()->flush();
+
+        $html = (string) $component->refresh()->render();
+        self::assertStringContainsString('id="figures-1" data-controller="dashboard-refresh"', $html);
+        self::assertSame($html, (string) $component->refresh()->render(), 'A poll shows the same element, so it is not connected again.');
+    }
+
+    public function testACarThatDidNotAnswerLeavesTheDashboardAlone(): void
+    {
+        $component = $this->component($this->mine);
+        $component->call('refresh');
+        $this->settle(RefreshOutcome::Asleep);
+
+        self::assertStringNotContainsString('dashboard-refresh', (string) $component->refresh()->render());
     }
 
     public function testASecondClickWithinTheHourShowsWhenToTryAgainAndQueuesNothing(): void
@@ -137,7 +165,7 @@ final class OdometerRefreshButtonTest extends WebTestCase
         $html = (string) $component->refresh()->render();
 
         self::assertStringContainsString('data-wake-dialog', $html);
-        self::assertStringContainsString('Your car is asleep. Wake it to get the current mileage?', $html);
+        self::assertStringContainsString('Wake it to get the current mileage?', $html);
         self::assertStringContainsString('$0.02', $html, 'The cost per wake comes from the configuration, formatted for the locale.');
         self::assertStringContainsString('Use last reading', $html);
         self::assertStringContainsString('Wake and refresh', $html);
@@ -171,8 +199,8 @@ final class OdometerRefreshButtonTest extends WebTestCase
 
         self::assertStringContainsString('data-wake-dialog', $html);
         self::assertStringContainsString('Your car is offline', $html);
-        self::assertStringContainsString('not guaranteed', $html);
-        self::assertMatchesRegularExpression('/current mileage\?<br \/>\s*Tesla bills each wake/', $html, 'The price is on its own line.');
+        self::assertStringContainsString('may not be able to wake it', $html);
+        self::assertMatchesRegularExpression('/Try anyway\?<br \/>\s*Tesla bills about/', $html, 'The price is on its own line.');
         self::assertStringContainsString('$0.02', $html);
         self::assertStringContainsString('Wake and refresh', $html);
         self::assertStringNotContainsString('Your car is asleep', $html);
@@ -188,7 +216,7 @@ final class OdometerRefreshButtonTest extends WebTestCase
         $html = (string) $component->call('declineWake')->render();
 
         self::assertStringNotContainsString('data-wake-dialog', $html);
-        self::assertStringContainsString('The car is asleep: the last reading is kept.', $html);
+        self::assertStringContainsString('The car is asleep, last reading kept.', $html);
         self::assertSame([], $this->queued(), 'Declining sends nothing.');
     }
 
@@ -223,8 +251,8 @@ final class OdometerRefreshButtonTest extends WebTestCase
         $html = (string) $component->refresh()->render();
 
         self::assertStringNotContainsString('data-wake-dialog', $html);
-        self::assertStringContainsString('was already woken as often as allowed in 24 hours', $html);
-        self::assertMatchesRegularExpression('/You can wake it again at [^(]+\(UTC\)\./', $html);
+        self::assertStringContainsString('wake limit reached', $html);
+        self::assertMatchesRegularExpression('/Try again at [^(]+\(UTC\)\./', $html);
         self::assertStringContainsString('data-toast-announce-variant-value="warning"', $html);
     }
 
@@ -239,7 +267,7 @@ final class OdometerRefreshButtonTest extends WebTestCase
         $html = (string) $component->refresh()->render();
 
         self::assertStringNotContainsString('data-wake-dialog', $html);
-        self::assertStringContainsString('waking is turned off in the Tesla settings', $html);
+        self::assertStringContainsString('waking is off in the Tesla settings', $html);
     }
 
     /**
@@ -249,8 +277,8 @@ final class OdometerRefreshButtonTest extends WebTestCase
     {
         yield 'timeout' => [RefreshOutcome::WakeTimeout, 'warning', 'did not come online within 90 seconds'];
         yield 'scope refused' => [RefreshOutcome::WakeScopeMissing, 'danger', 'Tesla refused the wake'];
-        yield 'cap' => [RefreshOutcome::WakeCapReached, 'warning', 'already woken as often as allowed'];
-        yield 'wake failed' => [RefreshOutcome::WakeFailed, 'warning', 'Tesla could not reach the car to wake it'];
+        yield 'cap' => [RefreshOutcome::WakeCapReached, 'warning', 'limit reached'];
+        yield 'wake failed' => [RefreshOutcome::WakeFailed, 'warning', 'Tesla could not reach the car'];
         yield 'limited' => [RefreshOutcome::Limited, 'warning', 'Another refresh read the car first'];
     }
 

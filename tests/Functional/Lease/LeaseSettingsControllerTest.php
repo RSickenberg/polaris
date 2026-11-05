@@ -79,7 +79,7 @@ final class LeaseSettingsControllerTest extends WebTestCase
 
         self::assertResponseRedirects($this->url());
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[data-slot=alert]', 'The lease terms were saved.');
+        self::assertSelectorTextContains('[data-slot=alert]', 'Lease terms saved.');
         self::assertSelectorTextContains('body', 'No reading after the lease start yet.');
 
         $contract = $this->contract();
@@ -150,7 +150,7 @@ final class LeaseSettingsControllerTest extends WebTestCase
         $this->submit(['lease_contract[startOdometer]' => '20000']);
 
         self::assertResponseStatusCodeSame(422);
-        self::assertSelectorTextContains('body', 'These terms do not fit the recorded readings');
+        self::assertSelectorTextContains('body', 'These terms contradict the saved readings');
         self::assertCount(0, $this->entityManager->getRepository(LeaseContract::class)->findAll());
     }
 
@@ -163,7 +163,7 @@ final class LeaseSettingsControllerTest extends WebTestCase
         yield 'partial month' => [['lease_contract[endDate]' => '2027-01-20'], 'The lease must last a whole number of months'];
         yield 'zero allowance' => [['lease_contract[allowance]' => '0'], 'This value should be positive.'];
         yield 'negative start odometer' => [['lease_contract[startOdometer]' => '-1'], 'This value should be either positive or zero.'];
-        yield 'negative cost' => [['lease_contract[excessCostPerKm]' => '-0.12'], 'Enter an amount such as 0.12'];
+        yield 'negative cost' => [['lease_contract[excessCostPerKm]' => '-0.12'], 'Enter an amount like 0.12'];
         yield 'tolerance above 50%' => [['lease_contract[tolerancePercent]' => '60'], 'This value should be between 0 and 50.'];
         yield 'negative tolerance' => [['lease_contract[tolerancePercent]' => '-1'], 'This value should be between 0 and 50.'];
         yield 'currency outside the supported list' => [['lease_contract[currency]' => 'XXX'], 'The selected choice is invalid.'];

@@ -59,7 +59,7 @@ final class MileageChartTest extends WebTestCase
         self::assertResponseIsSuccessful();
         $chart = $crawler->filter(self::CHART);
         self::assertCount(1, $chart);
-        self::assertSame('Line chart of the distance driven since the lease start, against the linear allowance and the projection to the lease end', $crawler->filter(self::CANVAS)->attr('aria-label'));
+        self::assertSame('Distance driven since the lease start, against the allowance and the projection to the lease end', $crawler->filter(self::CANVAS)->attr('aria-label'));
         self::assertSame('line', $chart->attr('data-chart-type-value'));
         self::assertSame('en', $chart->attr('data-chart-locale-value'));
         self::assertSame('UTC', $chart->attr('data-chart-time-zone-value'));
@@ -157,7 +157,7 @@ final class MileageChartTest extends WebTestCase
         self::assertSame('fr', $chart->attr('data-chart-locale-value'));
         self::assertSame(['Parcouru', 'Projection', 'Autorisé'], array_column($this->series($chart->attr('data-chart-series-value')), 'name'));
         self::assertStringContainsString('Distance (km)', (string) $chart->attr('data-chart-options-value'));
-        self::assertSelectorTextContains('main', 'Kilométrage sur la durée du bail');
+        self::assertSelectorTextContains('main', 'Kilométrage sur la durée du leasing');
     }
 
     /**

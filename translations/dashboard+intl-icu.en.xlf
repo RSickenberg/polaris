@@ -16,19 +16,19 @@
       </trans-unit>
       <trans-unit id="risk.message.ok">
         <source>risk.message.ok</source>
-        <target>Projected {projected, number, ::precision-integer} {unit} at lease end, within {allowance, number, ::precision-integer} {unit}.</target>
+        <target>{projected, number, ::precision-integer} {unit} projected at lease end, under the {allowance, number, ::precision-integer} {unit} limit.</target>
       </trans-unit>
       <trans-unit id="risk.message.watch">
         <source>risk.message.watch</source>
-        <target>Projected {projected, number, ::precision-integer} {unit} at lease end, close to the {allowance, number, ::precision-integer} {unit} limit.</target>
+        <target>{projected, number, ::precision-integer} {unit} projected at lease end, close to the {allowance, number, ::precision-integer} {unit} limit.</target>
       </trans-unit>
       <trans-unit id="risk.message.over">
         <source>risk.message.over</source>
-        <target>Projected {excess, number, ::precision-integer} {unit} over at lease end, about {cost}. Cut {cut, number, ::precision-integer} {unit} / week to stay within.</target>
+        <target>{excess, number, ::precision-integer} {unit} over at lease end, about {cost}. Drive {cut, number, ::precision-integer} {unit} less per week to stay within.</target>
       </trans-unit>
       <trans-unit id="risk.message.over_no_cut">
         <source>risk.message.over_no_cut</source>
-        <target>Projected {excess, number, ::precision-integer} {unit} over at lease end, about {cost}.</target>
+        <target>{excess, number, ::precision-integer} {unit} over at lease end, about {cost}.</target>
       </trans-unit>
       <trans-unit id="risk.message.ended_ok">
         <source>risk.message.ended_ok</source>
@@ -40,7 +40,19 @@
       </trans-unit>
       <trans-unit id="kpi.driven.hint">
         <source>kpi.driven.hint</source>
-        <target>Odometer {odometer, number, ::precision-integer} {unit} minus {start, number, ::precision-integer} {unit} at the lease start</target>
+        <target>Odometer {odometer, number, ::precision-integer} {unit}, minus {start, number, ::precision-integer} {unit} at the start</target>
+      </trans-unit>
+      <trans-unit id="returned.text">
+        <source>returned.text</source>
+        <target>Returned on {on, date, long}. Final figures.</target>
+      </trans-unit>
+      <trans-unit id="risk.message.returned_ok">
+        <source>risk.message.returned_ok</source>
+        <target>Returned within the {allowance, number, ::precision-integer} {unit} allowance.</target>
+      </trans-unit>
+      <trans-unit id="risk.message.returned_over">
+        <source>risk.message.returned_over</source>
+        <target>Returned {excess, number, ::precision-integer} {unit} over: {cost} final cost.</target>
       </trans-unit>
     </body>
   </file>

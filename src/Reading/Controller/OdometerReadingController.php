@@ -7,6 +7,7 @@ namespace Polaris\Reading\Controller;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
+use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Reading\Domain\ReadingRejection;
 use Polaris\Reading\Form\Model\OdometerReadingData;
 use Polaris\Reading\Form\OdometerReadingType;
@@ -31,6 +32,7 @@ final class OdometerReadingController extends AbstractController
         private readonly OdometerReadingService $readings,
         private readonly TranslatorInterface $translator,
         private readonly ClockInterface $clock,
+        private readonly LeaseTermsService $leaseTerms,
     ) {
     }
 
@@ -51,7 +53,16 @@ final class OdometerReadingController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $this->readings->recordManual($vehicle, $data);
-                $this->addFlash('success', $this->translator->trans('flash.reading_added', domain: 'reading'));
+
+                // Kept, as manual entry always works, but the lease is over: the projection ignores it.
+                $returnedAt = $this->leaseTerms->returnedAt($vehicle);
+                $returnedOn = $this->leaseTerms->returnedOn($vehicle);
+
+                if (null !== $returnedAt && null !== $returnedOn && $data->readAt->getTimestamp() > $returnedAt->getTimestamp()) {
+                    $this->addFlash('warning', $this->translator->trans('flash.reading_added_after_return', ['on' => $returnedOn], 'reading'));
+                } else {
+                    $this->addFlash('success', $this->translator->trans('flash.reading_added', domain: 'reading'));
+                }
 
                 return $this->redirectToRoute('reading_history', ['id' => $vehicle->getId()->toBase32()]);
             } catch (ReadingRejected $rejected) {
