@@ -62,7 +62,7 @@ final class RefreshAttemptPurgerTest extends KernelTestCase
             static fn (RecurringMessage $recurring): string => (string) $recurring->getTrigger(),
             self::getContainer()->get(FetchScheduleProvider::class)->getSchedule()->getRecurringMessages(),
         );
-        self::assertCount(2, $triggers, 'The fetch tick and the daily purge.');
+        self::assertCount(3, $triggers, 'The fetch tick, the daily purge and the daily projection snapshots.');
         self::assertCount(1, array_filter($triggers, static fn (string $trigger): bool => str_contains($trigger, FetchScheduleProvider::PURGE)));
     }
 }
