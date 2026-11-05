@@ -30,8 +30,8 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  * new terms. The only place the rules live: the settings form calls it, and so will the API.
  *
  * The recomputation is synchronous: the projection is a cheap pure calculation, so the
- * caller gets the new assessment right away. Nothing is persisted for it yet; the daily
- * snapshot is #48.
+ * caller gets the new assessment right away. Nothing is persisted for it here: the daily
+ * snapshot of what it says is {@see ProjectionSnapshotService}, which calls {@see self::assess()}.
  */
 final readonly class LeaseTermsService
 {
