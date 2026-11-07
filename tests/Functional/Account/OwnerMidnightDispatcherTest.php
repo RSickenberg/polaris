@@ -157,12 +157,8 @@ final class OwnerMidnightDispatcherTest extends KernelTestCase
     public function testAClaimIsGivenBackWhenTheMessageCannotBeQueued(): void
     {
         self::mockTime('2026-11-07 23:05:00 UTC');
-        $failing = new class implements MessageBusInterface {
-            public function dispatch(object $message, array $stamps = []): Envelope
-            {
-                throw new TransportException('Redis is down.');
-            }
-        };
+        $failing = $this->createStub(MessageBusInterface::class);
+        $failing->method('dispatch')->willThrowException(new TransportException('Redis is down.'));
         $dispatcher = new OwnerMidnightDispatcher(self::getContainer()->get(UserRepository::class), $failing, self::getContainer()->get(ClockInterface::class), new NullLogger());
 
         try {
