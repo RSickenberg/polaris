@@ -43,10 +43,7 @@ final readonly class LeaseAssessor
         $returned = null !== $returnedAt;
 
         if (null !== $returnedAt) {
-            $samples = array_values(array_filter(
-                $samples,
-                static fn (OdometerSample $sample): bool => $sample->readAt()->getTimestamp() <= $returnedAt->getTimestamp(),
-            ));
+            $samples = self::samplesUpTo($samples, $returnedAt);
         }
 
         $projection = $this->calculator->calculate($term, $allowance, $startOdometer, $samples);
@@ -79,6 +76,24 @@ final readonly class LeaseAssessor
             weeklyCut: $secondsLeft > 0 ? self::weeklyCut($projected - $allowed, $secondsLeft) : null,
             currentPace: Budget::spread(Distance::fromMetres(max(0, $projected - $projection->driven->metres())), $term, $secondsLeft),
         );
+    }
+
+    /**
+     * @param list<OdometerSample> $samples
+     *
+     * @return list<OdometerSample> the samples at or before $instant
+     */
+    private static function samplesUpTo(array $samples, CarbonImmutable $instant): array
+    {
+        $kept = [];
+
+        foreach ($samples as $sample) {
+            if ($sample->readAt()->getTimestamp() <= $instant->getTimestamp()) {
+                $kept[] = $sample;
+            }
+        }
+
+        return $kept;
     }
 
     /**

@@ -15,8 +15,8 @@ use Polaris\Lease\Domain\Budget;
 use Polaris\Lease\Domain\LeaseStatus;
 use Polaris\Lease\Domain\NoData;
 use Polaris\Lease\Service\LeaseTermsService;
-use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Reading\Service\OdometerReadingService;
+use Polaris\Shared\Domain\OdometerSample;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
 
@@ -68,16 +68,7 @@ final readonly class DashboardService
                     $contract->getTerm()->exclusiveEnd(),
                     $contract->getStartOdometer(),
                     $allowance,
-                    array_map(
-                        static fn (OdometerReading $reading) => $reading->toSample(),
-                        // Readings after the return are stored but not part of the lease any more.
-                        null === $returnedAt
-                            ? $this->readings->history($vehicle)
-                            : array_values(array_filter(
-                                $this->readings->history($vehicle),
-                                static fn (OdometerReading $reading): bool => $reading->getReadAt()->lessThanOrEqualTo($returnedAt),
-                            )),
-                    ),
+                    $this->leaseSamples($vehicle, $returnedAt),
                     DashboardState::Active === $state
                         ? new MileageForecast($projection->asOf, $projection->driven, $projection->projectedAtEnd)
                         : null,
@@ -94,5 +85,23 @@ final readonly class DashboardService
             Budget::evenPace($allowance, $contract->getTerm()),
             $this->leaseTerms->returnedOn($vehicle),
         );
+    }
+
+    /**
+     * The readings of the lease as samples. Readings after the return are stored but not part of the lease any more.
+     *
+     * @return list<OdometerSample>
+     */
+    private function leaseSamples(Vehicle $vehicle, ?CarbonImmutable $returnedAt): array
+    {
+        $samples = [];
+
+        foreach ($this->readings->history($vehicle) as $reading) {
+            if (null === $returnedAt || $reading->getReadAt()->lessThanOrEqualTo($returnedAt)) {
+                $samples[] = $reading->toSample();
+            }
+        }
+
+        return $samples;
     }
 }
