@@ -12,7 +12,6 @@ use Polaris\Shared\Domain\Distance;
 use Polaris\Tesla\Domain\FleetRegion;
 use Polaris\Tesla\Entity\TeslaApp;
 use Polaris\Tesla\Service\Dto\OdometerReading;
-use Polaris\Tesla\Service\Dto\VehicleSummary;
 use Polaris\Tesla\Service\Enum\FleetApiOperation;
 use Polaris\Tesla\Service\Enum\NoReadingReason;
 use Polaris\Tesla\Service\Enum\VehicleState;
@@ -27,54 +26,46 @@ final class TeslaOdometerReaderTest extends TestCase
 {
     public function testAnOnlineCarGivesALiveReading(): void
     {
-        $dataCalls = new \ArrayObject();
-        $vehicles = $this->vehicles($dataCalls, VehicleState::Online);
+        $vehicles = $this->vehicles(VehicleState::Online, 1);
 
         $result = new TeslaOdometerReader($vehicles)->read($this->app(), new Vin(FleetApiResponses::VIN));
 
         self::assertTrue($result->hasReading());
         self::assertSame(20_000_000, $result->reading?->odometer->metres());
         self::assertNull($result->reason);
-        self::assertCount(1, $dataCalls);
     }
 
     public function testAnAsleepCarGivesNoReadingAndIsNotAsked(): void
     {
-        $dataCalls = new \ArrayObject();
-        $vehicles = $this->vehicles($dataCalls, VehicleState::Asleep);
+        $vehicles = $this->vehicles(VehicleState::Asleep, 0);
 
         $result = new TeslaOdometerReader($vehicles)->read($this->app(), new Vin(FleetApiResponses::VIN));
 
         self::assertFalse($result->hasReading());
         self::assertSame(NoReadingReason::Asleep, $result->reason);
-        self::assertCount(0, $dataCalls);
     }
 
     public function testAnOfflineCarGivesNoReadingAndIsNotAsked(): void
     {
-        $dataCalls = new \ArrayObject();
-        $vehicles = $this->vehicles($dataCalls, VehicleState::Offline);
+        $vehicles = $this->vehicles(VehicleState::Offline, 0);
 
         $result = new TeslaOdometerReader($vehicles)->read($this->app(), new Vin(FleetApiResponses::VIN));
 
         self::assertSame(NoReadingReason::Offline, $result->reason);
-        self::assertCount(0, $dataCalls);
     }
 
     public function testACarThatFellAsleepBetweenTheCallsGivesNoReadingAndIsAskedOnce(): void
     {
-        $dataCalls = new \ArrayObject();
-        $vehicles = $this->vehicles($dataCalls, VehicleState::Online, FleetApiError::fromResponse(FleetApiOperation::VehicleData, FleetRegion::EuropeMiddleEastAfrica, 408, FleetApiResponses::vehicleNotOnline()));
+        $vehicles = $this->vehicles(VehicleState::Online, 1, FleetApiError::fromResponse(FleetApiOperation::VehicleData, FleetRegion::EuropeMiddleEastAfrica, 408, FleetApiResponses::vehicleNotOnline()));
 
         $result = new TeslaOdometerReader($vehicles)->read($this->app(), new Vin(FleetApiResponses::VIN));
 
         self::assertSame(NoReadingReason::Unavailable, $result->reason);
-        self::assertCount(1, $dataCalls);
     }
 
     public function testOtherFailuresOfTheLiveCallAreNotHidden(): void
     {
-        $vehicles = $this->vehicles(new \ArrayObject(), VehicleState::Online, FleetApiError::fromResponse(FleetApiOperation::VehicleData, FleetRegion::EuropeMiddleEastAfrica, 503, ''));
+        $vehicles = $this->vehicles(VehicleState::Online, 1, FleetApiError::fromResponse(FleetApiOperation::VehicleData, FleetRegion::EuropeMiddleEastAfrica, 503, ''));
 
         $this->expectException(FleetApiError::class);
 
@@ -82,39 +73,21 @@ final class TeslaOdometerReaderTest extends TestCase
     }
 
     /**
-     * @param \ArrayObject<int, true> $dataCalls filled with one entry per live read
+     * @param int $dataCalls how many live reads the reader must make (it must not ask a car that is not online)
      */
-    private function vehicles(\ArrayObject $dataCalls, VehicleState $state, ?FleetApiError $dataFailure = null): VehicleClient
+    private function vehicles(VehicleState $state, int $dataCalls, ?FleetApiError $dataFailure = null): VehicleClient
     {
-        return new class($dataCalls, $state, $dataFailure) implements VehicleClient {
-            /**
-             * @param \ArrayObject<int, true> $dataCalls
-             */
-            public function __construct(private \ArrayObject $dataCalls, private VehicleState $state, private ?FleetApiError $dataFailure)
-            {
-            }
+        $client = $this->createMock(VehicleClient::class);
+        $client->method('vehicleState')->willReturn($state);
+        $data = $client->expects(self::exactly($dataCalls))->method('vehicleData');
 
-            /**
-             * @return list<VehicleSummary>
-             */
-            public function listVehicles(TeslaApp $app): array
-            {
-                return [];
-            }
+        if ($dataFailure instanceof FleetApiError) {
+            $data->willThrowException($dataFailure);
+        } else {
+            $data->willReturn(new OdometerReading(Distance::fromKilometres(20000), CarbonImmutable::parse('2026-10-24 12:00:00 UTC')));
+        }
 
-            public function vehicleState(TeslaApp $app, Vin $vin): VehicleState
-            {
-                return $this->state;
-            }
-
-            public function vehicleData(TeslaApp $app, Vin $vin): OdometerReading
-            {
-                $this->dataCalls[] = true;
-
-                return $this->dataFailure instanceof FleetApiError
-                    ? throw $this->dataFailure : new OdometerReading(Distance::fromKilometres(20000), CarbonImmutable::parse('2026-10-24 12:00:00 UTC'));
-            }
-        };
+        return $client;
     }
 
     private function app(): TeslaApp

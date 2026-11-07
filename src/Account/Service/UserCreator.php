@@ -56,7 +56,13 @@ readonly class UserCreator
     {
         $violations = $this->validator->validate($newUser);
         if (\count($violations) > 0) {
-            throw new \InvalidArgumentException(implode(' ', array_map(static fn ($violation): string => \sprintf('%s: %s', $violation->getPropertyPath(), $violation->getMessage()), iterator_to_array($violations))));
+            $messages = [];
+
+            foreach ($violations as $violation) {
+                $messages[] = \sprintf('%s: %s', $violation->getPropertyPath(), $violation->getMessage());
+            }
+
+            throw new \InvalidArgumentException(implode(' ', $messages));
         }
 
         if (null !== $newUser->locale && !\in_array($newUser->locale, $this->enabledLocales, true)) {

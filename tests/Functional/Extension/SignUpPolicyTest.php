@@ -33,11 +33,8 @@ final class SignUpPolicyTest extends KernelTestCase
     public function testAReplacedPolicyDecidesWhoMaySignUp(): void
     {
         self::bootKernel();
-        self::getContainer()->set(SignUpPolicy::class, new class implements SignUpPolicy {
-            public function assertCanSignUp(NewUser $newUser): void
-            {
-            }
-        });
+        // A policy that never refuses.
+        self::getContainer()->set(SignUpPolicy::class, $this->createStub(SignUpPolicy::class));
         $creator = self::getContainer()->get(UserCreator::class);
 
         $creator->create(new NewUser('first@example.test', self::PASSWORD));

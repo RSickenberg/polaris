@@ -9,6 +9,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 use Polaris\Alert\Entity\AlertLog;
 use Polaris\Vehicle\Entity\Vehicle;
+use Symfony\Bridge\Doctrine\Types\UlidType;
 
 /**
  * @extends ServiceEntityRepository<AlertLog>
@@ -29,7 +30,7 @@ class AlertLogRepository extends ServiceEntityRepository
     {
         $log = $this->createQueryBuilder('a')
             ->where('a.vehicle = :vehicle')
-            ->setParameter('vehicle', $vehicle->getId(), 'ulid')
+            ->setParameter('vehicle', $vehicle->getId(), UlidType::NAME)
             ->orderBy('a.sentAt', \SortDirection::Descending)
             ->addOrderBy('a.id', \SortDirection::Descending)
             ->setMaxResults(1)

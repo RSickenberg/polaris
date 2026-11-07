@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Polaris\Lease\MessageHandler;
 
+use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Polaris\Lease\Message\SaveProjectionSnapshot;
 use Polaris\Lease\Service\Enum\SnapshotOutcome;
 use Polaris\Lease\Service\ProjectionSnapshotService;
+use Polaris\Shared\Domain\OwnerMidnight;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Component\Lock\Exception\LockAcquiringException;
 use Symfony\Component\Lock\Exception\LockConflictedException;
@@ -48,8 +50,16 @@ final readonly class SaveProjectionSnapshotHandler
             return;
         }
 
-        if (SnapshotOutcome::Busy === $this->snapshots->save($vehicle) && $message->attempt < self::MAX_RETRIES) {
-            $this->bus->dispatch(new SaveProjectionSnapshot($message->vehicleId, $message->attempt + 1), [new DelayStamp(self::RETRY_DELAY_MS)]);
+        $localDay = CarbonImmutable::createFromFormat('!Y-m-d', $message->localDay, 'UTC');
+
+        if (!$localDay instanceof CarbonImmutable) {
+            return;
+        }
+
+        $midnight = OwnerMidnight::of(CarbonImmutable::createFromTimestamp($message->midnightTimestamp, 'UTC'), $localDay);
+
+        if (SnapshotOutcome::Busy === $this->snapshots->save($vehicle, $midnight) && $message->attempt < self::MAX_RETRIES) {
+            $this->bus->dispatch(new SaveProjectionSnapshot($message->vehicleId, $message->localDay, $message->midnightTimestamp, $message->attempt + 1), [new DelayStamp(self::RETRY_DELAY_MS)]);
         }
     }
 }

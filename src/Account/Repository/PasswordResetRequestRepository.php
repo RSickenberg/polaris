@@ -6,9 +6,11 @@ namespace Polaris\Account\Repository;
 
 use Carbon\CarbonImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
 use Polaris\Account\Entity\PasswordResetRequest;
 use Polaris\Account\Entity\User;
+use Symfony\Bridge\Doctrine\Types\UlidType;
 
 /**
  * @extends ServiceEntityRepository<PasswordResetRequest>
@@ -33,14 +35,14 @@ class PasswordResetRequestRepository extends ServiceEntityRepository
     public function removeFor(User $user): void
     {
         $this->getEntityManager()->createQuery(\sprintf('DELETE %s r WHERE r.user = :user', PasswordResetRequest::class))
-            ->setParameter('user', $user->getId(), 'ulid')
+            ->setParameter('user', $user->getId(), UlidType::NAME)
             ->execute();
     }
 
     public function removeExpired(CarbonImmutable $now): void
     {
         $this->getEntityManager()->createQuery(\sprintf('DELETE %s r WHERE r.expiresAt <= :now', PasswordResetRequest::class))
-            ->setParameter('now', $now->utc(), 'datetime_immutable')
+            ->setParameter('now', $now->utc(), Types::DATETIME_IMMUTABLE)
             ->execute();
     }
 }

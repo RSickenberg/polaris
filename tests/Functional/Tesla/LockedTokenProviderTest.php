@@ -18,6 +18,7 @@ use Polaris\Tesla\Service\Exception\TeslaNotConnected;
 use Polaris\Tesla\Service\LockedTokenProvider;
 use Polaris\Tests\Support\SignsIn;
 use Polaris\Tests\Support\TeslaFixtures;
+use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Clock\MockClock;
 use Symfony\Component\HttpClient\MockHttpClient;
@@ -146,7 +147,7 @@ final class LockedTokenProviderTest extends KernelTestCase
                 'expires' => CarbonImmutable::parse(self::NOW)->addHours(8)->format('Y-m-d H:i:s'),
                 'id' => $token->getId(),
             ],
-            ['id' => 'ulid'],
+            ['id' => UlidType::NAME],
         );
 
         $access = $this->provider([])->accessToken($app);

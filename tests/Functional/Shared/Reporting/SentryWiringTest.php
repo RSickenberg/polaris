@@ -218,10 +218,9 @@ final class SentryWiringTest extends KernelTestCase
         $transaction->finish();
 
         self::assertCount(1, $transport->events);
-        $json = json_encode([
-            $transport->events[0]->getTransaction(),
-            array_map(static fn ($span): ?string => $span->getDescription(), $transport->events[0]->getSpans()),
-        ], \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_SLASHES);
+        $event = $transport->events[0];
+        $descriptions = array_map(static fn ($span): ?string => $span->getDescription(), $event->getSpans());
+        $json = json_encode([$event->getTransaction(), $descriptions], \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_SLASHES);
         self::assertStringNotContainsString(self::VIN, $json);
         self::assertStringContainsString('/api/1/vehicles/[Filtered]/vehicle_data', $json);
     }

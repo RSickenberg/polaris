@@ -35,16 +35,15 @@ final readonly class LeaseAssessor
     /**
      * @param list<OdometerSample> $samples
      * @param CarbonImmutable|null $returnedAt the instant the car went back (inclusive); null while the lease runs
+     * @param CarbonImmutable|null $at         the instant the lease is judged at (has it ended, how long is left); null is the clock.
+     *                                         The caller passes only samples up to it
      */
-    public function assess(LeaseTerm $term, Allowance $allowance, Distance $startOdometer, Money $excessCostPerKm, Tolerance $tolerance, array $samples, ?CarbonImmutable $returnedAt = null): LeaseAssessment|NoData
+    public function assess(LeaseTerm $term, Allowance $allowance, Distance $startOdometer, Money $excessCostPerKm, Tolerance $tolerance, array $samples, ?CarbonImmutable $returnedAt = null, ?CarbonImmutable $at = null): LeaseAssessment|NoData
     {
         $returned = null !== $returnedAt;
 
         if (null !== $returnedAt) {
-            $samples = array_values(array_filter(
-                $samples,
-                static fn (OdometerSample $sample): bool => $sample->readAt()->getTimestamp() <= $returnedAt->getTimestamp(),
-            ));
+            $samples = self::samplesUpTo($samples, $returnedAt);
         }
 
         $projection = $this->calculator->calculate($term, $allowance, $startOdometer, $samples);
@@ -59,7 +58,8 @@ final readonly class LeaseAssessor
 
         $allowed = $allowance->total()->metres();
         $projected = $projection->projectedAtEnd->metres();
-        $ended = $returned || $this->clock->now()->getTimestamp() >= $term->exclusiveEnd()->getTimestamp();
+        $now = null !== $at ? $at->getTimestamp() : $this->clock->now()->getTimestamp();
+        $ended = $returned || $now >= $term->exclusiveEnd()->getTimestamp();
         $secondsLeft = $ended ? 0 : $term->exclusiveEnd()->getTimestamp() - $projection->asOf->getTimestamp();
 
         $remaining = Distance::fromMetres(max(0, $allowed - $projection->driven->metres()));
@@ -76,6 +76,24 @@ final readonly class LeaseAssessor
             weeklyCut: $secondsLeft > 0 ? self::weeklyCut($projected - $allowed, $secondsLeft) : null,
             currentPace: Budget::spread(Distance::fromMetres(max(0, $projected - $projection->driven->metres())), $term, $secondsLeft),
         );
+    }
+
+    /**
+     * @param list<OdometerSample> $samples
+     *
+     * @return list<OdometerSample> the samples at or before $instant
+     */
+    private static function samplesUpTo(array $samples, CarbonImmutable $instant): array
+    {
+        $kept = [];
+
+        foreach ($samples as $sample) {
+            if ($sample->readAt()->getTimestamp() <= $instant->getTimestamp()) {
+                $kept[] = $sample;
+            }
+        }
+
+        return $kept;
     }
 
     /**

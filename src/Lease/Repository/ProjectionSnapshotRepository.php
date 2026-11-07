@@ -9,6 +9,8 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Polaris\Lease\Entity\LeaseContract;
 use Polaris\Lease\Entity\ProjectionSnapshot;
+use Polaris\Shared\Doctrine\Type\CarbonDateImmutableType;
+use Symfony\Bridge\Doctrine\Types\UlidType;
 
 /**
  * @extends ServiceEntityRepository<ProjectionSnapshot>
@@ -20,16 +22,16 @@ class ProjectionSnapshotRepository extends ServiceEntityRepository
         parent::__construct($registry, ProjectionSnapshot::class);
     }
 
-    public function findForDay(LeaseContract $contract, CarbonImmutable $day): ?ProjectionSnapshot
+    public function findForDay(LeaseContract $contract, CarbonImmutable $localDay): ?ProjectionSnapshot
     {
-        return $this->findOneBy(['leaseContract' => $contract, 'day' => $day]);
+        return $this->findOneBy(['leaseContract' => $contract, 'localDay' => $localDay]);
     }
 
     /**
-     * The snapshots of the lease, oldest day first.
+     * The snapshots of the lease, oldest local day first.
      *
-     * @param CarbonImmutable|null $from first day, inclusive
-     * @param CarbonImmutable|null $to   last day, inclusive
+     * @param CarbonImmutable|null $from first local day, inclusive
+     * @param CarbonImmutable|null $to   last local day, inclusive
      *
      * @return list<ProjectionSnapshot>
      */
@@ -37,18 +39,29 @@ class ProjectionSnapshotRepository extends ServiceEntityRepository
     {
         $query = $this->createQueryBuilder('s')
             ->andWhere('s.leaseContract = :contract')
-            ->setParameter('contract', $contract->getId(), 'ulid')
-            ->orderBy('s.day', \SortDirection::Ascending);
+            ->setParameter('contract', $contract->getId(), UlidType::NAME)
+            ->orderBy('s.localDay', \SortDirection::Ascending);
 
         if (null !== $from) {
-            $query->andWhere('s.day >= :from')->setParameter('from', $from->utc()->startOfDay(), 'carbon_date_immutable');
+            $query->andWhere('s.localDay >= :from')->setParameter('from', self::calendarDate($from), CarbonDateImmutableType::NAME);
         }
 
         if (null !== $to) {
-            $query->andWhere('s.day <= :to')->setParameter('to', $to->utc()->startOfDay(), 'carbon_date_immutable');
+            $query->andWhere('s.localDay <= :to')->setParameter('to', self::calendarDate($to), CarbonDateImmutableType::NAME);
         }
 
         /* @var list<ProjectionSnapshot> */
         return $query->getQuery()->getResult();
+    }
+
+    /**
+     * The calendar date of $date as written (its own Y-m-d, no conversion), as midnight UTC, the way a day is stored.
+     */
+    private static function calendarDate(CarbonImmutable $date): CarbonImmutable
+    {
+        $day = CarbonImmutable::createFromFormat('!Y-m-d', $date->format('Y-m-d'), 'UTC');
+        \assert($day instanceof CarbonImmutable);
+
+        return $day;
     }
 }
