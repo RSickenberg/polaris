@@ -92,6 +92,32 @@
                 </div>
             {% endif %}
 
+            {% if dashboard.comparison is not null %}
+                <div class="grid gap-4 lg:grid-cols-3">
+                    <twig:Dashboard:ComparisonPanel
+                        key="budget"
+                        title="{{ 'compare.budget.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'compare.budget.basis'|trans(domain='dashboard') }}"
+                        figuresLabel="{{ 'compare.column.driven'|trans(domain='dashboard') }}"
+                        :rows="dashboard.comparison.budget"
+                    />
+                    <twig:Dashboard:ComparisonPanel
+                        key="pace"
+                        title="{{ 'compare.pace.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'compare.pace.basis'|trans(domain='dashboard') }}"
+                        figuresLabel="{{ 'compare.column.driven'|trans(domain='dashboard') }}"
+                        :rows="dashboard.comparison.pace"
+                    />
+                    <twig:Dashboard:ComparisonPanel
+                        key="projected_end"
+                        title="{{ 'compare.projected_end.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'compare.projected_end.basis'|trans(domain='dashboard') }}"
+                        figuresLabel="{{ 'compare.column.projected'|trans(domain='dashboard') }}"
+                        :rows="dashboard.comparison.projectedEnd"
+                    />
+                </div>
+            {% endif %}
+
             <twig:Card>
                 <twig:Card:Content>
                     <twig:Dashboard:LeaseProgress

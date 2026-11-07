@@ -54,6 +54,18 @@
         <source>risk.message.returned_over</source>
         <target>Returned {excess, number, ::precision-integer} {unit} over: {cost} final cost.</target>
       </trans-unit>
+      <trans-unit id="compare.figures">
+        <source>compare.figures</source>
+        <target>{actual, number, ::precision-integer} / {expected, number, ::precision-integer} {unit}</target>
+      </trans-unit>
+      <trans-unit id="compare.delta">
+        <source>compare.delta</source>
+        <target>{sign, select, negative {−{km, number, ::precision-integer} {unit}} positive {+{km, number, ::precision-integer} {unit}} other {{km, number, ::precision-integer} {unit}}}</target>
+      </trans-unit>
+      <trans-unit id="compare.ratio">
+        <source>compare.ratio</source>
+        <target>{sign, select, negative {−{share, number, percent}} positive {+{share, number, percent}} other {{share, number, percent}}}</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -186,6 +186,66 @@
         <source>home.returned</source>
         <target>Returned</target>
       </trans-unit>
+      <trans-unit id="compare.budget.title">
+        <source>compare.budget.title</source>
+        <target>Against the budget</target>
+      </trans-unit>
+      <trans-unit id="compare.budget.basis">
+        <source>compare.budget.basis</source>
+        <target>Distance driven against the daily budget of that day's snapshot.</target>
+      </trans-unit>
+      <trans-unit id="compare.pace.title">
+        <source>compare.pace.title</source>
+        <target>Against the forecast pace</target>
+      </trans-unit>
+      <trans-unit id="compare.pace.basis">
+        <source>compare.pace.basis</source>
+        <target>Distance driven against the pace forecast on that day.</target>
+      </trans-unit>
+      <trans-unit id="compare.projected_end.title">
+        <source>compare.projected_end.title</source>
+        <target>Projected end</target>
+      </trans-unit>
+      <trans-unit id="compare.projected_end.basis">
+        <source>compare.projected_end.basis</source>
+        <target>Projected distance at lease end, now against the forecast of that day.</target>
+      </trans-unit>
+      <trans-unit id="compare.period.today">
+        <source>compare.period.today</source>
+        <target>Today</target>
+      </trans-unit>
+      <trans-unit id="compare.period.week">
+        <source>compare.period.week</source>
+        <target>Last 7 days</target>
+      </trans-unit>
+      <trans-unit id="compare.period.two_weeks">
+        <source>compare.period.two_weeks</source>
+        <target>Last 14 days</target>
+      </trans-unit>
+      <trans-unit id="compare.period.month">
+        <source>compare.period.month</source>
+        <target>Last 30 days</target>
+      </trans-unit>
+      <trans-unit id="compare.column.period">
+        <source>compare.column.period</source>
+        <target>Period</target>
+      </trans-unit>
+      <trans-unit id="compare.column.driven">
+        <source>compare.column.driven</source>
+        <target>Driven / expected</target>
+      </trans-unit>
+      <trans-unit id="compare.column.projected">
+        <source>compare.column.projected</source>
+        <target>Now / then</target>
+      </trans-unit>
+      <trans-unit id="compare.column.difference">
+        <source>compare.column.difference</source>
+        <target>Difference</target>
+      </trans-unit>
+      <trans-unit id="compare.no_history">
+        <source>compare.no_history</source>
+        <target>Not enough history</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

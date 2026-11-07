@@ -10,6 +10,7 @@ use Doctrine\ORM\Exception\ORMException;
 use Polaris\Lease\Domain\LeaseAssessment;
 use Polaris\Lease\Domain\LeaseAssessor;
 use Polaris\Lease\Domain\NoData;
+use Polaris\Lease\Domain\OdometerTimeline;
 use Polaris\Lease\Entity\LeaseContract;
 use Polaris\Lease\Event\LeaseReturned;
 use Polaris\Lease\Event\LeaseReturnUndone;
@@ -157,6 +158,32 @@ final readonly class LeaseTermsService
             $returned ? $returnedAt : null,
             $cutoff
         );
+    }
+
+    /**
+     * The odometer of the stored contract over time, from the lease start to the latest reading; null without a
+     * contract. Readings after a return are left out, as in {@see self::assess()}.
+     *
+     * @throws LeaseTermsRejected when the readings do not fit the terms
+     */
+    public function odometerTimeline(Vehicle $vehicle): ?OdometerTimeline
+    {
+        $contract = $this->contracts->findForVehicle($vehicle);
+
+        if (null === $contract) {
+            return null;
+        }
+
+        try {
+            return OdometerTimeline::fromSamples(
+                $contract->getTerm()->start(),
+                $contract->getStartOdometer(),
+                $this->samples($vehicle, $contract->getReturnedAt()),
+                CarbonImmutable::instance($this->clock->now()),
+            );
+        } catch (\InvalidArgumentException $e) {
+            throw new LeaseTermsRejected(previous: $e);
+        }
     }
 
     /**

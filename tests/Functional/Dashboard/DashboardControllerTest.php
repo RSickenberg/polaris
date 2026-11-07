@@ -14,8 +14,11 @@ use Polaris\Lease\Domain\Allowance;
 use Polaris\Lease\Domain\EndDateConvention;
 use Polaris\Lease\Domain\LeaseAssessment;
 use Polaris\Lease\Domain\LeaseTerm;
+use Polaris\Lease\Domain\Pace;
+use Polaris\Lease\Domain\RiskLevel;
 use Polaris\Lease\Domain\Tolerance;
 use Polaris\Lease\Entity\LeaseContract;
+use Polaris\Lease\Entity\ProjectionSnapshot;
 use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Currency;
@@ -64,6 +67,7 @@ final class DashboardControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Dashboard | Model 3');
         self::assertSelectorTextContains('main', 'Add the lease terms to see where you stand');
+        self::assertSelectorNotExists('[data-comparison]');
         self::assertSelectorExists(\sprintf('main a[data-slot=button][href="/vehicles/%s/lease"]', $this->id()));
         self::assertSelectorNotExists('[role=progressbar]');
     }
@@ -78,6 +82,7 @@ final class DashboardControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('main', 'No reading since the lease start.');
+        self::assertSelectorNotExists('[data-comparison]');
         self::assertSelectorExists(\sprintf('main a[data-slot=button][href="/vehicles/%s/readings"]', $this->id()));
         self::assertSelectorNotExists('[role=progressbar]');
     }
@@ -246,6 +251,63 @@ final class DashboardControllerTest extends WebTestCase
         self::assertSelectorTextContains('[data-live-name-value="Fetching:OdometerRefreshButton"]', 'Actualiser maintenant');
     }
 
+    public function testARunningLeaseShowsTheThreeComparisonPanelsOfFourPeriods(): void
+    {
+        $this->lease('2026-01-01', 12, 15_000, 0);
+        $this->reading('2026-07-02 11:00:00', 10_000);
+
+        $this->client->request('GET', $this->url());
+
+        self::assertResponseIsSuccessful();
+
+        foreach (['budget', 'pace', 'projected_end'] as $panel) {
+            self::assertSelectorExists(\sprintf('[data-comparison=%s]', $panel));
+            self::assertSelectorCount(4, \sprintf('[data-comparison=%s] tr[data-period]', $panel));
+            // No snapshot has been saved yet: every period lacks history.
+            self::assertSelectorCount(4, \sprintf('[data-comparison=%s] [data-no-history]', $panel));
+        }
+
+        self::assertSelectorTextContains('[data-comparison=budget]', 'Against the budget');
+        self::assertSelectorTextContains('[data-comparison=budget] [data-period=week]', 'Last 7 days');
+        self::assertSelectorTextContains('[data-comparison=budget] [data-period=week]', 'Not enough history');
+    }
+
+    public function testASnapshotOfTodayGivesFiguresToThePanels(): void
+    {
+        $this->lease('2026-01-01', 12, 15_000, 0);
+        $this->reading('2026-07-02 11:00:00', 10_000);
+        $contract = $this->entityManager->getRepository(LeaseContract::class)->findOneBy(['vehicle' => $this->vehicle]);
+        self::assertInstanceOf(LeaseContract::class, $contract);
+        $midnight = CarbonImmutable::parse('2026-07-02 00:00:00', 'UTC');
+        $pace = Pace::fromMetresPerDay(50_000.0);
+        $this->entityManager->persist(new ProjectionSnapshot(
+            $contract,
+            $midnight,
+            $midnight,
+            $midnight->addMinutes(5),
+            $midnight->subHours(1),
+            Distance::fromKilometres(9_900),
+            Distance::fromKilometres(7_500),
+            Distance::fromKilometres(20_000),
+            Distance::fromKilometres(30),
+            RiskLevel::Over,
+            $pace,
+            $pace,
+            $pace,
+        ));
+        $this->entityManager->flush();
+
+        $this->client->request('GET', $this->url());
+
+        self::assertResponseIsSuccessful();
+
+        foreach (['budget', 'pace', 'projected_end'] as $panel) {
+            self::assertSelectorExists(\sprintf('[data-comparison=%s] [data-period=today] [data-figure=delta]', $panel));
+            self::assertSelectorNotExists(\sprintf('[data-comparison=%s] [data-period=today] [data-no-history]', $panel));
+            self::assertSelectorExists(\sprintf('[data-comparison=%s] [data-period=week] [data-no-history]', $panel));
+        }
+    }
+
     public function testAnEndedLeaseShowsTheCostSoFarAndNoBudget(): void
     {
         $this->lease('2025-01-01', 12, 15_000, 0);
@@ -256,6 +318,7 @@ final class DashboardControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('main', 'The lease has ended');
+        self::assertSelectorNotExists('[data-comparison]');
         self::assertSelectorExists(\sprintf('main a[data-slot=button][href="/vehicles/%s/lease"]', $this->id()));
         self::assertSelectorTextContains('[data-slot=alert][data-risk=over]', 'Ended 1,000 km over,');
         self::assertStringContainsString('CHF 120.00', $this->text());

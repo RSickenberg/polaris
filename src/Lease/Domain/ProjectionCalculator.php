@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Polaris\Shared\Domain\Distance;
 use Polaris\Shared\Domain\DistanceDelta;
 use Polaris\Shared\Domain\OdometerSample;
+use Polaris\Shared\Domain\TimeZone;
 use Psr\Clock\ClockInterface;
 
 /**
@@ -58,16 +59,15 @@ final readonly class ProjectionCalculator
             throw new \InvalidArgumentException('The allowance is too large to project.');
         }
 
-        $timeline = $this->timeline($start, $startOdometer, $samples);
+        $timeline = OdometerTimeline::fromSamples($term->start(), $startOdometer, $samples, CarbonImmutable::instance($this->clock->now()));
 
-        if (1 === \count($timeline)) {
+        if (!$timeline->hasSamples()) {
             return null;
         }
 
-        $latest = array_key_last($timeline);
-        $reference = $latest;
+        $reference = $timeline->latestInstant();
         $elapsed = $reference - $start;
-        $referenceOdometer = self::odometerAt($timeline, $reference);
+        $referenceOdometer = $timeline->odometerAt($reference);
         $drivenMetres = $referenceOdometer - $startOdometer->metres();
 
         $overallPace = Pace::over($drivenMetres, $elapsed);
@@ -76,7 +76,7 @@ final readonly class ProjectionCalculator
         $windowSeconds = self::RECENT_WINDOW_DAYS * Pace::SECONDS_PER_DAY;
 
         if ($elapsed >= $windowSeconds) {
-            $recentPace = Pace::over($referenceOdometer - self::odometerAt($timeline, $reference - $windowSeconds), $windowSeconds);
+            $recentPace = Pace::over($referenceOdometer - $timeline->odometerAt($reference - $windowSeconds), $windowSeconds);
             $blendedPace = $this->recentPaceWeight->blend($recentPace, $overallPace);
         }
 
@@ -85,7 +85,7 @@ final readonly class ProjectionCalculator
         $allowedToDate = Distance::fromMetres(intdiv(2 * $allowanceMetres * min($elapsed, $termSeconds) + $termSeconds, 2 * $termSeconds));
 
         return new Projection(
-            asOf: CarbonImmutable::createFromTimestamp($reference, 'UTC'),
+            asOf: CarbonImmutable::createFromTimestamp($reference, TimeZone::UTC),
             driven: $driven,
             allowedToDate: $allowedToDate,
             margin: DistanceDelta::between($driven, $allowedToDate),
@@ -94,69 +94,5 @@ final readonly class ProjectionCalculator
             blendedPace: $blendedPace,
             projectedAtEnd: Distance::fromMetres((int) round($drivenMetres + $blendedPace->metresIn(max(0, $end - $reference)))),
         );
-    }
-
-    /**
-     * The odometer in metres by Unix timestamp, sorted, starting with the lease start.
-     *
-     * @param list<OdometerSample> $samples
-     *
-     * @return non-empty-array<int, int>
-     */
-    private function timeline(int $start, Distance $startOdometer, array $samples): array
-    {
-        $now = $this->clock->now()->getTimestamp();
-        $odometers = [];
-
-        foreach ($samples as $sample) {
-            $readAt = $sample->readAt()->getTimestamp();
-            $odometer = $sample->odometer()->metres();
-
-            if ($readAt > $now) {
-                throw new \InvalidArgumentException(\sprintf('The odometer sample of %s is in the future.', $sample->readAt()->toIso8601String()));
-            }
-
-            if ($readAt <= $start) {
-                continue;
-            }
-
-            if (isset($odometers[$readAt]) && $odometers[$readAt] !== $odometer) {
-                throw new \InvalidArgumentException(\sprintf('Two odometer samples of %s disagree: %d m and %d m.', $sample->readAt()->toIso8601String(), $odometers[$readAt], $odometer));
-            }
-
-            $odometers[$readAt] = $odometer;
-        }
-
-        ksort($odometers);
-        $timeline = [$start => $startOdometer->metres()] + $odometers;
-        $previous = $startOdometer->metres();
-
-        foreach ($timeline as $readAt => $odometer) {
-            if ($odometer < $previous) {
-                throw new \InvalidArgumentException(\sprintf('The odometer of %s (%d m) is lower than an earlier one (%d m).', CarbonImmutable::createFromTimestamp($readAt, 'UTC')->toIso8601String(), $odometer, $previous));
-            }
-
-            $previous = $odometer;
-        }
-
-        return $timeline;
-    }
-
-    /**
-     * The odometer at $instant, interpolated linearly between the samples around it.
-     *
-     * @param non-empty-array<int, int> $timeline sorted, with $instant between its first and last keys
-     */
-    private static function odometerAt(array $timeline, int $instant): float
-    {
-        $before = array_key_last(array_filter($timeline, static fn (int $readAt): bool => $readAt <= $instant, \ARRAY_FILTER_USE_KEY));
-        $after = array_key_first(array_filter($timeline, static fn (int $readAt): bool => $readAt >= $instant, \ARRAY_FILTER_USE_KEY));
-        \assert(null !== $before && null !== $after);
-
-        if ($before === $after) {
-            return $timeline[$instant];
-        }
-
-        return $timeline[$before] + ($timeline[$after] - $timeline[$before]) * (($instant - $before) / ($after - $before));
     }
 }
