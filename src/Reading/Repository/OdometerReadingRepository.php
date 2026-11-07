@@ -6,10 +6,12 @@ namespace Polaris\Reading\Repository;
 
 use Carbon\CarbonImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Vehicle\Entity\Vehicle;
+use Symfony\Bridge\Doctrine\Types\UlidType;
 
 /**
  * @extends ServiceEntityRepository<OdometerReading>
@@ -36,8 +38,8 @@ class OdometerReadingRepository extends ServiceEntityRepository
         $reading = $this->createQueryBuilder('r')
             ->where('r.vehicle = :vehicle')
             ->andWhere('r.readAt < :readAt')
-            ->setParameter('vehicle', $vehicle->getId(), 'ulid')
-            ->setParameter('readAt', $readAt, 'datetime_immutable')
+            ->setParameter('vehicle', $vehicle->getId(), UlidType::NAME)
+            ->setParameter('readAt', $readAt, Types::DATETIME_IMMUTABLE)
             ->orderBy('r.readAt', \SortDirection::Descending)
             ->setMaxResults(1)
             ->getQuery()
@@ -56,8 +58,8 @@ class OdometerReadingRepository extends ServiceEntityRepository
         $reading = $this->createQueryBuilder('r')
             ->where('r.vehicle = :vehicle')
             ->andWhere('r.readAt > :readAt')
-            ->setParameter('vehicle', $vehicle->getId(), 'ulid')
-            ->setParameter('readAt', $readAt, 'datetime_immutable')
+            ->setParameter('vehicle', $vehicle->getId(), UlidType::NAME)
+            ->setParameter('readAt', $readAt, Types::DATETIME_IMMUTABLE)
             ->orderBy('r.readAt', \SortDirection::Ascending)
             ->setMaxResults(1)
             ->getQuery()
@@ -75,7 +77,7 @@ class OdometerReadingRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('r')
             ->where('r.vehicle = :vehicle')
-            ->setParameter('vehicle', $vehicle->getId(), 'ulid')
+            ->setParameter('vehicle', $vehicle->getId(), UlidType::NAME)
             ->orderBy('r.readAt', \SortDirection::Descending)
             ->getQuery()
             ->getResult();

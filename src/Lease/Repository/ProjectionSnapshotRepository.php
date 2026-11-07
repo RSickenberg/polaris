@@ -10,6 +10,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Polaris\Lease\Entity\LeaseContract;
 use Polaris\Lease\Entity\ProjectionSnapshot;
 use Polaris\Shared\Doctrine\Type\CarbonDateImmutableType;
+use Symfony\Bridge\Doctrine\Types\UlidType;
 
 /**
  * @extends ServiceEntityRepository<ProjectionSnapshot>
@@ -38,7 +39,7 @@ class ProjectionSnapshotRepository extends ServiceEntityRepository
     {
         $query = $this->createQueryBuilder('s')
             ->andWhere('s.leaseContract = :contract')
-            ->setParameter('contract', $contract->getId(), 'ulid')
+            ->setParameter('contract', $contract->getId(), UlidType::NAME)
             ->orderBy('s.localDay', \SortDirection::Ascending);
 
         if (null !== $from) {

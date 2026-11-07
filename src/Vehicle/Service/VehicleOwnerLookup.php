@@ -6,6 +6,7 @@ namespace Polaris\Vehicle\Service;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DbalException;
+use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\Ulid;
 
 /**
@@ -36,7 +37,7 @@ final readonly class VehicleOwnerLookup
         $owner = $this->connection->fetchOne(
             'SELECT owner_id FROM vehicle WHERE id = :id',
             ['id' => $id],
-            ['id' => 'ulid'],
+            ['id' => UlidType::NAME],
         );
 
         return \is_string($owner) ? Ulid::fromString($owner)->toRfc4122() : null;

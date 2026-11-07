@@ -11,6 +11,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Polaris\Account\Entity\User;
 use Polaris\Shared\Doctrine\Type\CarbonDateImmutableType;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
+use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
@@ -58,7 +59,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->where('u.id = :id')
             ->andWhere('u.lastMidnightDay IS NULL OR u.lastMidnightDay < :day')
             ->setParameter('day', $day, CarbonDateImmutableType::NAME)
-            ->setParameter('id', $user->getId(), 'ulid')
+            ->setParameter('id', $user->getId(), UlidType::NAME)
             ->getQuery()
             ->execute();
     }
@@ -75,7 +76,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->andWhere('u.lastMidnightDay = :claimed')
             ->setParameter('previous', $previous, CarbonDateImmutableType::NAME)
             ->setParameter('claimed', $claimed, CarbonDateImmutableType::NAME)
-            ->setParameter('id', $user->getId(), 'ulid')
+            ->setParameter('id', $user->getId(), UlidType::NAME)
             ->getQuery()
             ->execute();
     }

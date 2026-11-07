@@ -8,6 +8,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DbalException;
 use Polaris\Shared\Reporting\ReportingPreference;
 use Polaris\Shared\Reporting\ReportingPreferences;
+use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\Ulid;
 
 /**
@@ -34,7 +35,7 @@ final readonly class UserReportingPreferences implements ReportingPreferences
         $row = $this->connection->fetchAssociative(
             'SELECT error_reporting, error_reporting_details FROM app_user WHERE id = :id',
             ['id' => $id],
-            ['id' => 'ulid'],
+            ['id' => UlidType::NAME],
         );
 
         if (false === $row) {

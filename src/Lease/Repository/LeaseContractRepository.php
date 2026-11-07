@@ -8,6 +8,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Polaris\Lease\Entity\LeaseContract;
 use Polaris\Vehicle\Entity\Vehicle;
+use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\Ulid;
 
 /**
@@ -36,7 +37,7 @@ class LeaseContractRepository extends ServiceEntityRepository
         $contracts = $this->createQueryBuilder('c')
             ->join('c.vehicle', 'v')
             ->where('v.owner = :owner')
-            ->setParameter('owner', $ownerId, 'ulid')
+            ->setParameter('owner', $ownerId, UlidType::NAME)
             ->getQuery()
             ->getResult();
 

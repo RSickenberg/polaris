@@ -96,7 +96,7 @@ class RefreshAttemptRepository extends ServiceEntityRepository
             ->where('a.vehicle IN (' . $vehicles . ')')
             ->andWhere('a.requestedAt < :before')
             ->andWhere('a.wokeAt IS NULL OR a.wokeAt < :before')
-            ->setParameter('owner', $ownerId, 'ulid')
+            ->setParameter('owner', $ownerId, UlidType::NAME)
             ->setParameter('before', $before, Types::DATETIME_IMMUTABLE)
             ->getQuery()
             ->execute();
