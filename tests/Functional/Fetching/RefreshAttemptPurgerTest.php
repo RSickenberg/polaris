@@ -54,7 +54,8 @@ final class RefreshAttemptPurgerTest extends KernelTestCase
         $entityManager->clear();
         $left = $entityManager->getRepository(RefreshAttempt::class)->findAll();
         self::assertCount(2, $left, 'The recent one, and the old one of another owner (purged at their own midnight).');
-        self::assertContains($recentId->toRfc4122(), array_map(static fn (RefreshAttempt $attempt): string => $attempt->getId()->toRfc4122(), $left));
+        $leftIds = array_map(static fn (RefreshAttempt $attempt): string => $attempt->getId()->toRfc4122(), $left);
+        self::assertContains($recentId->toRfc4122(), $leftIds);
     }
 
     public function testAnAttemptWhoseWakeIsYoungerThanTheRetentionIsKeptForTheWakeCap(): void

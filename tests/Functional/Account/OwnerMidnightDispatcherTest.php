@@ -18,7 +18,6 @@ use Psr\Clock\ClockInterface;
 use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Clock\Test\ClockSensitiveTrait;
-use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
@@ -50,7 +49,7 @@ final class OwnerMidnightDispatcherTest extends KernelTestCase
         self::mockTime('2026-11-07 23:04:59 UTC');
         $this->dispatch();
 
-        self::assertSame(['2026-11-07'], array_map(static fn (OwnerMidnightPassed $message): string => $message->localDay, $this->sentFor($this->zurich)), 'Still the midnight that opened the 7th.');
+        self::assertSame(['2026-11-07'], $this->daysFor($this->zurich), 'Still the midnight that opened the 7th.');
     }
 
     public function testJustAfterTheOwnersMidnightTheirDailyWorkIsQueuedOnceAndNobodyElses(): void
@@ -63,7 +62,7 @@ final class OwnerMidnightDispatcherTest extends KernelTestCase
         self::assertSame('2026-11-08', $sent[0]->localDay);
         self::assertSame(CarbonImmutable::parse('2026-11-07 23:00:00', 'UTC')->getTimestamp(), $sent[0]->midnightTimestamp);
         // 23:05 UTC is 15:05 in Los Angeles: their midnight of the 7th (08:00 UTC) ran earlier, and nothing is due now.
-        self::assertSame(['2026-11-07'], array_map(static fn (OwnerMidnightPassed $message): string => $message->localDay, $this->sentFor($this->losAngeles)), 'Their own midnight of the 7th, queued the first time the tick ran, not at 23:05.');
+        self::assertSame(['2026-11-07'], $this->daysFor($this->losAngeles), 'Their own midnight of the 7th, queued the first time the tick ran, not at 23:05.');
     }
 
     public function testAMinuteLaterOrAnHourLaterRunsNothingMore(): void
@@ -124,7 +123,7 @@ final class OwnerMidnightDispatcherTest extends KernelTestCase
     {
         self::mockTime('2026-11-07 10:00:00 UTC');
         $this->dispatch();
-        self::assertSame(['2026-11-07'], array_map(static fn (OwnerMidnightPassed $message): string => $message->localDay, $this->sentFor($this->zurich)));
+        self::assertSame(['2026-11-07'], $this->daysFor($this->zurich));
         $this->transport()->reset();
 
         // Moving to Los Angeles (02:00 on the 7th there): the 7th has already run.
@@ -139,7 +138,7 @@ final class OwnerMidnightDispatcherTest extends KernelTestCase
         // Their next midnight is the start of the 8th in Los Angeles (08:00 UTC on the 8th).
         self::mockTime('2026-11-08 08:05:00 UTC');
         $this->dispatch();
-        self::assertSame(['2026-11-08'], array_map(static fn (OwnerMidnightPassed $message): string => $message->localDay, $this->sentFor($this->zurich)));
+        self::assertSame(['2026-11-08'], $this->daysFor($this->zurich));
     }
 
     public function testBothDaylightSavingDaysOfZurichRunOnceEach(): void
@@ -150,7 +149,7 @@ final class OwnerMidnightDispatcherTest extends KernelTestCase
             $this->dispatch();
             $this->dispatch();
 
-            self::assertSame([$day], array_map(static fn (OwnerMidnightPassed $message): string => $message->localDay, $this->sentFor($this->zurich)), $now);
+            self::assertSame([$day], $this->daysFor($this->zurich), $now);
         }
     }
 
@@ -204,16 +203,35 @@ final class OwnerMidnightDispatcherTest extends KernelTestCase
     }
 
     /**
-     * @return list<OwnerMidnightPassed>
+     * @return list<string> the local days queued for the user, in the order they were queued
+     */
+    private function daysFor(User $user): array
+    {
+        $days = [];
+
+        foreach ($this->sentFor($user) as $message) {
+            $days[] = $message->localDay;
+        }
+
+        return $days;
+    }
+
+    /**
+     * @return list<OwnerMidnightPassed> the midnights queued for the user
      */
     private function sentFor(User $user): array
     {
-        $id = $user->getId()->toRfc4122();
+        $messages = [];
 
-        return array_values(array_filter(
-            array_map(static fn (Envelope $envelope): object => $envelope->getMessage(), $this->transport()->getSent()),
-            static fn (object $message): bool => $message instanceof OwnerMidnightPassed && $message->userId === $id,
-        ));
+        foreach ($this->transport()->getSent() as $envelope) {
+            $message = $envelope->getMessage();
+
+            if ($message instanceof OwnerMidnightPassed && $message->userId === $user->getId()->toRfc4122()) {
+                $messages[] = $message;
+            }
+        }
+
+        return $messages;
     }
 
     private function transport(): InMemoryTransport

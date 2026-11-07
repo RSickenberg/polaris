@@ -19,6 +19,7 @@ use Polaris\Lease\MessageHandler\QueueOwnerProjectionSnapshotsHandler;
 use Polaris\Lease\MessageHandler\SaveProjectionSnapshotHandler;
 use Polaris\Lease\Repository\LeaseContractRepository;
 use Polaris\Lease\Repository\ProjectionSnapshotRepository;
+use Polaris\Lease\Service\Dto\ProjectionSnapshotPoint;
 use Polaris\Lease\Service\Enum\SnapshotOutcome;
 use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Lease\Service\ProjectionHistoryService;
@@ -212,10 +213,7 @@ final class ProjectionSnapshotTest extends KernelTestCase
 
         $history = $this->history()->history($this->vehicle);
 
-        self::assertSame(
-            ['2026-07-03', '2026-07-04', '2026-07-05'],
-            array_map(static fn ($point): string => $point->localDay->format('Y-m-d'), $history),
-        );
+        self::assertSame(['2026-07-03', '2026-07-04', '2026-07-05'], $this->days($history));
         self::assertSame(10_000_000, $history[0]->driven->metres());
         self::assertSame(7_500_000, $history[0]->allowedToDate->metres());
         self::assertSame(20_000_000, $history[0]->projectedAtEnd->metres());
@@ -234,12 +232,9 @@ final class ProjectionSnapshotTest extends KernelTestCase
         }
         $history = $this->history();
 
-        $days = array_map(
-            static fn ($point): string => $point->localDay->format('Y-m-d'),
-            $history->history($this->vehicle, CarbonImmutable::parse('2026-07-04 15:00:00', 'UTC'), CarbonImmutable::parse('2026-07-05', 'UTC')),
-        );
+        $between = $history->history($this->vehicle, CarbonImmutable::parse('2026-07-04 15:00:00', 'UTC'), CarbonImmutable::parse('2026-07-05', 'UTC'));
 
-        self::assertSame(['2026-07-04', '2026-07-05'], $days);
+        self::assertSame(['2026-07-04', '2026-07-05'], $this->days($between));
         self::assertSame([], $history->history($this->vehicle('5YJ3E7EB2NF000093', 1_000)));
     }
 
@@ -258,12 +253,17 @@ final class ProjectionSnapshotTest extends KernelTestCase
         ));
 
         $sent = $this->sent();
-        $ids = array_map(static fn (object $message): string => $message instanceof SaveProjectionSnapshot ? $message->reportingVehicleId() : '', $sent);
-        sort($ids);
-        $expected = [$this->vehicle->getId()->toRfc4122(), $sameOwner->getId()->toRfc4122()];
-        sort($expected);
-        self::assertSame($expected, $ids);
         self::assertContainsOnlyInstancesOf(SaveProjectionSnapshot::class, $sent);
+        $queuedFor = [];
+
+        foreach ($sent as $save) {
+            $queuedFor[] = $save->reportingVehicleId();
+        }
+
+        $expected = [$this->vehicle->getId()->toRfc4122(), $sameOwner->getId()->toRfc4122()];
+        sort($queuedFor);
+        sort($expected);
+        self::assertSame($expected, $queuedFor, 'The owner\'s two leases, not the stranger\'s.');
         self::assertSame('2026-07-03', $sent[0]->localDay);
         self::assertSame(CarbonImmutable::parse('2026-07-03 00:00:00', 'UTC')->getTimestamp(), $sent[0]->midnightTimestamp);
     }
@@ -453,7 +453,29 @@ final class ProjectionSnapshotTest extends KernelTestCase
         $transport = self::getContainer()->get('messenger.transport.async');
         self::assertInstanceOf(InMemoryTransport::class, $transport);
 
-        return array_values(array_map(static fn ($envelope): object => $envelope->getMessage(), $transport->getSent()));
+        $messages = [];
+
+        foreach ($transport->getSent() as $envelope) {
+            $messages[] = $envelope->getMessage();
+        }
+
+        return $messages;
+    }
+
+    /**
+     * @param list<ProjectionSnapshotPoint> $points
+     *
+     * @return list<string> the local days (`Y-m-d`) of the points, in order
+     */
+    private function days(array $points): array
+    {
+        $days = [];
+
+        foreach ($points as $point) {
+            $days[] = $point->localDay->format('Y-m-d');
+        }
+
+        return $days;
     }
 
     private function asyncTransport(): InMemoryTransport
