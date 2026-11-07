@@ -16,12 +16,12 @@ use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\Ulid;
 
 /**
- * What Polaris projected for a lease at the owner's midnight M: the figures of the assessment with only the readings up
- * to M, kept so that past projections can be compared with what was driven. One row per lease and local day; a run for
+ * What Polaris projected for a lease at the owner's midnight: the figures of the assessment with only the readings up
+ * to that midnight, kept so that past projections can be compared with what was driven. One row per lease and local day; a run for
  * the same midnight replaces the figures (the last wins). It is a record: editing the terms or adding a reading later
  * never changes a row.
  *
- * The local day is the calendar date M OPENS (M is its first instant): the row of 2026-11-07 is the projection at the
+ * The local day is the calendar date the midnight OPENS (it is that day's first instant): the row of 2026-11-07 is the projection at the
  * very start of 7 November, so it describes the end of the 6th. "Today's snapshot" is the row with today's date.
  * Rows saved before the daily jobs followed the owner's midnight (UTC day label, taken at 23:50 UTC) have no cutoff and
  * no pace.
@@ -45,7 +45,7 @@ class ProjectionSnapshot
     private CarbonImmutable $localDay;
 
     /**
-     * The instant M of the owner's midnight the figures are taken at: only readings up to it count. UTC.
+     * The owner's midnight the figures are taken at: only readings up to it count. UTC.
      * Null only on rows saved before the daily jobs followed the owner's midnight.
      */
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]

@@ -16,7 +16,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 
 /**
  * Every daily job runs at the owner's local midnight, not at a UTC time. Called every minute: for each user it works
- * out the latest midnight M whose jobs are due ({@see OwnerMidnight::latestDue()}: M plus 5 minutes has passed) and,
+ * out the latest midnight whose jobs are due ({@see OwnerMidnight::latestDue()}: 5 minutes after it have passed) and,
  * if that local day has not run yet, queues one {@see OwnerMidnightPassed}. The local days are converted from the
  * owner's time zone every time, so daylight saving and a changed zone need no restart.
  *
