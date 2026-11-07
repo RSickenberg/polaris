@@ -78,13 +78,25 @@ class RefreshAttemptRepository extends ServiceEntityRepository
     }
 
     /**
+     * Deletes the attempts of an owner's vehicles that were requested before $before and whose wake, if any, was sent
+     * before it too (the wake cap still counts a younger one).
+     *
      * @return int how many rows were deleted
      */
-    public function deleteRequestedBefore(CarbonImmutable $before): int
+    public function deleteOfOwnerBefore(Ulid $ownerId, CarbonImmutable $before): int
     {
+        $vehicles = $this->getEntityManager()->createQueryBuilder()
+            ->select('v.id')
+            ->from(Vehicle::class, 'v')
+            ->where('v.owner = :owner')
+            ->getDQL();
+
         return (int) $this->createQueryBuilder('a')
             ->delete()
-            ->where('a.requestedAt < :before')
+            ->where('a.vehicle IN (' . $vehicles . ')')
+            ->andWhere('a.requestedAt < :before')
+            ->andWhere('a.wokeAt IS NULL OR a.wokeAt < :before')
+            ->setParameter('owner', $ownerId, 'ulid')
             ->setParameter('before', $before, Types::DATETIME_IMMUTABLE)
             ->getQuery()
             ->execute();

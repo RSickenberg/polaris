@@ -266,6 +266,33 @@ final class LeaseAssessorTest extends TestCase
         return $assessment;
     }
 
+    public function testTheLeaseIsJudgedAtTheGivenInstantNotAtTheClock(): void
+    {
+        $clock = new MockClock(new \DateTimeImmutable('2027-03-01 12:00', new \DateTimeZone('UTC')));
+        $assessor = new LeaseAssessor(new ProjectionCalculator($clock, RecentPaceWeight::fromBasisPoints(6_000)), $clock);
+        $assess = static fn (?CarbonImmutable $at): LeaseAssessment|NoData => $assessor->assess(
+            new LeaseTerm(new CarbonImmutable('2026-01-01', 'UTC'), new CarbonImmutable('2027-01-01', 'UTC'), EndDateConvention::Exclusive),
+            Allowance::ofTotal(Distance::fromKilometres(36_500)),
+            Distance::fromKilometres(10_000),
+            Money::fromDecimal('0.45', Currency::CHF),
+            Tolerance::fromBasisPoints(0),
+            [new OdometerSample(new CarbonImmutable('2026-04-11 00:00', 'UTC'), Distance::fromMetres(19_000_000))],
+            null,
+            $at,
+        );
+
+        $atTheClock = $assess(null);
+        $atMidnight = $assess(new CarbonImmutable('2026-04-12 00:00', 'UTC'));
+
+        self::assertInstanceOf(LeaseAssessment::class, $atTheClock);
+        self::assertInstanceOf(LeaseAssessment::class, $atMidnight);
+        self::assertSame(LeaseStatus::Ended, $atTheClock->status);
+        self::assertSame(LeaseStatus::Active, $atMidnight->status);
+        self::assertGreaterThan(0, $atMidnight->budget->perDay->metres());
+        self::assertSame(0, $atTheClock->budget->perDay->metres());
+        self::assertSame($atTheClock->projection->blendedPace->metresPerDay(), $atMidnight->projection->blendedPace->metresPerDay());
+    }
+
     /**
      * @param list<array{string, int}> $samples
      */

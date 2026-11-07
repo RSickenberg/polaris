@@ -7,14 +7,15 @@ namespace Polaris\Tests\Functional\Lease;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Polaris\Fetching\Scheduler\FetchScheduleProvider;
+use Polaris\Account\Entity\User;
+use Polaris\Account\Message\OwnerMidnightPassed;
 use Polaris\Lease\Command\SnapshotCommand;
+use Polaris\Lease\Domain\LeaseAssessment;
 use Polaris\Lease\Domain\RiskLevel;
 use Polaris\Lease\Entity\ProjectionSnapshot;
 use Polaris\Lease\Form\Model\LeaseContractData;
-use Polaris\Lease\Message\QueueProjectionSnapshots;
 use Polaris\Lease\Message\SaveProjectionSnapshot;
-use Polaris\Lease\MessageHandler\QueueProjectionSnapshotsHandler;
+use Polaris\Lease\MessageHandler\QueueOwnerProjectionSnapshotsHandler;
 use Polaris\Lease\MessageHandler\SaveProjectionSnapshotHandler;
 use Polaris\Lease\Repository\LeaseContractRepository;
 use Polaris\Lease\Repository\ProjectionSnapshotRepository;
@@ -25,6 +26,7 @@ use Polaris\Lease\Service\ProjectionSnapshotService;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Currency;
 use Polaris\Shared\Domain\Distance;
+use Polaris\Shared\Domain\OwnerMidnight;
 use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
@@ -36,17 +38,16 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
-use Symfony\Component\Scheduler\RecurringMessage;
 
 #[CoversClass(ProjectionSnapshotService::class)]
 #[CoversClass(ProjectionHistoryService::class)]
 #[CoversClass(ProjectionSnapshot::class)]
 #[CoversClass(ProjectionSnapshotRepository::class)]
-#[CoversClass(QueueProjectionSnapshotsHandler::class)]
+#[CoversClass(QueueOwnerProjectionSnapshotsHandler::class)]
 #[CoversClass(SaveProjectionSnapshotHandler::class)]
 #[CoversClass(SaveProjectionSnapshot::class)]
 #[CoversClass(SnapshotCommand::class)]
-#[CoversClass(FetchScheduleProvider::class)]
+#[CoversClass(OwnerMidnight::class)]
 final class ProjectionSnapshotTest extends KernelTestCase
 {
     use ClockSensitiveTrait;
@@ -60,7 +61,7 @@ final class ProjectionSnapshotTest extends KernelTestCase
     protected function setUp(): void
     {
         self::bootKernel();
-        self::mockTime('2026-07-02 12:00:00 UTC');
+        self::mockTime('2026-07-03 00:05:00 UTC');
         $container = self::getContainer();
         $this->entityManager = $container->get(EntityManagerInterface::class);
         $this->leases = $container->get(LeaseTermsService::class);
@@ -73,13 +74,14 @@ final class ProjectionSnapshotTest extends KernelTestCase
 
     public function testASnapshotKeepsTheFiguresOfTheAssessment(): void
     {
-        self::assertSame(SnapshotOutcome::Saved, $this->snapshots->save($this->vehicle));
+        self::assertSame(SnapshotOutcome::Saved, $this->snapshots->save($this->vehicle, $this->midnight()));
 
         $rows = $this->rows();
         self::assertCount(1, $rows);
         $row = $rows[0];
-        self::assertSame('2026-07-02T00:00:00+00:00', $row->getDay()->toIso8601String());
-        self::assertSame('2026-07-02T12:00:00+00:00', $row->getComputedAt()->toIso8601String());
+        self::assertSame('2026-07-03T00:00:00+00:00', $row->getLocalDay()->toIso8601String());
+        self::assertSame('2026-07-03T00:00:00+00:00', $row->getCutoffAt()?->toIso8601String());
+        self::assertSame('2026-07-03T00:05:00+00:00', $row->getComputedAt()->toIso8601String());
         self::assertSame('2026-07-02T12:00:00+00:00', $row->getAsOf()->toIso8601String());
         self::assertSame(10_000_000, $row->getDriven()->metres());
         self::assertSame(7_500_000, $row->getAllowedToDate()->metres());
@@ -93,36 +95,36 @@ final class ProjectionSnapshotTest extends KernelTestCase
     {
         self::mockTime('2026-07-05 08:30:00 UTC');
 
-        self::assertSame(SnapshotOutcome::Saved, $this->snapshots->save($this->vehicle));
+        self::assertSame(SnapshotOutcome::Saved, $this->snapshots->save($this->vehicle, $this->midnight('2026-07-05')));
 
         $row = $this->rows()[0];
-        self::assertSame('2026-07-05T00:00:00+00:00', $row->getDay()->toIso8601String());
+        self::assertSame('2026-07-05T00:00:00+00:00', $row->getLocalDay()->toIso8601String());
         self::assertSame('2026-07-05T08:30:00+00:00', $row->getComputedAt()->toIso8601String());
         self::assertSame('2026-07-02T12:00:00+00:00', $row->getAsOf()->toIso8601String());
     }
 
-    public function testRunningTwiceTheSameDayLeavesOneRowAndTheLastWins(): void
+    public function testRunningTwiceForTheSameMidnightLeavesOneRowAndTheLastWins(): void
     {
-        $this->snapshots->save($this->vehicle);
+        $this->snapshots->save($this->vehicle, $this->midnight());
         $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-02 12:30:00', 'UTC'), Distance::fromKilometres(10_100)));
         $this->entityManager->flush();
-        self::mockTime('2026-07-02 14:00:00 UTC');
+        self::mockTime('2026-07-03 14:00:00 UTC');
 
-        self::assertSame(SnapshotOutcome::Updated, $this->snapshots->save($this->vehicle));
-        self::assertSame(SnapshotOutcome::Updated, $this->snapshots->save($this->vehicle));
+        self::assertSame(SnapshotOutcome::Updated, $this->snapshots->save($this->vehicle, $this->midnight()));
+        self::assertSame(SnapshotOutcome::Updated, $this->snapshots->save($this->vehicle, $this->midnight()));
 
         $rows = $this->rows();
         self::assertCount(1, $rows);
         self::assertSame(10_100_000, $rows[0]->getDriven()->metres());
-        self::assertSame('2026-07-02T14:00:00+00:00', $rows[0]->getComputedAt()->toIso8601String());
+        self::assertSame('2026-07-03T14:00:00+00:00', $rows[0]->getComputedAt()->toIso8601String());
     }
 
-    public function testTwoUtcDaysGiveTwoRows(): void
+    public function testTwoMidnightsGiveTwoRows(): void
     {
-        $this->snapshots->save($this->vehicle);
-        self::mockTime('2026-07-03 00:05:00 UTC');
+        $this->snapshots->save($this->vehicle, $this->midnight());
+        self::mockTime('2026-07-04 00:05:00 UTC');
 
-        self::assertSame(SnapshotOutcome::Saved, $this->snapshots->save($this->vehicle));
+        self::assertSame(SnapshotOutcome::Saved, $this->snapshots->save($this->vehicle, $this->midnight('2026-07-04')));
 
         self::assertCount(2, $this->rows());
     }
@@ -133,59 +135,59 @@ final class ProjectionSnapshotTest extends KernelTestCase
         $this->leases->save($noData, self::data(15_000));
         $noContract = $this->vehicle('5YJ3E7EB2NF000092', 5_000);
 
-        self::assertSame(SnapshotOutcome::SkippedNoData, $this->snapshots->save($noData));
-        self::assertSame(SnapshotOutcome::SkippedNoContract, $this->snapshots->save($noContract));
+        self::assertSame(SnapshotOutcome::SkippedNoData, $this->snapshots->save($noData, $this->midnight()));
+        self::assertSame(SnapshotOutcome::SkippedNoContract, $this->snapshots->save($noContract, $this->midnight()));
 
         self::assertSame([], $this->rows());
     }
 
     public function testAnEndedLeaseStillGetsASnapshotWithNoBudget(): void
     {
-        self::mockTime('2027-02-01 12:00:00 UTC');
+        self::mockTime('2027-02-01 00:05:00 UTC');
 
-        self::assertSame(SnapshotOutcome::Saved, $this->snapshots->save($this->vehicle));
+        self::assertSame(SnapshotOutcome::Saved, $this->snapshots->save($this->vehicle, $this->midnight('2027-02-01')));
 
         $row = $this->rows()[0];
         self::assertSame(0, $row->getDailyBudget()->metres());
         self::assertSame(RiskLevel::Over, $row->getRiskLevel());
-        self::assertSame('2027-02-01T00:00:00+00:00', $row->getDay()->toIso8601String());
+        self::assertSame('2027-02-01T00:00:00+00:00', $row->getLocalDay()->toIso8601String());
     }
 
     public function testAReturnedLeaseGetsNoSnapshotButKeepsTheOnesItHas(): void
     {
-        $this->snapshots->save($this->vehicle);
+        $this->snapshots->save($this->vehicle, $this->midnight());
+        // Returned on 2 July: the car counts as returned from the start of the 3rd, which is the midnight of the 3rd.
         $this->leases->markReturned($this->vehicle, new \DateTimeImmutable('2026-07-02'));
-        self::mockTime('2026-07-03 12:00:00 UTC');
 
-        self::assertSame(SnapshotOutcome::SkippedReturned, $this->snapshots->save($this->vehicle));
+        self::assertSame(SnapshotOutcome::SkippedReturned, $this->snapshots->save($this->vehicle, $this->midnight()));
 
         self::assertCount(1, $this->rows());
     }
 
     public function testReadingsThatContradictTheTermsAreSkippedNotFatal(): void
     {
-        // A reading after the clock: the projection refuses it.
-        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-09 12:00:00', 'UTC'), Distance::fromKilometres(11_000)));
+        // An earlier reading with a higher odometer than the later one: the projection refuses it.
+        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-02 11:00:00', 'UTC'), Distance::fromKilometres(11_000)));
         $this->entityManager->flush();
 
-        self::assertSame(SnapshotOutcome::SkippedNotAssessable, $this->snapshots->save($this->vehicle));
+        self::assertSame(SnapshotOutcome::SkippedNotAssessable, $this->snapshots->save($this->vehicle, $this->midnight()));
         self::assertSame([], $this->rows());
     }
 
     public function testASecondInsertOfTheDayDoesNotFailTheRun(): void
     {
-        $this->snapshots->save($this->vehicle);
+        $this->snapshots->save($this->vehicle, $this->midnight());
         $container = self::getContainer();
         // A repository that misses the existing row, as if another writer stored it after the lookup.
         $blind = new class($container->get('doctrine')) extends ProjectionSnapshotRepository {
-            public function findForDay(\Polaris\Lease\Entity\LeaseContract $contract, CarbonImmutable $day): ?ProjectionSnapshot
+            public function findForDay(\Polaris\Lease\Entity\LeaseContract $contract, CarbonImmutable $localDay): ?ProjectionSnapshot
             {
                 return null;
             }
         };
         $service = new ProjectionSnapshotService($this->leases, $blind, $this->entityManager, $container->get(LockFactory::class), $container->get(ClockInterface::class));
 
-        self::assertSame(SnapshotOutcome::Concurrent, $service->save($this->vehicle));
+        self::assertSame(SnapshotOutcome::Concurrent, $service->save($this->vehicle, $this->midnight()));
     }
 
     public function testASaveWhileAnotherRunsDoesNothing(): void
@@ -196,69 +198,78 @@ final class ProjectionSnapshotTest extends KernelTestCase
         self::assertTrue($lock->acquire());
 
         try {
-            self::assertSame(SnapshotOutcome::Busy, $this->snapshots->save($this->vehicle));
+            self::assertSame(SnapshotOutcome::Busy, $this->snapshots->save($this->vehicle, $this->midnight()));
         } finally {
             $lock->release();
         }
 
         self::assertSame([], $this->rows());
-        self::assertSame(SnapshotOutcome::Saved, $this->snapshots->save($this->vehicle), 'The lock was released.');
+        self::assertSame(SnapshotOutcome::Saved, $this->snapshots->save($this->vehicle, $this->midnight()), 'The lock was released.');
     }
 
     public function testTheHistoryIsOrderedByDayWithTypedFigures(): void
     {
-        foreach (['2026-07-04 23:50:00', '2026-07-02 23:50:00', '2026-07-03 23:50:00'] as $at) {
-            self::mockTime($at . ' UTC');
-            $this->snapshots->save($this->vehicle);
+        foreach (['2026-07-05', '2026-07-03', '2026-07-04'] as $day) {
+            self::mockTime($day . ' 00:05:00 UTC');
+            $this->snapshots->save($this->vehicle, $this->midnight($day));
         }
 
         $history = $this->history()->history($this->vehicle);
 
         self::assertSame(
-            ['2026-07-02', '2026-07-03', '2026-07-04'],
-            array_map(static fn ($point): string => $point->day->format('Y-m-d'), $history),
+            ['2026-07-03', '2026-07-04', '2026-07-05'],
+            array_map(static fn ($point): string => $point->localDay->format('Y-m-d'), $history),
         );
         self::assertSame(10_000_000, $history[0]->driven->metres());
         self::assertSame(7_500_000, $history[0]->allowedToDate->metres());
         self::assertSame(20_000_000, $history[0]->projectedAtEnd->metres());
         self::assertSame(RiskLevel::Over, $history[0]->riskLevel);
         self::assertSame('2026-07-02T12:00:00+00:00', $history[0]->asOf->toIso8601String());
-        self::assertSame('2026-07-02T23:50:00+00:00', $history[0]->computedAt->toIso8601String());
+        self::assertSame('2026-07-03T00:05:00+00:00', $history[0]->computedAt->toIso8601String());
+        self::assertSame('2026-07-03T00:00:00+00:00', $history[0]->cutoffAt?->toIso8601String());
+        self::assertGreaterThan(0.0, $history[0]->blendedPace?->metresPerDay());
     }
 
     public function testTheHistoryBoundsAreInclusiveAndAVehicleWithoutAContractHasNone(): void
     {
-        foreach (['2026-07-02', '2026-07-03', '2026-07-04'] as $day) {
-            self::mockTime($day . ' 23:50:00 UTC');
-            $this->snapshots->save($this->vehicle);
+        foreach (['2026-07-03', '2026-07-04', '2026-07-05'] as $day) {
+            self::mockTime($day . ' 00:05:00 UTC');
+            $this->snapshots->save($this->vehicle, $this->midnight($day));
         }
         $history = $this->history();
 
         $days = array_map(
-            static fn ($point): string => $point->day->format('Y-m-d'),
-            $history->history($this->vehicle, CarbonImmutable::parse('2026-07-03 15:00:00', 'UTC'), CarbonImmutable::parse('2026-07-04', 'UTC')),
+            static fn ($point): string => $point->localDay->format('Y-m-d'),
+            $history->history($this->vehicle, CarbonImmutable::parse('2026-07-04 15:00:00', 'UTC'), CarbonImmutable::parse('2026-07-05', 'UTC')),
         );
 
-        self::assertSame(['2026-07-03', '2026-07-04'], $days);
+        self::assertSame(['2026-07-04', '2026-07-05'], $days);
         self::assertSame([], $history->history($this->vehicle('5YJ3E7EB2NF000093', 1_000)));
     }
 
-    public function testTheDailyTickQueuesOneSaveForEveryLease(): void
+    public function testTheOwnersMidnightQueuesOneSaveForEveryLeaseOfThatOwnerOnly(): void
     {
-        $other = $this->vehicle('5YJ3E7EB2NF000094', 2_000);
-        $this->leases->save($other, self::data(15_000));
+        $sameOwner = $this->vehicle('5YJ3E7EB2NF000094', 2_000, $this->vehicle->getOwner());
+        $this->leases->save($sameOwner, self::data(15_000));
+        $stranger = $this->vehicle('5YJ3E7EB2NF000096', 2_000, self::createUser('other@example.test'));
+        $this->leases->save($stranger, self::data(15_000));
         $this->asyncTransport();
 
-        self::getContainer()->get(QueueProjectionSnapshotsHandler::class)(new QueueProjectionSnapshots());
+        self::getContainer()->get(QueueOwnerProjectionSnapshotsHandler::class)(new OwnerMidnightPassed(
+            $this->vehicle->getOwner()->getId()->toRfc4122(),
+            '2026-07-03',
+            CarbonImmutable::parse('2026-07-03 00:00:00', 'UTC')->getTimestamp(),
+        ));
 
-        $ids = array_map(
-            static fn (object $message): string => $message instanceof SaveProjectionSnapshot ? $message->reportingVehicleId() : '',
-            $this->sent(),
-        );
+        $sent = $this->sent();
+        $ids = array_map(static fn (object $message): string => $message instanceof SaveProjectionSnapshot ? $message->reportingVehicleId() : '', $sent);
         sort($ids);
-        $expected = [$this->vehicle->getId()->toRfc4122(), $other->getId()->toRfc4122()];
+        $expected = [$this->vehicle->getId()->toRfc4122(), $sameOwner->getId()->toRfc4122()];
         sort($expected);
         self::assertSame($expected, $ids);
+        self::assertContainsOnlyInstancesOf(SaveProjectionSnapshot::class, $sent);
+        self::assertSame('2026-07-03', $sent[0]->localDay);
+        self::assertSame(CarbonImmutable::parse('2026-07-03 00:00:00', 'UTC')->getTimestamp(), $sent[0]->midnightTimestamp);
     }
 
     public function testTheSaveHandlerSavesQueuesABusyOneOnceMoreAndIgnoresAnUnknownVehicle(): void
@@ -266,8 +277,8 @@ final class ProjectionSnapshotTest extends KernelTestCase
         $handler = self::getContainer()->get(SaveProjectionSnapshotHandler::class);
         $this->asyncTransport();
 
-        $handler(new SaveProjectionSnapshot($this->vehicle->getId()->toRfc4122()));
-        $handler(new SaveProjectionSnapshot('01JZZZZZZZZZZZZZZZZZZZZZZZ'));
+        $handler(new SaveProjectionSnapshot($this->vehicle->getId()->toRfc4122(), '2026-07-03', $this->midnight()->at->getTimestamp()));
+        $handler(new SaveProjectionSnapshot('01JZZZZZZZZZZZZZZZZZZZZZZZ', '2026-07-03', $this->midnight()->at->getTimestamp()));
         self::assertCount(1, $this->rows());
         self::assertSame([], $this->sent());
 
@@ -277,7 +288,7 @@ final class ProjectionSnapshotTest extends KernelTestCase
         self::assertTrue($lock->acquire());
 
         try {
-            $handler(new SaveProjectionSnapshot($this->vehicle->getId()->toRfc4122()));
+            $handler(new SaveProjectionSnapshot($this->vehicle->getId()->toRfc4122(), '2026-07-03', $this->midnight()->at->getTimestamp()));
             self::assertCount(1, $this->sent());
             $retry = $this->sent()[0];
             self::assertInstanceOf(SaveProjectionSnapshot::class, $retry);
@@ -288,15 +299,6 @@ final class ProjectionSnapshotTest extends KernelTestCase
         } finally {
             $lock->release();
         }
-    }
-
-    public function testTheDailyScheduleListsTheSnapshotTick(): void
-    {
-        $recurring = self::getContainer()->get(FetchScheduleProvider::class)->getSchedule()->getRecurringMessages();
-
-        $triggers = array_map(static fn (RecurringMessage $message): string => (string) $message->getTrigger(), $recurring);
-
-        self::assertCount(1, array_filter($triggers, static fn (string $trigger): bool => str_contains($trigger, FetchScheduleProvider::PROJECTION_SNAPSHOTS)));
     }
 
     public function testTheCommandSavesEveryLeaseAndSummarisesAndAnotherRunUpdates(): void
@@ -322,6 +324,113 @@ final class ProjectionSnapshotTest extends KernelTestCase
 
         self::assertSame(Command::FAILURE, $tester->execute(['--vin' => '5YJ3E7EB2NF999999']));
         self::assertStringContainsString('No vehicle with VIN 5YJ3E7EB2NF999999.', $tester->getDisplay());
+    }
+
+    public function testOnlyTheReadingsUpToTheMidnightCount(): void
+    {
+        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-02 23:59:59', 'UTC'), Distance::fromKilometres(10_050)));
+        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-03 00:00:01', 'UTC'), Distance::fromKilometres(10_100)));
+        $this->entityManager->flush();
+
+        // The job runs late, after both readings are stored: the figures are still those of the midnight.
+        self::mockTime('2026-07-03 09:00:00 UTC');
+        $this->snapshots->save($this->vehicle, $this->midnight());
+
+        $row = $this->rows()[0];
+        self::assertSame(10_050_000, $row->getDriven()->metres());
+        self::assertSame('2026-07-02T23:59:59+00:00', $row->getAsOf()->toIso8601String());
+        self::assertSame('2026-07-03T09:00:00+00:00', $row->getComputedAt()->toIso8601String());
+    }
+
+    public function testAReadingAtTheMidnightItselfCounts(): void
+    {
+        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-03 00:00:00', 'UTC'), Distance::fromKilometres(10_100)));
+        $this->entityManager->flush();
+
+        $this->snapshots->save($this->vehicle, $this->midnight());
+
+        self::assertSame(10_100_000, $this->rows()[0]->getDriven()->metres());
+    }
+
+    public function testAConfirmationRunningPastTheMidnightIsCutThere(): void
+    {
+        $reading = $this->entityManager->getRepository(OdometerReading::class)->findOneBy(['vehicle' => $this->vehicle]);
+        \assert($reading instanceof OdometerReading);
+        self::mockTime('2026-07-03 09:00:00 UTC');
+        $reading->confirm(CarbonImmutable::parse('2026-07-03 08:00:00', 'UTC'));
+        $this->entityManager->flush();
+
+        $this->snapshots->save($this->vehicle, $this->midnight());
+
+        $row = $this->rows()[0];
+        self::assertSame('2026-07-03T00:00:00+00:00', $row->getAsOf()->toIso8601String(), 'The car still had that odometer at the midnight, not after it.');
+        self::assertSame(10_000_000, $row->getDriven()->metres());
+    }
+
+    public function testTheSnapshotStoresThePaceTheProjectionUsed(): void
+    {
+        $this->snapshots->save($this->vehicle, $this->midnight());
+
+        $assessment = $this->leases->assessAt($this->vehicle, $this->midnight()->at);
+        self::assertInstanceOf(LeaseAssessment::class, $assessment);
+        $row = $this->rows()[0];
+        self::assertSame($assessment->projection->blendedPace->metresPerDay(), $row->getBlendedPace()?->metresPerDay());
+        self::assertSame($assessment->projection->overallPace->metresPerDay(), $row->getOverallPace()?->metresPerDay());
+        self::assertSame($assessment->projection->recentPace?->metresPerDay(), $row->getRecentPace()?->metresPerDay());
+        self::assertNotNull($row->getRecentPace(), 'More than 30 days into the lease.');
+    }
+
+    public function testThereIsNoRecentPaceBeforeThirtyDaysOfLease(): void
+    {
+        $young = $this->vehicle('5YJ3E7EB2NF000097', null);
+        $data = self::data(15_000);
+        $data->startDate = new \DateTimeImmutable('2026-06-20');
+        $this->leases->save($young, $data);
+        $this->entityManager->persist(OdometerReading::manual($young, CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'), Distance::fromKilometres(500)));
+        $this->entityManager->flush();
+
+        self::assertSame(SnapshotOutcome::Saved, $this->snapshots->save($young, $this->midnight()));
+
+        $contract = $this->leases->find($young);
+        $row = $this->entityManager->getRepository(ProjectionSnapshot::class)->findOneBy(['leaseContract' => $contract]);
+        self::assertInstanceOf(ProjectionSnapshot::class, $row);
+        self::assertNull($row->getRecentPace());
+        self::assertSame($row->getOverallPace()?->metresPerDay(), $row->getBlendedPace()?->metresPerDay());
+    }
+
+    public function testAReturnAfterTheMidnightDoesNotStopThatMidnightFromBeingSnapshotted(): void
+    {
+        // Returned on the 2nd (counts as returned from the start of the 3rd); the snapshot of the midnight that opens the 2nd is late.
+        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-01 12:00:00', 'UTC'), Distance::fromKilometres(5_000)));
+        $this->entityManager->flush();
+        $this->leases->markReturned($this->vehicle, new \DateTimeImmutable('2026-07-02'));
+
+        self::assertSame(SnapshotOutcome::Saved, $this->snapshots->save($this->vehicle, $this->midnight('2026-07-02')));
+
+        $row = $this->rows()[0];
+        self::assertSame('2026-07-02T00:00:00+00:00', $row->getLocalDay()->toIso8601String());
+        self::assertSame(5_000_000, $row->getDriven()->metres());
+    }
+
+    public function testTheLocalDayAndTheCutoffFollowTheOwnersTimeZone(): void
+    {
+        // Midnight of the 3rd in Zurich (UTC+2 in summer) is 22:00 UTC on the 2nd; the reading of 12:00 UTC on the 2nd is before it.
+        $midnight = $this->midnight('2026-07-03', 'Europe/Zurich');
+
+        $this->snapshots->save($this->vehicle, $midnight);
+
+        $row = $this->rows()[0];
+        self::assertSame('2026-07-03T00:00:00+00:00', $row->getLocalDay()->toIso8601String());
+        self::assertSame('2026-07-02T22:00:00+00:00', $row->getCutoffAt()?->toIso8601String());
+        self::assertSame(10_000_000, $row->getDriven()->metres());
+    }
+
+    /**
+     * The midnight that opens $day (UTC owners in these tests, unless a test says otherwise).
+     */
+    private function midnight(string $day = '2026-07-03', string $timeZone = 'UTC'): OwnerMidnight
+    {
+        return OwnerMidnight::opening(CarbonImmutable::parse($day, 'UTC'), $timeZone);
     }
 
     private function history(): ProjectionHistoryService
@@ -358,9 +467,9 @@ final class ProjectionSnapshotTest extends KernelTestCase
         return $transport;
     }
 
-    private function vehicle(string $vin, ?int $odometerKm): Vehicle
+    private function vehicle(string $vin, ?int $odometerKm, ?User $owner = null): Vehicle
     {
-        $vehicle = new Vehicle(new Vin($vin), 'Model 3', self::createUser());
+        $vehicle = new Vehicle(new Vin($vin), 'Model 3', $owner ?? self::createUser());
         $this->entityManager->persist($vehicle);
 
         if (null !== $odometerKm) {
@@ -382,7 +491,7 @@ final class ProjectionSnapshotTest extends KernelTestCase
         \assert($vehicle instanceof Vehicle);
         $this->vehicle = $vehicle;
 
-        return $this->entityManager->getRepository(ProjectionSnapshot::class)->findBy([], ['day' => 'ASC']);
+        return $this->entityManager->getRepository(ProjectionSnapshot::class)->findBy([], ['localDay' => 'ASC']);
     }
 
     private static function data(int $allowancePerYear): LeaseContractData

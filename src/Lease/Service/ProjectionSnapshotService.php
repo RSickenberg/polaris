@@ -16,6 +16,7 @@ use Polaris\Lease\Entity\ProjectionSnapshot;
 use Polaris\Lease\Repository\ProjectionSnapshotRepository;
 use Polaris\Lease\Service\Enum\SnapshotOutcome;
 use Polaris\Lease\Service\Exception\LeaseTermsRejected;
+use Polaris\Shared\Domain\OwnerMidnight;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\Lock\Exception\LockAcquiringException;
@@ -24,10 +25,11 @@ use Symfony\Component\Lock\Exception\LockReleasingException;
 use Symfony\Component\Lock\LockFactory;
 
 /**
- * Keeps what Polaris projects for a vehicle's lease today: one snapshot per lease and UTC day, the last run of the day
- * winning. The assessment is the one the dashboard shows ({@see LeaseTermsService::assess()}). Nothing is saved without
- * a contract, without data, or once the car is returned. The scheduler, the console command and any listener only call
- * this class.
+ * Keeps what Polaris projected for a vehicle's lease at the owner's midnight M ({@see OwnerMidnight}): one snapshot per
+ * lease and local day, the last run for the same midnight winning. Only the readings and confirmations up to M count
+ * ({@see LeaseTermsService::assessAt()}), so the figures are the same whenever the job runs; `computedAt` is the clock
+ * of the run. Nothing is saved without a contract, without data, or for a car returned at or before M. The scheduler,
+ * the console command and any listener only call this class.
  *
  * One save per lease runs at a time (a lock); the unique (lease, day) constraint backs it up.
  */
@@ -51,7 +53,7 @@ final readonly class ProjectionSnapshotService
      * @throws LockConflictedException
      * @throws LockReleasingException
      */
-    public function save(Vehicle $vehicle): SnapshotOutcome
+    public function save(Vehicle $vehicle, OwnerMidnight $midnight): SnapshotOutcome
     {
         $contract = $this->leases->find($vehicle);
 
@@ -66,7 +68,7 @@ final readonly class ProjectionSnapshotService
         }
 
         try {
-            return $this->saveLocked($vehicle);
+            return $this->saveLocked($vehicle, $midnight);
         } finally {
             $lock->release();
         }
@@ -75,10 +77,10 @@ final readonly class ProjectionSnapshotService
     /**
      * @throws ORMException
      */
-    private function saveLocked(Vehicle $vehicle): SnapshotOutcome
+    private function saveLocked(Vehicle $vehicle, OwnerMidnight $midnight): SnapshotOutcome
     {
         try {
-            $assessment = $this->leases->assess($vehicle);
+            $assessment = $this->leases->assessAt($vehicle, $midnight->at);
         } catch (LeaseTermsRejected) {
             return SnapshotOutcome::SkippedNotAssessable;
         }
@@ -95,34 +97,33 @@ final readonly class ProjectionSnapshotService
             return LeaseStatus::Returned === $assessment->status ? SnapshotOutcome::SkippedReturned : SnapshotOutcome::SkippedNotAssessable;
         }
 
-        return $this->store($vehicle, $assessment);
+        return $this->store($vehicle, $midnight, $assessment);
     }
 
     /**
      * @throws ORMException
      */
-    private function store(Vehicle $vehicle, LeaseAssessment $assessment): SnapshotOutcome
+    private function store(Vehicle $vehicle, OwnerMidnight $midnight, LeaseAssessment $assessment): SnapshotOutcome
     {
         $contract = $this->leases->find($vehicle);
         \assert(null !== $contract);
 
-        $day = SnapshotPolicy::dayOf($this->clock);
         $computedAt = CarbonImmutable::instance($this->clock->now())->utc();
         $projection = $assessment->projection;
-        $existing = $this->snapshots->findForDay($contract, $day);
+        $existing = $this->snapshots->findForDay($contract, $midnight->localDay);
 
         if (null !== $existing) {
-            $existing->replace($computedAt, $projection->asOf, $projection->driven, $projection->allowedToDate, $projection->projectedAtEnd, $assessment->budget->perDay, $assessment->riskLevel);
+            $existing->replace($midnight->at, $computedAt, $projection->asOf, $projection->driven, $projection->allowedToDate, $projection->projectedAtEnd, $assessment->budget->perDay, $assessment->riskLevel, $projection->overallPace, $projection->recentPace, $projection->blendedPace);
             $this->entityManager->flush();
 
             return SnapshotOutcome::Updated;
         }
 
         try {
-            $this->entityManager->persist(new ProjectionSnapshot($contract, $day, $computedAt, $projection->asOf, $projection->driven, $projection->allowedToDate, $projection->projectedAtEnd, $assessment->budget->perDay, $assessment->riskLevel));
+            $this->entityManager->persist(new ProjectionSnapshot($contract, $midnight->localDay, $midnight->at, $computedAt, $projection->asOf, $projection->driven, $projection->allowedToDate, $projection->projectedAtEnd, $assessment->budget->perDay, $assessment->riskLevel, $projection->overallPace, $projection->recentPace, $projection->blendedPace));
             $this->entityManager->flush();
         } catch (UniqueConstraintViolationException) {
-            // Another writer stored the day's row after the lookup above. The entity manager is closed after this.
+            // Another writer stored the row of the day after the lookup above. The entity manager is closed after this.
             return SnapshotOutcome::Concurrent;
         }
 

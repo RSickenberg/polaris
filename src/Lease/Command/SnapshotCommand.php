@@ -4,27 +4,32 @@ declare(strict_types=1);
 
 namespace Polaris\Lease\Command;
 
+use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Polaris\Lease\Repository\LeaseContractRepository;
 use Polaris\Lease\Service\Enum\SnapshotOutcome;
 use Polaris\Lease\Service\ProjectionSnapshotService;
+use Polaris\Shared\Domain\OwnerMidnight;
 use Polaris\Vehicle\Entity\Vehicle;
+use Psr\Clock\ClockInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * Saves today's projection snapshot of one lease or of all of them, as the daily schedule does. Running it again the
- * same day replaces the figures of the day, so it never adds a second row.
+ * Saves the projection snapshot of one lease or of all of them at the latest local midnight of their owner, as the
+ * daily schedule does for that midnight. Running it again replaces the figures of that midnight, so it never adds a
+ * second row.
  */
-#[AsCommand(name: 'polaris:lease:snapshot', description: 'Save today\'s projection snapshot of one lease (--vin) or of all leases')]
+#[AsCommand(name: 'polaris:lease:snapshot', description: 'Save the projection snapshot at the owner\'s latest midnight of one lease (--vin) or of all leases')]
 final readonly class SnapshotCommand
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
         private LeaseContractRepository $contracts,
         private ProjectionSnapshotService $snapshots,
+        private ClockInterface $clock,
     ) {
     }
 
@@ -51,8 +56,10 @@ final readonly class SnapshotCommand
         /** @var array<string, int> $counts */
         $counts = [];
 
+        $now = CarbonImmutable::instance($this->clock->now());
+
         foreach ($vehicles as $vehicle) {
-            $outcome = $this->snapshots->save($vehicle);
+            $outcome = $this->snapshots->save($vehicle, OwnerMidnight::latestAt($now, $vehicle->getOwner()->getTimeZone()));
             $counts[$outcome->value] = ($counts[$outcome->value] ?? 0) + 1;
         }
 

@@ -127,6 +127,39 @@ final readonly class LeaseTermsService
     }
 
     /**
+     * The projection as it stood at $cutoff (an owner's midnight): only readings and confirmations up to it count, a
+     * confirmation running past it is cut there, and the lease is judged (ended or not, time left) at that instant.
+     * A car returned at or before $cutoff is a returned lease, as in {@see self::assess()}; a return after it is
+     * ignored, as the car was still leased then. Null without a contract.
+     *
+     * @throws LeaseTermsRejected when the readings do not fit the terms
+     */
+    public function assessAt(Vehicle $vehicle, CarbonImmutable $cutoff): LeaseAssessment|NoData|null
+    {
+        $contract = $this->contracts->findForVehicle($vehicle);
+
+        if (null === $contract) {
+            return null;
+        }
+
+        $returnedAt = $contract->getReturnedAt();
+        $returned = null !== $returnedAt && $returnedAt->lessThanOrEqualTo($cutoff);
+
+        return $this->assessTerms(
+            new LeaseTerms(
+                $contract->getTerm(),
+                $contract->getAllowance(),
+                $contract->getStartOdometer(),
+                $contract->getExcessCostPerKm(),
+                $contract->getTolerance()
+            ),
+            $this->samples($vehicle, $returned ? $returnedAt : $cutoff),
+            $returned ? $returnedAt : null,
+            $cutoff
+        );
+    }
+
+    /**
      * Whether the user gave the car back. Cheap: no assessment is made.
      */
     public function isReturned(Vehicle $vehicle): bool
@@ -217,7 +250,7 @@ final readonly class LeaseTermsService
     /**
      * @param list<OdometerSample> $samples
      */
-    private function assessTerms(LeaseTerms $terms, array $samples, ?CarbonImmutable $returnedAt): LeaseAssessment|NoData
+    private function assessTerms(LeaseTerms $terms, array $samples, ?CarbonImmutable $returnedAt, ?CarbonImmutable $at = null): LeaseAssessment|NoData
     {
         try {
             return $this->assessor->assess(
@@ -227,7 +260,8 @@ final readonly class LeaseTermsService
                 $terms->excessCostPerKm,
                 $terms->tolerance,
                 $samples,
-                $returnedAt
+                $returnedAt,
+                $at
             );
         } catch (\InvalidArgumentException $e) {
             throw new LeaseTermsRejected(previous: $e);

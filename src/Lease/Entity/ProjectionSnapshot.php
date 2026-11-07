@@ -7,6 +7,7 @@ namespace Polaris\Lease\Entity;
 use Carbon\CarbonImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Polaris\Lease\Domain\Pace;
 use Polaris\Lease\Domain\RiskLevel;
 use Polaris\Lease\Repository\ProjectionSnapshotRepository;
 use Polaris\Shared\Doctrine\Type\CarbonDateImmutableType;
@@ -15,14 +16,20 @@ use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\Ulid;
 
 /**
- * What Polaris projected for a lease on a UTC day: the figures of the assessment, kept so that past projections can be
- * compared with what was driven. One row per lease and day; a run the same day replaces the figures (the last wins).
- * It is a record: editing the terms or adding a reading later never changes a row.
+ * What Polaris projected for a lease at the owner's midnight M: the figures of the assessment with only the readings up
+ * to M, kept so that past projections can be compared with what was driven. One row per lease and local day; a run for
+ * the same midnight replaces the figures (the last wins). It is a record: editing the terms or adding a reading later
+ * never changes a row.
  *
- * Columns hold scalars (metres); the getters return the Domain value objects.
+ * The local day is the calendar date M OPENS (M is its first instant): the row of 2026-11-07 is the projection at the
+ * very start of 7 November, so it describes the end of the 6th. "Today's snapshot" is the row with today's date.
+ * Rows saved before the daily jobs followed the owner's midnight (UTC day label, taken at 23:50 UTC) have no cutoff and
+ * no pace.
+ *
+ * Columns hold scalars (metres, metres per day); the getters return the Domain value objects.
  */
 #[ORM\Entity(repositoryClass: ProjectionSnapshotRepository::class)]
-#[ORM\UniqueConstraint(name: 'uniq_projection_snapshot_lease_day', columns: ['lease_contract_id', 'day'])]
+#[ORM\UniqueConstraint(name: 'uniq_projection_snapshot_lease_day', columns: ['lease_contract_id', 'local_day'])]
 class ProjectionSnapshot
 {
     #[ORM\Id]
@@ -33,9 +40,13 @@ class ProjectionSnapshot
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private LeaseContract $leaseContract;
 
-    /** The UTC day the snapshot belongs to (taken from the clock when it was computed), at midnight UTC. */
+    /** The local calendar date of the owner that the midnight {@see $cutoffAt} opens, as midnight UTC (a label). */
     #[ORM\Column(type: CarbonDateImmutableType::NAME)]
-    private CarbonImmutable $day;
+    private CarbonImmutable $localDay;
+
+    /** M, the owner's midnight the figures are taken at (only readings up to it count), UTC; null before the cutoff existed. */
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?CarbonImmutable $cutoffAt = null;
 
     /** When it was saved, UTC. */
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
@@ -60,12 +71,24 @@ class ProjectionSnapshot
     #[ORM\Column(length: 8, enumType: RiskLevel::class)]
     private RiskLevel $riskLevel;
 
+    /** Metres per day, full precision (a float, so it equals the {@see Pace} the projection used); null before the pace was kept. */
+    #[ORM\Column(nullable: true)]
+    private ?float $overallPaceMetresPerDay = null;
+
+    /** Null before 30 days of lease. */
+    #[ORM\Column(nullable: true)]
+    private ?float $recentPaceMetresPerDay = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $blendedPaceMetresPerDay = null;
+
     /**
-     * @throws \InvalidArgumentException when the day is not midnight UTC
+     * @throws \InvalidArgumentException when the local day is not midnight UTC
      */
     public function __construct(
         LeaseContract $leaseContract,
-        CarbonImmutable $day,
+        CarbonImmutable $localDay,
+        CarbonImmutable $cutoffAt,
         CarbonImmutable $computedAt,
         CarbonImmutable $asOf,
         Distance $driven,
@@ -73,21 +96,25 @@ class ProjectionSnapshot
         Distance $projectedAtEnd,
         Distance $dailyBudget,
         RiskLevel $riskLevel,
+        Pace $overallPace,
+        ?Pace $recentPace,
+        Pace $blendedPace,
     ) {
-        if (0 !== $day->getOffset() || '00:00:00' !== $day->format('H:i:s')) {
-            throw new \InvalidArgumentException(\sprintf('A snapshot day must be midnight UTC, got %s.', $day->toIso8601String()));
+        if (0 !== $localDay->getOffset() || '00:00:00' !== $localDay->format('H:i:s')) {
+            throw new \InvalidArgumentException(\sprintf('A snapshot day must be midnight UTC, got %s.', $localDay->toIso8601String()));
         }
 
         $this->id = new Ulid();
         $this->leaseContract = $leaseContract;
-        $this->day = $day;
-        $this->replace($computedAt, $asOf, $driven, $allowedToDate, $projectedAtEnd, $dailyBudget, $riskLevel);
+        $this->localDay = $localDay;
+        $this->replace($cutoffAt, $computedAt, $asOf, $driven, $allowedToDate, $projectedAtEnd, $dailyBudget, $riskLevel, $overallPace, $recentPace, $blendedPace);
     }
 
     /**
-     * Replaces the figures of the day: a later run of the same day wins.
+     * Replaces the figures of the day: a later run for the same midnight wins.
      */
     public function replace(
+        CarbonImmutable $cutoffAt,
         CarbonImmutable $computedAt,
         CarbonImmutable $asOf,
         Distance $driven,
@@ -95,7 +122,11 @@ class ProjectionSnapshot
         Distance $projectedAtEnd,
         Distance $dailyBudget,
         RiskLevel $riskLevel,
+        Pace $overallPace,
+        ?Pace $recentPace,
+        Pace $blendedPace,
     ): void {
+        $this->cutoffAt = $cutoffAt->utc();
         $this->computedAt = $computedAt->utc();
         $this->asOf = $asOf->utc();
         $this->drivenMetres = $driven->metres();
@@ -103,6 +134,9 @@ class ProjectionSnapshot
         $this->projectedAtEndMetres = $projectedAtEnd->metres();
         $this->dailyBudgetMetres = $dailyBudget->metres();
         $this->riskLevel = $riskLevel;
+        $this->overallPaceMetresPerDay = $overallPace->metresPerDay();
+        $this->recentPaceMetresPerDay = $recentPace?->metresPerDay();
+        $this->blendedPaceMetresPerDay = $blendedPace->metresPerDay();
     }
 
     public function getId(): Ulid
@@ -115,9 +149,16 @@ class ProjectionSnapshot
         return $this->leaseContract;
     }
 
-    public function getDay(): CarbonImmutable
+    /** The local calendar date the midnight {@see self::getCutoffAt()} opens, as midnight UTC. */
+    public function getLocalDay(): CarbonImmutable
     {
-        return $this->day;
+        return $this->localDay;
+    }
+
+    /** The owner's midnight the figures are taken at; null for a row saved before it was kept. */
+    public function getCutoffAt(): ?CarbonImmutable
+    {
+        return $this->cutoffAt;
     }
 
     public function getComputedAt(): CarbonImmutable
@@ -153,5 +194,20 @@ class ProjectionSnapshot
     public function getRiskLevel(): RiskLevel
     {
         return $this->riskLevel;
+    }
+
+    public function getOverallPace(): ?Pace
+    {
+        return null === $this->overallPaceMetresPerDay ? null : Pace::fromMetresPerDay($this->overallPaceMetresPerDay);
+    }
+
+    public function getRecentPace(): ?Pace
+    {
+        return null === $this->recentPaceMetresPerDay ? null : Pace::fromMetresPerDay($this->recentPaceMetresPerDay);
+    }
+
+    public function getBlendedPace(): ?Pace
+    {
+        return null === $this->blendedPaceMetresPerDay ? null : Pace::fromMetresPerDay($this->blendedPaceMetresPerDay);
     }
 }

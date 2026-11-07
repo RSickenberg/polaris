@@ -35,8 +35,10 @@ final readonly class LeaseAssessor
     /**
      * @param list<OdometerSample> $samples
      * @param CarbonImmutable|null $returnedAt the instant the car went back (inclusive); null while the lease runs
+     * @param CarbonImmutable|null $at         the instant the lease is judged at (has it ended, how long is left); null is the clock.
+     *                                         The caller passes only samples up to it
      */
-    public function assess(LeaseTerm $term, Allowance $allowance, Distance $startOdometer, Money $excessCostPerKm, Tolerance $tolerance, array $samples, ?CarbonImmutable $returnedAt = null): LeaseAssessment|NoData
+    public function assess(LeaseTerm $term, Allowance $allowance, Distance $startOdometer, Money $excessCostPerKm, Tolerance $tolerance, array $samples, ?CarbonImmutable $returnedAt = null, ?CarbonImmutable $at = null): LeaseAssessment|NoData
     {
         $returned = null !== $returnedAt;
 
@@ -59,7 +61,8 @@ final readonly class LeaseAssessor
 
         $allowed = $allowance->total()->metres();
         $projected = $projection->projectedAtEnd->metres();
-        $ended = $returned || $this->clock->now()->getTimestamp() >= $term->exclusiveEnd()->getTimestamp();
+        $now = null !== $at ? $at->getTimestamp() : $this->clock->now()->getTimestamp();
+        $ended = $returned || $now >= $term->exclusiveEnd()->getTimestamp();
         $secondsLeft = $ended ? 0 : $term->exclusiveEnd()->getTimestamp() - $projection->asOf->getTimestamp();
 
         $remaining = Distance::fromMetres(max(0, $allowed - $projection->driven->metres()));

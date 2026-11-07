@@ -24,10 +24,10 @@ final readonly class ProjectionHistoryService
     }
 
     /**
-     * @param CarbonImmutable|null $from first UTC day, inclusive
-     * @param CarbonImmutable|null $to   last UTC day, inclusive
+     * @param CarbonImmutable|null $from first local day, inclusive (its calendar date, whatever the zone of the value)
+     * @param CarbonImmutable|null $to   last local day, inclusive
      *
-     * @return list<ProjectionSnapshotPoint> oldest day first; empty without a contract
+     * @return list<ProjectionSnapshotPoint> oldest local day first; empty without a contract
      */
     public function history(Vehicle $vehicle, ?CarbonImmutable $from = null, ?CarbonImmutable $to = null): array
     {
@@ -39,7 +39,8 @@ final readonly class ProjectionHistoryService
 
         return array_map(
             static fn (ProjectionSnapshot $snapshot): ProjectionSnapshotPoint => new ProjectionSnapshotPoint(
-                $snapshot->getDay(),
+                $snapshot->getLocalDay(),
+                $snapshot->getCutoffAt(),
                 $snapshot->getComputedAt(),
                 $snapshot->getAsOf(),
                 $snapshot->getDriven(),
@@ -47,6 +48,9 @@ final readonly class ProjectionHistoryService
                 $snapshot->getProjectedAtEnd(),
                 $snapshot->getDailyBudget(),
                 $snapshot->getRiskLevel(),
+                $snapshot->getOverallPace(),
+                $snapshot->getRecentPace(),
+                $snapshot->getBlendedPace(),
             ),
             $this->snapshots->findHistory($contract, $from, $to),
         );

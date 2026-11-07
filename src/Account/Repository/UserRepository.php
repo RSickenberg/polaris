@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Account\Repository;
 
+use Carbon\CarbonImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
@@ -42,5 +43,39 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         $user->changePassword($newHashedPassword);
         $this->getEntityManager()->flush();
+    }
+
+    /**
+     * Claims the midnight jobs of a local day: moves `lastMidnightDay` to $day only if it is older (or never set), in one
+     * UPDATE, so of two writers exactly one gets true.
+     */
+    public function claimMidnight(User $user, CarbonImmutable $day): bool
+    {
+        return 1 === (int) $this->createQueryBuilder('u')
+            ->update()
+            ->set('u.lastMidnightDay', ':day')
+            ->where('u.id = :id')
+            ->andWhere('u.lastMidnightDay IS NULL OR u.lastMidnightDay < :day')
+            ->setParameter('day', $day, 'carbon_date_immutable')
+            ->setParameter('id', $user->getId(), 'ulid')
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
+     * Gives a claim back when its message could not be queued: only if nobody moved the day since.
+     */
+    public function releaseMidnight(User $user, CarbonImmutable $claimed, ?CarbonImmutable $previous): void
+    {
+        $this->createQueryBuilder('u')
+            ->update()
+            ->set('u.lastMidnightDay', ':previous')
+            ->where('u.id = :id')
+            ->andWhere('u.lastMidnightDay = :claimed')
+            ->setParameter('previous', $previous, 'carbon_date_immutable')
+            ->setParameter('claimed', $claimed, 'carbon_date_immutable')
+            ->setParameter('id', $user->getId(), 'ulid')
+            ->getQuery()
+            ->execute();
     }
 }
