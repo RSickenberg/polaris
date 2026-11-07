@@ -374,9 +374,10 @@ final class ProjectionSnapshotTest extends KernelTestCase
         $assessment = $this->leases->assessAt($this->vehicle, $this->midnight()->at);
         self::assertInstanceOf(LeaseAssessment::class, $assessment);
         $row = $this->rows()[0];
-        self::assertSame($assessment->projection->blendedPace->metresPerDay(), $row->getBlendedPace()?->metresPerDay());
-        self::assertSame($assessment->projection->overallPace->metresPerDay(), $row->getOverallPace()?->metresPerDay());
-        self::assertSame($assessment->projection->recentPace?->metresPerDay(), $row->getRecentPace()?->metresPerDay());
+        // The driver binds a float with 14 significant digits (PHP `precision`), so the stored pace is equal to within 1e-9 m/day.
+        self::assertEqualsWithDelta($assessment->projection->blendedPace->metresPerDay(), $row->getBlendedPace()?->metresPerDay(), 1e-6);
+        self::assertEqualsWithDelta($assessment->projection->overallPace->metresPerDay(), $row->getOverallPace()?->metresPerDay(), 1e-6);
+        self::assertEqualsWithDelta($assessment->projection->recentPace?->metresPerDay(), $row->getRecentPace()?->metresPerDay(), 1e-6);
         self::assertNotNull($row->getRecentPace(), 'More than 30 days into the lease.');
     }
 
@@ -385,6 +386,7 @@ final class ProjectionSnapshotTest extends KernelTestCase
         $young = $this->vehicle('5YJ3E7EB2NF000097', null);
         $data = self::data(15_000);
         $data->startDate = new \DateTimeImmutable('2026-06-20');
+        $data->endDate = new \DateTimeImmutable('2027-06-20');
         $this->leases->save($young, $data);
         $this->entityManager->persist(OdometerReading::manual($young, CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'), Distance::fromKilometres(500)));
         $this->entityManager->flush();
@@ -395,7 +397,7 @@ final class ProjectionSnapshotTest extends KernelTestCase
         $row = $this->entityManager->getRepository(ProjectionSnapshot::class)->findOneBy(['leaseContract' => $contract]);
         self::assertInstanceOf(ProjectionSnapshot::class, $row);
         self::assertNull($row->getRecentPace());
-        self::assertSame($row->getOverallPace()?->metresPerDay(), $row->getBlendedPace()?->metresPerDay());
+        self::assertEqualsWithDelta($row->getOverallPace()?->metresPerDay(), $row->getBlendedPace()?->metresPerDay(), 1e-6);
     }
 
     public function testAReturnAfterTheMidnightDoesNotStopThatMidnightFromBeingSnapshotted(): void

@@ -71,7 +71,7 @@ class ProjectionSnapshot
     #[ORM\Column(length: 8, enumType: RiskLevel::class)]
     private RiskLevel $riskLevel;
 
-    /** Metres per day, full precision (a float, so it equals the {@see Pace} the projection used); null before the pace was kept. */
+    /** Metres per day (a float; the driver keeps 14 significant digits, so it equals the {@see Pace} the projection used to within 1e-9); null before the pace was kept. */
     #[ORM\Column(nullable: true)]
     private ?float $overallPaceMetresPerDay = null;
 
