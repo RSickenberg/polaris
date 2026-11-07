@@ -33,6 +33,7 @@ framework:
             Polaris\Fetching\Message\FetchOdometerMessage: tesla
             Polaris\Alert\Message\CheckRiskLevel: async
             Polaris\Lease\Message\SaveProjectionSnapshot: async
+            Polaris\Account\Message\OwnerMidnightPassed: async
 
 when@test:
     framework:

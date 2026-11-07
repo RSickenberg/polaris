@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Polaris\Account\Domain\Initials;
 use Polaris\Account\Repository\UserRepository;
+use Polaris\Shared\Doctrine\Type\CarbonDateImmutableType;
 use Polaris\Shared\Domain\TimeZone;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -63,6 +64,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column(options: ['default' => false])]
     private bool $errorReportingDetails = false;
+
+    /**
+     * The latest local day (a date, as midnight UTC) whose midnight jobs were queued for this user. Moved only by
+     * {@see UserRepository::claimMidnight()}, which is atomic, so a job runs once per owner and midnight.
+     */
+    #[ORM\Column(type: CarbonDateImmutableType::NAME, nullable: true)]
+    private ?CarbonImmutable $lastMidnightDay = null;
 
     public function __construct(string $email, #[\SensitiveParameter] string $passwordHash, CarbonImmutable $createdAt)
     {
@@ -185,6 +193,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         $this->timeZone = $timeZone;
+    }
+
+    public function getLastMidnightDay(): ?CarbonImmutable
+    {
+        return $this->lastMidnightDay;
     }
 
     public function getCreatedAt(): CarbonImmutable
