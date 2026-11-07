@@ -9,6 +9,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Polaris\Lease\Entity\LeaseContract;
 use Polaris\Lease\Entity\ProjectionSnapshot;
+use Polaris\Shared\Doctrine\Type\CarbonDateImmutableType;
 
 /**
  * @extends ServiceEntityRepository<ProjectionSnapshot>
@@ -41,11 +42,11 @@ class ProjectionSnapshotRepository extends ServiceEntityRepository
             ->orderBy('s.localDay', \SortDirection::Ascending);
 
         if (null !== $from) {
-            $query->andWhere('s.localDay >= :from')->setParameter('from', self::calendarDate($from), 'carbon_date_immutable');
+            $query->andWhere('s.localDay >= :from')->setParameter('from', self::calendarDate($from), CarbonDateImmutableType::NAME);
         }
 
         if (null !== $to) {
-            $query->andWhere('s.localDay <= :to')->setParameter('to', self::calendarDate($to), 'carbon_date_immutable');
+            $query->andWhere('s.localDay <= :to')->setParameter('to', self::calendarDate($to), CarbonDateImmutableType::NAME);
         }
 
         /* @var list<ProjectionSnapshot> */
