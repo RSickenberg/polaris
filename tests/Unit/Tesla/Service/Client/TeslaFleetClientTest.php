@@ -285,16 +285,13 @@ final class TeslaFleetClientTest extends TestCase
 
             return array_shift($responses) ?? new MockResponse('{}', ['http_code' => 500]);
         });
-        $tokens = new class($connected) implements TokenProvider {
-            public function __construct(private bool $connected)
-            {
-            }
+        $tokens = $this->createStub(TokenProvider::class);
 
-            public function accessToken(TeslaApp $app, bool $force = false): string
-            {
-                return $this->connected ? TeslaFleetClientTest::ACCESS_TOKEN : throw TeslaNotConnected::never();
-            }
-        };
+        if ($connected) {
+            $tokens->method('accessToken')->willReturn(self::ACCESS_TOKEN);
+        } else {
+            $tokens->method('accessToken')->willThrowException(TeslaNotConnected::never());
+        }
 
         $repository = $this->createStub(EntityRepository::class);
         $repository->method('findOneBy')->willReturn($stored ? $this->token() : null);

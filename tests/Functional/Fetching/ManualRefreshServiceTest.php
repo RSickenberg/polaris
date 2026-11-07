@@ -137,12 +137,8 @@ final class ManualRefreshServiceTest extends KernelTestCase
 
     public function testWithoutALimitEveryRequestIsAccepted(): void
     {
-        $policy = new class implements ManualRefreshPolicy {
-            public function isLimited(Vehicle $vehicle): bool
-            {
-                return false;
-            }
-        };
+        $policy = $this->createStub(ManualRefreshPolicy::class);
+        $policy->method('isLimited')->willReturn(false);
         $service = $this->service($policy);
 
         self::assertNull($this->limit($policy)->consume($this->vehicle));

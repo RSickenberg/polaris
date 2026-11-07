@@ -19,7 +19,7 @@ final class LocaleListenerTest extends TestCase
 {
     public function testUserPreferenceWinsOverTheBrowser(): void
     {
-        $request = $this->handle(self::request('en'), self::preference('fr'));
+        $request = $this->handle(self::request('en'), $this->preference('fr'));
 
         self::assertSame('fr', $request->getLocale());
     }
@@ -39,7 +39,7 @@ final class LocaleListenerTest extends TestCase
         $request = self::request('fr');
         $request->attributes->set('_locale', 'en');
 
-        self::assertSame('en', $this->handle($request, self::preference('fr'))->getLocale());
+        self::assertSame('en', $this->handle($request, $this->preference('fr'))->getLocale());
     }
 
     public function testSubRequestsAreIgnored(): void
@@ -68,17 +68,11 @@ final class LocaleListenerTest extends TestCase
         return $request;
     }
 
-    private static function preference(string $locale): PreferredLocaleProvider
+    private function preference(string $locale): PreferredLocaleProvider
     {
-        return new readonly class($locale) implements PreferredLocaleProvider {
-            public function __construct(private string $locale)
-            {
-            }
+        $preference = $this->createStub(PreferredLocaleProvider::class);
+        $preference->method('preferredLocale')->willReturn($locale);
 
-            public function preferredLocale(): string
-            {
-                return $this->locale;
-            }
-        };
+        return $preference;
     }
 }
