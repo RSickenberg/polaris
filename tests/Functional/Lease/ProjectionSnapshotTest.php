@@ -179,12 +179,8 @@ final class ProjectionSnapshotTest extends KernelTestCase
         $this->snapshots->save($this->vehicle, $this->midnight());
         $container = self::getContainer();
         // A repository that misses the existing row, as if another writer stored it after the lookup.
-        $blind = new class($container->get('doctrine')) extends ProjectionSnapshotRepository {
-            public function findForDay(\Polaris\Lease\Entity\LeaseContract $contract, CarbonImmutable $localDay): ?ProjectionSnapshot
-            {
-                return null;
-            }
-        };
+        $blind = $this->createStub(ProjectionSnapshotRepository::class);
+        $blind->method('findForDay')->willReturn(null);
         $service = new ProjectionSnapshotService($this->leases, $blind, $this->entityManager, $container->get(LockFactory::class), $container->get(ClockInterface::class));
 
         self::assertSame(SnapshotOutcome::Concurrent, $service->save($this->vehicle, $this->midnight()));
