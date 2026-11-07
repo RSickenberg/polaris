@@ -44,7 +44,10 @@ class ProjectionSnapshot
     #[ORM\Column(type: CarbonDateImmutableType::NAME)]
     private CarbonImmutable $localDay;
 
-    /** M, the owner's midnight the figures are taken at (only readings up to it count), UTC; null before the cutoff existed. */
+    /**
+     * The instant M of the owner's midnight the figures are taken at: only readings up to it count. UTC.
+     * Null only on rows saved before the daily jobs followed the owner's midnight.
+     */
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?CarbonImmutable $cutoffAt = null;
 
@@ -71,14 +74,18 @@ class ProjectionSnapshot
     #[ORM\Column(length: 8, enumType: RiskLevel::class)]
     private RiskLevel $riskLevel;
 
-    /** Metres per day (a float; the driver keeps 14 significant digits, so it equals the {@see Pace} the projection used to within 1e-9); null before the pace was kept. */
+    /**
+     * The pace since the lease start, in metres per day. The driver keeps 14 significant digits, so it equals the
+     * {@see Pace} the projection used to within 1e-9. Null only on rows saved before the pace was stored.
+     */
     #[ORM\Column(nullable: true)]
     private ?float $overallPaceMetresPerDay = null;
 
-    /** Null before 30 days of lease. */
+    /** The pace over the 30 days before `asOf`. Null before 30 days of lease, and on rows saved before the pace was stored. */
     #[ORM\Column(nullable: true)]
     private ?float $recentPaceMetresPerDay = null;
 
+    /** The pace the projection used: the weighted mix of both, or the overall pace alone without a recent one. */
     #[ORM\Column(nullable: true)]
     private ?float $blendedPaceMetresPerDay = null;
 
