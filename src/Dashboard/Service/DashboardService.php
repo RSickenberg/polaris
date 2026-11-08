@@ -12,9 +12,12 @@ use Polaris\Dashboard\Domain\MileageSeriesBuilder;
 use Polaris\Dashboard\Service\Dto\ComparisonPanels;
 use Polaris\Dashboard\Service\Dto\DashboardView;
 use Polaris\Dashboard\Service\Enum\DashboardState;
+use Polaris\Dashboard\Service\Enum\RiskMessage;
 use Polaris\Lease\Domain\Budget;
+use Polaris\Lease\Domain\LeaseAssessment;
 use Polaris\Lease\Domain\LeaseStatus;
 use Polaris\Lease\Domain\NoData;
+use Polaris\Lease\Domain\RiskLevel;
 use Polaris\Lease\Service\ActualVersusPredictedService;
 use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Lease\Service\LeaseTermsService;
@@ -93,6 +96,7 @@ final readonly class DashboardService
             Budget::evenPace($allowance, $contract->getTerm()),
             $this->leaseReturns->returnedOn($vehicle),
             DashboardState::Active === $state ? $this->comparison($vehicle) : null,
+            self::riskMessage($state, $assessment),
         );
     }
 
@@ -101,5 +105,31 @@ final readonly class DashboardService
         $comparison = $this->predictions->compare($vehicle);
 
         return null === $comparison ? null : $this->comparisonMapper->map($comparison);
+    }
+
+    private static function riskMessage(DashboardState $state, LeaseAssessment $assessment): RiskMessage
+    {
+        $over = RiskLevel::Over === $assessment->riskLevel;
+
+        if (DashboardState::Returned === $state) {
+            return $over ? RiskMessage::ReturnedOver : RiskMessage::ReturnedWithin;
+        }
+
+        if (DashboardState::Ended === $state) {
+            return $over ? RiskMessage::EndedOver : RiskMessage::EndedWithin;
+        }
+
+        if (RiskLevel::Watch === $assessment->riskLevel) {
+            return RiskMessage::Watch;
+        }
+
+        if (!$over) {
+            return RiskMessage::Ok;
+        }
+
+        $cut = $assessment->weeklyCut;
+        $cutHelps = null !== $cut && !$cut->isNegative() && $cut->metres() > 0;
+
+        return $cutHelps ? RiskMessage::Over : RiskMessage::OverWithoutCut;
     }
 }

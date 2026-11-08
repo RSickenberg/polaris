@@ -105,7 +105,9 @@ final class ComparisonPanelTest extends KernelTestCase
             new ComparisonRow(ComparisonPeriod::LastMonth, $withHistory ? $this->figures(9_000, 9_000) : null),
         ];
 
-        $template = "{{ component('Dashboard:ComparisonPanel', {key: 'budget', title: 'Title', basis: 'Basis', rows: rows, help: help}) }}";
+        $template = "{{ component('Dashboard:ComparisonPanel', {"
+            . "key: 'budget', title: 'Title', basis: 'Basis', rows: rows, help: help"
+            . '}) }}';
         $html = self::getContainer()->get(Environment::class)
             ->createTemplate($template)
             ->render(['rows' => $rows, 'help' => $help]);

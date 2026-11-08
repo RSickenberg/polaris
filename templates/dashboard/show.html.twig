@@ -1,7 +1,8 @@
 {% extends 'base.html.twig' %}
 
 {% set id = vehicle.id.toBase32() %}
-{% set state = dashboard.state.value %}
+{% set state = dashboard.state %}
+{% set states = enum('Polaris\\Dashboard\\Service\\Enum\\DashboardState') %}
 {% set km = enum('Polaris\\Shared\\Domain\\DistanceUnit').Kilometre %}
 
 {# A refresh after a fetch morphs the page in place and keeps the scroll, see dashboard_refresh_controller.js. #}
@@ -15,25 +16,25 @@
 {% block main %}
     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.title'|trans(domain='dashboard') }} <span class="font-normal text-muted-foreground">| {{ vehicle.name }}</span></h1>
-        {% if state not in ['no_lease', 'no_reading', 'draft', 'ended', 'returned'] %}
+        {% if state.canRefresh %}
             <twig:Fetching:OdometerRefreshButton :vehicleId="vehicle.id.toRfc4122()" class="flex w-full shrink-0 flex-col sm:w-auto" />
         {% endif %}
     </div>
 
     <div class="mt-6 flex flex-col gap-6">
-        {% if 'no_lease' == state %}
+        {% if states.NoLease == state %}
             {{ include('dashboard/_empty.html.twig', {text: 'empty.no_lease.text'|trans(domain='dashboard'), cta: 'empty.no_lease.cta'|trans(domain='dashboard'), href: path('lease_settings', {id: id})}) }}
-        {% elseif 'no_reading' == state %}
+        {% elseif states.NoReading == state %}
             {{ include('dashboard/_empty.html.twig', {text: 'empty.no_reading.text'|trans(domain='dashboard'), cta: 'empty.no_reading.cta'|trans(domain='dashboard'), href: path('reading_history', {id: id})}) }}
-        {% elseif 'draft' == state %}
+        {% elseif states.Draft == state %}
             {{ include('dashboard/_empty.html.twig', {text: 'empty.draft.text'|trans(domain='dashboard'), cta: 'empty.draft.cta'|trans(domain='dashboard'), href: path('lease_settings', {id: id})}) }}
         {% else %}
             {% set assessment = dashboard.assessment %}
             {% set projection = assessment.projection %}
             {% set progress = dashboard.progress %}
             {% set unit = 'unit.km'|trans(domain='shared') %}
-            {% set returned = 'returned' == state %}
-            {% set ended = 'ended' == state or returned %}
+            {% set returned = states.Returned == state %}
+            {% set ended = state.hasEnded %}
             {% set excess = assessment.projectedExcess.metres / 1000 %}
             {% set cost = assessment.projectedExcessCost.toDecimal()|format_currency(assessment.projectedExcessCost.currency.value) %}
             {% set cut = assessment.weeklyCut %}
@@ -44,28 +45,17 @@
                 {{ include('dashboard/_empty.html.twig', {text: 'ended.text'|trans(domain='dashboard'), cta: 'ended.cta'|trans(domain='dashboard'), href: path('lease_settings', {id: id})}) }}
             {% endif %}
 
+            {# Every risk message takes the same parameters and uses the ones it needs. #}
+            {% set riskParameters = {
+                excess: excess,
+                cost: cost,
+                cut: cut is null ? 0 : cut.metres / 1000,
+                projected: projection.projectedAtEnd.metres / 1000,
+                allowance: dashboard.allowance.metres / 1000,
+                unit: unit,
+            } %}
             <twig:Dashboard:RiskAlert :level="assessment.riskLevel.value">
-                {%- if returned -%}
-                    {%- if 'over' == assessment.riskLevel.value -%}
-                        {{- 'risk.message.returned_over'|trans({excess: excess, unit: unit, cost: cost}, 'dashboard') -}}
-                    {%- else -%}
-                        {{- 'risk.message.returned_ok'|trans({allowance: dashboard.allowance.metres / 1000, unit: unit}, 'dashboard') -}}
-                    {%- endif -%}
-                {%- elseif ended -%}
-                    {%- if 'over' == assessment.riskLevel.value -%}
-                        {{- 'risk.message.ended_over'|trans({excess: excess, unit: unit, cost: cost}, 'dashboard') -}}
-                    {%- else -%}
-                        {{- 'risk.message.ended_ok'|trans({allowance: dashboard.allowance.metres / 1000, unit: unit}, 'dashboard') -}}
-                    {%- endif -%}
-                {%- elseif 'over' == assessment.riskLevel.value -%}
-                    {%- if cut is not null and not cut.isNegative and cut.metres > 0 -%}
-                        {{- 'risk.message.over'|trans({excess: excess, unit: unit, cost: cost, cut: cut.metres / 1000}, 'dashboard') -}}
-                    {%- else -%}
-                        {{- 'risk.message.over_no_cut'|trans({excess: excess, unit: unit, cost: cost}, 'dashboard') -}}
-                    {%- endif -%}
-                {%- else -%}
-                    {{- ('risk.message.' ~ assessment.riskLevel.value)|trans({projected: projection.projectedAtEnd.metres / 1000, allowance: dashboard.allowance.metres / 1000, unit: unit}, 'dashboard') -}}
-                {%- endif -%}
+                {{- dashboard.riskMessage.value|trans(riskParameters, 'dashboard') -}}
             </twig:Dashboard:RiskAlert>
 
             <twig:Card>

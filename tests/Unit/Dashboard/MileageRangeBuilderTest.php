@@ -53,7 +53,11 @@ final class MileageRangeBuilderTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        new MileageRange(MileageRangeKey::Week, CarbonImmutable::parse('2026-01-02', 'UTC'), CarbonImmutable::parse('2026-01-01', 'UTC'));
+        new MileageRange(
+            MileageRangeKey::Week,
+            CarbonImmutable::parse('2026-01-02', 'UTC'),
+            CarbonImmutable::parse('2026-01-01', 'UTC'),
+        );
     }
 
     /**

@@ -14,13 +14,13 @@
 
         <aside class="lg:sticky lg:top-4">
             <h2 class="mb-3 text-lg font-semibold">{{ 'page.settings.assessment'|trans(domain='lease') }}</h2>
-            {% if assessment is null %}
+            {% if not hasContract %}
                 <twig:Card>
                     <twig:Card:Content>
                         <p class="text-sm text-muted-foreground">{{ 'assessment.no_contract'|trans(domain='lease') }}</p>
                     </twig:Card:Content>
                 </twig:Card>
-            {% elseif assessment.riskLevel is not defined %}
+            {% elseif assessment is null %}
                 <twig:Card>
                     <twig:Card:Content>
                         <p class="text-sm text-muted-foreground">{{ 'assessment.no_data'|trans(domain='lease') }}</p>

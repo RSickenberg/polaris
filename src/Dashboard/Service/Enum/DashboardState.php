@@ -26,4 +26,20 @@ enum DashboardState: string
 
     /** The user gave the car back: final figures at the last reading up to the return, no forecast, no refresh. */
     case Returned = 'returned';
+
+    /**
+     * Whether the figures are final or as of the lease end: no forecast, no budget.
+     */
+    public function hasEnded(): bool
+    {
+        return self::Ended === $this || self::Returned === $this;
+    }
+
+    /**
+     * Whether the odometer can be refreshed from the dashboard: only while the lease runs.
+     */
+    public function canRefresh(): bool
+    {
+        return self::Active === $this;
+    }
 }

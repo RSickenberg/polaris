@@ -12,7 +12,7 @@ final readonly class MileageSeries
     /**
      * @param non-empty-list<MileagePoint> $actual     the lease start, then one point per reading, oldest first
      * @param non-empty-list<MileagePoint> $allowed    from the lease start to the lease end, linear
-     * @param list<MileagePoint>           $projection from the latest reading to the lease end, empty when there is none
+     * @param list<MileagePoint>           $projection from the latest reading to the lease end, empty without one
      */
     public function __construct(
         public array $actual,

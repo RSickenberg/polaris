@@ -9,6 +9,7 @@ use Polaris\Dashboard\Domain\AllowanceProgress;
 use Polaris\Dashboard\Domain\MileageRange;
 use Polaris\Dashboard\Domain\MileageSeries;
 use Polaris\Dashboard\Service\Enum\DashboardState;
+use Polaris\Dashboard\Service\Enum\RiskMessage;
 use Polaris\Lease\Domain\Budget;
 use Polaris\Lease\Domain\LeaseAssessment;
 use Polaris\Shared\Domain\Distance;
@@ -42,6 +43,8 @@ final readonly class DashboardView
         public ?CarbonImmutable $returnedOn = null,
         /** The last days against what the daily snapshots predicted; set for Active only. */
         public ?ComparisonPanels $comparison = null,
+        /** The sentence under the risk level; null without figures. */
+        public ?RiskMessage $riskMessage = null,
     ) {
     }
 }

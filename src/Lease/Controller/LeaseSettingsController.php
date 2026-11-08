@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polaris\Lease\Controller;
 
 use Doctrine\ORM\Exception\ORMException;
+use Polaris\Lease\Domain\LeaseAssessment;
 use Polaris\Lease\Form\LeaseContractType;
 use Polaris\Lease\Form\LeaseReturnType;
 use Polaris\Lease\Form\Model\LeaseContractData;
@@ -163,13 +164,20 @@ final class LeaseSettingsController extends AbstractController
         FormInterface $returnForm,
         bool $submitted,
     ): Response {
-        return $this->render('lease/settings.html.twig', [
-            'vehicle' => $vehicle,
-            'form' => $form,
-            'returnForm' => $returnForm,
-            'returnedOn' => $this->leaseReturns->returnedOn($vehicle),
-            'hasContract' => null !== $this->leaseTerms->find($vehicle),
-            'assessment' => $this->leaseTerms->assess($vehicle),
-        ], new Response(status: $submitted ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
+        $assessment = $this->leaseTerms->assess($vehicle);
+
+        return $this->render(
+            'lease/settings.html.twig',
+            [
+                'vehicle' => $vehicle,
+                'form' => $form,
+                'returnForm' => $returnForm,
+                'returnedOn' => $this->leaseReturns->returnedOn($vehicle),
+                'hasContract' => null !== $this->leaseTerms->find($vehicle),
+                // Null without a contract, or before the first reading of the lease.
+                'assessment' => $assessment instanceof LeaseAssessment ? $assessment : null,
+            ],
+            new Response(status: $submitted ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK),
+        );
     }
 }

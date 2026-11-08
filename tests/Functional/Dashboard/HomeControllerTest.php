@@ -87,19 +87,28 @@ final class HomeControllerTest extends WebTestCase
         $entityManager->persist($running);
         $entityManager->persist(new LeaseContract(
             $returned,
-            LeaseTerm::fromCalendarDates(CarbonImmutable::parse('2020-01-01', 'UTC'), CarbonImmutable::parse('2021-01-01', 'UTC'), EndDateConvention::Exclusive),
+            LeaseTerm::fromCalendarDates(
+                CarbonImmutable::parse('2020-01-01', 'UTC'),
+                CarbonImmutable::parse('2021-01-01', 'UTC'),
+                EndDateConvention::Exclusive,
+            ),
             Allowance::ofTotal(Distance::fromKilometres(15_000)),
             Distance::fromKilometres(0),
             Money::fromDecimal('0.12', Currency::CHF),
             Tolerance::fromPercent(0),
         ));
         $entityManager->flush();
-        self::getContainer()->get(LeaseReturnService::class)->markReturned($returned, new \DateTimeImmutable('2021-01-02'));
+        self::getContainer()
+            ->get(LeaseReturnService::class)
+            ->markReturned($returned, new \DateTimeImmutable('2021-01-02'));
 
         $this->client->request('GET', '/');
 
         self::assertResponseIsSuccessful();
-        self::assertSame(['Zebra', 'Aardvark'], $this->client->getCrawler()->filter('main h2')->each(static fn ($node): string => $node->text()));
+        self::assertSame(
+            ['Zebra', 'Aardvark'],
+            $this->client->getCrawler()->filter('main h2')->each(static fn ($node): string => $node->text()),
+        );
         self::assertSelectorCount(1, '[data-returned-badge]');
         self::assertSelectorTextContains('[data-returned=true] [data-returned-badge]', 'Returned');
         self::assertSelectorNotExists('[data-returned=false] [data-returned-badge]');

@@ -36,10 +36,8 @@ final class HomeController extends AbstractController
         }
 
         // The sort is stable: the vehicles keep their order by name inside each group.
-        usort(
-            $vehicles,
-            static fn (Vehicle $a, Vehicle $b): int => $returned[$a->getId()->toBase32()] <=> $returned[$b->getId()->toBase32()],
-        );
+        $isReturned = static fn (Vehicle $vehicle): bool => $returned[$vehicle->getId()->toBase32()];
+        usort($vehicles, static fn (Vehicle $a, Vehicle $b): int => $isReturned($a) <=> $isReturned($b));
 
         return $this->render('dashboard/home.html.twig', [
             'vehicles' => $vehicles,
