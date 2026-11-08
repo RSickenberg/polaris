@@ -31,7 +31,7 @@ return new PhpCsFixer\Config()
         'no_redundant_readonly_property' => true,
         'php_unit_data_provider_return_type' => true,
         'declare_strict_types' => ['strategy' => 'enforce'],
-        PhpCsFixerCustomFixers\Fixer\FunctionParameterSeparationFixer::name() => true,
+        PhpCsFixerCustomFixers\Fixer\FunctionParameterSeparationFixer::name() => false,
         PhpCsFixerCustomFixers\Fixer\MultilineCommentOpeningClosingAloneFixer::name() => true,
         PhpCsFixerCustomFixers\Fixer\NoImportFromGlobalNamespaceFixer::name() => true,
         PhpCsFixerCustomFixers\Fixer\NoUselessParenthesisFixer::name() => true,

@@ -35,7 +35,6 @@ final readonly class SnapshotCommand
 
     public function __invoke(
         SymfonyStyle $io,
-
         #[Option(description: 'The VIN of the vehicle. Omit it to snapshot every lease')]
         ?string $vin = null,
     ): int {

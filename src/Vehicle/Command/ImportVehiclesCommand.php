@@ -36,13 +36,10 @@ final readonly class ImportVehiclesCommand
      */
     public function __invoke(
         SymfonyStyle $io,
-
         #[Option(description: 'Only import this VIN (repeat the option for several). Default: every new vehicle')]
         array $vin = [],
-
         #[Option(description: 'List what would be imported, add nothing')]
         bool $dryRun = false,
-
         #[Option(description: 'The email of the owner. Optional when there is a single user')]
         ?string $email = null,
     ): int {

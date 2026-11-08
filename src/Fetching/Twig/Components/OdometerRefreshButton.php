@@ -94,18 +94,12 @@ final class OdometerRefreshButton
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-
         private readonly RefreshAttemptRepository $attempts,
-
         private readonly ManualRefreshService $refreshes,
-
         private readonly Security $security,
-
         private readonly ClockInterface $clock,
-
         #[Autowire(param: 'polaris.tesla.wake_cost')]
         private readonly float $wakeCost,
-
         #[Autowire(param: 'polaris.tesla.wake_currency')]
         private readonly string $wakeCurrency,
     ) {

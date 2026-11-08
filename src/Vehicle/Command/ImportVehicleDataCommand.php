@@ -37,10 +37,8 @@ final readonly class ImportVehicleDataCommand
      */
     public function __invoke(
         SymfonyStyle $io,
-
         #[Argument(description: 'The 17 characters VIN of the vehicle to import into')]
         string $vin,
-
         #[Argument(description: 'The export file (JSON)')]
         string $file,
     ): int {

@@ -39,12 +39,9 @@ final readonly class ExportVehicleDataCommand
      */
     public function __invoke(
         SymfonyStyle $io,
-
         OutputInterface $output,
-
         #[Argument(description: 'The 17 characters VIN of the vehicle')]
         string $vin,
-
         #[Option(description: 'The file to write. Omit it to print the JSON')]
         ?string $file = null,
     ): int {

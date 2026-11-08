@@ -18,7 +18,6 @@ final readonly class ResetToken
 
     private function __construct(
         private string $selector,
-
         #[\SensitiveParameter]
         private string $verifier,
     ) {

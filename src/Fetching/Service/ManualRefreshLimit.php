@@ -19,7 +19,6 @@ final readonly class ManualRefreshLimit
 {
     public function __construct(
         private ManualRefreshPolicy $policy,
-
         #[Autowire(service: 'limiter.manual_refresh')]
         private RateLimiterFactoryInterface $manualRefreshLimiter,
     ) {

@@ -39,15 +39,10 @@ final readonly class LockedTokenProvider implements TokenProvider
 
     public function __construct(
         private EntityManagerInterface $entityManager,
-
         private OAuthClient $client,
-
         private SecretEncrypter $encrypter,
-
         private LockFactory $lockFactory,
-
         private ClockInterface $clock,
-
         #[Autowire(env: 'int:POLARIS_TESLA_REFRESH_MARGIN')]
         private int $refreshMarginSeconds,
     ) {
