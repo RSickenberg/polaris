@@ -4,7 +4,7 @@
 
 {% block form_widget_simple %}
     {%- set type = type|default('text') -%}
-    {%- if type in ['hidden', 'file', 'range', 'color', 'checkbox', 'radio'] -%}
+    {%- if type in ['hidden', 'range', 'color', 'checkbox', 'radio'] -%}
         {{- parent() -}}
     {%- else -%}
         {%- set control = attr|merge({type: type, id: id, name: full_name, disabled: disabled, required: required}) -%}
@@ -74,8 +74,14 @@
 
 {% block button_widget %}
     {%- set label_content -%}{{- block('form_label_content') -}}{%- endset -%}
+    {# A button can carry a Lucide icon before its label: `attr: {'data-icon': 'lucide:upload'}`. #}
+    {%- set icon = attr['data-icon']|default(null) -%}
+    {%- set attr = attr|filter((value, key) => 'data-icon' != key) -%}
     {# A block on a phone, as wide as its label from the small breakpoint. #}
-    <twig:Button {{ ...attr|merge({type: type|default('button'), id: id, name: full_name, disabled: disabled, class: ('w-full sm:w-auto ' ~ attr.class|default(''))|trim}) }}>{{ label_content }}</twig:Button>
+    <twig:Button {{ ...attr|merge({type: type|default('button'), id: id, name: full_name, disabled: disabled, class: ('w-full sm:w-auto ' ~ attr.class|default(''))|trim}) }}>
+        {%- if icon is not null %}<twig:ux:icon :name="icon" aria-hidden="true" />{% endif -%}
+        {{ label_content }}
+    </twig:Button>
 {% endblock %}
 
 {% block form_label %}

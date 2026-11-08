@@ -25,7 +25,10 @@ final class VehicleDataImportType extends AbstractType
                 'label' => 'form.data.file.label',
                 'attr' => ['accept' => '.json,application/json'],
             ])
-            ->add('save', SubmitType::class, ['label' => 'form.data.submit']);
+            ->add('save', SubmitType::class, [
+                'label' => 'form.data.submit',
+                'attr' => ['data-icon' => 'lucide:upload'],
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

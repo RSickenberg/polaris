@@ -78,7 +78,9 @@ final class VehicleDataControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Data | Model 3');
         self::assertSelectorExists(\sprintf('[data-data=export] a[href="%s"]', $this->url($this->source) . '/export'));
-        self::assertSelectorExists('[data-data=import] input[type=file]');
+        self::assertSelectorExists('[data-data=import] input[type=file][data-slot=input]');
+        self::assertSelectorExists('[data-data=import] button[type=submit] svg');
+        self::assertSelectorExists('[data-data=export] a svg');
         self::assertSelectorExists(\sprintf('nav a[href="%s"]', $this->url($this->source)));
     }
 
