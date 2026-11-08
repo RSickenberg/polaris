@@ -120,7 +120,7 @@ final class TeslaConnectionControllerTest extends WebTestCase
         $this->client->request('GET', '/settings/tesla/consent');
 
         self::assertSelectorTextContains('h1', 'Connecter Tesla');
-        self::assertSelectorTextContains('#consent', 'compteur kilométrique');
+        self::assertSelectorTextContains('#consent', 'les données de ma voiture');
     }
 
     public function testTheConnectPageOffersTheThreeWaysAndShowsTheRedirectUri(): void

@@ -30,15 +30,17 @@ The result shows on the next reading.</target>
       <trans-unit id="outcome.asleep">
         <source>outcome.asleep</source>
         <target>The car is asleep, last reading kept.
-Wake it from the Tesla app, then refresh.</target>
+Wake it from the Tesla mobile app, then refresh.</target>
       </trans-unit>
       <trans-unit id="outcome.offline">
         <source>outcome.offline</source>
-        <target>The car is offline, last reading kept.</target>
+        <target>The car is offline, last reading kept.
+Try again once it has a connection.</target>
       </trans-unit>
       <trans-unit id="outcome.unavailable">
         <source>outcome.unavailable</source>
-        <target>The car fell asleep during the read, last reading kept.</target>
+        <target>The car stopped answering during the read, last reading kept.
+Try again in a few minutes.</target>
       </trans-unit>
       <trans-unit id="outcome.not_connected">
         <source>outcome.not_connected</source>
@@ -47,7 +49,7 @@ Connect in the Tesla settings.</target>
       </trans-unit>
       <trans-unit id="outcome.rejected">
         <source>outcome.rejected</source>
-        <target>The car reported a lower odometer than a saved reading, so it was ignored.</target>
+        <target>The car reported a lower odometer than a saved reading: it was not stored.</target>
       </trans-unit>
       <trans-unit id="outcome.busy">
         <source>outcome.busy</source>
@@ -56,8 +58,8 @@ Try again shortly.</target>
       </trans-unit>
       <trans-unit id="outcome.failed">
         <source>outcome.failed</source>
-        <target>Tesla returned an error.
-No automatic retry.</target>
+        <target>Tesla returned an error, last reading kept.
+Try again later.</target>
       </trans-unit>
       <trans-unit id="outcome.waking">
         <source>outcome.waking</source>
@@ -65,7 +67,7 @@ No automatic retry.</target>
       </trans-unit>
       <trans-unit id="outcome.wake_timeout">
         <source>outcome.wake_timeout</source>
-        <target>The car did not come online within 90 seconds, last reading kept.</target>
+        <target>The car did not come online within {seconds, number} seconds, last reading kept.</target>
       </trans-unit>
       <trans-unit id="outcome.wake_cap">
         <source>outcome.wake_cap</source>

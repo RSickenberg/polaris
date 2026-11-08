@@ -92,7 +92,7 @@
       </trans-unit>
       <trans-unit id="data.rejected.unknown_version">
         <source>data.rejected.unknown_version</source>
-        <target>This export has a format version that this Polaris does not know.</target>
+        <target>This export has a format version that this Polaris does not know. Update Polaris, then import it again.</target>
       </trans-unit>
       <trans-unit id="data.rejected.invalid">
         <source>data.rejected.invalid</source>

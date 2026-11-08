@@ -44,7 +44,7 @@ final class TeslaSettingsControllerTest extends WebTestCase
         $this->client->request('GET', '/settings/tesla');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Tesla app');
+        self::assertSelectorTextContains('h1', 'Tesla settings');
         self::assertSelectorTextContains('#no-key-pair', 'polaris:tesla:keygen');
         self::assertSelectorNotExists('form');
     }
@@ -179,7 +179,7 @@ final class TeslaSettingsControllerTest extends WebTestCase
 
         self::assertResponseRedirects('/settings/tesla');
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[data-slot=alert]', 'Tesla app settings saved.');
+        self::assertSelectorTextContains('[data-slot=alert]', 'Tesla settings saved.');
 
         $this->entityManager->clear();
         $app = $this->entityManager->getRepository(TeslaApp::class)->findOneBy([]);
@@ -226,7 +226,7 @@ final class TeslaSettingsControllerTest extends WebTestCase
         $this->createApp(self::signIn($this->client));
         $this->client->request('GET', '/settings/tesla');
         self::assertSelectorExists('input[type=checkbox][name="' . self::FORM . '[keepVehicleData]"][checked]');
-        self::assertSelectorTextContains('label[for=' . self::FORM . '_keepVehicleData]', 'Keep what the car reports');
+        self::assertSelectorTextContains('label[for=' . self::FORM . '_keepVehicleData]', 'Keep everything the car reports');
         self::assertSelectorTextContains('[id$=keepVehicleData_help]', 'never the location');
         self::assertSelectorExists(
             '[id$=keepVehicleData_help] br',
@@ -287,7 +287,7 @@ final class TeslaSettingsControllerTest extends WebTestCase
         $errors = $this->client->getCrawler()->filter('[data-slot=field-error]')->each(
             static fn ($node): string => trim($node->text())
         );
-        self::assertContains('Enter the domain only, e.g. polaris.example.com, without https:// or a path.', $errors);
+        self::assertContains('Enter the domain only, for example polaris.example.com, without https:// or a path.', $errors);
         self::assertContains('Enable at least one region.', $errors);
     }
 
@@ -330,7 +330,7 @@ final class TeslaSettingsControllerTest extends WebTestCase
 
         $this->client->request('GET', '/settings/tesla');
 
-        self::assertSelectorTextContains('h1', 'Application Tesla');
+        self::assertSelectorTextContains('h1', 'Réglages Tesla');
         self::assertSelectorTextContains('label[for=' . self::FORM . '_clientSecret]', 'Secret client');
         self::assertSelectorTextContains('label[for=' . self::FORM . '_regions_2]', 'Chine');
     }
@@ -352,7 +352,7 @@ final class TeslaSettingsControllerTest extends WebTestCase
     private function submit(array $values): void
     {
         $crawler = $this->client->request('GET', '/settings/tesla');
-        $form = $crawler->selectButton('Save the Tesla app')->form();
+        $form = $crawler->selectButton('Save the credentials')->form();
         $posted = $form->getPhpValues();
         $posted[self::FORM] = array_merge(
             (array) $posted[self::FORM],

@@ -372,8 +372,8 @@ final class DashboardControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Tableau de bord | Model 3');
-        self::assertSelectorTextContains('[data-slot=alert-title]', 'Au-dessus du kilométrage');
-        self::assertSelectorExists('[role=progressbar][aria-label="Part du kilométrage parcourue"]');
+        self::assertSelectorTextContains('[data-slot=alert-title]', 'Au-delà du kilométrage autorisé');
+        self::assertSelectorExists('[role=progressbar][aria-label="Part du kilométrage autorisé parcourue"]');
         $text = $this->text();
         self::assertStringContainsString('Parcouru 10', $text);
         self::assertStringContainsString('km / jour', $text);

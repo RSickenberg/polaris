@@ -100,7 +100,7 @@ final class LeaseReturnTest extends WebTestCase
         self::assertResponseRedirects($this->url());
         $this->client->followRedirect();
         self::assertSelectorTextContains('[data-slot=alert]', 'Car marked as returned.');
-        self::assertSelectorTextContains('#lease-return [data-returned]', 'Returned to the bank on June 30, 2026');
+        self::assertSelectorTextContains('#lease-return [data-returned]', 'Returned on June 30, 2026');
 
         // Zurich is UTC+2 on 2026-06-30: the end of that day is 22:00 UTC.
         self::assertSame('2026-06-30T22:00:00+00:00', $this->contract()->getReturnedAt()?->toIso8601String());
@@ -151,7 +151,7 @@ final class LeaseReturnTest extends WebTestCase
         self::assertResponseStatusCodeSame(422);
         self::assertSelectorTextContains(
             '#lease-return',
-            'Le véhicule ne peut pas être rendu avant le début du leasing.',
+            'La voiture ne peut pas être rendue avant le début du leasing.',
         );
     }
 

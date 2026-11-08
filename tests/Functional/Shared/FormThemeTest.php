@@ -176,11 +176,11 @@ final class FormThemeTest extends WebTestCase
 
         $french = $this->get('lease', 'fr');
         self::assertSame(
-            'Comptée par an ou sur toute la durée, selon le choix ci-dessus.',
+            'Compté par an ou sur toute la durée, selon le choix ci-dessus.',
             trim($french->filter('#lease_contract_allowance_help')->text()),
         );
         self::assertSame(
-            'Prix facturé pour chaque kilomètre au-delà du forfait.',
+            'Prix facturé pour chaque kilomètre au-delà du kilométrage autorisé.',
             trim($french->filter('#lease_contract_excessCostPerKm_help')->text()),
         );
         self::assertCount(5, $french->filter('form [data-slot=field-description]'));

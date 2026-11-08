@@ -12,6 +12,7 @@ use Polaris\Reading\Form\Model\OdometerReadingData;
 use Polaris\Reading\Form\OdometerReadingType;
 use Polaris\Reading\Service\Exception\ReadingRejected;
 use Polaris\Reading\Service\OdometerReadingService;
+use Polaris\Reading\Service\ReadingRejectionMessage;
 use Polaris\Shared\Service\Enum\ToastVariant;
 use Polaris\Vehicle\Entity\Vehicle;
 use Polaris\Vehicle\Service\Enum\VehiclePermission;
@@ -33,6 +34,7 @@ final class OdometerReadingController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly ClockInterface $clock,
         private readonly LeaseReturnService $leaseReturns,
+        private readonly ReadingRejectionMessage $rejectionMessage,
     ) {
     }
 
@@ -83,7 +85,7 @@ final class OdometerReadingController extends AbstractController
             } catch (ReadingRejected $rejected) {
                 $field = $rejected->reason->concernsTheDate() ? 'readAt' : 'odometer';
                 $form->get($field)->addError(
-                    new FormError($this->translator->trans($rejected->reason->value, $rejected->parameters, 'reading'))
+                    new FormError($this->rejectionMessage->of($rejected, $user->getTimeZone())),
                 );
             }
         }

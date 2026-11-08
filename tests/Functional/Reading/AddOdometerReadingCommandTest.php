@@ -87,7 +87,7 @@ final class AddOdometerReadingCommandTest extends KernelTestCase
 
         self::assertSame(Command::FAILURE, $status);
         self::assertStringContainsString(
-            'Lower than the previous reading (10,000 km on Oct 1, 2026 at 8:00 AM UTC).',
+            'Lower than the previous reading (10,000 km on Oct 1, 2026, 8:00 AM).',
             preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', $tester->getDisplay())) ?? '',
         );
         self::assertCount(1, self::getContainer()->get(OdometerReadingRepository::class)->findAll());

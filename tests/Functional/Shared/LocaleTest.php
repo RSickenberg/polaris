@@ -99,7 +99,7 @@ final class LocaleTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(422);
         self::assertStringContainsString(
-            'Inférieur au relevé précédent (12 345 km le 1 oct. 2026 à 08:00 UTC).',
+            'Inférieur au relevé précédent (12 345 km le 1 oct. 2026, 08:00).',
             self::text($this->client->getCrawler()->filter('body')->text()),
         );
     }

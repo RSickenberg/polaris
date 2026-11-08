@@ -8,7 +8,7 @@
       </trans-unit>
       <trans-unit id="progress.label">
         <source>progress.label</source>
-        <target>Part du kilométrage parcourue</target>
+        <target>Part du kilométrage autorisé parcourue</target>
       </trans-unit>
       <trans-unit id="progress.tick">
         <source>progress.tick</source>
@@ -32,7 +32,7 @@
       </trans-unit>
       <trans-unit id="kpi.last_reading.hint">
         <source>kpi.last_reading.hint</source>
-        <target>Fuseau horaire : %timezone%</target>
+        <target>Fuseau horaire : %timezone%</target>
       </trans-unit>
       <trans-unit id="budget.title">
         <source>budget.title</source>
@@ -40,7 +40,7 @@
       </trans-unit>
       <trans-unit id="budget.none">
         <source>budget.none</source>
-        <target>Kilométrage épuisé.</target>
+        <target>Kilométrage autorisé épuisé.</target>
       </trans-unit>
       <trans-unit id="empty.no_lease.text">
         <source>empty.no_lease.text</source>
@@ -100,7 +100,7 @@
       </trans-unit>
       <trans-unit id="chart.label">
         <source>chart.label</source>
-        <target>Distance parcourue depuis le début du leasing, comparée au forfait et à la projection jusqu’à la fin</target>
+        <target>Distance parcourue depuis le début du leasing, comparée au kilométrage autorisé et à la projection jusqu’à la fin</target>
       </trans-unit>
       <trans-unit id="chart.series.actual">
         <source>chart.series.actual</source>
@@ -184,7 +184,7 @@
       </trans-unit>
       <trans-unit id="home.returned">
         <source>home.returned</source>
-        <target>Rendu</target>
+        <target>Rendue</target>
       </trans-unit>
       <trans-unit id="compare.budget.title">
         <source>compare.budget.title</source>
@@ -240,7 +240,7 @@
       </trans-unit>
       <trans-unit id="help.open">
         <source>help.open</source>
-        <target>À propos de « %title% »</target>
+        <target>À propos de « %title% »</target>
       </trans-unit>
       <trans-unit id="help.current_pace">
         <source>help.current_pace</source>
@@ -256,15 +256,15 @@
       </trans-unit>
       <trans-unit id="help.compare_budget">
         <source>help.compare_budget</source>
-        <target>Vous voyez ici ce que vous avez parcouru sur chaque période, à côté de ce que votre budget quotidien permettait. Le budget est celui que Polaris avait au début de la période, pas celui d’aujourd’hui.\n\nSous chaque période, vous lisez : parcourus / prévus. À droite, l’écart, avec un pourcentage de ce qui était prévu. Un plus veut dire que vous avez roulé plus que prévu.\n\n« Aujourd’hui » est compté à partir de minuit, heure locale, jusqu’au dernier relevé du compteur. La distance prévue ne couvre donc que la partie de la journée écoulée.\nC’est pourquoi elle peut sembler plus petite.</target>
+        <target>Vous voyez ici ce que vous avez parcouru sur chaque période, à côté de ce que votre budget quotidien permettait. Le budget est celui que Polaris avait au début de la période, pas celui d’aujourd’hui.\n\nSous chaque période, vous lisez : parcourus / prévus. À droite, l’écart, avec un pourcentage de ce qui était prévu. Un plus veut dire que vous avez roulé plus que prévu.\n\n« Aujourd’hui » est compté à partir de minuit, heure locale, jusqu’au dernier relevé du compteur. La distance prévue ne couvre donc que la partie de la journée écoulée.\nC’est pourquoi elle peut sembler plus petite.</target>
       </trans-unit>
       <trans-unit id="help.compare_pace">
         <source>help.compare_pace</source>
-        <target>Vous voyez ici ce que vous avez parcouru sur chaque période, à côté de ce que votre rythme habituel annonçait. Le rythme est celui que Polaris avait au début de la période.\n\nSous chaque période, vous lisez : parcourus / prévus. À droite, l’écart, avec un pourcentage de ce qui était prévu. Un plus veut dire que vous avez roulé plus que prévu.\n\nPolaris garde un instantané par jour. Une période affiche « Historique insuffisant » tant qu’il n’y en a pas pour le jour où elle commence.</target>
+        <target>Vous voyez ici ce que vous avez parcouru sur chaque période, à côté de ce que votre rythme habituel annonçait. Le rythme est celui que Polaris avait au début de la période.\n\nSous chaque période, vous lisez : parcourus / prévus. À droite, l’écart, avec un pourcentage de ce qui était prévu. Un plus veut dire que vous avez roulé plus que prévu.\n\nPolaris garde un instantané par jour. Une période affiche « Historique insuffisant » tant qu’il n’y en a pas pour le jour où elle commence.</target>
       </trans-unit>
       <trans-unit id="help.compare_projected_end">
         <source>help.compare_projected_end</source>
-        <target>Vous voyez ici où votre leasing se dirige maintenant, à côté de où il se dirigeait au début de chaque période.\n\nSous chaque période, vous lisez : maintenant / prévu, tous deux à la fin du leasing. À droite, l’écart. Un plus veut dire que vous êtes maintenant parti pour plus de kilomètres que ce qui était prévu à l’époque.\n\nPolaris garde un instantané par jour. Une période affiche « Historique insuffisant » tant qu’il n’y en a pas pour le jour où elle commence.</target>
+        <target>Vous voyez ici où votre leasing se dirige maintenant, à côté de où il se dirigeait au début de chaque période.\n\nSous chaque période, vous lisez : maintenant / prévu, tous deux à la fin du leasing. À droite, l’écart. Un plus veut dire que vous êtes maintenant parti pour plus de kilomètres que ce qui était prévu à l’époque.\n\nPolaris garde un instantané par jour. Une période affiche « Historique insuffisant » tant qu’il n’y en a pas pour le jour où elle commence.</target>
       </trans-unit>
     </body>
   </file>

@@ -6,10 +6,14 @@
 {% set wakeCost = this.wakeCost|format_currency(this.wakeCurrency) %}
 {% set toastMessage = null %}
 {% if toast is not null %}
-    {% set toastParameters = toast.at is null ? {} : {
-        time: toast.at|format_time('short', timezone=this.timeZone),
-        zone: toast.at|format_datetime(pattern: 'zzz', timezone: this.timeZone),
-    } %}
+    {# Every message takes the parameters it needs among these. #}
+    {% set toastParameters = {seconds: constant('Polaris\\Fetching\\Domain\\WakeWindow::TIMEOUT_SECONDS')} %}
+    {% if toast.at is not null %}
+        {% set toastParameters = toastParameters|merge({
+            time: toast.at|format_time('short', timezone=this.timeZone),
+            zone: toast.at|format_datetime(pattern: 'zzz', timezone: this.timeZone),
+        }) %}
+    {% endif %}
     {% set toastMessage = toast.key|trans(toastParameters, 'fetching') %}
 {% endif %}
 <div

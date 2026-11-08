@@ -79,6 +79,22 @@ final class OdometerReadingControllerTest extends WebTestCase
         self::assertStringContainsString('Manual', $rows[1]);
     }
 
+    public function testTheTimeOfTheNeighbouringReadingIsInTheTimeZoneOfTheUser(): void
+    {
+        $user = self::createUser();
+        $user->changeTimeZone('Europe/Zurich');
+        self::getContainer()->get(EntityManagerInterface::class)->flush();
+
+        // The form takes the time in the user's zone: 10:00 in Zurich is 08:00 UTC.
+        $this->submit('2026-10-01T10:00', '10000', 'km');
+        $this->submit('2026-10-02T10:00', '9000', 'km');
+
+        self::assertStringContainsString(
+            'Lower than the previous reading (10,000 km on Oct 1, 2026, 10:00 AM).',
+            self::oneLine($this->client->getCrawler()->filter('body')->text()),
+        );
+    }
+
     public function testMilesAreConvertedForTheHistory(): void
     {
         $this->submit('2026-10-01T08:00', '1000', 'mi');
@@ -94,7 +110,7 @@ final class OdometerReadingControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(422);
         self::assertStringContainsString(
-            'Lower than the previous reading (10,000 km on Oct 1, 2026 at 8:00 AM UTC).',
+            'Lower than the previous reading (10,000 km on Oct 1, 2026, 8:00 AM).',
             self::oneLine($this->client->getCrawler()->filter('body')->text()),
         );
         self::assertCount(1, $this->client->getCrawler()->filter('tbody tr'));
