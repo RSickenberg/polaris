@@ -73,7 +73,13 @@ final readonly class OdometerReadingService
             $neighbour = ReadingRejection::LowerThanPrevious === $rejection ? $previous : $next;
             \assert(null !== $neighbour);
 
-            throw new ReadingRejected($rejection, ['limit' => $neighbour->getOdometer()->in($data->distanceUnit), 'unit' => $data->distanceUnit->value, 'at' => $neighbour->getReadAt()->getTimestamp()]);
+            $parameters = [
+                'limit' => $neighbour->getOdometer()->in($data->distanceUnit),
+                'unit' => $data->distanceUnit->value,
+                'at' => $neighbour->getReadAt()->getTimestamp(),
+            ];
+
+            throw new ReadingRejected($rejection, $parameters);
         }
 
         try {
@@ -120,9 +126,19 @@ final readonly class OdometerReadingService
                 continue;
             }
 
-            $reading = OdometerReading::restore($vehicle, $import->readAt, $import->odometer, $import->source, $import->odometerRaw, $import->odometerRawUnit, $import->confirmedAt?->min($now));
+            $reading = OdometerReading::restore(
+                vehicle: $vehicle,
+                readAt: $import->readAt,
+                odometer: $import->odometer,
+                source: $import->source,
+                odometerRaw: $import->odometerRaw,
+                odometerRawUnit: $import->odometerRawUnit,
+                confirmedAt: $import->confirmedAt?->min($now),
+            );
+            $before = $this->readings->findBefore($vehicle, $import->readAt);
+            $after = $this->readings->findAfter($vehicle, $import->readAt);
 
-            if (null !== $this->order->check($reading->toSample(), $this->readings->findBefore($vehicle, $import->readAt)?->toSample(), $this->readings->findAfter($vehicle, $import->readAt)?->toSample())) {
+            if (null !== $this->order->check($reading->toSample(), $before?->toSample(), $after?->toSample())) {
                 ++$rejected;
 
                 continue;

@@ -110,7 +110,21 @@ final readonly class ProjectionSnapshotService
                 continue;
             }
 
-            $this->entityManager->persist(new ProjectionSnapshot($contract, $point->localDay, $point->cutoffAt, $point->computedAt, $point->asOf, $point->driven, $point->allowedToDate, $point->projectedAtEnd, $point->dailyBudget, $point->riskLevel, $point->overallPace, $point->recentPace, $point->blendedPace));
+            $this->entityManager->persist(new ProjectionSnapshot(
+                leaseContract: $contract,
+                localDay: $point->localDay,
+                cutoffAt: $point->cutoffAt,
+                computedAt: $point->computedAt,
+                asOf: $point->asOf,
+                driven: $point->driven,
+                allowedToDate: $point->allowedToDate,
+                projectedAtEnd: $point->projectedAtEnd,
+                dailyBudget: $point->dailyBudget,
+                riskLevel: $point->riskLevel,
+                overallPace: $point->overallPace,
+                recentPace: $point->recentPace,
+                blendedPace: $point->blendedPace,
+            ));
             ++$added;
         }
 
@@ -160,14 +174,40 @@ final readonly class ProjectionSnapshotService
         $existing = $this->snapshots->findForDay($contract, $midnight->localDay);
 
         if (null !== $existing) {
-            $existing->replace($midnight->at, $computedAt, $projection->asOf, $projection->driven, $projection->allowedToDate, $projection->projectedAtEnd, $assessment->budget->perDay, $assessment->riskLevel, $projection->overallPace, $projection->recentPace, $projection->blendedPace);
+            $existing->replace(
+                cutoffAt: $midnight->at,
+                computedAt: $computedAt,
+                asOf: $projection->asOf,
+                driven: $projection->driven,
+                allowedToDate: $projection->allowedToDate,
+                projectedAtEnd: $projection->projectedAtEnd,
+                dailyBudget: $assessment->budget->perDay,
+                riskLevel: $assessment->riskLevel,
+                overallPace: $projection->overallPace,
+                recentPace: $projection->recentPace,
+                blendedPace: $projection->blendedPace,
+            );
             $this->entityManager->flush();
 
             return SnapshotOutcome::Updated;
         }
 
         try {
-            $this->entityManager->persist(new ProjectionSnapshot($contract, $midnight->localDay, $midnight->at, $computedAt, $projection->asOf, $projection->driven, $projection->allowedToDate, $projection->projectedAtEnd, $assessment->budget->perDay, $assessment->riskLevel, $projection->overallPace, $projection->recentPace, $projection->blendedPace));
+            $this->entityManager->persist(new ProjectionSnapshot(
+                leaseContract: $contract,
+                localDay: $midnight->localDay,
+                cutoffAt: $midnight->at,
+                computedAt: $computedAt,
+                asOf: $projection->asOf,
+                driven: $projection->driven,
+                allowedToDate: $projection->allowedToDate,
+                projectedAtEnd: $projection->projectedAtEnd,
+                dailyBudget: $assessment->budget->perDay,
+                riskLevel: $assessment->riskLevel,
+                overallPace: $projection->overallPace,
+                recentPace: $projection->recentPace,
+                blendedPace: $projection->blendedPace,
+            ));
             $this->entityManager->flush();
         } catch (UniqueConstraintViolationException) {
             // Another writer stored the row of the day after the lookup above. The entity manager is closed after this.

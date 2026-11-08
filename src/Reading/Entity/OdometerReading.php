@@ -60,8 +60,14 @@ class OdometerReading
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?CarbonImmutable $confirmedAt = null;
 
-    private function __construct(Vehicle $vehicle, CarbonImmutable $readAt, Distance $odometer, ?string $odometerRaw, ?DistanceUnit $odometerRawUnit, ReadingSource $source)
-    {
+    private function __construct(
+        Vehicle $vehicle,
+        CarbonImmutable $readAt,
+        Distance $odometer,
+        ?string $odometerRaw,
+        ?DistanceUnit $odometerRawUnit,
+        ReadingSource $source,
+    ) {
         if (0 !== $readAt->getOffset()) {
             throw new \InvalidArgumentException(\sprintf('An odometer reading must be read at a UTC instant, got %s.', $readAt->toIso8601String()));
         }
@@ -98,8 +104,15 @@ class OdometerReading
      *
      * @throws \InvalidArgumentException when the raw value and its unit do not fit the source
      */
-    public static function restore(Vehicle $vehicle, CarbonImmutable $readAt, Distance $odometer, ReadingSource $source, ?string $odometerRaw, ?DistanceUnit $odometerRawUnit, ?CarbonImmutable $confirmedAt): self
-    {
+    public static function restore(
+        Vehicle $vehicle,
+        CarbonImmutable $readAt,
+        Distance $odometer,
+        ReadingSource $source,
+        ?string $odometerRaw,
+        ?DistanceUnit $odometerRawUnit,
+        ?CarbonImmutable $confirmedAt,
+    ): self {
         if (ReadingSource::Api === $source ? (null === $odometerRaw || null === $odometerRawUnit) : (null !== $odometerRaw || null !== $odometerRawUnit)) {
             throw new \InvalidArgumentException('The raw odometer and its unit belong to a reading of the API, and only to it.');
         }

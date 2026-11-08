@@ -67,7 +67,9 @@ final readonly class VehicleDataImporter
         }
 
         if (VehicleDataExporter::VERSION !== $file->int('version')) {
-            throw new VehicleDataRejected(VehicleDataRejected::UNKNOWN_VERSION, \sprintf('The format version %d is not supported (only %d).', $file->int('version'), VehicleDataExporter::VERSION));
+            $detail = \sprintf('The format version %d is not supported (only %d).', $file->int('version'), VehicleDataExporter::VERSION);
+
+            throw new VehicleDataRejected(VehicleDataRejected::UNKNOWN_VERSION, $detail);
         }
 
         try {
@@ -108,8 +110,10 @@ final readonly class VehicleDataImporter
      */
     private function terms(JsonObject $lease): LeaseTerms
     {
-        $convention = EndDateConvention::tryFrom($lease->string('endDateConvention')) ?? throw new \InvalidArgumentException('lease.endDateConvention is not a known convention.');
-        $currency = Currency::tryFrom($lease->string('currency')) ?? throw new \InvalidArgumentException('lease.currency is not a currency Polaris supports.');
+        $convention = EndDateConvention::tryFrom($lease->string('endDateConvention'))
+            ?? throw new \InvalidArgumentException('lease.endDateConvention is not a known convention.');
+        $currency = Currency::tryFrom($lease->string('currency'))
+            ?? throw new \InvalidArgumentException('lease.currency is not a currency Polaris supports.');
 
         return new LeaseTerms(
             LeaseTerm::fromCalendarDates($this->day($lease, 'startDate'), $this->day($lease, 'endDate'), $convention),
@@ -156,7 +160,13 @@ final readonly class VehicleDataImporter
 
         foreach ($readings as $reading) {
             if (null !== $previous && $reading->odometer->metres() < $previous->odometer->metres()) {
-                throw new \InvalidArgumentException(\sprintf('The odometer goes down between the readings of %s and %s.', $previous->readAt->toIso8601String(), $reading->readAt->toIso8601String()));
+                $message = \sprintf(
+                    'The odometer goes down between the readings of %s and %s.',
+                    $previous->readAt->toIso8601String(),
+                    $reading->readAt->toIso8601String(),
+                );
+
+                throw new \InvalidArgumentException($message);
             }
 
             $previous = $reading;
@@ -209,7 +219,11 @@ final readonly class VehicleDataImporter
         $value = $object->string($key);
         $day = CarbonImmutable::createFromFormat('!Y-m-d', $value, TimeZone::UTC);
 
-        return $day instanceof CarbonImmutable && $day->format('Y-m-d') === $value ? $day : throw new \InvalidArgumentException(\sprintf('%s is not a date (Y-m-d): %s.', $key, $value));
+        if (!$day instanceof CarbonImmutable || $day->format('Y-m-d') !== $value) {
+            throw new \InvalidArgumentException(\sprintf('%s is not a date (Y-m-d): %s.', $key, $value));
+        }
+
+        return $day;
     }
 
     /**
@@ -220,7 +234,11 @@ final readonly class VehicleDataImporter
         $value = $object->string($key);
         $instant = CarbonImmutable::createFromFormat(\DATE_ATOM, $value);
 
-        return $instant instanceof CarbonImmutable ? $instant->utc() : throw new \InvalidArgumentException(\sprintf('%s is not a date and time (ISO 8601): %s.', $key, $value));
+        if (!$instant instanceof CarbonImmutable) {
+            throw new \InvalidArgumentException(\sprintf('%s is not a date and time (ISO 8601): %s.', $key, $value));
+        }
+
+        return $instant->utc();
     }
 
     /**

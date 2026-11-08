@@ -78,7 +78,12 @@ final readonly class ImportVehicleDataCommand
                 LeaseImportOutcome::None => 'none in the file',
             }],
             ['Readings' => \sprintf('%d added, %d already there, %d refused', $result->readings->added, $result->readings->alreadyThere, $result->readings->rejected)],
-            ['Snapshots' => \sprintf('%d added, %d already there, %d left out', $result->snapshots->added, $result->snapshots->alreadyThere, $result->snapshots->skipped)],
+            ['Snapshots' => \sprintf(
+                '%d added, %d already there, %d left out',
+                $result->snapshots->added,
+                $result->snapshots->alreadyThere,
+                $result->snapshots->skipped,
+            )],
         );
         $io->success(\sprintf('Imported into %s.', $vehicle->getName()));
 
