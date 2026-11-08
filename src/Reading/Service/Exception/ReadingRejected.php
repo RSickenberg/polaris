@@ -14,7 +14,8 @@ use Polaris\Reading\Domain\ReadingRejection;
 final class ReadingRejected extends \DomainException
 {
     /**
-     * @param array<string, int|float|string> $parameters ICU parameters of the message: numbers and timestamps, which the translation formats for the active locale
+     * @param array<string, int|float|string> $parameters ICU parameters of the message: numbers and timestamps, which
+     *                                                    the translation formats for the active locale
      */
     public function __construct(
         public readonly ReadingRejection $reason,

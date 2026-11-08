@@ -69,7 +69,9 @@ final class OdometerReadingControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('[data-slot=alert]', 'Reading added.');
-        $rows = $this->client->getCrawler()->filter('tbody tr')->each(static fn ($row): string => preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', trim($row->text()))) ?? '');
+        $rows = $this->client->getCrawler()->filter('tbody tr')->each(
+            static fn ($row): string => self::oneLine($row->text()),
+        );
         self::assertCount(2, $rows);
         self::assertStringContainsString('Oct 2, 2026, 9:30 AM UTC', $rows[0]);
         self::assertStringContainsString('10,050', $rows[0]);
@@ -91,7 +93,10 @@ final class OdometerReadingControllerTest extends WebTestCase
         $this->submit('2026-10-02T08:00', '9000', 'km');
 
         self::assertResponseStatusCodeSame(422);
-        self::assertStringContainsString('Lower than the previous reading (10,000 km on Oct 1, 2026 at 8:00 AM UTC).', preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', $this->client->getCrawler()->filter('body')->text())) ?? '');
+        self::assertStringContainsString(
+            'Lower than the previous reading (10,000 km on Oct 1, 2026 at 8:00 AM UTC).',
+            self::oneLine($this->client->getCrawler()->filter('body')->text()),
+        );
         self::assertCount(1, $this->client->getCrawler()->filter('tbody tr'));
     }
 
@@ -126,5 +131,13 @@ final class OdometerReadingControllerTest extends WebTestCase
     private function url(): string
     {
         return \sprintf('/vehicles/%s/readings', $this->vehicle->getId()->toBase32());
+    }
+
+    /**
+     * The text on one line: the narrow no-break space of ICU and runs of white space become one space.
+     */
+    private static function oneLine(string $text): string
+    {
+        return preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', trim($text))) ?? '';
     }
 }

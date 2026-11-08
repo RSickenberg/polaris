@@ -16,7 +16,7 @@ use Polaris\Fetching\Entity\RefreshAttempt;
 use Polaris\Fetching\Message\FetchOdometerMessage;
 use Polaris\Fetching\Repository\FetchSlotRunRepository;
 use Polaris\Fetching\Repository\RefreshAttemptRepository;
-use Polaris\Lease\Service\LeaseTermsService;
+use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Reading\Service\Enum\RecordOutcome;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Reading\Service\VehicleDataRecorder;
@@ -96,7 +96,7 @@ final readonly class OdometerFetcher
         private MessageBusInterface $bus,
         private ClockInterface $clock,
         private LoggerInterface $logger,
-        private LeaseTermsService $leases,
+        private LeaseReturnService $leaseReturns,
     ) {
     }
 
@@ -171,7 +171,7 @@ final readonly class OdometerFetcher
 
         // The message may have been queued before the user gave the car back: nothing is asked of Tesla, not even
         // the state.
-        if ($this->leases->isReturned($vehicle)) {
+        if ($this->leaseReturns->isReturned($vehicle)) {
             $this->logger->info('Odometer fetch dropped: the lease is returned.', ['vehicle' => $message->vehicleId]);
             $refresh?->settle(RefreshOutcome::Returned, $now);
 

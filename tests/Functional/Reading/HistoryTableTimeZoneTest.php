@@ -35,15 +35,22 @@ final class HistoryTableTimeZoneTest extends KernelTestCase
         $html = $this->render($readings, 'Europe/Zurich');
 
         // 22:30 UTC is 00:30 CEST (UTC+2) the next day; 00:30 UTC is 02:30 CEST; 01:30 UTC is 02:30 CET (UTC+1).
-        self::assertSame(['Oct 25, 2026, 2:30 AM GMT+1', 'Oct 25, 2026, 2:30 AM GMT+2', 'Oct 25, 2026, 12:30 AM GMT+2'], $this->dates($html));
-        // The two 02:30 rows are an hour apart in reality: the offset tells them apart, and the list keeps UTC order, newest first.
+        self::assertSame(
+            ['Oct 25, 2026, 2:30 AM GMT+1', 'Oct 25, 2026, 2:30 AM GMT+2', 'Oct 25, 2026, 12:30 AM GMT+2'],
+            $this->dates($html),
+        );
+        // The two 02:30 rows are an hour apart in reality: the offset tells them apart, and the list keeps UTC order,
+        // newest first.
         self::assertSame([3.0, 2.0, 1.0], $this->kilometres($html));
     }
 
     public function testDatesAcrossTheStartOfDaylightSavingTime(): void
     {
         // Europe/Zurich enters summer time on 2026-03-29 at 01:00 UTC: 01:59 CET jumps to 03:00 CEST.
-        $html = $this->render([self::reading('2026-03-29 01:00', 2), self::reading('2026-03-29 00:59', 1)], 'Europe/Zurich');
+        $html = $this->render(
+            [self::reading('2026-03-29 01:00', 2), self::reading('2026-03-29 00:59', 1)],
+            'Europe/Zurich',
+        );
 
         self::assertSame(['Mar 29, 2026, 3:00 AM GMT+2', 'Mar 29, 2026, 1:59 AM GMT+1'], $this->dates($html));
     }
@@ -68,7 +75,10 @@ final class HistoryTableTimeZoneTest extends KernelTestCase
     {
         self::bootKernel();
 
-        return self::getContainer()->get(Environment::class)->render('reading/_table.html.twig', ['readings' => $readings, 'timeZone' => $timeZone]);
+        return self::getContainer()->get(Environment::class)->render(
+            'reading/_table.html.twig',
+            ['readings' => $readings, 'timeZone' => $timeZone],
+        );
     }
 
     /**
@@ -76,9 +86,11 @@ final class HistoryTableTimeZoneTest extends KernelTestCase
      */
     private function dates(string $html): array
     {
-        $dates = new Crawler($html)->filter('tbody tr td:nth-child(1)')->each(static fn (Crawler $cell): string => $cell->text());
+        $dates = new Crawler($html)->filter('tbody tr td:nth-child(1)')->each(
+            static fn (Crawler $cell): string => $cell->text()
+        );
 
-        return array_map(static fn (string $date): string => preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', trim($date))) ?? '', $dates);
+        return array_map(self::oneLine(...), $dates);
     }
 
     /**
@@ -86,13 +98,27 @@ final class HistoryTableTimeZoneTest extends KernelTestCase
      */
     private function kilometres(string $html): array
     {
-        $values = new Crawler($html)->filter('tbody tr td:nth-child(2)')->each(static fn (Crawler $cell): string => $cell->text());
+        $values = new Crawler($html)->filter('tbody tr td:nth-child(2)')->each(
+            static fn (Crawler $cell): string => $cell->text()
+        );
 
         return array_map(static fn (string $value): float => (float) str_replace(',', '', $value), $values);
     }
 
     private static function reading(string $readAtUtc, int $km): OdometerReading
     {
-        return OdometerReading::manual(new Vehicle(new Vin('5YJ3E7EB2NF000040'), 'Model 3', self::createUser()), CarbonImmutable::parse($readAtUtc, 'UTC'), Distance::fromKilometres($km));
+        return OdometerReading::manual(
+            new Vehicle(new Vin('5YJ3E7EB2NF000040'), 'Model 3', self::createUser()),
+            CarbonImmutable::parse($readAtUtc, 'UTC'),
+            Distance::fromKilometres($km),
+        );
+    }
+
+    /**
+     * The text on one line: the narrow no-break space of ICU and runs of white space become one space.
+     */
+    private static function oneLine(string $text): string
+    {
+        return preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', trim($text))) ?? '';
     }
 }

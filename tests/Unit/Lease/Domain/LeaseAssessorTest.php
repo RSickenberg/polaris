@@ -44,7 +44,10 @@ final class LeaseAssessorTest extends TestCase
         //   day 27,500,000 / 265 = 103,773.6 -> 103,774; week x 7 = 726,415.1 -> 726,415;
         //   month 27,500,000 x 365 / (12 x 265) = 3,156,446.5 -> 3,156,447.
         // To cut per week: 1,120,000 x 7 / 265 = 29,584.9 -> 29,585.
-        $assessment = self::assess('2026-04-11 12:00', [['2026-03-12 00:00', 15_400_000], ['2026-04-11 00:00', 19_000_000]]);
+        $assessment = self::assess(
+            '2026-04-11 12:00',
+            [['2026-03-12 00:00', 15_400_000], ['2026-04-11 00:00', 19_000_000]],
+        );
 
         self::assertSame(LeaseStatus::Active, $assessment->status);
         self::assertSame(RiskLevel::Over, $assessment->riskLevel);
@@ -61,7 +64,10 @@ final class LeaseAssessorTest extends TestCase
         // The weekly cut is that week minus the budget week: 756,000 - 726,415 = 29,585.
         self::assertSame(108_000, $assessment->currentPace->perDay->metres());
         self::assertSame(756_000, $assessment->currentPace->perWeek->metres());
-        self::assertSame($assessment->weeklyCut->metres(), $assessment->currentPace->perWeek->metres() - $assessment->budget->perWeek->metres());
+        self::assertSame(
+            $assessment->weeklyCut->metres(),
+            $assessment->currentPace->perWeek->metres() - $assessment->budget->perWeek->metres(),
+        );
     }
 
     public function testFarUnderTheAllowanceHasRoomAndNoCost(): void
@@ -170,7 +176,11 @@ final class LeaseAssessorTest extends TestCase
     {
         // Returned on 2027-01-20 after the end: the sample of 2027-02-11 (48,000,000) is left out.
         // Driven 37,500,000, excess 1,000,000 m = 1,000 km x 0.45 = 450.00 CHF, nothing to forecast or budget.
-        $assessment = self::assess('2027-03-01 00:00', [['2027-01-11 00:00', 47_500_000], ['2027-02-11 00:00', 48_000_000]], returnedAt: '2027-01-20 00:00');
+        $assessment = self::assess(
+            '2027-03-01 00:00',
+            [['2027-01-11 00:00', 47_500_000], ['2027-02-11 00:00', 48_000_000]],
+            returnedAt: '2027-01-20 00:00',
+        );
 
         self::assertSame(LeaseStatus::Returned, $assessment->status);
         self::assertSame(RiskLevel::Over, $assessment->riskLevel);
@@ -186,7 +196,11 @@ final class LeaseAssessorTest extends TestCase
 
     public function testASampleExactlyAtTheReturnCounts(): void
     {
-        $assessment = self::assess('2027-03-01 00:00', [['2027-01-11 00:00', 47_500_000], ['2027-01-20 00:00', 47_800_000]], returnedAt: '2027-01-20 00:00');
+        $assessment = self::assess(
+            '2027-03-01 00:00',
+            [['2027-01-11 00:00', 47_500_000], ['2027-01-20 00:00', 47_800_000]],
+            returnedAt: '2027-01-20 00:00',
+        );
 
         self::assertSame(37_800_000, $assessment->projection->driven->metres());
         self::assertSame(1_300_000, $assessment->projectedExcess->metres());
@@ -196,7 +210,11 @@ final class LeaseAssessorTest extends TestCase
     {
         // Returned on day 101, 264 days before the end: no forecast, the 9,000 km driven are far below the
         // 36,500 km allowance, so there is no excess whatever the pace was.
-        $assessment = self::assess('2026-04-11 12:00', [['2026-03-12 00:00', 15_400_000], ['2026-04-11 00:00', 19_000_000]], returnedAt: '2026-04-12 00:00');
+        $assessment = self::assess(
+            '2026-04-11 12:00',
+            [['2026-03-12 00:00', 15_400_000], ['2026-04-11 00:00', 19_000_000]],
+            returnedAt: '2026-04-12 00:00',
+        );
 
         self::assertSame(LeaseStatus::Returned, $assessment->status);
         self::assertSame(RiskLevel::Ok, $assessment->riskLevel);
@@ -211,7 +229,11 @@ final class LeaseAssessorTest extends TestCase
     public function testAnEarlyReturnOverTheWholeAllowanceCostsTheExcess(): void
     {
         // 40,000 km driven by day 200, returned then: 3,500 km over the whole allowance, not a prorated one.
-        $assessment = self::assess('2026-07-30 00:00', [['2026-07-19 00:00', 50_000_000]], returnedAt: '2026-07-20 00:00');
+        $assessment = self::assess(
+            '2026-07-30 00:00',
+            [['2026-07-19 00:00', 50_000_000]],
+            returnedAt: '2026-07-20 00:00',
+        );
 
         self::assertSame(RiskLevel::Over, $assessment->riskLevel);
         self::assertSame(3_500_000, $assessment->projectedExcess->metres());
@@ -223,7 +245,11 @@ final class LeaseAssessorTest extends TestCase
         $samples = [['2026-04-11 00:00', 19_000_000]];
 
         foreach (['2026-04-12 00:00', '2026-12-31 23:59:59', '2027-01-01 00:00', '2035-01-01 00:00'] as $now) {
-            self::assertSame(LeaseStatus::Returned, self::assess($now, $samples, returnedAt: '2026-04-12 00:00')->status, $now);
+            self::assertSame(
+                LeaseStatus::Returned,
+                self::assess($now, $samples, returnedAt: '2026-04-12 00:00')->status,
+                $now,
+            );
         }
     }
 
@@ -242,7 +268,14 @@ final class LeaseAssessorTest extends TestCase
 
     public function testAReturnBeforeAnyReadingGivesNoData(): void
     {
-        self::assertInstanceOf(NoData::class, self::assessOrNoData('2027-03-01 00:00', [['2026-04-11 00:00', 19_000_000]], returnedAt: '2026-03-01 00:00'));
+        self::assertInstanceOf(
+            NoData::class,
+            self::assessOrNoData(
+                '2027-03-01 00:00',
+                [['2026-04-11 00:00', 19_000_000]],
+                returnedAt: '2026-03-01 00:00',
+            ),
+        );
     }
 
     public function testNoSampleGivesNoData(): void
@@ -252,14 +285,21 @@ final class LeaseAssessorTest extends TestCase
 
     public function testALeaseNotStartedYetGivesNoData(): void
     {
-        self::assertInstanceOf(NoData::class, self::assessOrNoData('2025-12-15 12:00', [['2025-12-14 00:00', 9_990_000]]));
+        self::assertInstanceOf(
+            NoData::class,
+            self::assessOrNoData('2025-12-15 12:00', [['2025-12-14 00:00', 9_990_000]]),
+        );
     }
 
     /**
      * @param list<array{string, int}> $samples
      */
-    private static function assess(string $now, array $samples, int $toleranceBasisPoints = 0, ?string $returnedAt = null): LeaseAssessment
-    {
+    private static function assess(
+        string $now,
+        array $samples,
+        int $toleranceBasisPoints = 0,
+        ?string $returnedAt = null,
+    ): LeaseAssessment {
         $assessment = self::assessOrNoData($now, $samples, $toleranceBasisPoints, $returnedAt);
         self::assertInstanceOf(LeaseAssessment::class, $assessment);
 
@@ -269,9 +309,16 @@ final class LeaseAssessorTest extends TestCase
     public function testTheLeaseIsJudgedAtTheGivenInstantNotAtTheClock(): void
     {
         $clock = new MockClock(new \DateTimeImmutable('2027-03-01 12:00', new \DateTimeZone('UTC')));
-        $assessor = new LeaseAssessor(new ProjectionCalculator($clock, RecentPaceWeight::fromBasisPoints(6_000)), $clock);
+        $assessor = new LeaseAssessor(
+            new ProjectionCalculator($clock, RecentPaceWeight::fromBasisPoints(6_000)),
+            $clock,
+        );
         $assess = static fn (?CarbonImmutable $at): LeaseAssessment|NoData => $assessor->assess(
-            new LeaseTerm(new CarbonImmutable('2026-01-01', 'UTC'), new CarbonImmutable('2027-01-01', 'UTC'), EndDateConvention::Exclusive),
+            new LeaseTerm(
+                new CarbonImmutable('2026-01-01', 'UTC'),
+                new CarbonImmutable('2027-01-01', 'UTC'),
+                EndDateConvention::Exclusive,
+            ),
             Allowance::ofTotal(Distance::fromKilometres(36_500)),
             Distance::fromKilometres(10_000),
             Money::fromDecimal('0.45', Currency::CHF),
@@ -290,24 +337,40 @@ final class LeaseAssessorTest extends TestCase
         self::assertSame(LeaseStatus::Active, $atMidnight->status);
         self::assertGreaterThan(0, $atMidnight->budget->perDay->metres());
         self::assertSame(0, $atTheClock->budget->perDay->metres());
-        self::assertSame($atTheClock->projection->blendedPace->metresPerDay(), $atMidnight->projection->blendedPace->metresPerDay());
+        self::assertSame(
+            $atTheClock->projection->blendedPace->metresPerDay(),
+            $atMidnight->projection->blendedPace->metresPerDay(),
+        );
     }
 
     /**
      * @param list<array{string, int}> $samples
      */
-    private static function assessOrNoData(string $now, array $samples, int $toleranceBasisPoints = 0, ?string $returnedAt = null): LeaseAssessment|NoData
-    {
+    private static function assessOrNoData(
+        string $now,
+        array $samples,
+        int $toleranceBasisPoints = 0,
+        ?string $returnedAt = null,
+    ): LeaseAssessment|NoData {
         $clock = new MockClock(new \DateTimeImmutable($now, new \DateTimeZone('UTC')));
 
-        return new LeaseAssessor(new ProjectionCalculator($clock, RecentPaceWeight::fromBasisPoints(6_000)), $clock)->assess(
-            new LeaseTerm(new CarbonImmutable('2026-01-01', 'UTC'), new CarbonImmutable('2027-01-01', 'UTC'), EndDateConvention::Exclusive),
+        $calculator = new ProjectionCalculator($clock, RecentPaceWeight::fromBasisPoints(6_000));
+
+        return new LeaseAssessor($calculator, $clock)->assess(
+            new LeaseTerm(
+                new CarbonImmutable('2026-01-01', 'UTC'),
+                new CarbonImmutable('2027-01-01', 'UTC'),
+                EndDateConvention::Exclusive,
+            ),
             Allowance::ofTotal(Distance::fromKilometres(36_500)),
             Distance::fromKilometres(10_000),
             Money::fromDecimal('0.45', Currency::CHF),
             Tolerance::fromBasisPoints($toleranceBasisPoints),
             array_map(
-                static fn (array $sample): OdometerSample => new OdometerSample(new CarbonImmutable($sample[0], 'UTC'), Distance::fromMetres($sample[1])),
+                static fn (array $sample): OdometerSample => new OdometerSample(
+                    new CarbonImmutable($sample[0], 'UTC'),
+                    Distance::fromMetres($sample[1]),
+                ),
                 $samples,
             ),
             null === $returnedAt ? null : new CarbonImmutable($returnedAt, 'UTC'),

@@ -43,7 +43,9 @@ final readonly class AddOdometerReadingCommand
         int $odometer,
         #[Option(description: 'Unit of the value: km or mi')]
         string $unit = 'km',
-        #[Option(description: 'When it was read, as an ISO 8601 date and time; UTC when it has no offset. Defaults to now')]
+        #[Option(
+            description: 'When it was read, as an ISO 8601 date and time; UTC when it has no offset. Defaults to now'
+        )]
         ?string $at = null,
         #[Option(description: 'The vehicle, by VIN or id. Optional when only one vehicle exists')]
         ?string $vehicle = null,
@@ -56,7 +58,8 @@ final readonly class AddOdometerReadingCommand
         }
 
         try {
-            $readAt = null === $at ? CarbonImmutable::instance($this->clock->now()) : CarbonImmutable::parse($at, 'UTC');
+            $now = CarbonImmutable::instance($this->clock->now());
+            $readAt = null === $at ? $now : CarbonImmutable::parse($at, 'UTC');
         } catch (\Exception) {
             $io->error(\sprintf('"%s" is not a valid date and time.', $at));
 
@@ -108,7 +111,11 @@ final readonly class AddOdometerReadingCommand
         if (null === $identifier) {
             $vehicles = $repository->findAll();
             if (1 !== \count($vehicles)) {
-                $io->error(0 === \count($vehicles) ? 'There is no vehicle yet.' : 'There are several vehicles: choose one with --vehicle (VIN or id).');
+                $io->error(
+                    [] === $vehicles
+                        ? 'There is no vehicle yet.'
+                        : 'There are several vehicles: choose one with --vehicle (VIN or id).',
+                );
 
                 return null;
             }

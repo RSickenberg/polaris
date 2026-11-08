@@ -6,7 +6,7 @@ namespace Polaris\Dashboard\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Polaris\Account\Entity\User;
-use Polaris\Lease\Service\LeaseTermsService;
+use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,7 +21,7 @@ final class HomeController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly LeaseTermsService $leaseTerms,
+        private readonly LeaseReturnService $leaseReturns,
     ) {
     }
 
@@ -32,7 +32,7 @@ final class HomeController extends AbstractController
 
         $returned = [];
         foreach ($vehicles as $vehicle) {
-            $returned[$vehicle->getId()->toBase32()] = $this->leaseTerms->isReturned($vehicle);
+            $returned[$vehicle->getId()->toBase32()] = $this->leaseReturns->isReturned($vehicle);
         }
 
         // The sort is stable: the vehicles keep their order by name inside each group.

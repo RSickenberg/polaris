@@ -35,11 +35,19 @@ final readonly class LeaseAssessor
     /**
      * @param list<OdometerSample> $samples
      * @param CarbonImmutable|null $returnedAt the instant the car went back (inclusive); null while the lease runs
-     * @param CarbonImmutable|null $at         the instant the lease is judged at (has it ended, how long is left); null is the clock.
-     *                                         The caller passes only samples up to it
+     * @param CarbonImmutable|null $at         the instant the lease is judged at (has it ended, how long is left); null
+     *                                         is the clock. The caller passes only samples up to it
      */
-    public function assess(LeaseTerm $term, Allowance $allowance, Distance $startOdometer, Money $excessCostPerKm, Tolerance $tolerance, array $samples, ?CarbonImmutable $returnedAt = null, ?CarbonImmutable $at = null): LeaseAssessment|NoData
-    {
+    public function assess(
+        LeaseTerm $term,
+        Allowance $allowance,
+        Distance $startOdometer,
+        Money $excessCostPerKm,
+        Tolerance $tolerance,
+        array $samples,
+        ?CarbonImmutable $returnedAt = null,
+        ?CarbonImmutable $at = null,
+    ): LeaseAssessment|NoData {
         $returned = null !== $returnedAt;
 
         if (null !== $returnedAt) {
@@ -78,7 +86,11 @@ final readonly class LeaseAssessor
             projectedExcess: $excess,
             projectedExcessCost: ExcessCost::of($excess, $excessCostPerKm),
             weeklyCut: $secondsLeft > 0 ? self::weeklyCut($projected - $allowed, $secondsLeft) : null,
-            currentPace: Budget::spread(Distance::fromMetres(max(0, $projected - $projection->driven->metres())), $term, $secondsLeft),
+            currentPace: Budget::spread(
+                Distance::fromMetres(max(0, $projected - $projection->driven->metres())),
+                $term,
+                $secondsLeft,
+            ),
         );
     }
 
@@ -124,7 +136,9 @@ final readonly class LeaseAssessor
         }
 
         // projected > allowed x (1 - tolerance), in integers.
-        if ($projected * Tolerance::BASIS_POINTS_IN_ONE > $allowed * (Tolerance::BASIS_POINTS_IN_ONE - $tolerance->basisPoints())) {
+        $watchFrom = $allowed * (Tolerance::BASIS_POINTS_IN_ONE - $tolerance->basisPoints());
+
+        if ($projected * Tolerance::BASIS_POINTS_IN_ONE > $watchFrom) {
             return RiskLevel::Watch;
         }
 

@@ -55,6 +55,10 @@ final class BudgetTest extends TestCase
 
     private static function term(): LeaseTerm
     {
-        return new LeaseTerm(new CarbonImmutable('2026-01-01', 'UTC'), new CarbonImmutable('2031-01-01', 'UTC'), EndDateConvention::Exclusive);
+        return new LeaseTerm(
+            new CarbonImmutable('2026-01-01', 'UTC'),
+            new CarbonImmutable('2031-01-01', 'UTC'),
+            EndDateConvention::Exclusive,
+        );
     }
 }

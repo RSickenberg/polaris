@@ -43,7 +43,10 @@ final class AddOdometerReadingCommandTest extends KernelTestCase
         $status = $tester->execute(['odometer' => '12345']);
 
         self::assertSame(Command::SUCCESS, $status);
-        self::assertStringContainsString('Recorded 12345 km for Model 3 at 2026-10-20T12:00Z UTC', $tester->getDisplay());
+        self::assertStringContainsString(
+            'Recorded 12345 km for Model 3 at 2026-10-20T12:00Z UTC',
+            $tester->getDisplay(),
+        );
         $readings = self::getContainer()->get(OdometerReadingRepository::class)->findAll();
         self::assertCount(1, $readings);
         self::assertSame(12_345_000, $readings[0]->getOdometer()->metres());
@@ -53,7 +56,14 @@ final class AddOdometerReadingCommandTest extends KernelTestCase
     {
         $tester = $this->tester();
 
-        $status = $tester->execute(['odometer' => '1000', '--unit' => 'mi', '--at' => '2026-10-01T10:00:00+02:00', '--vehicle' => '5yj3e7eb2nf000020']);
+        $status = $tester->execute(
+            [
+                'odometer' => '1000',
+                '--unit' => 'mi',
+                '--at' => '2026-10-01T10:00:00+02:00',
+                '--vehicle' => '5yj3e7eb2nf000020',
+            ]
+        );
 
         self::assertSame(Command::SUCCESS, $status);
         $reading = self::getContainer()->get(OdometerReadingRepository::class)->findAll()[0];
@@ -76,7 +86,10 @@ final class AddOdometerReadingCommandTest extends KernelTestCase
         $status = $tester->execute(['odometer' => '9999', '--at' => '2026-10-02T08:00:00']);
 
         self::assertSame(Command::FAILURE, $status);
-        self::assertStringContainsString('Lower than the previous reading (10,000 km on Oct 1, 2026 at 8:00 AM UTC).', preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', $tester->getDisplay())) ?? '');
+        self::assertStringContainsString(
+            'Lower than the previous reading (10,000 km on Oct 1, 2026 at 8:00 AM UTC).',
+            preg_replace('/\s+/u', ' ', str_replace("\u{202f}", ' ', $tester->getDisplay())) ?? '',
+        );
         self::assertCount(1, self::getContainer()->get(OdometerReadingRepository::class)->findAll());
     }
 
@@ -94,7 +107,10 @@ final class AddOdometerReadingCommandTest extends KernelTestCase
         $tester->execute(['odometer' => '10000', '--at' => '2026-10-01T08:00:00']);
 
         self::assertSame(Command::FAILURE, $tester->execute(['odometer' => '10100', '--at' => '2026-10-01T08:00:00']));
-        self::assertStringContainsString('A reading already exists at this date and time.', preg_replace('/\s+/', ' ', $tester->getDisplay()) ?? '');
+        self::assertStringContainsString(
+            'A reading already exists at this date and time.',
+            preg_replace('/\s+/', ' ', $tester->getDisplay()) ?? '',
+        );
     }
 
     public function testInvalidInputIsInvalid(): void
@@ -102,9 +118,21 @@ final class AddOdometerReadingCommandTest extends KernelTestCase
         $tester = $this->tester();
 
         self::assertSame(Command::INVALID, $tester->execute(['odometer' => '-5']), 'a negative value');
-        self::assertSame(Command::INVALID, $tester->execute(['odometer' => '5', '--unit' => 'furlong']), 'an unknown unit');
-        self::assertSame(Command::INVALID, $tester->execute(['odometer' => '5', '--at' => 'not a date']), 'an unparsable date');
-        self::assertSame(Command::INVALID, $tester->execute(['odometer' => '5', '--vehicle' => '5YJ3E7EB2NF999999']), 'an unknown vehicle');
+        self::assertSame(
+            Command::INVALID,
+            $tester->execute(['odometer' => '5', '--unit' => 'furlong']),
+            'an unknown unit',
+        );
+        self::assertSame(
+            Command::INVALID,
+            $tester->execute(['odometer' => '5', '--at' => 'not a date']),
+            'an unparsable date',
+        );
+        self::assertSame(
+            Command::INVALID,
+            $tester->execute(['odometer' => '5', '--vehicle' => '5YJ3E7EB2NF999999']),
+            'an unknown vehicle',
+        );
         self::assertCount(0, self::getContainer()->get(OdometerReadingRepository::class)->findAll());
     }
 

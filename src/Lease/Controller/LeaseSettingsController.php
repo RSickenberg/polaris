@@ -9,8 +9,10 @@ use Polaris\Lease\Form\LeaseContractType;
 use Polaris\Lease\Form\LeaseReturnType;
 use Polaris\Lease\Form\Model\LeaseContractData;
 use Polaris\Lease\Form\Model\LeaseReturnData;
+use Polaris\Lease\Service\Enum\LeaseTermsRejection;
 use Polaris\Lease\Service\Exception\LeaseReturnRejected;
 use Polaris\Lease\Service\Exception\LeaseTermsRejected;
+use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Shared\Service\Enum\ToastVariant;
 use Polaris\Vehicle\Entity\Vehicle;
@@ -31,6 +33,7 @@ final class LeaseSettingsController extends AbstractController
 
     public function __construct(
         private readonly LeaseTermsService $leaseTerms,
+        private readonly LeaseReturnService $leaseReturns,
         private readonly TranslatorInterface $translator,
     ) {
     }
@@ -55,13 +58,16 @@ final class LeaseSettingsController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $this->leaseTerms->save($vehicle, $form->getData());
-                $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.lease_saved', domain: 'lease'));
+                $this->addFlash(
+                    ToastVariant::Success->value,
+                    $this->translator->trans('flash.lease_saved', domain: 'lease'),
+                );
 
                 return $this->redirectToRoute('lease_settings', ['id' => $vehicle->getId()->toBase32()]);
             } catch (LeaseTermsRejected $rejected) {
                 $form
-                    ->get(LeaseTermsRejected::START_AFTER_RETURN === $rejected->getMessage() ? 'startDate' : 'startOdometer')
-                    ->addError(new FormError($this->translator->trans($rejected->getMessage(), domain: 'lease')));
+                    ->get(LeaseTermsRejection::StartAfterReturn === $rejected->reason ? 'startDate' : 'startOdometer')
+                    ->addError(new FormError($this->translator->trans($rejected->reason->value, domain: 'lease')));
             }
         }
 
@@ -78,19 +84,28 @@ final class LeaseSettingsController extends AbstractController
     public function markReturned(Request $request, #[MapEntity(id: 'id')] Vehicle $vehicle): Response
     {
         $data = new LeaseReturnData();
-        $returnForm = $this->createForm(LeaseReturnType::class, $data, ['action' => $this->generateUrl('lease_return', ['id' => $vehicle->getId()->toBase32()])]);
+        $returnForm = $this->createForm(
+            LeaseReturnType::class,
+            $data,
+            ['action' => $this->generateUrl('lease_return', ['id' => $vehicle->getId()->toBase32()])],
+        );
         $returnForm->handleRequest($request);
 
         if ($returnForm->isSubmitted() && $returnForm->isValid()) {
             \assert(null !== $data->returnedOn);
 
             try {
-                $this->leaseTerms->markReturned($vehicle, $data->returnedOn);
-                $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.lease_returned', domain: 'lease'));
+                $this->leaseReturns->markReturned($vehicle, $data->returnedOn);
+                $this->addFlash(
+                    ToastVariant::Success->value,
+                    $this->translator->trans('flash.lease_returned', domain: 'lease'),
+                );
 
                 return $this->redirectToRoute('lease_settings', ['id' => $vehicle->getId()->toBase32()]);
             } catch (LeaseReturnRejected $rejected) {
-                $returnForm->get('returnedOn')->addError(new FormError($this->translator->trans($rejected->getMessage(), domain: 'lease')));
+                $returnForm->get('returnedOn')->addError(
+                    new FormError($this->translator->trans($rejected->reason->value, domain: 'lease'))
+                );
             }
         }
 
@@ -114,8 +129,11 @@ final class LeaseSettingsController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $this->leaseTerms->undoReturn($vehicle);
-        $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.lease_return_undone', domain: 'lease'));
+        $this->leaseReturns->undoReturn($vehicle);
+        $this->addFlash(
+            ToastVariant::Success->value,
+            $this->translator->trans('flash.lease_return_undone', domain: 'lease'),
+        );
 
         return $this->redirectToRoute('lease_settings', ['id' => $vehicle->getId()->toBase32()]);
     }
@@ -126,22 +144,30 @@ final class LeaseSettingsController extends AbstractController
     private function returnForm(Vehicle $vehicle): FormInterface
     {
         $data = new LeaseReturnData();
-        $data->returnedOn = $this->leaseTerms->returnedOn($vehicle)?->toDateTimeImmutable();
+        $data->returnedOn = $this->leaseReturns->returnedOn($vehicle)?->toDateTimeImmutable();
 
-        return $this->createForm(LeaseReturnType::class, $data, ['action' => $this->generateUrl('lease_return', ['id' => $vehicle->getId()->toBase32()])]);
+        return $this->createForm(
+            LeaseReturnType::class,
+            $data,
+            ['action' => $this->generateUrl('lease_return', ['id' => $vehicle->getId()->toBase32()])],
+        );
     }
 
     /**
      * @param FormInterface<LeaseContractData> $form
      * @param FormInterface<LeaseReturnData>   $returnForm
      */
-    private function renderSettings(Vehicle $vehicle, FormInterface $form, FormInterface $returnForm, bool $submitted): Response
-    {
+    private function renderSettings(
+        Vehicle $vehicle,
+        FormInterface $form,
+        FormInterface $returnForm,
+        bool $submitted,
+    ): Response {
         return $this->render('lease/settings.html.twig', [
             'vehicle' => $vehicle,
             'form' => $form,
             'returnForm' => $returnForm,
-            'returnedOn' => $this->leaseTerms->returnedOn($vehicle),
+            'returnedOn' => $this->leaseReturns->returnedOn($vehicle),
             'hasContract' => null !== $this->leaseTerms->find($vehicle),
             'assessment' => $this->leaseTerms->assess($vehicle),
         ], new Response(status: $submitted ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));

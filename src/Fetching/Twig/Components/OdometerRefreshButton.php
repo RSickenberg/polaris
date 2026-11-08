@@ -283,11 +283,11 @@ final class OdometerRefreshButton
     {
         $attempt = $this->attempt();
 
+        $now = CarbonImmutable::instance($this->clock->now());
+
         return null !== $attempt
             && !$attempt->getOutcome()->isSettled()
-            && $attempt->getUpdatedAt()->addSeconds(self::POLL_SECONDS) > CarbonImmutable::instance(
-                $this->clock->now()
-            );
+            && $attempt->getUpdatedAt()->addSeconds(self::POLL_SECONDS) > $now;
     }
 
     public function timeZone(): string

@@ -68,7 +68,10 @@ final class LeaseContractFactoryTest extends TestCase
         $data->allowance = 10_000;
         $data->startOdometer = 7;
 
-        $contract = new LeaseContractFactory()->create(new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', Owner::user()), $data);
+        $contract = new LeaseContractFactory()->create(
+            new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', Owner::user()),
+            $data,
+        );
 
         self::assertSame(48_280_320, $contract->getAllowance()->total()->metres());
         self::assertSame(11_265, $contract->getStartOdometer()->metres());

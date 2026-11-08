@@ -30,7 +30,12 @@ final class ReadingOrderTest extends TestCase
         yield 'backfill lower than the previous' => [10_000, 11_000, 9_500, ReadingRejection::LowerThanPrevious];
         yield 'backfill higher than the next' => [10_000, 11_000, 11_500, ReadingRejection::HigherThanNext];
         yield 'before the first reading, lower than the next' => [null, 11_000, 500, null];
-        yield 'before the first reading, higher than the next' => [null, 11_000, 11_001, ReadingRejection::HigherThanNext];
+        yield 'before the first reading, higher than the next' => [
+            null,
+            11_000,
+            11_001,
+            ReadingRejection::HigherThanNext,
+        ];
     }
 
     #[DataProvider('cases')]

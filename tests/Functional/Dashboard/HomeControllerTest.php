@@ -13,7 +13,7 @@ use Polaris\Lease\Domain\EndDateConvention;
 use Polaris\Lease\Domain\LeaseTerm;
 use Polaris\Lease\Domain\Tolerance;
 use Polaris\Lease\Entity\LeaseContract;
-use Polaris\Lease\Service\LeaseTermsService;
+use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Shared\Domain\Currency;
 use Polaris\Shared\Domain\Distance;
 use Polaris\Shared\Domain\Money;
@@ -94,7 +94,7 @@ final class HomeControllerTest extends WebTestCase
             Tolerance::fromPercent(0),
         ));
         $entityManager->flush();
-        self::getContainer()->get(LeaseTermsService::class)->markReturned($returned, new \DateTimeImmutable('2021-01-02'));
+        self::getContainer()->get(LeaseReturnService::class)->markReturned($returned, new \DateTimeImmutable('2021-01-02'));
 
         $this->client->request('GET', '/');
 

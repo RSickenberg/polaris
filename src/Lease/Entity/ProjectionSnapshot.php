@@ -17,14 +17,14 @@ use Symfony\Component\Uid\Ulid;
 
 /**
  * What Polaris projected for a lease at the owner's midnight: the figures of the assessment with only the readings up
- * to that midnight, kept so that past projections can be compared with what was driven. One row per lease and local day; a run for
- * the same midnight replaces the figures (the last wins). It is a record: editing the terms or adding a reading later
- * never changes a row.
+ * to that midnight, kept so that past projections can be compared with what was driven. One row per lease and local
+ * day; a run for the same midnight replaces the figures (the last wins). It is a record: editing the terms or adding a
+ * reading later never changes a row.
  *
- * The local day is the calendar date the midnight OPENS (it is that day's first instant): the row of 2026-11-07 is the projection at the
- * very start of 7 November, so it describes the end of the 6th. "Today's snapshot" is the row with today's date.
- * Rows saved before the daily jobs followed the owner's midnight (UTC day label, taken at 23:50 UTC) have no cutoff and
- * no pace.
+ * The local day is the calendar date the midnight OPENS (it is that day's first instant): the row of 2026-11-07 is the
+ * projection at the very start of 7 November, so it describes the end of the 6th. "Today's snapshot" is the row with
+ * today's date. Rows saved before the daily jobs followed the owner's midnight (UTC day label, taken at 23:50 UTC) have
+ * no cutoff and no pace.
  *
  * Columns hold scalars (metres, metres per day); the getters return the Domain value objects.
  */
@@ -81,7 +81,10 @@ class ProjectionSnapshot
     #[ORM\Column(nullable: true)]
     private ?float $overallPaceMetresPerDay = null;
 
-    /** The pace over the 30 days before `asOf`. Null before 30 days of lease, and on rows saved before the pace was stored. */
+    /**
+     * The pace over the 30 days before `asOf`. Null before 30 days of lease, and on rows saved before the pace was
+     * stored.
+     */
     #[ORM\Column(nullable: true)]
     private ?float $recentPaceMetresPerDay = null;
 
@@ -108,13 +111,27 @@ class ProjectionSnapshot
         Pace $blendedPace,
     ) {
         if (0 !== $localDay->getOffset() || '00:00:00' !== $localDay->format('H:i:s')) {
-            throw new \InvalidArgumentException(\sprintf('A snapshot day must be midnight UTC, got %s.', $localDay->toIso8601String()));
+            throw new \InvalidArgumentException(
+                \sprintf('A snapshot day must be midnight UTC, got %s.', $localDay->toIso8601String())
+            );
         }
 
         $this->id = new Ulid();
         $this->leaseContract = $leaseContract;
         $this->localDay = $localDay;
-        $this->replace($cutoffAt, $computedAt, $asOf, $driven, $allowedToDate, $projectedAtEnd, $dailyBudget, $riskLevel, $overallPace, $recentPace, $blendedPace);
+        $this->replace(
+            $cutoffAt,
+            $computedAt,
+            $asOf,
+            $driven,
+            $allowedToDate,
+            $projectedAtEnd,
+            $dailyBudget,
+            $riskLevel,
+            $overallPace,
+            $recentPace,
+            $blendedPace,
+        );
     }
 
     /**

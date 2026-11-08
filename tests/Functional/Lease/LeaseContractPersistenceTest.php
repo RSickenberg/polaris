@@ -40,7 +40,11 @@ final class LeaseContractPersistenceTest extends KernelTestCase
         $entityManager = self::entityManager();
 
         $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', self::createUser());
-        $term = new LeaseTerm(CarbonImmutable::parse('2028-02-29', 'UTC'), CarbonImmutable::parse('2031-02-27', 'UTC'), EndDateConvention::Inclusive);
+        $term = new LeaseTerm(
+            CarbonImmutable::parse('2028-02-29', 'UTC'),
+            CarbonImmutable::parse('2031-02-27', 'UTC'),
+            EndDateConvention::Inclusive,
+        );
         $contract = new LeaseContract(
             $vehicle,
             $term,
@@ -88,21 +92,42 @@ final class LeaseContractPersistenceTest extends KernelTestCase
         $entityManager = self::entityManager();
 
         $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000002'), 'Model Y', self::createUser());
-        $term = new LeaseTerm(CarbonImmutable::parse('2026-01-15', 'UTC'), CarbonImmutable::parse('2029-01-15', 'UTC'), EndDateConvention::Exclusive);
+        $term = new LeaseTerm(
+            CarbonImmutable::parse('2026-01-15', 'UTC'),
+            CarbonImmutable::parse('2029-01-15', 'UTC'),
+            EndDateConvention::Exclusive,
+        );
         $entityManager->persist($vehicle);
-        $contract = new LeaseContract($vehicle, $term, Allowance::fromYearly(Distance::fromKilometres(10_000), $term), Distance::fromMetres(0), Money::ofMinor(0, Currency::EUR), Tolerance::fromBasisPoints(0));
+        $contract = new LeaseContract(
+            $vehicle,
+            $term,
+            Allowance::fromYearly(Distance::fromKilometres(10_000), $term),
+            Distance::fromMetres(0),
+            Money::ofMinor(0, Currency::EUR),
+            Tolerance::fromBasisPoints(0),
+        );
         $entityManager->persist($contract);
         $entityManager->flush();
 
         $row = $entityManager->getConnection()->fetchAssociative(
-            'SELECT id::text AS id, pg_typeof(id)::text AS id_type, start_date, end_date, pg_typeof(start_date)::text AS start_type FROM lease_contract WHERE vehicle_id = ?',
+            'SELECT id::text AS id, pg_typeof(id)::text AS id_type, start_date, end_date,'
+            . ' pg_typeof(start_date)::text AS start_type FROM lease_contract WHERE vehicle_id = ?',
             [$vehicle->getId()],
             [UlidType::NAME],
         );
 
         self::assertIsArray($row);
         // The ULID is stored in a native UUID column, in its RFC 4122 form.
-        self::assertSame(['id' => $contract->getId()->toRfc4122(), 'id_type' => 'uuid', 'start_date' => '2026-01-15', 'end_date' => '2029-01-15', 'start_type' => 'date'], $row);
+        self::assertSame(
+            [
+                'id' => $contract->getId()->toRfc4122(),
+                'id_type' => 'uuid',
+                'start_date' => '2026-01-15',
+                'end_date' => '2029-01-15',
+                'start_type' => 'date',
+            ],
+            $row,
+        );
     }
 
     public function testVinIsUnique(): void

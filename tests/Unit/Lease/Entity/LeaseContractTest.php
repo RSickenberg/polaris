@@ -28,8 +28,18 @@ final class LeaseContractTest extends TestCase
         $id = $contract->getId();
         $vehicle = $contract->getVehicle();
 
-        $term = new LeaseTerm(CarbonImmutable::parse('2027-03-01', 'UTC'), CarbonImmutable::parse('2029-03-01', 'UTC'), EndDateConvention::Exclusive);
-        $contract->updateTerms($term, Allowance::ofTotal(Distance::fromKilometres(40_000)), Distance::fromKilometres(500), Money::fromDecimal('0.25', Currency::EUR), Tolerance::fromPercent(5));
+        $term = new LeaseTerm(
+            CarbonImmutable::parse('2027-03-01', 'UTC'),
+            CarbonImmutable::parse('2029-03-01', 'UTC'),
+            EndDateConvention::Exclusive,
+        );
+        $contract->updateTerms(
+            $term,
+            Allowance::ofTotal(Distance::fromKilometres(40_000)),
+            Distance::fromKilometres(500),
+            Money::fromDecimal('0.25', Currency::EUR),
+            Tolerance::fromPercent(5),
+        );
 
         self::assertSame($id, $contract->getId());
         self::assertSame($vehicle, $contract->getVehicle());
@@ -48,7 +58,13 @@ final class LeaseContractTest extends TestCase
         $term = $contract->getTerm();
 
         try {
-            $contract->updateTerms($term, Allowance::ofTotal(Distance::fromKilometres(1)), Distance::fromMetres(0), Money::ofMinor(-1, Currency::CHF), Tolerance::fromBasisPoints(0));
+            $contract->updateTerms(
+                $term,
+                Allowance::ofTotal(Distance::fromKilometres(1)),
+                Distance::fromMetres(0),
+                Money::ofMinor(-1, Currency::CHF),
+                Tolerance::fromBasisPoints(0),
+            );
             self::fail('A negative cost must be refused.');
         } catch (\InvalidArgumentException) {
             self::assertSame(12, $contract->getExcessCostPerKm()->minorAmount());
@@ -59,7 +75,11 @@ final class LeaseContractTest extends TestCase
     {
         return new LeaseContract(
             new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', Owner::user()),
-            new LeaseTerm(CarbonImmutable::parse('2026-01-15', 'UTC'), CarbonImmutable::parse('2029-01-15', 'UTC'), EndDateConvention::Exclusive),
+            new LeaseTerm(
+                CarbonImmutable::parse('2026-01-15', 'UTC'),
+                CarbonImmutable::parse('2029-01-15', 'UTC'),
+                EndDateConvention::Exclusive,
+            ),
             Allowance::ofTotal(Distance::fromKilometres(45_000)),
             Distance::fromKilometres(12),
             Money::fromDecimal('0.12', Currency::CHF),

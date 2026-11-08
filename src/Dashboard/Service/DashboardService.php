@@ -16,9 +16,8 @@ use Polaris\Lease\Domain\Budget;
 use Polaris\Lease\Domain\LeaseStatus;
 use Polaris\Lease\Domain\NoData;
 use Polaris\Lease\Service\ActualVersusPredictedService;
+use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Lease\Service\LeaseTermsService;
-use Polaris\Reading\Service\OdometerReadingService;
-use Polaris\Shared\Domain\OdometerSample;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
 
@@ -29,7 +28,7 @@ final readonly class DashboardService
 {
     public function __construct(
         private LeaseTermsService $leaseTerms,
-        private OdometerReadingService $readings,
+        private LeaseReturnService $leaseReturns,
         private MileageSeriesBuilder $mileageBuilder,
         private MileageRangeBuilder $rangeBuilder,
         private ClockInterface $clock,
@@ -51,7 +50,6 @@ final readonly class DashboardService
         }
 
         $allowance = $contract->getAllowance()->total();
-        $returnedAt = $contract->getReturnedAt();
         $projection = $assessment->projection;
         $state = match ($assessment->status) {
             LeaseStatus::Draft => DashboardState::Draft,
@@ -73,7 +71,7 @@ final readonly class DashboardService
                 $contract->getTerm()->exclusiveEnd(),
                 $contract->getStartOdometer(),
                 $allowance,
-                $this->leaseSamples($vehicle, $returnedAt),
+                $this->leaseTerms->readingSamples($vehicle),
                 $forecast,
             );
             $ranges = $this->rangeBuilder->build(
@@ -93,27 +91,9 @@ final readonly class DashboardService
             $ranges,
             $contract->getStartOdometer(),
             Budget::evenPace($allowance, $contract->getTerm()),
-            $this->leaseTerms->returnedOn($vehicle),
+            $this->leaseReturns->returnedOn($vehicle),
             DashboardState::Active === $state ? $this->comparison($vehicle) : null,
         );
-    }
-
-    /**
-     * The readings of the lease as samples. Readings after the return are stored but not part of the lease any more.
-     *
-     * @return list<OdometerSample>
-     */
-    private function leaseSamples(Vehicle $vehicle, ?CarbonImmutable $returnedAt): array
-    {
-        $samples = [];
-
-        foreach ($this->readings->history($vehicle) as $reading) {
-            if (null === $returnedAt || $reading->getReadAt()->lessThanOrEqualTo($returnedAt)) {
-                $samples[] = $reading->toSample();
-            }
-        }
-
-        return $samples;
     }
 
     private function comparison(Vehicle $vehicle): ?ComparisonPanels

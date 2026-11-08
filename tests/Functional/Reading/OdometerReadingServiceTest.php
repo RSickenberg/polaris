@@ -54,7 +54,10 @@ final class OdometerReadingServiceTest extends KernelTestCase
 
     public function testMilesAreConvertedToMetres(): void
     {
-        $reading = self::service()->recordManual($this->vehicle, self::data('2026-10-01 08:00', 1_000, DistanceUnit::Mile));
+        $reading = self::service()->recordManual(
+            $this->vehicle,
+            self::data('2026-10-01 08:00', 1_000, DistanceUnit::Mile),
+        );
 
         self::assertSame(1_609_344, $reading->getOdometer()->metres());
         self::assertNull($reading->getOdometerRaw(), 'The raw value is kept only for readings that come from Tesla.');
@@ -98,7 +101,10 @@ final class OdometerReadingServiceTest extends KernelTestCase
             self::assertSame(ReadingRejection::LowerThanPrevious, $rejected->reason);
             self::assertSame(10_000.0, $rejected->parameters['limit']);
             self::assertSame('km', $rejected->parameters['unit']);
-            self::assertSame(CarbonImmutable::parse('2026-10-01 08:00', 'UTC')->getTimestamp(), $rejected->parameters['at']);
+            self::assertSame(
+                CarbonImmutable::parse('2026-10-01 08:00', 'UTC')->getTimestamp(),
+                $rejected->parameters['at'],
+            );
         }
 
         self::assertCount(1, self::service()->history($this->vehicle));
@@ -133,7 +139,12 @@ final class OdometerReadingServiceTest extends KernelTestCase
 
         self::service()->recordManual($this->vehicle, self::data('2026-10-05 08:00', 10_500));
 
-        foreach ([[9_500, ReadingRejection::LowerThanPrevious], [11_500, ReadingRejection::HigherThanNext]] as [$km, $expected]) {
+        foreach (
+            [
+                [9_500, ReadingRejection::LowerThanPrevious],
+                [11_500, ReadingRejection::HigherThanNext],
+            ] as [$km, $expected]
+        ) {
             try {
                 self::service()->recordManual($this->vehicle, self::data('2026-10-06 08:00', $km));
                 self::fail('A backfill outside its neighbours must be rejected.');
@@ -153,7 +164,13 @@ final class OdometerReadingServiceTest extends KernelTestCase
         }
 
         // Exactly now is fine.
-        self::assertSame(10_000_000, self::service()->recordManual($this->vehicle, self::data('2026-10-20 12:00', 10_000))->getOdometer()->metres());
+        self::assertSame(
+            10_000_000,
+            self::service()->recordManual(
+                $this->vehicle,
+                self::data('2026-10-20 12:00', 10_000),
+            )->getOdometer()->metres(),
+        );
     }
 
     public function testHistoryIsNewestFirstAndPerVehicle(): void
@@ -167,7 +184,10 @@ final class OdometerReadingServiceTest extends KernelTestCase
         self::service()->recordManual($this->vehicle, self::data('2026-10-03 08:00', 10_200));
         self::service()->recordManual($other, self::data('2026-10-04 08:00', 5));
 
-        $dates = array_map(static fn (OdometerReading $reading): string => $reading->getReadAt()->format('m-d'), self::service()->history($this->vehicle));
+        $dates = array_map(
+            static fn (OdometerReading $reading): string => $reading->getReadAt()->format('m-d'),
+            self::service()->history($this->vehicle),
+        );
 
         self::assertSame(['10-03', '10-02', '10-01'], $dates);
     }
@@ -184,7 +204,9 @@ final class OdometerReadingServiceTest extends KernelTestCase
         self::service()->recordManual($this->vehicle, self::data('2026-10-01 08:00', 100, DistanceUnit::Mile));
         self::entityManager()->clear();
 
-        $row = self::entityManager()->getConnection()->fetchAssociative('SELECT odometer_m, odometer_raw, odometer_raw_unit, source, read_at FROM odometer_reading');
+        $row = self::entityManager()->getConnection()->fetchAssociative(
+            'SELECT odometer_m, odometer_raw, odometer_raw_unit, source, read_at FROM odometer_reading'
+        );
 
         self::assertIsArray($row);
         self::assertSame(160_934, $row['odometer_m']);
@@ -210,13 +232,20 @@ final class OdometerReadingServiceTest extends KernelTestCase
         self::assertSame('2026-10-01 08:00:00.123456', $reloaded->getReadAt()->format('Y-m-d H:i:s.u'));
         self::assertSame(
             6,
-            $entityManager->getConnection()->fetchOne("SELECT datetime_precision FROM information_schema.columns WHERE table_name = 'odometer_reading' AND column_name = 'read_at'"),
+            $entityManager->getConnection()->fetchOne(
+                'SELECT datetime_precision FROM information_schema.columns'
+                . " WHERE table_name = 'odometer_reading' AND column_name = 'read_at'"
+            ),
         );
     }
 
     public function testAValueReadFromTheCarIsStoredWithItsRawMiles(): void
     {
-        $recording = self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-01 08:00', 'UTC'), Distance::fromMiles(1_000.5));
+        $recording = self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-10-01 08:00', 'UTC'),
+            Distance::fromMiles(1_000.5),
+        );
 
         self::assertSame(RecordOutcome::Stored, $recording->outcome);
         self::assertSame(ReadingSource::Api, $recording->stored?->getSource());
@@ -227,9 +256,17 @@ final class OdometerReadingServiceTest extends KernelTestCase
 
     public function testTheSameValueAtALaterInstantIsNotStored(): void
     {
-        self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-01 08:00', 'UTC'), Distance::fromMiles(1_000.5));
+        self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-10-01 08:00', 'UTC'),
+            Distance::fromMiles(1_000.5),
+        );
 
-        $recording = self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-02 08:00', 'UTC'), Distance::fromMiles(1_000.5));
+        $recording = self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-10-02 08:00', 'UTC'),
+            Distance::fromMiles(1_000.5),
+        );
 
         self::assertSame(RecordOutcome::Unchanged, $recording->outcome);
         self::assertCount(1, self::service()->history($this->vehicle));
@@ -237,10 +274,22 @@ final class OdometerReadingServiceTest extends KernelTestCase
 
     public function testTheSameValueAtALaterInstantIsNotedOnTheLatestReading(): void
     {
-        self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-01 08:00', 'UTC'), Distance::fromMiles(1_000.5));
-        self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-02 08:00', 'UTC'), Distance::fromMiles(1_000.5));
+        self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-10-01 08:00', 'UTC'),
+            Distance::fromMiles(1_000.5),
+        );
+        self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-10-02 08:00', 'UTC'),
+            Distance::fromMiles(1_000.5),
+        );
         // An earlier answer arriving late does not move the verification back.
-        self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-01 20:00', 'UTC'), Distance::fromMiles(1_000.5));
+        self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-10-01 20:00', 'UTC'),
+            Distance::fromMiles(1_000.5),
+        );
 
         $reading = self::service()->history($this->vehicle)[0];
 
@@ -249,19 +298,38 @@ final class OdometerReadingServiceTest extends KernelTestCase
 
     public function testAVerificationNeverGoesPastTheClock(): void
     {
-        self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-01 08:00', 'UTC'), Distance::fromMiles(1_000.5));
+        self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-10-01 08:00', 'UTC'),
+            Distance::fromMiles(1_000.5),
+        );
 
-        self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-21 08:00', 'UTC'), Distance::fromMiles(1_000.5));
+        self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-10-21 08:00', 'UTC'),
+            Distance::fromMiles(1_000.5),
+        );
 
-        self::assertSame('2026-10-20T12:00:00+00:00', self::service()->history($this->vehicle)[0]->getLastVerifiedAt()?->toIso8601String());
+        self::assertSame(
+            '2026-10-20T12:00:00+00:00',
+            self::service()->history($this->vehicle)[0]->getLastVerifiedAt()?->toIso8601String(),
+        );
     }
 
     public function testAReadingThatIsNotTheLatestIsNotConfirmed(): void
     {
-        self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-01 08:00', 'UTC'), Distance::fromMiles(1_000.5));
+        self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-10-01 08:00', 'UTC'),
+            Distance::fromMiles(1_000.5),
+        );
         self::service()->recordManual($this->vehicle, self::data('2026-10-03 08:00', 5_000));
 
-        self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-02 08:00', 'UTC'), Distance::fromMiles(1_000.5));
+        self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-10-02 08:00', 'UTC'),
+            Distance::fromMiles(1_000.5),
+        );
 
         $history = self::service()->history($this->vehicle);
         self::assertNull($history[1]->getLastVerifiedAt());
@@ -269,7 +337,11 @@ final class OdometerReadingServiceTest extends KernelTestCase
 
     public function testAReadingStartsWithoutVerification(): void
     {
-        self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-01 08:00', 'UTC'), Distance::fromMiles(1_000.5));
+        self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-10-01 08:00', 'UTC'),
+            Distance::fromMiles(1_000.5),
+        );
 
         self::assertNull(self::service()->history($this->vehicle)[0]->getLastVerifiedAt());
     }
@@ -278,7 +350,11 @@ final class OdometerReadingServiceTest extends KernelTestCase
     {
         self::service()->recordManual($this->vehicle, self::data('2026-10-01 08:00', 1_000));
 
-        $recording = self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-01 08:00', 'UTC'), Distance::fromKilometres(2_000));
+        $recording = self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-10-01 08:00', 'UTC'),
+            Distance::fromKilometres(2_000),
+        );
 
         self::assertSame(RecordOutcome::Unchanged, $recording->outcome);
     }
@@ -287,7 +363,11 @@ final class OdometerReadingServiceTest extends KernelTestCase
     {
         self::service()->recordManual($this->vehicle, self::data('2026-10-01 08:00', 10_000));
 
-        $recording = self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-02 08:00', 'UTC'), Distance::fromKilometres(9_000));
+        $recording = self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-10-02 08:00', 'UTC'),
+            Distance::fromKilometres(9_000),
+        );
 
         self::assertSame(RecordOutcome::Rejected, $recording->outcome);
         self::assertSame(ReadingRejection::LowerThanPrevious, $recording->rejection);
@@ -299,13 +379,20 @@ final class OdometerReadingServiceTest extends KernelTestCase
     {
         self::service()->recordManual($this->vehicle, self::data('2026-10-03 08:00', 10_000));
 
-        $recording = self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-10-02 08:00', 'UTC'), Distance::fromKilometres(11_000));
+        $recording = self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-10-02 08:00', 'UTC'),
+            Distance::fromKilometres(11_000),
+        );
 
         self::assertSame(ReadingRejection::HigherThanNext, $recording->rejection);
     }
 
-    private static function data(string $readAtUtc, int $value, DistanceUnit $unit = DistanceUnit::Kilometre): OdometerReadingData
-    {
+    private static function data(
+        string $readAtUtc,
+        int $value,
+        DistanceUnit $unit = DistanceUnit::Kilometre,
+    ): OdometerReadingData {
         $data = new OdometerReadingData();
         $data->readAt = CarbonImmutable::parse($readAtUtc, 'UTC');
         $data->odometer = $value;

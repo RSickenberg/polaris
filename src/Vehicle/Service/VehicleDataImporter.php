@@ -101,7 +101,9 @@ final readonly class VehicleDataImporter
                     $this->snapshots->import($vehicle, $points),
                 ),
             );
-        } catch (LeaseTermsRejected|\InvalidArgumentException $e) {
+        } catch (LeaseTermsRejected $e) {
+            throw new VehicleDataRejected(VehicleDataRejected::INVALID, $e->reason->value, $e);
+        } catch (\InvalidArgumentException $e) {
             throw new VehicleDataRejected(VehicleDataRejected::INVALID, $e->getMessage(), $e);
         }
     }

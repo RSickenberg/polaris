@@ -12,7 +12,7 @@ use Polaris\Fetching\Domain\SlotCalculator;
 use Polaris\Fetching\Entity\FetchSlotRun;
 use Polaris\Fetching\Message\FetchOdometerMessage;
 use Polaris\Fetching\Repository\FetchSlotRunRepository;
-use Polaris\Lease\Service\LeaseTermsService;
+use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
@@ -36,7 +36,7 @@ final readonly class DueFetchDispatcher
         private SlotCalculator $calculator,
         private MessageBusInterface $bus,
         private ClockInterface $clock,
-        private LeaseTermsService $leases,
+        private LeaseReturnService $leaseReturns,
     ) {
     }
 
@@ -53,7 +53,7 @@ final readonly class DueFetchDispatcher
 
         foreach ($this->entityManager->getRepository(Vehicle::class)->findAll() as $vehicle) {
             // A car given back is not read any more: no slot is recorded and nothing is queued for it.
-            if ($this->leases->isReturned($vehicle)) {
+            if ($this->leaseReturns->isReturned($vehicle)) {
                 continue;
             }
 

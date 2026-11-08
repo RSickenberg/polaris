@@ -23,7 +23,9 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 final class LeaseContractData
 {
-    /** Far above any real lease, and low enough for the projection to stay within integer range in the unit of the user. */
+    /**
+     * Far above any real lease, and low enough for the projection to stay within integer range in the unit of the user.
+     */
     public const int MAX_ALLOWANCE = 500_000;
     public const int MAX_ODOMETER = 5_000_000;
 
@@ -127,7 +129,10 @@ final class LeaseContractData
             LeaseTerm::fromCalendarDates($this->startDate, $this->endDate, $this->endDateConvention);
         } catch (\InvalidArgumentException) {
             $context->buildViolation('lease.term.whole_months')
-                ->setParameter('{{ end }}', EndDateConvention::Inclusive === $this->endDateConvention ? '2029-01-14' : '2029-01-15')
+                ->setParameter(
+                    '{{ end }}',
+                    EndDateConvention::Inclusive === $this->endDateConvention ? '2029-01-14' : '2029-01-15',
+                )
                 ->atPath('endDate')
                 ->addViolation();
         }

@@ -58,7 +58,13 @@ final class RiskLevelWatcherTest extends KernelTestCase
         $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000090'), 'Model 3', self::createUser());
         $this->entityManager->persist($this->vehicle);
         // 10,000 km after 182 days of a one-year lease: about 20,000 km projected at the end.
-        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'), Distance::fromKilometres(10_000)));
+        $this->entityManager->persist(
+            OdometerReading::manual(
+                $this->vehicle,
+                CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'),
+                Distance::fromKilometres(10_000),
+            )
+        );
         $this->entityManager->flush();
     }
 
@@ -110,7 +116,11 @@ final class RiskLevelWatcherTest extends KernelTestCase
         $this->leases->save($this->vehicle, self::data(15_000));
 
         self::assertSame(RiskCheckOutcome::Notified, $watcher->check($this->vehicle));
-        self::assertSame(RiskCheckOutcome::Unchanged, $watcher->check($this->vehicle), 'The second check finds the row of the first.');
+        self::assertSame(
+            RiskCheckOutcome::Unchanged,
+            $watcher->check($this->vehicle),
+            'The second check finds the row of the first.',
+        );
 
         self::assertCount(1, $notifier->changes);
         $change = $notifier->changes[0];
@@ -182,7 +192,11 @@ final class RiskLevelWatcherTest extends KernelTestCase
         }
 
         self::assertSame([], $this->logs());
-        self::assertSame(RiskCheckOutcome::Recorded, $this->watcher($notifier)->check($this->vehicle), 'The lock was released.');
+        self::assertSame(
+            RiskCheckOutcome::Recorded,
+            $this->watcher($notifier)->check($this->vehicle),
+            'The lock was released.',
+        );
     }
 
     public function testTheDefaultNotifierSendsNothingButTheRiseIsStillLogged(): void
@@ -190,7 +204,11 @@ final class RiskLevelWatcherTest extends KernelTestCase
         $this->leases->save($this->vehicle, self::data(30_000));
         $assessment = $this->leases->assess($this->vehicle);
         self::assertInstanceOf(LeaseAssessment::class, $assessment);
-        self::assertNull(new NullRiskAlertNotifier()->notify(new RiskLevelChange($this->vehicle, RiskLevel::Ok, RiskLevel::Over, $assessment)));
+        self::assertNull(
+            new NullRiskAlertNotifier()->notify(
+                new RiskLevelChange($this->vehicle, RiskLevel::Ok, RiskLevel::Over, $assessment)
+            )
+        );
 
         $handler = self::getContainer()->get(CheckRiskLevelHandler::class);
         $id = $this->vehicle->getId()->toRfc4122();
@@ -251,7 +269,10 @@ final class RiskLevelWatcherTest extends KernelTestCase
 
     private function lock(): \Symfony\Component\Lock\SharedLockInterface
     {
-        return self::getContainer()->get(LockFactory::class)->createLock('risk_alert_' . $this->vehicle->getId()->toBase32(), 60);
+        return self::getContainer()->get(LockFactory::class)->createLock(
+            'risk_alert_' . $this->vehicle->getId()->toBase32(),
+            60,
+        );
     }
 
     private function watcher(RiskAlertNotifier $notifier): RiskLevelWatcher

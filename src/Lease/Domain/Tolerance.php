@@ -16,7 +16,13 @@ final readonly class Tolerance
         private int $basisPoints,
     ) {
         if ($basisPoints < 0 || $basisPoints > self::MAX_BASIS_POINTS) {
-            throw new \InvalidArgumentException(\sprintf('A tolerance must be between 0 and %d basis points, got %d.', self::MAX_BASIS_POINTS, $basisPoints));
+            throw new \InvalidArgumentException(
+                \sprintf(
+                    'A tolerance must be between 0 and %d basis points, got %d.',
+                    self::MAX_BASIS_POINTS,
+                    $basisPoints,
+                )
+            );
         }
     }
 
@@ -38,7 +44,9 @@ final readonly class Tolerance
 
         // Checked before the cast: PHP 8.5 deprecates casting an out-of-range float to int.
         if ($basisPoints < 0 || $basisPoints > self::MAX_BASIS_POINTS) {
-            throw new \InvalidArgumentException(\sprintf('A tolerance must be between 0%% and %d%%, got %s%%.', self::MAX_BASIS_POINTS / 100, $percent));
+            throw new \InvalidArgumentException(
+                \sprintf('A tolerance must be between 0%% and %d%%, got %s%%.', self::MAX_BASIS_POINTS / 100, $percent)
+            );
         }
 
         return new self((int) $basisPoints);

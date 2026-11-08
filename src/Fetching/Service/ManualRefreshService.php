@@ -14,7 +14,7 @@ use Polaris\Fetching\Repository\RefreshAttemptRepository;
 use Polaris\Fetching\Service\Dto\RefreshRequestResult;
 use Polaris\Fetching\Service\Dto\WakeRequestResult;
 use Polaris\Fetching\Service\Enum\WakeRequestStatus;
-use Polaris\Lease\Service\LeaseTermsService;
+use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Tesla\Service\Enum\WakeAccess;
 use Polaris\Tesla\Service\TeslaAppSettings;
 use Polaris\Tesla\Service\TeslaVehicleWaker;
@@ -45,7 +45,7 @@ final readonly class ManualRefreshService
         private TeslaAppSettings $teslaApps,
         private TeslaVehicleWaker $waker,
         private WakeCap $wakeCap,
-        private LeaseTermsService $leases,
+        private LeaseReturnService $leaseReturns,
     ) {
     }
 
@@ -57,7 +57,7 @@ final readonly class ManualRefreshService
     {
         $vehicleId = $vehicle->getId()->toRfc4122();
 
-        if ($this->leases->isReturned($vehicle)) {
+        if ($this->leaseReturns->isReturned($vehicle)) {
             return RefreshRequestResult::returned();
         }
 
@@ -83,7 +83,7 @@ final readonly class ManualRefreshService
      */
     public function wakeOffer(Vehicle $vehicle, string $attemptId): WakeRequestResult
     {
-        if ($this->leases->isReturned($vehicle)) {
+        if ($this->leaseReturns->isReturned($vehicle)) {
             return WakeRequestResult::refused(WakeRequestStatus::Returned);
         }
 
@@ -109,7 +109,7 @@ final readonly class ManualRefreshService
      */
     public function requestWake(Vehicle $vehicle, string $attemptId): WakeRequestResult
     {
-        if ($this->leases->isReturned($vehicle)) {
+        if ($this->leaseReturns->isReturned($vehicle)) {
             return WakeRequestResult::refused(WakeRequestStatus::Returned);
         }
 

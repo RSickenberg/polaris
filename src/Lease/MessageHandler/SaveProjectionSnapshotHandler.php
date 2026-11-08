@@ -56,10 +56,24 @@ final readonly class SaveProjectionSnapshotHandler
             return;
         }
 
-        $midnight = OwnerMidnight::of(CarbonImmutable::createFromTimestamp($message->midnightTimestamp, 'UTC'), $localDay);
+        $midnight = OwnerMidnight::of(
+            CarbonImmutable::createFromTimestamp($message->midnightTimestamp, 'UTC'),
+            $localDay,
+        );
 
-        if (SnapshotOutcome::Busy === $this->snapshots->save($vehicle, $midnight) && $message->attempt < self::MAX_RETRIES) {
-            $this->bus->dispatch(new SaveProjectionSnapshot($message->vehicleId, $message->localDay, $message->midnightTimestamp, $message->attempt + 1), [new DelayStamp(self::RETRY_DELAY_MS)]);
+        if (
+            SnapshotOutcome::Busy === $this->snapshots->save($vehicle, $midnight)
+            && $message->attempt < self::MAX_RETRIES
+        ) {
+            $this->bus->dispatch(
+                new SaveProjectionSnapshot(
+                    $message->vehicleId,
+                    $message->localDay,
+                    $message->midnightTimestamp,
+                    $message->attempt + 1,
+                ),
+                [new DelayStamp(self::RETRY_DELAY_MS)],
+            );
         }
     }
 }

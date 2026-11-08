@@ -16,7 +16,13 @@ final readonly class RecentPaceWeight
         private int $basisPoints,
     ) {
         if ($basisPoints < 0 || $basisPoints > self::MAX_BASIS_POINTS) {
-            throw new \InvalidArgumentException(\sprintf('A recent pace weight must be between 0 and %d basis points, got %d.', self::MAX_BASIS_POINTS, $basisPoints));
+            throw new \InvalidArgumentException(
+                \sprintf(
+                    'A recent pace weight must be between 0 and %d basis points, got %d.',
+                    self::MAX_BASIS_POINTS,
+                    $basisPoints,
+                )
+            );
         }
     }
 
@@ -35,9 +41,9 @@ final readonly class RecentPaceWeight
      */
     public function blend(Pace $recent, Pace $overall): Pace
     {
-        return Pace::fromMetresPerDay(
-            ($this->basisPoints * $recent->metresPerDay() + (self::MAX_BASIS_POINTS - $this->basisPoints) * $overall->metresPerDay())
-            / self::MAX_BASIS_POINTS,
-        );
+        $recentPart = $this->basisPoints * $recent->metresPerDay();
+        $overallPart = (self::MAX_BASIS_POINTS - $this->basisPoints) * $overall->metresPerDay();
+
+        return Pace::fromMetresPerDay(($recentPart + $overallPart) / self::MAX_BASIS_POINTS);
     }
 }

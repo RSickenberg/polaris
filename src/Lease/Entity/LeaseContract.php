@@ -111,7 +111,9 @@ class LeaseContract
     public function markReturned(CarbonImmutable $returnedAt): void
     {
         if (0 !== $returnedAt->getOffset()) {
-            throw new \InvalidArgumentException(\sprintf('A return must be stored at a UTC instant, got %s.', $returnedAt->toIso8601String()));
+            throw new \InvalidArgumentException(
+                \sprintf('A return must be stored at a UTC instant, got %s.', $returnedAt->toIso8601String())
+            );
         }
 
         $this->returnedAt = $returnedAt;
