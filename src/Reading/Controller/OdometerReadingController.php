@@ -13,6 +13,7 @@ use Polaris\Reading\Form\Model\OdometerReadingData;
 use Polaris\Reading\Form\OdometerReadingType;
 use Polaris\Reading\Service\Exception\ReadingRejected;
 use Polaris\Reading\Service\OdometerReadingService;
+use Polaris\Shared\Service\Enum\ToastVariant;
 use Polaris\Vehicle\Entity\Vehicle;
 use Polaris\Vehicle\Service\Enum\VehiclePermission;
 use Psr\Clock\ClockInterface;
@@ -59,9 +60,9 @@ final class OdometerReadingController extends AbstractController
                 $returnedOn = $this->leaseTerms->returnedOn($vehicle);
 
                 if (null !== $returnedAt && null !== $returnedOn && $data->readAt->getTimestamp() > $returnedAt->getTimestamp()) {
-                    $this->addFlash('warning', $this->translator->trans('flash.reading_added_after_return', ['on' => $returnedOn], 'reading'));
+                    $this->addFlash(ToastVariant::Warning->value, $this->translator->trans('flash.reading_added_after_return', ['on' => $returnedOn], 'reading'));
                 } else {
-                    $this->addFlash('success', $this->translator->trans('flash.reading_added', domain: 'reading'));
+                    $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.reading_added', domain: 'reading'));
                 }
 
                 return $this->redirectToRoute('reading_history', ['id' => $vehicle->getId()->toBase32()]);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polaris\Vehicle\Controller;
 
 use Doctrine\ORM\Exception\ORMException;
+use Polaris\Shared\Service\Enum\ToastVariant;
 use Polaris\Vehicle\Entity\Vehicle;
 use Polaris\Vehicle\Form\Model\VehicleDataImportFormData;
 use Polaris\Vehicle\Form\VehicleDataImportType;
@@ -53,7 +54,7 @@ final class VehicleDataController extends AbstractController
 
             try {
                 $result = $this->importer->import($vehicle, $data->file?->getContent() ?? '');
-                $this->addFlash('success', $this->summary($result));
+                $this->addFlash(ToastVariant::Success->value, $this->summary($result));
 
                 return $this->redirectToRoute('vehicle_data', ['id' => $vehicle->getId()->toBase32()]);
             } catch (VehicleDataRejected $rejected) {

@@ -86,7 +86,10 @@ final class OdometerFetcherTest extends KernelTestCase
             ManualRefreshLimit::class,
             new ManualRefreshLimit(
                 $this->hourlyLimit,
-                new RateLimiterFactory(['id' => 'manual_refresh', 'policy' => 'fixed_window', 'limit' => 1, 'interval' => '1 hour'], new InMemoryStorage()),
+                new RateLimiterFactory(
+                    ['id' => 'manual_refresh', 'policy' => 'fixed_window', 'limit' => 1, 'interval' => '1 hour'],
+                    new InMemoryStorage(),
+                ),
             ),
         );
         $this->vehicle = new Vehicle(new Vin(FleetApiResponses::VIN), 'Model 3', $owner);
@@ -122,7 +125,11 @@ final class OdometerFetcherTest extends KernelTestCase
         $this->fetch(0);
 
         self::assertSame([], $this->entityManager()->getRepository(VehicleDataSnapshot::class)->findAll());
-        self::assertCount(1, $this->entityManager()->getRepository(OdometerReading::class)->findAll(), 'The odometer is stored all the same.');
+        self::assertCount(
+            1,
+            $this->entityManager()->getRepository(OdometerReading::class)->findAll(),
+            'The odometer is stored all the same.',
+        );
     }
 
     public function testWhatTheCarAnsweredIsKeptWithoutItsLocationOnceForEachInstant(): void
@@ -136,8 +143,15 @@ final class OdometerFetcherTest extends KernelTestCase
         $this->fetch(0, 2);
 
         $this->entityManager()->clear();
-        $snapshots = $this->entityManager()->getRepository(VehicleDataSnapshot::class)->findBy([], ['capturedAt' => 'ASC']);
-        self::assertCount(2, $snapshots, 'The same instant twice is one row; an unchanged odometer at a new instant is a new one.');
+        $snapshots = $this->entityManager()->getRepository(VehicleDataSnapshot::class)->findBy(
+            [],
+            ['capturedAt' => 'ASC'],
+        );
+        self::assertCount(
+            2,
+            $snapshots,
+            'The same instant twice is one row; an unchanged odometer at a new instant is a new one.',
+        );
         self::assertSame('2026-10-24T17:53:45+00:00', $snapshots[0]->getCapturedAt()->toIso8601String());
         $payload = $snapshots[0]->getPayload();
         $charge = $payload['charge_state'] ?? null;
@@ -223,7 +237,11 @@ final class OdometerFetcherTest extends KernelTestCase
 
         $this->fetch(0);
 
-        self::assertSame(3_360_000, $this->queued()[0]->last(DelayStamp::class)?->getDelay(), 'The next check is at 20:00, an hour after the slot.');
+        self::assertSame(
+            3_360_000,
+            $this->queued()[0]->last(DelayStamp::class)?->getDelay(),
+            'The next check is at 20:00, an hour after the slot.',
+        );
     }
 
     public function testACarThatStaysAsleepForTheWholeWindowIsSkippedAfterFourChecksWithoutWaking(): void
@@ -235,7 +253,10 @@ final class OdometerFetcherTest extends KernelTestCase
             $statuses[] = $this->fetch($attempt);
         }
 
-        self::assertSame([SlotRunStatus::Retrying, SlotRunStatus::Retrying, SlotRunStatus::Retrying, SlotRunStatus::Skipped], $statuses);
+        self::assertSame(
+            [SlotRunStatus::Retrying, SlotRunStatus::Retrying, SlotRunStatus::Retrying, SlotRunStatus::Skipped],
+            $statuses,
+        );
         self::assertCount(3, $this->queued(), 'The last check queues nothing.');
         self::assertSame(SlotRunStatus::Skipped, $this->slotRun()->getStatus());
         self::assertSame(4, $this->slotRun()->getAttempts());
@@ -281,7 +302,9 @@ final class OdometerFetcherTest extends KernelTestCase
     {
         $this->answerWith('asleep');
 
-        $status = self::getContainer()->get(OdometerFetcher::class)->fetch(new FetchOdometerMessage($this->vehicle->getId()->toRfc4122()));
+        $status = self::getContainer()->get(OdometerFetcher::class)->fetch(
+            new FetchOdometerMessage($this->vehicle->getId()->toRfc4122())
+        );
 
         self::assertSame(SlotRunStatus::Skipped, $status);
         self::assertSame([], $this->queued());
@@ -308,7 +331,9 @@ final class OdometerFetcherTest extends KernelTestCase
         $this->fetch(0);
         $this->answerWith('online', 100.0);
         $this->requests = [];
-        $this->entityManager()->createQuery('UPDATE ' . FetchSlotRun::class . ' r SET r.status = :status')->setParameter('status', SlotRunStatus::Superseded)->execute();
+        $this->entityManager()->createQuery(
+            'UPDATE ' . FetchSlotRun::class . ' r SET r.status = :status'
+        )->setParameter('status', SlotRunStatus::Superseded)->execute();
         $this->entityManager()->clear();
 
         self::assertSame(SlotRunStatus::Superseded, $this->fetch(1));
@@ -318,7 +343,9 @@ final class OdometerFetcherTest extends KernelTestCase
 
     public function testAVehicleThatNoLongerExistsIsDropped(): void
     {
-        $status = self::getContainer()->get(OdometerFetcher::class)->fetch(new FetchOdometerMessage('01JAAAAAAAAAAAAAAAAAAAAAAA', self::slot()->getTimestamp()));
+        $status = self::getContainer()->get(OdometerFetcher::class)->fetch(
+            new FetchOdometerMessage('01JAAAAAAAAAAAAAAAAAAAAAAA', self::slot()->getTimestamp())
+        );
 
         self::assertSame(SlotRunStatus::Skipped, $status);
         self::assertSame([], $this->requests);
@@ -326,8 +353,12 @@ final class OdometerFetcherTest extends KernelTestCase
 
     public function testASuccessfulReadDeletesTheSlotsOlderThanADay(): void
     {
-        $this->entityManager()->persist(new FetchSlotRun($this->vehicle, self::slot()->subHours(25), self::slot()->subHours(25)));
-        $this->entityManager()->persist(new FetchSlotRun($this->vehicle, self::slot()->subHours(23), self::slot()->subHours(23)));
+        $this->entityManager()->persist(
+            new FetchSlotRun($this->vehicle, self::slot()->subHours(25), self::slot()->subHours(25))
+        );
+        $this->entityManager()->persist(
+            new FetchSlotRun($this->vehicle, self::slot()->subHours(23), self::slot()->subHours(23))
+        );
         $this->entityManager()->flush();
         $this->answerWith('online', 100.0);
 
@@ -343,7 +374,9 @@ final class OdometerFetcherTest extends KernelTestCase
 
     public function testNothingIsDeletedWhenTheCarDoesNotAnswer(): void
     {
-        $this->entityManager()->persist(new FetchSlotRun($this->vehicle, self::slot()->subHours(25), self::slot()->subHours(25)));
+        $this->entityManager()->persist(
+            new FetchSlotRun($this->vehicle, self::slot()->subHours(25), self::slot()->subHours(25))
+        );
         $this->entityManager()->flush();
         $this->answerWith('asleep');
 
@@ -378,7 +411,11 @@ final class OdometerFetcherTest extends KernelTestCase
         $this->useHourlyLimit(true);
         $this->answerWith('asleep');
         self::assertSame(RefreshOutcome::Asleep, $this->refresh()[1]);
-        self::assertSame(RefreshOutcome::Asleep, $this->refresh()[1], 'Looking at a sleeping car is free, as often as asked.');
+        self::assertSame(
+            RefreshOutcome::Asleep,
+            $this->refresh()[1],
+            'Looking at a sleeping car is free, as often as asked.',
+        );
 
         $this->answerWith('online', 100.0);
         $this->forgetRequests();
@@ -414,7 +451,11 @@ final class OdometerFetcherTest extends KernelTestCase
         self::assertSame(SlotRunStatus::Stored, $this->fetch(0, 1), 'The scheduled read of a later slot goes through.');
 
         $this->answerWith('online', 130.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS + 7_200_000);
-        self::assertSame(RefreshOutcome::Limited, $this->refresh()[1], 'It did not give the manual refresh a new hour.');
+        self::assertSame(
+            RefreshOutcome::Limited,
+            $this->refresh()[1],
+            'It did not give the manual refresh a new hour.',
+        );
     }
 
     public function testAManualRefreshOfAnOfflineCarSaysSo(): void
@@ -467,7 +508,9 @@ final class OdometerFetcherTest extends KernelTestCase
         $attempt = $this->newAttempt();
 
         try {
-            self::getContainer()->get(OdometerFetcher::class)->fetch(new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), null, 0, $attempt->getId()->toRfc4122()));
+            self::getContainer()->get(OdometerFetcher::class)->fetch(
+                new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), null, 0, $attempt->getId()->toRfc4122())
+            );
             self::fail('The Tesla error must reach the failure transport.');
         } catch (FleetApiError) {
             self::assertSame(RefreshOutcome::Failed, $this->outcomeOf($attempt));
@@ -560,7 +603,10 @@ final class OdometerFetcherTest extends KernelTestCase
 
     private function holdLock(): \Symfony\Component\Lock\SharedLockInterface
     {
-        $lock = self::getContainer()->get(LockFactory::class)->createLock('odometer_fetch_' . $this->vehicle->getId()->toBase32(), 60);
+        $lock = self::getContainer()->get(LockFactory::class)->createLock(
+            'odometer_fetch_' . $this->vehicle->getId()->toBase32(),
+            60,
+        );
         self::assertTrue($lock->acquire(), 'The test could not take the lock.');
 
         return $lock;
@@ -583,8 +629,11 @@ final class OdometerFetcherTest extends KernelTestCase
         );
     }
 
-    private function answerWith(string $state, ?float $miles = null, int $timestampMs = FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS): void
-    {
+    private function answerWith(
+        string $state,
+        ?float $miles = null,
+        int $timestampMs = FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS,
+    ): void {
         $this->state = $state;
         $this->miles = $miles ?? 0.0;
         $this->timestampMs = $timestampMs;

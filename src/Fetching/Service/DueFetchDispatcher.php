@@ -19,11 +19,12 @@ use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 /**
- * Queues one fetch per vehicle per slot that is due; a newer slot supersedes an older one that is still retrying. Slots are the local times of the owner turned into
- * UTC instants now, so a daylight saving change moves nothing by hand. A slot is recorded before its message
- * is queued and looked up first, so the tick can run as often as it likes (the unique (vehicle, slot) pair
- * backs this up if two ticks ever overlap). A slot whose window already closed (the worker was down) is not run late.
- * A vehicle whose lease is returned gets nothing; once the return is undone, fetching resumes at the next slot.
+ * Queues one fetch per vehicle per slot that is due; a newer slot supersedes an older one that is still retrying. Slots
+ * are the local times of the owner turned into UTC instants now, so a daylight saving change moves nothing by hand. A
+ * slot is recorded before its message is queued and looked up first, so the tick can run as often as it likes (the
+ * unique (vehicle, slot) pair backs this up if two ticks ever overlap). A slot whose window already closed (the worker
+ * was down) is not run late. A vehicle whose lease is returned gets nothing; once the return is undone, fetching
+ * resumes at the next slot.
  */
 final readonly class DueFetchDispatcher
 {
@@ -56,7 +57,11 @@ final readonly class DueFetchDispatcher
                 continue;
             }
 
-            $slots = $this->calculator->around($now, $vehicle->getOwner()->getTimeZone(), $this->schedules->slotsFor($vehicle));
+            $slots = $this->calculator->around(
+                $now,
+                $vehicle->getOwner()->getTimeZone(),
+                $this->schedules->slotsFor($vehicle),
+            );
 
             foreach ($slots as $slot) {
                 if (!FetchWindow::isOpen($slot, $now) || null !== $this->runs->findAt($vehicle, $slot)) {

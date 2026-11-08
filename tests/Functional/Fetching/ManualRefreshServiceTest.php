@@ -87,7 +87,10 @@ final class ManualRefreshServiceTest extends KernelTestCase
     public function testARequestDoesNotSpendTheHourUntilTheCarIsRead(): void
     {
         self::assertTrue($this->service()->request($this->vehicle)->isAccepted());
-        self::assertTrue($this->service()->request($this->vehicle)->isAccepted(), 'A car found asleep costs nothing against the limit.');
+        self::assertTrue(
+            $this->service()->request($this->vehicle)->isAccepted(),
+            'A car found asleep costs nothing against the limit.',
+        );
         self::assertCount(2, $this->queued());
 
         self::assertNull($this->limit()->consume($this->vehicle), 'The fetch spends the hour when it reads the car.');
@@ -152,7 +155,10 @@ final class ManualRefreshServiceTest extends KernelTestCase
     {
         self::assertTrue(new ConfiguredManualRefreshPolicy(true)->isLimited($this->vehicle));
         self::assertFalse(new ConfiguredManualRefreshPolicy(false)->isLimited($this->vehicle));
-        self::assertTrue(self::getContainer()->get(ManualRefreshPolicy::class)->isLimited($this->vehicle), 'The shipped default limits.');
+        self::assertTrue(
+            self::getContainer()->get(ManualRefreshPolicy::class)->isLimited($this->vehicle),
+            'The shipped default limits.',
+        );
     }
 
     public function testAWakeConfirmedAfterAnAsleepRefreshContinuesTheSameRefreshWithoutUsingTheHourlyLimit(): void
@@ -180,7 +186,11 @@ final class ManualRefreshServiceTest extends KernelTestCase
         self::assertSame($attempt->getId()->toRfc4122(), $message->refreshId);
         $stored = $this->entityManager()->find(RefreshAttempt::class, $attempt->getId());
         self::assertSame(RefreshOutcome::Queued, $stored?->getOutcome());
-        self::assertCount(2, $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(), 'The wake did not create a refresh.');
+        self::assertCount(
+            2,
+            $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(),
+            'The wake did not create a refresh.',
+        );
         $this->limit()->consume($vehicle);
         self::assertFalse($service->request($vehicle)->isAccepted(), 'The hourly limit still applies after a wake.');
     }
@@ -196,7 +206,10 @@ final class ManualRefreshServiceTest extends KernelTestCase
         $result = $service->requestWake($this->vehicle, $attempt->getId()->toRfc4122());
 
         self::assertTrue($result->isAccepted());
-        self::assertSame(RefreshOutcome::Queued, $this->entityManager()->find(RefreshAttempt::class, $attempt->getId())?->getOutcome());
+        self::assertSame(
+            RefreshOutcome::Queued,
+            $this->entityManager()->find(RefreshAttempt::class, $attempt->getId())?->getOutcome(),
+        );
     }
 
     public function testAWakeThatTeslaCouldNotDeliverIsNotOfferedAgain(): void
@@ -207,7 +220,10 @@ final class ManualRefreshServiceTest extends KernelTestCase
         $attempt->settle(RefreshOutcome::WakeFailed, $this->now());
         $this->entityManager()->flush();
 
-        self::assertSame(WakeRequestStatus::NothingToWake, $service->requestWake($this->vehicle, $attempt->getId()->toRfc4122())->status);
+        self::assertSame(
+            WakeRequestStatus::NothingToWake,
+            $service->requestWake($this->vehicle, $attempt->getId()->toRfc4122())->status,
+        );
     }
 
     public function testAWakeIsRefusedUnlessTheRefreshFoundTheCarAsleepAndRecently(): void
@@ -219,13 +235,25 @@ final class ManualRefreshServiceTest extends KernelTestCase
         $sent = \count($this->queued());
 
         self::mockTime('2026-10-26 12:10:01 UTC');
-        self::assertSame(WakeRequestStatus::NothingToWake, $service->requestWake($this->vehicle, $id)->status, 'Ten minutes is the limit.');
+        self::assertSame(
+            WakeRequestStatus::NothingToWake,
+            $service->requestWake($this->vehicle, $id)->status,
+            'Ten minutes is the limit.',
+        );
 
         self::mockTime('2026-10-26 12:09:59 UTC');
         $attempt->settle(RefreshOutcome::Stored, $this->now());
         $this->entityManager()->flush();
-        self::assertSame(WakeRequestStatus::NothingToWake, $service->requestWake($this->vehicle, $id)->status, 'A car that was read is not woken.');
-        self::assertSame(WakeRequestStatus::NothingToWake, $service->requestWake($this->other, $id)->status, 'The refresh of another vehicle is not found.');
+        self::assertSame(
+            WakeRequestStatus::NothingToWake,
+            $service->requestWake($this->vehicle, $id)->status,
+            'A car that was read is not woken.',
+        );
+        self::assertSame(
+            WakeRequestStatus::NothingToWake,
+            $service->requestWake($this->other, $id)->status,
+            'The refresh of another vehicle is not found.',
+        );
         self::assertSame(WakeRequestStatus::NothingToWake, $service->requestWake($this->vehicle, 'not-an-id')->status);
         self::assertCount($sent, $this->queued());
     }
@@ -236,16 +264,27 @@ final class ManualRefreshServiceTest extends KernelTestCase
         $attempt = $this->asleepAttempt($service);
         $id = $attempt->getId()->toRfc4122();
 
-        self::assertSame(WakeRequestStatus::NotConnected, $service->requestWake($this->vehicle, $id)->status, 'No Tesla app yet.');
+        self::assertSame(
+            WakeRequestStatus::NotConnected,
+            $service->requestWake($this->vehicle, $id)->status,
+            'No Tesla app yet.',
+        );
 
         $app = self::createConfiguredApp($this->owner);
-        self::assertSame(WakeRequestStatus::NotConnected, $service->requestWake($this->vehicle, $id)->status, 'An app, but no connection.');
+        self::assertSame(
+            WakeRequestStatus::NotConnected,
+            $service->requestWake($this->vehicle, $id)->status,
+            'An app, but no connection.',
+        );
 
         self::createToken($app, CarbonImmutable::parse('2026-10-26 20:00:00', 'UTC'));
         $result = $service->requestWake($this->vehicle, $id);
         self::assertSame(WakeRequestStatus::ScopeMissing, $result->status);
         self::assertFalse($result->isAccepted());
-        self::assertSame(RefreshOutcome::Asleep, $this->entityManager()->find(RefreshAttempt::class, $attempt->getId())?->getOutcome());
+        self::assertSame(
+            RefreshOutcome::Asleep,
+            $this->entityManager()->find(RefreshAttempt::class, $attempt->getId())?->getOutcome(),
+        );
     }
 
     public function testAWakeIsRefusedWhenTheCapIsReachedAndSaysWhenItFreesUp(): void
@@ -264,10 +303,16 @@ final class ManualRefreshServiceTest extends KernelTestCase
 
         self::assertSame(WakeRequestStatus::CapReached, $result->status);
         self::assertSame('2026-10-27 02:00:00', $result->availableAt?->toDateTimeString());
-        self::assertSame(RefreshOutcome::Asleep, $this->entityManager()->find(RefreshAttempt::class, $attempt->getId())?->getOutcome());
+        self::assertSame(
+            RefreshOutcome::Asleep,
+            $this->entityManager()->find(RefreshAttempt::class, $attempt->getId())?->getOutcome(),
+        );
 
         $other = $this->asleepAttempt($service, $this->other);
-        self::assertTrue($service->requestWake($this->other, $other->getId()->toRfc4122())->isAccepted(), 'The cap is per vehicle.');
+        self::assertTrue(
+            $service->requestWake($this->other, $other->getId()->toRfc4122())->isAccepted(),
+            'The cap is per vehicle.',
+        );
     }
 
     public function testAWakeIsRefusedWhileTheHourIsSpentBecauseNoReadCouldFollow(): void
@@ -281,7 +326,10 @@ final class ManualRefreshServiceTest extends KernelTestCase
 
         self::assertSame(WakeRequestStatus::RateLimited, $result->status);
         self::assertNotNull($result->availableAt);
-        self::assertSame(RefreshOutcome::Asleep, $this->entityManager()->find(RefreshAttempt::class, $attempt->getId())?->getOutcome());
+        self::assertSame(
+            RefreshOutcome::Asleep,
+            $this->entityManager()->find(RefreshAttempt::class, $attempt->getId())?->getOutcome(),
+        );
     }
 
     public function testAWakeIsRefusedWhileAnotherIsRunning(): void
@@ -294,7 +342,10 @@ final class ManualRefreshServiceTest extends KernelTestCase
         $this->entityManager()->flush();
         $attempt = $this->asleepAttempt($service);
 
-        self::assertSame(WakeRequestStatus::NothingToWake, $service->requestWake($this->vehicle, $attempt->getId()->toRfc4122())->status);
+        self::assertSame(
+            WakeRequestStatus::NothingToWake,
+            $service->requestWake($this->vehicle, $attempt->getId()->toRfc4122())->status,
+        );
     }
 
     private function now(): CarbonImmutable
@@ -305,7 +356,11 @@ final class ManualRefreshServiceTest extends KernelTestCase
     private function connect(): TeslaApp
     {
         $app = self::createConfiguredApp($this->owner);
-        self::createToken($app, CarbonImmutable::parse('2026-10-26 20:00:00', 'UTC'), scopes: 'openid offline_access vehicle_device_data vehicle_cmds');
+        self::createToken(
+            $app,
+            CarbonImmutable::parse('2026-10-26 20:00:00', 'UTC'),
+            scopes: 'openid offline_access vehicle_device_data vehicle_cmds',
+        );
 
         return $app;
     }
@@ -344,7 +399,10 @@ final class ManualRefreshServiceTest extends KernelTestCase
     {
         return new ManualRefreshLimit(
             $policy ?? self::getContainer()->get(ManualRefreshPolicy::class),
-            new RateLimiterFactory(['id' => 'manual_refresh', 'policy' => 'fixed_window', 'limit' => 1, 'interval' => '1 hour'], $this->storage),
+            new RateLimiterFactory(
+                ['id' => 'manual_refresh', 'policy' => 'fixed_window', 'limit' => 1, 'interval' => '1 hour'],
+                $this->storage,
+            ),
         );
     }
 

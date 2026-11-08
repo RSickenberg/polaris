@@ -6,6 +6,7 @@ namespace Polaris\Tesla\Controller;
 
 use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
+use Polaris\Shared\Service\Enum\ToastVariant;
 use Polaris\Tesla\Domain\CallbackParameters;
 use Polaris\Tesla\Entity\TeslaApp;
 use Polaris\Tesla\Form\ActionType;
@@ -238,7 +239,7 @@ final class TeslaConnectionController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->connection->disconnect($app);
-            $this->addFlash('success', $this->translator->trans('flash.disconnected', domain: 'tesla'));
+            $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.disconnected', domain: 'tesla'));
         }
 
         return $this->redirectToRoute('tesla_settings');
@@ -310,10 +311,10 @@ final class TeslaConnectionController extends AbstractController
 
     private function connected(ConnectionResult $result): Response
     {
-        $this->addFlash('success', $this->translator->trans('flash.connected', domain: 'tesla'));
+        $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.connected', domain: 'tesla'));
 
         if ($result->regionDiffers) {
-            $this->addFlash('error', $this->translator->trans('flash.region_differs', domain: 'tesla'));
+            $this->addFlash(ToastVariant::Danger->value, $this->translator->trans('flash.region_differs', domain: 'tesla'));
         }
 
         return $this->redirectToRoute('tesla_settings');
@@ -321,7 +322,7 @@ final class TeslaConnectionController extends AbstractController
 
     private function reject(ConnectionRejected $rejected): Response
     {
-        $this->addFlash('error', $this->translator->trans($rejected->key, domain: 'tesla'));
+        $this->addFlash(ToastVariant::Danger->value, $this->translator->trans($rejected->key, domain: 'tesla'));
 
         return $this->redirectToRoute(ConnectionRejected::NO_CONSENT === $rejected->key ? 'tesla_consent' : 'tesla_connect');
     }

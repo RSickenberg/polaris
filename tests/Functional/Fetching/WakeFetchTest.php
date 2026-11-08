@@ -42,6 +42,7 @@ final class WakeFetchTest extends KernelTestCase
     use TeslaFixtures;
 
     private const string NOW = '2026-10-27 20:00:00';
+    private const string VEHICLES = 'https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles';
     private const string WITH_WAKE = 'openid offline_access vehicle_device_data vehicle_cmds';
 
     private TeslaApp $app;
@@ -82,7 +83,13 @@ final class WakeFetchTest extends KernelTestCase
         $status = $this->fetch($attempt, true);
 
         self::assertSame(SlotRunStatus::Retrying, $status);
-        self::assertSame(['GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . FleetApiResponses::VIN, 'POST https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . FleetApiResponses::VIN . '/wake_up'], $this->requests);
+        self::assertSame(
+            [
+                'GET ' . self::VEHICLES . '/' . FleetApiResponses::VIN,
+                'POST ' . self::VEHICLES . '/' . FleetApiResponses::VIN . '/wake_up',
+            ],
+            $this->requests,
+        );
         self::assertSame(RefreshOutcome::Waking, $this->outcomeOf($attempt));
         self::assertSame(self::NOW, $attempt->getWokeAt()?->toDateTimeString());
         $queued = $this->queued();
@@ -102,8 +109,8 @@ final class WakeFetchTest extends KernelTestCase
         self::assertSame(RefreshOutcome::Stored, $this->outcomeOf($attempt));
         self::assertSame(
             [
-                'GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles',
-                'GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . FleetApiResponses::VIN . '/vehicle_data',
+                'GET ' . self::VEHICLES,
+                'GET ' . self::VEHICLES . '/' . FleetApiResponses::VIN . '/vehicle_data',
             ],
             $this->requests,
             'The list already said the car is online, so its state is not asked again before the live read.',
@@ -123,8 +130,16 @@ final class WakeFetchTest extends KernelTestCase
             self::mockTime(\sprintf('2026-10-27 20:%02d:%02d UTC', intdiv($seconds, 60), $seconds % 60));
             $this->requests = [];
 
-            self::assertSame(SlotRunStatus::Retrying, $this->process($message), "At {$seconds} s the car is still asleep.");
-            self::assertSame(['GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles'], $this->requests, 'A poll only reads the list.');
+            self::assertSame(
+                SlotRunStatus::Retrying,
+                $this->process($message),
+                "At {$seconds} s the car is still asleep.",
+            );
+            self::assertSame(
+                ['GET ' . self::VEHICLES],
+                $this->requests,
+                'A poll only reads the list.',
+            );
             self::assertSame(RefreshOutcome::Waking, $this->outcomeOf($attempt));
             self::assertSame(10_000, $this->lastEnvelope()->last(DelayStamp::class)?->getDelay());
             $message = $this->lastQueued();
@@ -140,7 +155,11 @@ final class WakeFetchTest extends KernelTestCase
         self::assertSame(RefreshOutcome::WakeTimeout, $this->outcomeOf($attempt));
         self::assertCount(9, $this->queued(), 'The wake, then eight polls: the last check queues nothing.');
         self::assertSame([], $this->entityManager()->getRepository(OdometerReading::class)->findAll());
-        self::assertSame(['GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles'], $this->requests, 'The last check reads the list and never the car.');
+        self::assertSame(
+            ['GET ' . self::VEHICLES],
+            $this->requests,
+            'The last check reads the list and never the car.',
+        );
     }
 
     public function testACarThatComesOnlineAtTheDeadlineIsStillRead(): void
@@ -164,14 +183,21 @@ final class WakeFetchTest extends KernelTestCase
 
         self::assertSame(RefreshOutcome::Waking, $this->outcomeOf($attempt));
         self::assertSame(NoReadingReason::Offline, $attempt->getWokeFrom());
-        self::assertContains('POST https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . FleetApiResponses::VIN . '/wake_up', $this->requests);
+        self::assertContains(
+            'POST ' . self::VEHICLES . '/' . FleetApiResponses::VIN . '/wake_up',
+            $this->requests,
+        );
 
         // The wake works: the car is online ten seconds later.
         $this->state = 'online';
         self::mockTime('2026-10-27 20:00:10 UTC');
         self::assertSame(SlotRunStatus::Stored, $this->process($this->lastQueued()));
         self::assertSame(RefreshOutcome::Stored, $this->outcomeOf($attempt));
-        self::assertSame(NoReadingReason::Offline, $attempt->getWokeFrom(), 'The state before the wake stays, so the result can be read against it.');
+        self::assertSame(
+            NoReadingReason::Offline,
+            $attempt->getWokeFrom(),
+            'The state before the wake stays, so the result can be read against it.',
+        );
     }
 
     public function testAnOfflineCarThatDoesNotAnswerTheWakeEndsInATimeoutWithItsStateRecorded(): void
@@ -234,7 +260,10 @@ final class WakeFetchTest extends KernelTestCase
 
         self::assertSame(RefreshOutcome::WakeCapReached, $this->outcomeOf($attempt));
         self::assertNull($attempt->getWokeAt());
-        self::assertNotContains('POST', array_map(static fn (string $request): string => explode(' ', $request)[0], $this->requests));
+        self::assertNotContains(
+            'POST',
+            array_map(static fn (string $request): string => explode(' ', $request)[0], $this->requests),
+        );
     }
 
     public function testAWakeOlderThanTwentyFourHoursDoesNotCountAnyMore(): void
@@ -308,7 +337,9 @@ final class WakeFetchTest extends KernelTestCase
         $this->entityManager()->persist(new FetchSlotRun($this->vehicle, $slot, $slot));
         $this->entityManager()->flush();
 
-        self::getContainer()->get(OdometerFetcher::class)->fetch(new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), $slot->getTimestamp(), 0, null, true));
+        self::getContainer()->get(OdometerFetcher::class)->fetch(
+            new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), $slot->getTimestamp(), 0, null, true)
+        );
 
         self::assertCount(1, $this->requests);
         self::assertStringStartsWith('GET ', $this->requests[0]);
@@ -357,7 +388,15 @@ final class WakeFetchTest extends KernelTestCase
 
     private function fetch(RefreshAttempt $attempt, bool $allowWake): SlotRunStatus
     {
-        return $this->process(new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), null, 0, $attempt->getId()->toRfc4122(), $allowWake));
+        return $this->process(
+            new FetchOdometerMessage(
+                $this->vehicle->getId()->toRfc4122(),
+                null,
+                0,
+                $attempt->getId()->toRfc4122(),
+                $allowWake,
+            )
+        );
     }
 
     private function process(FetchOdometerMessage $message): SlotRunStatus
@@ -410,11 +449,22 @@ final class WakeFetchTest extends KernelTestCase
                 return new MockResponse('{"error":"not_a_JSON_request"}', ['http_code' => 406]);
             }
 
-            return new MockResponse(200 === $this->wakeStatus ? FleetApiResponses::vehicle('asleep') : '{}', ['http_code' => $this->wakeStatus]);
+            return new MockResponse(
+                200 === $this->wakeStatus ? FleetApiResponses::vehicle('asleep') : '{}',
+                ['http_code' => $this->wakeStatus],
+            );
         }
 
         if (str_ends_with($url, '/api/1/vehicles')) {
-            return new MockResponse((string) json_encode(['response' => [['vin' => FleetApiResponses::VIN, 'display_name' => 'Lucia', 'state' => $this->state]]]));
+            return new MockResponse(
+                (string) json_encode(
+                    [
+                        'response' => [
+                            ['vin' => FleetApiResponses::VIN, 'display_name' => 'Lucia', 'state' => $this->state],
+                        ],
+                    ]
+                )
+            );
         }
 
         if (str_ends_with($url, '/vehicle_data')) {

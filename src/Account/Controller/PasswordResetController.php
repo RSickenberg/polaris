@@ -10,6 +10,7 @@ use Polaris\Account\Form\Model\ForgotPasswordData;
 use Polaris\Account\Form\Model\ResetPasswordData;
 use Polaris\Account\Form\ResetPasswordType;
 use Polaris\Account\Service\PasswordResetService;
+use Polaris\Shared\Service\Enum\ToastVariant;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -86,7 +87,7 @@ final class PasswordResetController extends AbstractController
             /** @var ResetPasswordData $data */
             $data = $form->getData();
             $this->reset->reset($pending, $data->newPassword);
-            $this->addFlash('success', $this->translator->trans('flash.password_reset', domain: 'account'));
+            $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.password_reset', domain: 'account'));
 
             return $this->noReferrer($this->redirectToRoute('account_login'));
         }

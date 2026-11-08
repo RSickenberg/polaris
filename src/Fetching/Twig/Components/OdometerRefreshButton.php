@@ -15,6 +15,7 @@ use Polaris\Fetching\Service\Dto\WakeRequestResult;
 use Polaris\Fetching\Service\Enum\RefreshRequestStatus;
 use Polaris\Fetching\Service\Enum\WakeRequestStatus;
 use Polaris\Fetching\Service\ManualRefreshService;
+use Polaris\Shared\Service\Enum\ToastVariant;
 use Polaris\Vehicle\Entity\Vehicle;
 use Polaris\Vehicle\Service\Enum\VehiclePermission;
 use Psr\Clock\ClockInterface;
@@ -69,10 +70,10 @@ final class OdometerRefreshButton
     public ?string $declinedAttemptId = null;
 
     /**
-     * What the last confirmed wake got when it was refused, a {@see WakeRequestStatus} value; null otherwise.
+     * What the last confirmed wake got when it was refused; null otherwise.
      */
     #[LiveProp]
-    public ?string $wakeRefusal = null;
+    public ?WakeRequestStatus $wakeRefusal = null;
 
     /**
      * The UTC timestamp from which another wake is allowed, set with a refused wake because of the cap.
@@ -91,6 +92,17 @@ final class OdometerRefreshButton
      */
     #[LiveProp]
     public int $clicks = 0;
+
+    /**
+     * Loaded once per request: the template and {@see self::toast()} ask for them several times.
+     */
+    private ?Vehicle $loadedVehicle = null;
+
+    private ?RefreshAttempt $loadedAttempt = null;
+
+    private ?WakeRequestResult $offer = null;
+
+    private bool $offerLoaded = false;
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
@@ -140,7 +152,7 @@ final class OdometerRefreshButton
 
         $result = $this->refreshes->requestWake($this->vehicle(), $this->attemptId);
 
-        $this->wakeRefusal = $result->isAccepted() ? null : $result->status->value;
+        $this->wakeRefusal = $result->isAccepted() ? null : $result->status;
         $this->wakeAvailableAt = $result->availableAt?->getTimestamp();
     }
 
@@ -159,15 +171,84 @@ final class OdometerRefreshButton
      */
     public function wakeOffer(): ?WakeRequestResult
     {
-        if (null === $this->attemptId) {
+        if (!$this->offerLoaded) {
+            $this->offer = $this->loadWakeOffer();
+            $this->offerLoaded = true;
+        }
+
+        return $this->offer;
+    }
+
+    /**
+     * Whether the dialog that asks to wake the car is open.
+     */
+    public function isWakeDialogOpen(): bool
+    {
+        return true === $this->wakeOffer()?->isAccepted();
+    }
+
+    /**
+     * The translation key prefix of the dialog: an offline car gets a dialog that promises nothing.
+     */
+    public function wakeDialogKey(): string
+    {
+        return RefreshOutcome::Offline === $this->outcome() ? 'wake.dialog_offline' : 'wake.dialog';
+    }
+
+    /**
+     * Whether the connection lacks the scope to wake: the component then links to the reconnection.
+     */
+    public function needsReconnectToWake(): bool
+    {
+        return WakeRequestStatus::ScopeMissing === $this->wakeOffer()?->status;
+    }
+
+    /**
+     * What to announce after the last click, null when there is nothing new to say.
+     */
+    public function toast(): ?RefreshToast
+    {
+        $offer = $this->wakeOffer();
+        $offerStatus = $offer?->status;
+        $offerRefused = WakeRequestStatus::CapReached === $offerStatus || WakeRequestStatus::RateLimited === $offerStatus;
+        $wakeStatus = $this->wakeRefusal ?? ($offerRefused ? $offerStatus : null);
+
+        if (null !== $wakeStatus) {
+            $availableAt = null !== $this->wakeRefusal ? $this->wakeAvailableAt() : $offer?->availableAt;
+            $disabled = WakeRequestStatus::CapReached === $wakeStatus && null === $availableAt;
+
+            return new RefreshToast(
+                'wake-' . $this->clicks,
+                ToastVariant::Warning,
+                $disabled ? 'wake.disabled' : 'wake.' . $wakeStatus->value,
+                $availableAt,
+            );
+        }
+
+        if ($this->returned) {
+            return new RefreshToast('returned-' . $this->clicks, ToastVariant::Info, 'outcome.returned');
+        }
+
+        $retryAt = $this->retryAt();
+
+        if (null !== $retryAt) {
+            return new RefreshToast('limited-' . $this->clicks, ToastVariant::Warning, 'limited.message', $retryAt);
+        }
+
+        $outcome = $this->outcome();
+
+        if (null === $outcome || $this->isWakeDialogOpen()) {
             return null;
         }
 
-        if ($this->declinedAttemptId === $this->attemptId || !\in_array($this->outcome(), [RefreshOutcome::Asleep, RefreshOutcome::Offline], true)) {
-            return null;
+        if ($outcome->isSettled()) {
+            return new RefreshToast('result-' . $this->clicks, self::variantOf($outcome), 'outcome.' . $outcome->value);
         }
 
-        return $this->refreshes->wakeOffer($this->vehicle(), $this->attemptId);
+        // Still queued after the polling stopped: the result will show on a later reading.
+        return $this->isPolling()
+            ? null
+            : new RefreshToast('result-' . $this->clicks, ToastVariant::Info, 'outcome.queued_late');
     }
 
     public function wakeAvailableAt(): ?CarbonImmutable
@@ -204,7 +285,9 @@ final class OdometerRefreshButton
 
         return null !== $attempt
             && !$attempt->getOutcome()->isSettled()
-            && $attempt->getUpdatedAt()->addSeconds(self::POLL_SECONDS) > CarbonImmutable::instance($this->clock->now());
+            && $attempt->getUpdatedAt()->addSeconds(self::POLL_SECONDS) > CarbonImmutable::instance(
+                $this->clock->now()
+            );
     }
 
     public function timeZone(): string
@@ -214,13 +297,69 @@ final class OdometerRefreshButton
         return $user instanceof User ? $user->getTimeZone() : 'UTC';
     }
 
-    private function attempt(): ?RefreshAttempt
+    private function loadWakeOffer(): ?WakeRequestResult
     {
-        return null === $this->attemptId ? null : $this->attempts->findOf($this->vehicle(), $this->attemptId);
+        if (null === $this->attemptId || $this->declinedAttemptId === $this->attemptId) {
+            return null;
+        }
+
+        if (true !== $this->outcome()?->isWakeable()) {
+            return null;
+        }
+
+        return $this->refreshes->wakeOffer($this->vehicle(), $this->attemptId);
     }
 
+    /**
+     * How to tell the user: a new reading is good news, a car that is not reachable is a warning, and what
+     * needs an action of theirs or went wrong is danger.
+     */
+    private static function variantOf(RefreshOutcome $outcome): ToastVariant
+    {
+        return match ($outcome) {
+            RefreshOutcome::Stored => ToastVariant::Success,
+            RefreshOutcome::Queued,
+            RefreshOutcome::Waking,
+            RefreshOutcome::Unchanged,
+            RefreshOutcome::Returned => ToastVariant::Info,
+            RefreshOutcome::Asleep,
+            RefreshOutcome::Offline,
+            RefreshOutcome::Unavailable,
+            RefreshOutcome::Busy,
+            RefreshOutcome::Limited,
+            RefreshOutcome::WakeTimeout,
+            RefreshOutcome::WakeFailed,
+            RefreshOutcome::WakeCapReached => ToastVariant::Warning,
+            RefreshOutcome::NotConnected,
+            RefreshOutcome::Rejected,
+            RefreshOutcome::Failed,
+            RefreshOutcome::WakeScopeMissing => ToastVariant::Danger,
+        };
+    }
+
+    private function attempt(): ?RefreshAttempt
+    {
+        if (null === $this->attemptId) {
+            return null;
+        }
+
+        if ($this->loadedAttempt?->getId()->toRfc4122() !== $this->attemptId) {
+            $this->loadedAttempt = $this->attempts->findOf($this->vehicle(), $this->attemptId);
+        }
+
+        return $this->loadedAttempt;
+    }
+
+    /**
+     * The vehicle of the props, checked against the user on every request: a Live Component action has no
+     * #[IsGranted], and a foreign or unknown vehicle answers 404.
+     */
     private function vehicle(): Vehicle
     {
+        if (null !== $this->loadedVehicle) {
+            return $this->loadedVehicle;
+        }
+
         try {
             $vehicle = $this->entityManager->find(Vehicle::class, Ulid::fromString($this->vehicleId));
         } catch (\InvalidArgumentException) {
@@ -231,6 +370,6 @@ final class OdometerRefreshButton
             throw new NotFoundHttpException();
         }
 
-        return $vehicle;
+        return $this->loadedVehicle = $vehicle;
     }
 }

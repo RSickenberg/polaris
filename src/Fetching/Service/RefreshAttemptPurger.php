@@ -18,8 +18,8 @@ use Symfony\Component\Uid\Ulid;
  * (2 minutes) and to be shown it once; what the car answered is in the logs, and a reading that was stored is in
  * `odometer_reading`. A day keeps the last answers for a look at the logs without the table growing for ever.
  *
- * The wake cap counts the wakes of the last 24 hours from these rows (`wokeAt`), so an attempt is kept while its wake is
- * younger than the retention too, even if it was requested earlier.
+ * The wake cap counts the wakes of the last 24 hours from these rows (`wokeAt`), so an attempt is kept while its wake
+ * is younger than the retention too, even if it was requested earlier.
  */
 final readonly class RefreshAttemptPurger
 {
@@ -45,7 +45,10 @@ final readonly class RefreshAttemptPurger
         $deleted = $this->attempts->deleteOfOwnerBefore($ownerId, $before);
 
         if ($deleted > 0) {
-            $this->logger->info('Old manual refreshes deleted.', ['count' => $deleted, 'before' => $before->toIso8601String()]);
+            $this->logger->info(
+                'Old manual refreshes deleted.',
+                ['count' => $deleted, 'before' => $before->toIso8601String()],
+            );
         }
 
         return $deleted;

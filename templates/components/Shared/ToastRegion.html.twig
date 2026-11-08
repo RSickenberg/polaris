@@ -10,8 +10,8 @@
     data-controller="toast-region"
     data-toast-region-toasts-value="{{ {success: success|raw, warning: warning|raw, info: info|raw, danger: danger|raw}|json_encode|e('html_attr') }}"
 >
-    {# The flash types of Symfony, and the toast variant each one gets. #}
-    {% for type, variant in {success: 'success', warning: 'warning', info: 'info', error: 'danger'} %}
+    {# Each flash type is the toast variant of the same name (Polaris\Shared\Service\Enum\ToastVariant); `error`, the type of Symfony, is a danger toast. #}
+    {% for type, variant in {success: 'success', warning: 'warning', info: 'info', danger: 'danger', error: 'danger'} %}
         {% for message in app.flashes(type) %}
             <twig:Shared:Toast :variant="variant" :message="message" />
         {% endfor %}

@@ -98,19 +98,12 @@ enum RefreshOutcome: string
     case Returned = 'returned';
 
     /**
-     * How to tell the user: a new reading is good news, a car that is not reachable is a warning, and what
-     * needs an action of theirs or went wrong is danger.
-     *
-     * @return 'success'|'warning'|'info'|'danger'
+     * Whether the refresh found the car asleep or offline, so that a wake can be offered. Whether Tesla can wake an
+     * offline car is not documented: it is offered anyway (see "Waking the car" in AGENTS.md).
      */
-    public function toastVariant(): string
+    public function isWakeable(): bool
     {
-        return match ($this) {
-            self::Stored => 'success',
-            self::Queued, self::Waking, self::Unchanged, self::Returned => 'info',
-            self::Asleep, self::Offline, self::Unavailable, self::Busy, self::Limited, self::WakeTimeout, self::WakeFailed, self::WakeCapReached => 'warning',
-            self::NotConnected, self::Rejected, self::Failed, self::WakeScopeMissing => 'danger',
-        };
+        return self::Asleep === $this || self::Offline === $this;
     }
 
     /**

@@ -15,11 +15,15 @@ final readonly class FetchOdometerMessage implements ReportsForVehicle
 {
     /**
      * @param string      $vehicleId     the ULID (RFC 4122 form) of the vehicle
-     * @param int|null    $slotTimestamp the UTC instant of the scheduled slot, null for a fetch that belongs to no slot (a manual refresh)
+     * @param int|null    $slotTimestamp the UTC instant of the scheduled slot, null for a fetch that belongs to no slot
+     *                                   (a manual refresh)
      * @param int         $attempt       how many state checks already happened for this slot (0 for the first)
-     * @param string|null $refreshId     the ULID (RFC 4122 form) of the {@see \Polaris\Fetching\Entity\RefreshAttempt} a manual refresh settles, null otherwise
-     * @param bool        $allowWake     whether a car found asleep may be woken: only a manual refresh the user confirmed sets it, a scheduled fetch never does
-     * @param int|null    $wakeDeadline  the UTC instant after which a woken car that is still not online is given up on, null before wake_up was sent
+     * @param string|null $refreshId     the ULID (RFC 4122 form) of the {@see \Polaris\Fetching\Entity\RefreshAttempt}
+     *                                   a manual refresh settles, null otherwise
+     * @param bool        $allowWake     whether a car found asleep may be woken: only a manual refresh the user
+     *                                   confirmed sets it, a scheduled fetch never does
+     * @param int|null    $wakeDeadline  the UTC instant after which a woken car that is still not online is given up
+     *                                   on, null before wake_up was sent
      */
     public function __construct(
         public string $vehicleId,

@@ -52,7 +52,10 @@ final readonly class FetchScheduleService
     {
         $slots = $this->slotsFor($vehicle);
         $zone = $vehicle->getOwner()->getTimeZone();
-        $instants = [...$this->calculator->around($now, $zone, $slots), ...$this->calculator->around($now->addDay(), $zone, $slots)];
+        $instants = [
+            ...$this->calculator->around($now, $zone, $slots),
+            ...$this->calculator->around($now->addDay(), $zone, $slots),
+        ];
 
         foreach ($instants as $instant) {
             if ($instant->greaterThan($now)) {

@@ -46,7 +46,10 @@ final class FetchScheduleCommandTest extends KernelTestCase
         self::assertSame(Command::SUCCESS, $tester->execute(['first' => '07:30']));
         self::assertStringContainsString('at 07:30 (UTC)', $tester->getDisplay());
 
-        self::assertSame(Command::SUCCESS, $tester->execute(['first' => '07:30', 'second' => '18:00', '--vin' => strtolower(FleetApiResponses::VIN)]));
+        self::assertSame(
+            Command::SUCCESS,
+            $tester->execute(['first' => '07:30', 'second' => '18:00', '--vin' => strtolower(FleetApiResponses::VIN)]),
+        );
         self::assertStringContainsString('at 07:30 and 18:00 (UTC)', $tester->getDisplay());
     }
 

@@ -14,6 +14,7 @@ use Polaris\Account\Form\PasswordChangeType;
 use Polaris\Account\Form\ProfileType;
 use Polaris\Account\Service\Exception\UserSettingsRejected;
 use Polaris\Account\Service\UserSettings;
+use Polaris\Shared\Service\Enum\ToastVariant;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\FormError;
@@ -78,7 +79,7 @@ final class SettingsController extends AbstractController
             /** @var ErrorReportingData $data */
             $data = $reporting->getData();
             $this->settings->changeErrorReporting($user, $data->enabled, $data->details);
-            $this->addFlash('success', $this->translator->trans('flash.reporting_saved', domain: 'account'));
+            $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.reporting_saved', domain: 'account'));
 
             return $this->redirectToRoute('account_settings');
         }
@@ -98,7 +99,7 @@ final class SettingsController extends AbstractController
     {
         $this->security->login($user, self::AUTHENTICATOR, self::FIREWALL);
         // In the language the user just chose, which is the one of the next page.
-        $this->addFlash('success', $this->translator->trans($flash, domain: 'account', locale: $user->getLocale()));
+        $this->addFlash(ToastVariant::Success->value, $this->translator->trans($flash, domain: 'account', locale: $user->getLocale()));
 
         return $this->redirectToRoute('account_settings');
     }

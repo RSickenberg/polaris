@@ -12,7 +12,8 @@ use Carbon\CarbonImmutable;
 final readonly class WakeCapStatus
 {
     /**
-     * @param CarbonImmutable|null $availableAt when the next wake is allowed, null when one is allowed now or when the cap is 0 (never)
+     * @param CarbonImmutable|null $availableAt when the next wake is allowed, null when one is allowed now or when the
+     *                                          cap is 0 (never)
      */
     public function __construct(
         public int $cap,

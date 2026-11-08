@@ -12,6 +12,7 @@ use Polaris\Lease\Form\Model\LeaseReturnData;
 use Polaris\Lease\Service\Exception\LeaseReturnRejected;
 use Polaris\Lease\Service\Exception\LeaseTermsRejected;
 use Polaris\Lease\Service\LeaseTermsService;
+use Polaris\Shared\Service\Enum\ToastVariant;
 use Polaris\Vehicle\Entity\Vehicle;
 use Polaris\Vehicle\Service\Enum\VehiclePermission;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -54,7 +55,7 @@ final class LeaseSettingsController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $this->leaseTerms->save($vehicle, $form->getData());
-                $this->addFlash('success', $this->translator->trans('flash.lease_saved', domain: 'lease'));
+                $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.lease_saved', domain: 'lease'));
 
                 return $this->redirectToRoute('lease_settings', ['id' => $vehicle->getId()->toBase32()]);
             } catch (LeaseTermsRejected $rejected) {
@@ -85,7 +86,7 @@ final class LeaseSettingsController extends AbstractController
 
             try {
                 $this->leaseTerms->markReturned($vehicle, $data->returnedOn);
-                $this->addFlash('success', $this->translator->trans('flash.lease_returned', domain: 'lease'));
+                $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.lease_returned', domain: 'lease'));
 
                 return $this->redirectToRoute('lease_settings', ['id' => $vehicle->getId()->toBase32()]);
             } catch (LeaseReturnRejected $rejected) {
@@ -114,7 +115,7 @@ final class LeaseSettingsController extends AbstractController
         }
 
         $this->leaseTerms->undoReturn($vehicle);
-        $this->addFlash('success', $this->translator->trans('flash.lease_return_undone', domain: 'lease'));
+        $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.lease_return_undone', domain: 'lease'));
 
         return $this->redirectToRoute('lease_settings', ['id' => $vehicle->getId()->toBase32()]);
     }

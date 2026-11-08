@@ -6,6 +6,7 @@ namespace Polaris\Vehicle\Controller;
 
 use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
+use Polaris\Shared\Service\Enum\ToastVariant;
 use Polaris\Tesla\Service\Exception\FleetApiError;
 use Polaris\Tesla\Service\Exception\TeslaNotConnected;
 use Polaris\Vehicle\Domain\Vin;
@@ -79,7 +80,7 @@ final class VehicleImportController extends AbstractController
                 return $this->page(self::STATUS_ERROR);
             }
 
-            $this->addFlash('success', $this->translator->trans('flash.imported', ['count' => \count($result->added)], 'vehicle'));
+            $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.imported', ['count' => \count($result->added)], 'vehicle'));
 
             return $this->redirectToRoute('dashboard_home');
         }

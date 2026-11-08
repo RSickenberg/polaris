@@ -6,6 +6,7 @@ namespace Polaris\Tesla\Controller;
 
 use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
+use Polaris\Shared\Service\Enum\ToastVariant;
 use Polaris\Tesla\Form\ActionType;
 use Polaris\Tesla\Form\Model\TeslaAppSettingsFormData;
 use Polaris\Tesla\Form\TeslaAppSettingsType;
@@ -64,7 +65,7 @@ final class TeslaSettingsController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $this->settings->save($user, $data->toSettingsData());
-                $this->addFlash('success', $this->translator->trans('flash.saved', domain: 'tesla'));
+                $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.saved', domain: 'tesla'));
 
                 return $this->redirectToRoute('tesla_settings');
             } catch (TeslaSettingsRejected) {

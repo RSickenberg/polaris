@@ -20,7 +20,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * Shows or sets the local times at which the odometer is read. The times are in the time zone of the owner
  * of the vehicle; the scheduler turns them into UTC each day.
  */
-#[AsCommand(name: 'polaris:fetch:schedule', description: 'Show or set the 1 or 2 daily local times at which the odometer is read')]
+#[AsCommand(
+    name: 'polaris:fetch:schedule',
+    description: 'Show or set the 1 or 2 daily local times at which the odometer is read',
+)]
 final readonly class FetchScheduleCommand
 {
     public function __construct(
@@ -54,7 +57,11 @@ final readonly class FetchScheduleCommand
         }
 
         try {
-            $this->schedules->change($vehicle, LocalTime::fromString($first), null === $second ? null : LocalTime::fromString($second));
+            $this->schedules->change(
+                $vehicle,
+                LocalTime::fromString($first),
+                null === $second ? null : LocalTime::fromString($second),
+            );
         } catch (\InvalidArgumentException $invalid) {
             $io->error($invalid->getMessage());
 

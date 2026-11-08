@@ -20,15 +20,22 @@ final class SlotCalculatorTest extends TestCase
      * @param list<string> $expected UTC instants, oldest first
      */
     #[DataProvider('days')]
-    public function testSlotsBecomeUtcInstantsOfTheLocalDays(string $now, string $timeZone, array $slots, array $expected): void
-    {
+    public function testSlotsBecomeUtcInstantsOfTheLocalDays(
+        string $now,
+        string $timeZone,
+        array $slots,
+        array $expected,
+    ): void {
         $instants = new SlotCalculator()->around(
             CarbonImmutable::parse($now, 'UTC'),
             $timeZone,
             array_map(LocalTime::fromString(...), $slots),
         );
 
-        self::assertSame($expected, array_map(static fn (CarbonImmutable $instant): string => $instant->format('Y-m-d H:i e'), $instants));
+        self::assertSame(
+            $expected,
+            array_map(static fn (CarbonImmutable $instant): string => $instant->format('Y-m-d H:i e'), $instants),
+        );
     }
 
     /**
@@ -127,7 +134,11 @@ final class SlotCalculatorTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        new SlotCalculator()->around(CarbonImmutable::parse('2026-10-26 12:00', 'UTC'), 'Mars/Olympus', [LocalTime::default()]);
+        new SlotCalculator()->around(
+            CarbonImmutable::parse('2026-10-26 12:00', 'UTC'),
+            'Mars/Olympus',
+            [LocalTime::default()],
+        );
     }
 
     public function testTheDefaultSlotIsNineInTheEvening(): void
