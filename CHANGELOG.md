@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.2.0](https://github.com/RSickenberg/polaris/compare/v0.1.0...v0.2.0) (2026-11-08)
+
+### Features
+
+* add optional error reporting to Sentry ([b78e00a](https://github.com/RSickenberg/polaris/commit/b78e00ab4efddff6f551a18c9dd460e97096b2a2))
+* **dashboard:** compare the last days with the daily predictions ([ff92a0e](https://github.com/RSickenberg/polaris/commit/ff92a0e6e47fb2d4ebc0330fd6839ce6ce7d51bd)), closes [#107](https://github.com/RSickenberg/polaris/issues/107)
+* **dashboard:** refresh the figures after a fetch and align the return card ([89ed294](https://github.com/RSickenberg/polaris/commit/89ed2940c52ac80c141673d523c7bfd36475666a))
+* **fixtures:** seed the daily snapshots of the running leases ([b01ca19](https://github.com/RSickenberg/polaris/commit/b01ca1916b6aedbe779d96aed1f737841b160281))
+* **lease:** mark the leased car as returned to the bank ([7820938](https://github.com/RSickenberg/polaris/commit/782093822af249daa95b1b510c69bc6bbd02f83d)), closes [#49](https://github.com/RSickenberg/polaris/issues/49)
+* **lease:** polish the return card, mark returned vehicles, break toast lines ([3f48141](https://github.com/RSickenberg/polaris/commit/3f4814131dcfee976908c7e469200b2b980a940c))
+* **lease:** run daily jobs at the owner's midnight and store the pace ([7c026f8](https://github.com/RSickenberg/polaris/commit/7c026f8882373cdcd596b91c77ed34fee1beebcc)), references [#107](https://github.com/RSickenberg/polaris/issues/107)
+* **lease:** save a daily projection snapshot for projected-versus-actual charts ([bcb8af5](https://github.com/RSickenberg/polaris/commit/bcb8af58919dc58f7f3bf9d15f3161e4e2785ce9))
+* **vehicle:** save and import the data of a vehicle ([cc65cf7](https://github.com/RSickenberg/polaris/commit/cc65cf7f6b601d51edd9391dfb8dae9ede46be0e))
+
+### Bug Fixes
+
+* **dashboard:** make the comparison panels shorter and easier to read ([df03de4](https://github.com/RSickenberg/polaris/commit/df03de47d0a26f3d2a3bca2d7ea43a150bbf6276))
+* **dashboard:** no hover colour on the comparison header, reword its texts ([e6d1f98](https://github.com/RSickenberg/polaris/commit/e6d1f98acdb42e903dfdf75020d0a15c175d6110))
+* leave stateless requests alone when binding the reporting user ([4487a98](https://github.com/RSickenberg/polaris/commit/4487a9874884ac64859322946adc4347759ea963))
+* **security:** enhanced the security for a bit ([0f8c84e](https://github.com/RSickenberg/polaris/commit/0f8c84ee078b018bac1573934ae2fac71c57165d))
+* **vehicle:** refuse a bad date with a clear message, wrap long lines ([4adcbff](https://github.com/RSickenberg/polaris/commit/4adcbffa7ceaa33f2087df553ad45a7425e21a64))
+* **vehicle:** show the file field and give the import button an icon ([e3a524f](https://github.com/RSickenberg/polaris/commit/e3a524f52f586f1270c42696135855bdb2b60423))
+
 ## 0.1.0 (2026-10-31)
 
 ### Features
