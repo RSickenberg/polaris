@@ -32,8 +32,12 @@ final readonly class OdometerTimeline
      *
      * @throws \InvalidArgumentException when a sample is in the future, contradicts another, or goes back in odometer
      */
-    public static function fromSamples(CarbonImmutable $start, Distance $startOdometer, array $samples, CarbonImmutable $now): self
-    {
+    public static function fromSamples(
+        CarbonImmutable $start,
+        Distance $startOdometer,
+        array $samples,
+        CarbonImmutable $now
+    ): self {
         $odometers = [];
 
         foreach ($samples as $sample) {
@@ -41,7 +45,9 @@ final readonly class OdometerTimeline
             $odometer = $sample->odometer()->metres();
 
             if ($readAt > $now->getTimestamp()) {
-                throw new \InvalidArgumentException(\sprintf('The odometer sample of %s is in the future.', $sample->readAt()->toIso8601String()));
+                throw new \InvalidArgumentException(
+                    \sprintf('The odometer sample of %s is in the future.', $sample->readAt()->toIso8601String())
+                );
             }
 
             if ($readAt <= $start->getTimestamp()) {
@@ -49,7 +55,14 @@ final readonly class OdometerTimeline
             }
 
             if (isset($odometers[$readAt]) && $odometers[$readAt] !== $odometer) {
-                throw new \InvalidArgumentException(\sprintf('Two odometer samples of %s disagree: %d m and %d m.', $sample->readAt()->toIso8601String(), $odometers[$readAt], $odometer));
+                throw new \InvalidArgumentException(
+                    \sprintf(
+                        'Two odometer samples of %s disagree: %d m and %d m.',
+                        $sample->readAt()->toIso8601String(),
+                        $odometers[$readAt],
+                        $odometer
+                    )
+                );
             }
 
             $odometers[$readAt] = $odometer;
@@ -61,7 +74,14 @@ final readonly class OdometerTimeline
 
         foreach ($timeline as $readAt => $odometer) {
             if ($odometer < $previous) {
-                throw new \InvalidArgumentException(\sprintf('The odometer of %s (%d m) is lower than an earlier one (%d m).', CarbonImmutable::createFromTimestamp($readAt, TimeZone::UTC)->toIso8601String(), $odometer, $previous));
+                throw new \InvalidArgumentException(
+                    \sprintf(
+                        'The odometer of %s (%d m) is lower than an earlier one (%d m).',
+                        CarbonImmutable::createFromTimestamp($readAt, TimeZone::UTC)->toIso8601String(),
+                        $odometer,
+                        $previous
+                    )
+                );
             }
 
             $previous = $odometer;
@@ -113,7 +133,8 @@ final readonly class OdometerTimeline
             }
 
             if ($readAt > $instant) {
-                return $this->odometers[$beforeAt] + ($odometer - $this->odometers[$beforeAt]) * (($instant - $beforeAt) / ($readAt - $beforeAt));
+                return $this->odometers[$beforeAt] + ($odometer - $this->odometers[$beforeAt]) * (($instant - $beforeAt)
+                        / ($readAt - $beforeAt));
             }
 
             $beforeAt = $readAt;

@@ -48,8 +48,12 @@ final readonly class ProjectionCalculator
      *
      * @return Projection|null null when no sample falls after the lease start yet
      */
-    public function calculate(LeaseTerm $term, Allowance $allowance, Distance $startOdometer, array $samples): ?Projection
-    {
+    public function calculate(
+        LeaseTerm $term,
+        Allowance $allowance,
+        Distance $startOdometer,
+        array $samples
+    ): ?Projection {
         $start = $term->start()->getTimestamp();
         $end = $term->exclusiveEnd()->getTimestamp();
         $termSeconds = $end - $start;
@@ -59,7 +63,12 @@ final readonly class ProjectionCalculator
             throw new \InvalidArgumentException('The allowance is too large to project.');
         }
 
-        $timeline = OdometerTimeline::fromSamples($term->start(), $startOdometer, $samples, CarbonImmutable::instance($this->clock->now()));
+        $timeline = OdometerTimeline::fromSamples(
+            $term->start(),
+            $startOdometer,
+            $samples,
+            CarbonImmutable::instance($this->clock->now())
+        );
 
         if (!$timeline->hasSamples()) {
             return null;
@@ -76,13 +85,18 @@ final readonly class ProjectionCalculator
         $windowSeconds = self::RECENT_WINDOW_DAYS * Pace::SECONDS_PER_DAY;
 
         if ($elapsed >= $windowSeconds) {
-            $recentPace = Pace::over($referenceOdometer - $timeline->odometerAt($reference - $windowSeconds), $windowSeconds);
+            $recentPace = Pace::over(
+                $referenceOdometer - $timeline->odometerAt($reference - $windowSeconds),
+                $windowSeconds
+            );
             $blendedPace = $this->recentPaceWeight->blend($recentPace, $overallPace);
         }
 
         $driven = Distance::fromMetres((int) round($drivenMetres));
         // round(allowance x elapsed / term), half up, in integers: floor((2 x allowance x elapsed + term) / (2 x term)).
-        $allowedToDate = Distance::fromMetres(intdiv(2 * $allowanceMetres * min($elapsed, $termSeconds) + $termSeconds, 2 * $termSeconds));
+        $allowedToDate = Distance::fromMetres(
+            intdiv(2 * $allowanceMetres * min($elapsed, $termSeconds) + $termSeconds, 2 * $termSeconds)
+        );
 
         return new Projection(
             asOf: CarbonImmutable::createFromTimestamp($reference, TimeZone::UTC),
@@ -92,7 +106,9 @@ final readonly class ProjectionCalculator
             overallPace: $overallPace,
             recentPace: $recentPace,
             blendedPace: $blendedPace,
-            projectedAtEnd: Distance::fromMetres((int) round($drivenMetres + $blendedPace->metresIn(max(0, $end - $reference)))),
+            projectedAtEnd: Distance::fromMetres(
+                (int) round($drivenMetres + $blendedPace->metresIn(max(0, $end - $reference)))
+            ),
         );
     }
 }

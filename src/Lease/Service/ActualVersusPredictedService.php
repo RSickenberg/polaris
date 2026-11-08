@@ -54,7 +54,11 @@ final readonly class ActualVersusPredictedService
         $snapshots = [];
 
         foreach ($this->history->history($vehicle, $earliest, $lastMidnight->localDay) as $point) {
-            $snapshots[$point->localDay->format('Y-m-d')] = new SnapshotFigures($point->projectedAtEnd, $point->dailyBudget, $point->blendedPace);
+            $snapshots[$point->localDay->format('Y-m-d')] = new SnapshotFigures(
+                $point->projectedAtEnd,
+                $point->dailyBudget,
+                $point->blendedPace
+            );
         }
 
         return $this->comparer->compare($timeline, $assessment->projection, $timeZone, $snapshots);

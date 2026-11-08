@@ -73,7 +73,9 @@ final readonly class LeaseTermsService
         $contract = $this->contracts->findForVehicle($vehicle);
 
         // The return is kept by an edit, so a start on or after it would leave no time under the lease.
-        if (null !== $contract?->getReturnedAt() && $terms->term->start()->getTimestamp() >= $contract->getReturnedAt()->getTimestamp()) {
+        if (null !== $contract?->getReturnedAt()
+            && $terms->term->start()->getTimestamp() >= $contract->getReturnedAt()->getTimestamp()
+        ) {
             throw new LeaseTermsRejected(LeaseTermsRejected::START_AFTER_RETURN);
         }
 
@@ -277,8 +279,12 @@ final readonly class LeaseTermsService
     /**
      * @param list<OdometerSample> $samples
      */
-    private function assessTerms(LeaseTerms $terms, array $samples, ?CarbonImmutable $returnedAt, ?CarbonImmutable $at = null): LeaseAssessment|NoData
-    {
+    private function assessTerms(
+        LeaseTerms $terms,
+        array $samples,
+        ?CarbonImmutable $returnedAt,
+        ?CarbonImmutable $at = null
+    ): LeaseAssessment|NoData {
         try {
             return $this->assessor->assess(
                 $terms->term,
@@ -320,7 +326,10 @@ final readonly class LeaseTermsService
             $next = $readings[$index + 1] ?? null;
 
             if (null !== $confirmedAt && (null === $next || $confirmedAt->lessThan($next->getReadAt()))) {
-                $samples[] = new OdometerSample(null !== $returnedAt && $confirmedAt->greaterThan($returnedAt) ? $returnedAt : $confirmedAt, $reading->getOdometer());
+                $samples[] = new OdometerSample(
+                    null !== $returnedAt && $confirmedAt->greaterThan($returnedAt) ? $returnedAt : $confirmedAt,
+                    $reading->getOdometer()
+                );
             }
         }
 

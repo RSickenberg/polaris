@@ -23,6 +23,7 @@ return new PhpCsFixer\Config()
     ->registerCustomFixers(new PhpCsFixerCustomFixers\Fixers())
     ->setRiskyAllowed(true)
     ->setRules([
+        '@PSR12' => true,
         '@Symfony' => true,
         '@Symfony:risky' => true,
         '@PHP8x5Migration' => true,
@@ -31,6 +32,7 @@ return new PhpCsFixer\Config()
         'no_redundant_readonly_property' => true,
         'php_unit_data_provider_return_type' => true,
         'declare_strict_types' => ['strategy' => 'enforce'],
+        'single_line_throw' => false,
         PhpCsFixerCustomFixers\Fixer\FunctionParameterSeparationFixer::name() => true,
         PhpCsFixerCustomFixers\Fixer\MultilineCommentOpeningClosingAloneFixer::name() => true,
         PhpCsFixerCustomFixers\Fixer\NoImportFromGlobalNamespaceFixer::name() => true,
