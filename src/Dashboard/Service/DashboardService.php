@@ -9,11 +9,13 @@ use Polaris\Dashboard\Domain\AllowanceProgress;
 use Polaris\Dashboard\Domain\MileageForecast;
 use Polaris\Dashboard\Domain\MileageRangeBuilder;
 use Polaris\Dashboard\Domain\MileageSeriesBuilder;
+use Polaris\Dashboard\Service\Dto\ComparisonPanels;
 use Polaris\Dashboard\Service\Dto\DashboardView;
 use Polaris\Dashboard\Service\Enum\DashboardState;
 use Polaris\Lease\Domain\Budget;
 use Polaris\Lease\Domain\LeaseStatus;
 use Polaris\Lease\Domain\NoData;
+use Polaris\Lease\Service\ActualVersusPredictedService;
 use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Shared\Domain\OdometerSample;
@@ -31,6 +33,8 @@ final readonly class DashboardService
         private MileageSeriesBuilder $mileageBuilder,
         private MileageRangeBuilder $rangeBuilder,
         private ClockInterface $clock,
+        private ActualVersusPredictedService $predictions,
+        private ComparisonPanelsMapper $comparisonMapper,
     ) {
     }
 
@@ -90,6 +94,7 @@ final readonly class DashboardService
             $contract->getStartOdometer(),
             Budget::evenPace($allowance, $contract->getTerm()),
             $this->leaseTerms->returnedOn($vehicle),
+            DashboardState::Active === $state ? $this->comparison($vehicle) : null,
         );
     }
 
@@ -109,5 +114,12 @@ final readonly class DashboardService
         }
 
         return $samples;
+    }
+
+    private function comparison(Vehicle $vehicle): ?ComparisonPanels
+    {
+        $comparison = $this->predictions->compare($vehicle);
+
+        return null === $comparison ? null : $this->comparisonMapper->map($comparison);
     }
 }

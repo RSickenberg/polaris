@@ -9,15 +9,18 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Polaris\Account\Entity\User;
 use Polaris\Lease\Domain\Allowance;
+use Polaris\Lease\Domain\ComparisonWindow;
 use Polaris\Lease\Domain\EndDateConvention;
 use Polaris\Lease\Domain\LeaseTerm;
 use Polaris\Lease\Domain\Tolerance;
 use Polaris\Lease\Entity\LeaseContract;
+use Polaris\Lease\Service\ProjectionSnapshotService;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Currency;
 use Polaris\Shared\Domain\Distance;
 use Polaris\Shared\Domain\DistanceUnit;
 use Polaris\Shared\Domain\Money;
+use Polaris\Shared\Domain\OwnerMidnight;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
@@ -39,6 +42,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
  * - Model S: readings and no lease.
  * - Model X: 24-month lease with a 10 % tolerance, projected 93 to 97 % of the allowance (watch).
  * - Roadster: 12-month lease that ended 2 to 8 months ago, 300 to 2 500 km over its allowance (ended).
+ *
+ * The running leases (Model 3, Model Y, Model X) also get the daily projection snapshots of the last 30 days and
+ * today, as the owner's midnights would have saved them, so the comparison panels of the dashboard have figures in
+ * every row.
  */
 final class DevSeed extends Fixture
 {
@@ -47,6 +54,7 @@ final class DevSeed extends Fixture
     public function __construct(
         private readonly ClockInterface $clock,
         private readonly UserPasswordHasherInterface $hasher,
+        private readonly ProjectionSnapshotService $snapshots,
         private readonly Randomizer $random = new Randomizer(),
     ) {
     }
@@ -116,6 +124,23 @@ final class DevSeed extends Fixture
         }
 
         $manager->flush();
+
+        foreach ([$modelThree, $modelY, $modelX] as $vehicle) {
+            $this->saveSnapshots($vehicle, $today);
+        }
+    }
+
+    /**
+     * The snapshots the owner's midnights of the last 30 days and of today would have saved, each with only the
+     * readings up to its midnight. A midnight before the first reading has no data and saves nothing.
+     */
+    private function saveSnapshots(Vehicle $vehicle, CarbonImmutable $today): void
+    {
+        $timeZone = $vehicle->getOwner()->getTimeZone();
+
+        for ($daysAgo = ComparisonWindow::LastMonth->days(); $daysAgo >= 0; --$daysAgo) {
+            $this->snapshots->save($vehicle, OwnerMidnight::opening($today->subDays($daysAgo), $timeZone));
+        }
     }
 
     /**

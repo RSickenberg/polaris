@@ -12,6 +12,8 @@ use Polaris\Lease\Domain\LeaseStatus;
 use Polaris\Lease\Domain\NoData;
 use Polaris\Lease\Domain\RiskLevel;
 use Polaris\Lease\Service\LeaseTermsService;
+use Polaris\Lease\Service\ProjectionHistoryService;
+use Polaris\Lease\Service\ProjectionSnapshotService;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
@@ -50,6 +52,7 @@ final class DevSeedTest extends KernelTestCase
         new DevSeed(
             $container->get(ClockInterface::class),
             $container->get(UserPasswordHasherInterface::class),
+            $container->get(ProjectionSnapshotService::class),
             new Randomizer(new Mt19937($seed)),
         )->load($entityManager);
 
@@ -80,6 +83,48 @@ final class DevSeedTest extends KernelTestCase
         );
     }
 
+    /**
+     * The running leases come with the daily snapshots of the last 30 days and today, so that the comparison panels have
+     * figures; the other vehicles have none.
+     */
+    public function testTheRunningLeasesGetTheDailySnapshotsOfTheLastMonth(): void
+    {
+        self::mockTime('2026-07-02 12:00:00 UTC');
+        self::bootKernel();
+        $container = self::getContainer();
+        $entityManager = $container->get(EntityManagerInterface::class);
+
+        new DevSeed(
+            $container->get(ClockInterface::class),
+            $container->get(UserPasswordHasherInterface::class),
+            $container->get(ProjectionSnapshotService::class),
+            new Randomizer(new Mt19937(1)),
+        )->load($entityManager);
+
+        $history = $container->get(ProjectionHistoryService::class);
+        $counts = [];
+        foreach ($entityManager->getRepository(Vehicle::class)->findAll() as $vehicle) {
+            $points = $history->history($vehicle);
+            $counts[$vehicle->getName()] = \count($points);
+
+            if ([] !== $points) {
+                $lastDay = $points[array_key_last($points)]->localDay->format('Y-m-d');
+
+                self::assertSame('2026-07-02', $lastDay, $vehicle->getName() . ': the last snapshot is today\'s.');
+                self::assertNotNull($points[0]->blendedPace, $vehicle->getName() . ': the snapshots keep the pace.');
+            }
+        }
+
+        foreach (['Model 3', 'Model X', 'Model Y'] as $name) {
+            self::assertGreaterThan(20, $counts[$name], $name);
+            self::assertLessThanOrEqual(31, $counts[$name], $name);
+        }
+
+        foreach (['Cybertruck', 'Model S', 'Roadster'] as $name) {
+            self::assertSame(0, $counts[$name], $name);
+        }
+    }
+
     public function testTwoSeedsGiveDifferentReadings(): void
     {
         self::mockTime('2026-07-02 12:00:00 UTC');
@@ -89,6 +134,7 @@ final class DevSeedTest extends KernelTestCase
         $seed = static fn (int $number): DevSeed => new DevSeed(
             $container->get(ClockInterface::class),
             $container->get(UserPasswordHasherInterface::class),
+            $container->get(ProjectionSnapshotService::class),
             new Randomizer(new Mt19937($number)),
         );
 

@@ -34,24 +34,60 @@ final class LeaseContractDataValidationTest extends KernelTestCase
      */
     public static function invalidData(): iterable
     {
-        yield 'missing start date' => [static function (LeaseContractData $data): void { $data->startDate = null; }, 'startDate'];
-        yield 'missing end date' => [static function (LeaseContractData $data): void { $data->endDate = null; }, 'endDate'];
-        yield 'partial month' => [static function (LeaseContractData $data): void { $data->endDate = new \DateTimeImmutable('2029-01-20'); }, 'endDate'];
-        yield 'inclusive end one day over' => [static function (LeaseContractData $data): void { $data->endDateConvention = EndDateConvention::Inclusive; }, 'endDate'];
-        yield 'end before start' => [static function (LeaseContractData $data): void { $data->endDate = new \DateTimeImmutable('2025-01-15'); }, 'endDate'];
-        yield 'zero allowance' => [static function (LeaseContractData $data): void { $data->allowance = 0; }, 'allowance'];
-        yield 'negative allowance' => [static function (LeaseContractData $data): void { $data->allowance = -15_000; }, 'allowance'];
-        yield 'missing allowance' => [static function (LeaseContractData $data): void { $data->allowance = null; }, 'allowance'];
-        yield 'allowance above the maximum' => [static function (LeaseContractData $data): void { $data->allowance = LeaseContractData::MAX_ALLOWANCE + 1; }, 'allowance'];
-        yield 'start odometer above the maximum' => [static function (LeaseContractData $data): void { $data->startOdometer = LeaseContractData::MAX_ODOMETER + 1; }, 'startOdometer'];
-        yield 'negative start odometer' => [static function (LeaseContractData $data): void { $data->startOdometer = -1; }, 'startOdometer'];
-        yield 'sub-cent excess cost' => [static function (LeaseContractData $data): void { $data->excessCostPerKm = '0.085'; }, 'excessCostPerKm'];
-        yield 'negative excess cost' => [static function (LeaseContractData $data): void { $data->excessCostPerKm = '-0.12'; }, 'excessCostPerKm'];
-        yield 'blank excess cost' => [static function (LeaseContractData $data): void { $data->excessCostPerKm = ''; }, 'excessCostPerKm'];
-        yield 'missing currency' => [static function (LeaseContractData $data): void { $data->currency = null; }, 'currency'];
-        yield 'negative tolerance' => [static function (LeaseContractData $data): void { $data->tolerancePercent = -1; }, 'tolerancePercent'];
-        yield 'tolerance above 50%' => [static function (LeaseContractData $data): void { $data->tolerancePercent = 50.5; }, 'tolerancePercent'];
-        yield 'missing tolerance' => [static function (LeaseContractData $data): void { $data->tolerancePercent = null; }, 'tolerancePercent'];
+        yield 'missing start date' => [static function (LeaseContractData $data): void {
+            $data->startDate = null;
+        }, 'startDate'];
+        yield 'missing end date' => [static function (LeaseContractData $data): void {
+            $data->endDate = null;
+        }, 'endDate'];
+        yield 'partial month' => [static function (LeaseContractData $data): void {
+            $data->endDate = new \DateTimeImmutable('2029-01-20');
+        }, 'endDate'];
+        yield 'inclusive end one day over' => [static function (LeaseContractData $data): void {
+            $data->endDateConvention = EndDateConvention::Inclusive;
+        }, 'endDate'];
+        yield 'end before start' => [static function (LeaseContractData $data): void {
+            $data->endDate = new \DateTimeImmutable('2025-01-15');
+        }, 'endDate'];
+        yield 'zero allowance' => [static function (LeaseContractData $data): void {
+            $data->allowance = 0;
+        }, 'allowance'];
+        yield 'negative allowance' => [static function (LeaseContractData $data): void {
+            $data->allowance = -15_000;
+        }, 'allowance'];
+        yield 'missing allowance' => [static function (LeaseContractData $data): void {
+            $data->allowance = null;
+        }, 'allowance'];
+        yield 'allowance above the maximum' => [static function (LeaseContractData $data): void {
+            $data->allowance = LeaseContractData::MAX_ALLOWANCE + 1;
+        }, 'allowance'];
+        yield 'start odometer above the maximum' => [static function (LeaseContractData $data): void {
+            $data->startOdometer = LeaseContractData::MAX_ODOMETER + 1;
+        }, 'startOdometer'];
+        yield 'negative start odometer' => [static function (LeaseContractData $data): void {
+            $data->startOdometer = -1;
+        }, 'startOdometer'];
+        yield 'sub-cent excess cost' => [static function (LeaseContractData $data): void {
+            $data->excessCostPerKm = '0.085';
+        }, 'excessCostPerKm'];
+        yield 'negative excess cost' => [static function (LeaseContractData $data): void {
+            $data->excessCostPerKm = '-0.12';
+        }, 'excessCostPerKm'];
+        yield 'blank excess cost' => [static function (LeaseContractData $data): void {
+            $data->excessCostPerKm = '';
+        }, 'excessCostPerKm'];
+        yield 'missing currency' => [static function (LeaseContractData $data): void {
+            $data->currency = null;
+        }, 'currency'];
+        yield 'negative tolerance' => [static function (LeaseContractData $data): void {
+            $data->tolerancePercent = -1;
+        }, 'tolerancePercent'];
+        yield 'tolerance above 50%' => [static function (LeaseContractData $data): void {
+            $data->tolerancePercent = 50.5;
+        }, 'tolerancePercent'];
+        yield 'missing tolerance' => [static function (LeaseContractData $data): void {
+            $data->tolerancePercent = null;
+        }, 'tolerancePercent'];
     }
 
     /**
