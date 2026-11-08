@@ -12,6 +12,7 @@ use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 
 /**
  * Writes what Polaris keeps about a vehicle into one JSON file, to keep it or to bring it to another install: the lease,
@@ -54,7 +55,7 @@ final readonly class VehicleDataExporter
      */
     public function fileName(Vehicle $vehicle): string
     {
-        $name = trim((string) preg_replace('/[^a-z0-9]+/', '-', mb_strtolower($vehicle->getName())), '-');
+        $name = new AsciiSlugger()->slug($vehicle->getName())->lower()->toString();
 
         return \sprintf('polaris-%s-%s.json', '' === $name ? 'vehicle' : $name, CarbonImmutable::instance($this->clock->now())->utc()->format('Y-m-d'));
     }

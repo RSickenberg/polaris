@@ -22,6 +22,7 @@ use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Domain\JsonObject;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
+use Polaris\Vehicle\Service\Enum\LeaseImportOutcome;
 use Polaris\Vehicle\Service\Exception\VehicleDataRejected;
 use Polaris\Vehicle\Service\VehicleDataExporter;
 use Polaris\Vehicle\Service\VehicleDataImporter;
@@ -98,8 +99,7 @@ final class VehicleDataTransferTest extends KernelTestCase
     {
         $result = $this->importer->import($this->target, $this->exporter->export($this->source));
 
-        self::assertTrue($result->leaseCreated);
-        self::assertFalse($result->leaseKept);
+        self::assertSame(LeaseImportOutcome::Created, $result->lease);
         self::assertSame([2, 0, 0], [$result->readings->added, $result->readings->alreadyThere, $result->readings->rejected]);
         self::assertSame([1, 0, 0], [$result->snapshots->added, $result->snapshots->alreadyThere, $result->snapshots->skipped]);
         self::assertSame($this->exporter->export($this->source), $this->exporter->export($this->target));
@@ -113,8 +113,7 @@ final class VehicleDataTransferTest extends KernelTestCase
 
         $again = $this->importer->import($this->target, $json);
 
-        self::assertFalse($again->leaseCreated);
-        self::assertTrue($again->leaseKept);
+        self::assertSame(LeaseImportOutcome::Kept, $again->lease);
         self::assertSame([0, 2, 0], [$again->readings->added, $again->readings->alreadyThere, $again->readings->rejected]);
         self::assertSame([0, 1, 0], [$again->snapshots->added, $again->snapshots->alreadyThere, $again->snapshots->skipped]);
         self::assertSame($before, $this->exporter->export($this->target));
@@ -128,8 +127,7 @@ final class VehicleDataTransferTest extends KernelTestCase
 
         $result = $this->importer->import($this->target, $this->exporter->export($this->source));
 
-        self::assertFalse($result->leaseCreated);
-        self::assertTrue($result->leaseKept);
+        self::assertSame(LeaseImportOutcome::Kept, $result->lease);
         self::assertSame([1, 1, 0], [$result->readings->added, $result->readings->alreadyThere, $result->readings->rejected]);
         self::assertSame(30_000_000, $this->leases->find($this->target)?->getAllowance()->total()->metres(), 'The lease of the vehicle is not replaced.');
         self::assertCount(2, self::getContainer()->get(OdometerReadingService::class)->history($this->target));
@@ -235,8 +233,7 @@ final class VehicleDataTransferTest extends KernelTestCase
     {
         $result = $this->importer->import($this->target, $this->file(['lease' => null]));
 
-        self::assertFalse($result->leaseCreated);
-        self::assertFalse($result->leaseKept);
+        self::assertSame(LeaseImportOutcome::None, $result->lease);
         self::assertSame(1, $result->snapshots->skipped);
     }
 

@@ -83,7 +83,7 @@ final class VehicleDataController extends AbstractController
     private function summary(VehicleDataImportResult $result): string
     {
         return $this->translator->trans('flash.data_imported', [
-            'lease' => $result->leaseCreated ? 'created' : ($result->leaseKept ? 'kept' : 'none'),
+            'lease' => $result->lease->value,
             'readingsAdded' => $result->readings->added,
             'readingsAlreadyThere' => $result->readings->alreadyThere,
             'readingsRejected' => $result->readings->rejected,

@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
+use Polaris\Vehicle\Service\Enum\LeaseImportOutcome;
 use Polaris\Vehicle\Service\Exception\VehicleDataRejected;
 use Polaris\Vehicle\Service\VehicleDataImporter;
 use Symfony\Component\Console\Attribute\Argument;
@@ -71,7 +72,11 @@ final readonly class ImportVehicleDataCommand
         }
 
         $io->definitionList(
-            ['Lease' => $result->leaseCreated ? 'created' : ($result->leaseKept ? 'kept (the vehicle already has one)' : 'none in the file')],
+            ['Lease' => match ($result->lease) {
+                LeaseImportOutcome::Created => 'created',
+                LeaseImportOutcome::Kept => 'kept (the vehicle already has one)',
+                LeaseImportOutcome::None => 'none in the file',
+            }],
             ['Readings' => \sprintf('%d added, %d already there, %d refused', $result->readings->added, $result->readings->alreadyThere, $result->readings->rejected)],
             ['Snapshots' => \sprintf('%d added, %d already there, %d left out', $result->snapshots->added, $result->snapshots->alreadyThere, $result->snapshots->skipped)],
         );

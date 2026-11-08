@@ -71,6 +71,12 @@ final class JsonObjectTest extends TestCase
         JsonObject::parse('{"a": ');
     }
 
+    public function testAnEmptyObjectIsAnObject(): void
+    {
+        self::assertFalse(JsonObject::parse('{}')->has('anything'));
+        self::assertSame([], JsonObject::parse('{"items": []}')->objects('items'));
+    }
+
     public function testATopLevelThatIsNotAnObjectIsRefused(): void
     {
         $this->expectException(\InvalidArgumentException::class);

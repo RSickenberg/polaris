@@ -29,6 +29,7 @@ use Polaris\Shared\Domain\TimeZone;
 use Polaris\Vehicle\Domain\JsonObject;
 use Polaris\Vehicle\Entity\Vehicle;
 use Polaris\Vehicle\Service\Dto\VehicleDataImportResult;
+use Polaris\Vehicle\Service\Enum\LeaseImportOutcome;
 use Polaris\Vehicle\Service\Exception\VehicleDataRejected;
 
 /**
@@ -85,11 +86,14 @@ final readonly class VehicleDataImporter
 
         try {
             return $this->entityManager->wrapInTransaction(function () use ($vehicle, $terms, $returnedAt, $readings, $points): VehicleDataImportResult {
-                $created = null !== $terms && $this->leases->import($vehicle, $terms, $returnedAt);
+                $lease = LeaseImportOutcome::None;
+
+                if (null !== $terms) {
+                    $lease = $this->leases->import($vehicle, $terms, $returnedAt) ? LeaseImportOutcome::Created : LeaseImportOutcome::Kept;
+                }
 
                 return new VehicleDataImportResult(
-                    $created,
-                    null !== $terms && !$created,
+                    $lease,
                     $this->readings->import($vehicle, $readings),
                     $this->snapshots->import($vehicle, $points),
                 );
@@ -148,10 +152,14 @@ final readonly class VehicleDataImporter
 
         usort($readings, static fn (ReadingImport $a, ReadingImport $b): int => $a->readAt <=> $b->readAt);
 
-        for ($index = 1; $index < \count($readings); ++$index) {
-            if ($readings[$index]->odometer->metres() < $readings[$index - 1]->odometer->metres()) {
-                throw new \InvalidArgumentException(\sprintf('The odometer goes down between the readings of %s and %s.', $readings[$index - 1]->readAt->toIso8601String(), $readings[$index]->readAt->toIso8601String()));
+        $previous = null;
+
+        foreach ($readings as $reading) {
+            if (null !== $previous && $reading->odometer->metres() < $previous->odometer->metres()) {
+                throw new \InvalidArgumentException(\sprintf('The odometer goes down between the readings of %s and %s.', $previous->readAt->toIso8601String(), $reading->readAt->toIso8601String()));
             }
+
+            $previous = $reading;
         }
 
         return $readings;

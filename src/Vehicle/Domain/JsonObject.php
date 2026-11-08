@@ -30,7 +30,7 @@ final readonly class JsonObject
             throw new \InvalidArgumentException('The file is not valid JSON.', 0, $e);
         }
 
-        if (!\is_array($data) || array_is_list($data) && [] !== $data) {
+        if (!self::isObject($data)) {
             throw new \InvalidArgumentException('The file is not a JSON object.');
         }
 
@@ -77,7 +77,7 @@ final readonly class JsonObject
     {
         $value = $this->data[$key] ?? null;
 
-        return \is_array($value) && !array_is_list($value) ? new self($value, $this->child($key)) : throw $this->invalid($key, 'an object');
+        return self::isObject($value) ? new self($value, $this->child($key)) : throw $this->invalid($key, 'an object');
     }
 
     public function nullableObject(string $key): ?self
@@ -99,7 +99,7 @@ final readonly class JsonObject
         $objects = [];
 
         foreach ($value as $index => $item) {
-            if (!\is_array($item) || array_is_list($item) && [] !== $item) {
+            if (!self::isObject($item)) {
                 throw new \InvalidArgumentException(\sprintf('%s[%d] must be an object.', $this->child($key), $index));
             }
 
@@ -107,6 +107,17 @@ final readonly class JsonObject
         }
 
         return $objects;
+    }
+
+    /**
+     * Whether a decoded value is a JSON object: an array with keys (`{}` decodes to an empty array, which is accepted as
+     * an object too, since PHP cannot tell it from `[]`).
+     *
+     * @phpstan-assert-if-true array<mixed> $value
+     */
+    private static function isObject(mixed $value): bool
+    {
+        return \is_array($value) && ([] === $value || !array_is_list($value));
     }
 
     private function child(string $key): string
