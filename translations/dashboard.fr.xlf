@@ -168,15 +168,15 @@
       </trans-unit>
       <trans-unit id="pace.day">
         <source>pace.day</source>
-        <target>km/jour</target>
+        <target>km / jour</target>
       </trans-unit>
       <trans-unit id="pace.week">
         <source>pace.week</source>
-        <target>km/semaine</target>
+        <target>km / semaine</target>
       </trans-unit>
       <trans-unit id="pace.month">
         <source>pace.month</source>
-        <target>km/mois</target>
+        <target>km / mois</target>
       </trans-unit>
       <trans-unit id="returned.cta">
         <source>returned.cta</source>

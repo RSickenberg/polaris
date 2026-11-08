@@ -388,9 +388,9 @@ final class DashboardControllerTest extends WebTestCase
         self::assertSelectorExists('[role=progressbar][aria-label="Part du kilométrage autorisé parcourue"]');
         $text = $this->text();
         self::assertStringContainsString('Parcouru 10', $text);
-        self::assertStringContainsString('km/jour', $text);
-        self::assertStringContainsString('km/semaine', $text);
-        self::assertStringContainsString('km/mois', $text);
+        self::assertStringContainsString('km / jour', $text);
+        self::assertStringContainsString('km / semaine', $text);
+        self::assertStringContainsString('km / mois', $text);
         self::assertStringContainsString('Dernier relevé', $text);
         self::assertMatchesRegularExpression('/\d\s€|\d\sCHF/u', $text);
         self::assertMatchesRegularExpression('/\d\.\d\d\sCHF/u', $text, 'Swiss amounts have a decimal point.');

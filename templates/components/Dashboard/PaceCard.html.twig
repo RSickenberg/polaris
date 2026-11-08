@@ -28,8 +28,9 @@
             <dl class="grid grid-cols-3 divide-x">
                 {% for period, distance in {day: budget.perDay, week: budget.perWeek, month: budget.perMonth} %}
                     {# The term comes first for a screen reader; flex order shows the figure above it. #}
-                    <div class="flex flex-col px-2 text-center">
-                        <dt class="order-2 text-sm text-muted-foreground">{{ ('pace.' ~ period)|trans(domain='dashboard') }}</dt>
+                    {# The unit stays on one line: a smaller label where three cards share the row. #}
+                    <div class="flex flex-col px-1 text-center">
+                        <dt class="order-2 text-sm whitespace-nowrap text-muted-foreground lg:text-xs">{{ ('pace.' ~ period)|trans(domain='dashboard') }}</dt>
                         <dd class="order-1 text-2xl font-light" data-figure>{{ distance|km }}</dd>
                     </div>
                 {% endfor %}
