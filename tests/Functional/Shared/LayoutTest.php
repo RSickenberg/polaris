@@ -67,7 +67,7 @@ final class LayoutTest extends WebTestCase
         // A bar separates the vehicle list link from the links of this vehicle.
         self::assertSelectorExists('[data-slot=sidebar-content] > [data-slot=sidebar-separator]');
         $links = $crawler->filter('nav[aria-label="Main navigation"] a');
-        self::assertCount(3, $links);
+        self::assertCount(4, $links);
         self::assertSame(\sprintf('/vehicles/%s', $this->id), $links->eq(0)->attr('href'));
         self::assertSame('Dashboard', trim($links->eq(0)->text()));
         self::assertSame('false', $links->eq(0)->attr('data-active'));
@@ -77,6 +77,9 @@ final class LayoutTest extends WebTestCase
         self::assertSame(\sprintf('/vehicles/%s/lease', $this->id), $links->eq(2)->attr('href'));
         self::assertSame('Lease terms', trim($links->eq(2)->text()));
         self::assertSame('page', $links->eq(2)->attr('aria-current'));
+        self::assertSame(\sprintf('/vehicles/%s/data', $this->id), $links->eq(3)->attr('href'));
+        self::assertSame('Data', trim($links->eq(3)->text()));
+        self::assertSame('false', $links->eq(3)->attr('data-active'));
     }
 
     public function testNavigationMarksTheDashboardWhenOnIt(): void
@@ -88,7 +91,11 @@ final class LayoutTest extends WebTestCase
 
     public function testShellIsTranslatedToFrench(): void
     {
-        $this->client->request('GET', \sprintf('/vehicles/%s/readings', $this->id), server: ['HTTP_ACCEPT_LANGUAGE' => 'fr']);
+        $this->client->request(
+            'GET',
+            \sprintf('/vehicles/%s/readings', $this->id),
+            server: ['HTTP_ACCEPT_LANGUAGE' => 'fr'],
+        );
 
         self::assertSelectorExists('html[lang="fr"]');
         self::assertSelectorExists('aside[aria-label="Barre latérale"]');
@@ -106,11 +113,18 @@ final class LayoutTest extends WebTestCase
     #[DataProvider('themeLabels')]
     public function testThemeToggleRendersInEachLocale(string $acceptLanguage, string $label, array $options): void
     {
-        $crawler = $this->client->request('GET', \sprintf('/vehicles/%s/readings', $this->id), server: ['HTTP_ACCEPT_LANGUAGE' => $acceptLanguage]);
+        $crawler = $this->client->request(
+            'GET',
+            \sprintf('/vehicles/%s/readings', $this->id),
+            server: ['HTTP_ACCEPT_LANGUAGE' => $acceptLanguage],
+        );
 
         self::assertSelectorExists(\sprintf('[data-controller~="theme"] button[aria-label="%s"]', $label));
         $radios = $crawler->filter('[data-controller~="theme"] [role="menuitemradio"]');
-        self::assertSame(['light', 'dark', 'system'], $radios->each(static fn ($radio): ?string => $radio->attr('data-value')));
+        self::assertSame(
+            ['light', 'dark', 'system'],
+            $radios->each(static fn ($radio): ?string => $radio->attr('data-value')),
+        );
         self::assertSame($options, $radios->each(static fn ($radio): string => trim($radio->text())));
     }
 

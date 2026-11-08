@@ -13,12 +13,9 @@ final readonly class TokenSet
     public function __construct(
         #[\SensitiveParameter]
         public string $accessToken,
-
         #[\SensitiveParameter]
         public string $refreshToken,
-
         public int $expiresIn,
-
         public string $scopes,
     ) {
     }

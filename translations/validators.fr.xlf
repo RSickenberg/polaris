@@ -58,6 +58,10 @@
         <source>tesla.wake_cap.range</source>
         <target>La limite de réveils doit être comprise entre 0 et 20.</target>
       </trans-unit>
+      <trans-unit id="vehicle.data.file_required">
+        <source>vehicle.data.file_required</source>
+        <target>Choisissez un fichier à importer.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

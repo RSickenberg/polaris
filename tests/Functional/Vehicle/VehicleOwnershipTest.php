@@ -53,6 +53,9 @@ final class VehicleOwnershipTest extends WebTestCase
         yield 'add a reading' => ['POST', '/readings'];
         yield 'lease' => ['GET', '/lease'];
         yield 'save the lease' => ['POST', '/lease'];
+        yield 'data' => ['GET', '/data'];
+        yield 'import data' => ['POST', '/data'];
+        yield 'export data' => ['GET', '/data/export'];
     }
 
     #[DataProvider('pages')]
@@ -71,6 +74,8 @@ final class VehicleOwnershipTest extends WebTestCase
         yield 'dashboard' => [''];
         yield 'readings' => ['/readings'];
         yield 'lease' => ['/lease'];
+        yield 'data' => ['/data'];
+        yield 'export data' => ['/data/export'];
     }
 
     #[DataProvider('ownPages')]
@@ -103,7 +108,11 @@ final class VehicleOwnershipTest extends WebTestCase
 
     public function testTheRefreshActionOfAnotherUsersVehicleIsNotFound(): void
     {
-        $component = $this->createLiveComponent('Fetching:OdometerRefreshButton', ['vehicleId' => $this->theirs->getId()->toRfc4122()], $this->client);
+        $component = $this->createLiveComponent(
+            'Fetching:OdometerRefreshButton',
+            ['vehicleId' => $this->theirs->getId()->toRfc4122()],
+            $this->client,
+        );
 
         $this->expectException(NotFoundHttpException::class);
 
@@ -112,7 +121,11 @@ final class VehicleOwnershipTest extends WebTestCase
 
     public function testTheRefreshActionOfTheOwnVehicleIsAccepted(): void
     {
-        $component = $this->createLiveComponent('Fetching:OdometerRefreshButton', ['vehicleId' => $this->mine->getId()->toRfc4122()], $this->client);
+        $component = $this->createLiveComponent(
+            'Fetching:OdometerRefreshButton',
+            ['vehicleId' => $this->mine->getId()->toRfc4122()],
+            $this->client,
+        );
 
         self::assertSame(200, $component->call('refresh')->response()->getStatusCode());
     }

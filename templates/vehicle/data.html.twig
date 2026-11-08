@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'page.data.title'|trans(domain='vehicle') }} | {{ vehicle.name }}{% endblock %}
+
+{% block main %}
+    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.data.title'|trans(domain='vehicle') }} <span class="font-normal text-muted-foreground">| {{ vehicle.name }}</span></h1>
+
+    <div class="mt-6 grid max-w-5xl gap-4 lg:grid-cols-2">
+        <twig:Card data-data="export">
+            <twig:Card:Header>
+                <twig:Card:Title><h2>{{ 'data.export.title'|trans(domain='vehicle') }}</h2></twig:Card:Title>
+                <twig:Card:Description>{{ 'data.export.description'|trans(domain='vehicle') }}</twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content class="mt-auto">
+                <twig:Button as="a" href="{{ path('vehicle_data_export', {id: vehicle.id.toBase32()}) }}" class="w-full sm:w-auto" data-turbo="false">
+                    <twig:ux:icon name="lucide:download" aria-hidden="true" />
+                    {{ 'data.export.button'|trans(domain='vehicle') }}
+                </twig:Button>
+            </twig:Card:Content>
+        </twig:Card>
+
+        <twig:Card data-data="import">
+            <twig:Card:Header>
+                <twig:Card:Title><h2>{{ 'data.import.title'|trans(domain='vehicle') }}</h2></twig:Card:Title>
+                <twig:Card:Description>{{ 'data.import.description'|trans(domain='vehicle') }}</twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content>
+                {{ form(form) }}
+            </twig:Card:Content>
+        </twig:Card>
+    </div>
+{% endblock %}

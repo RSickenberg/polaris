@@ -31,13 +31,10 @@ final readonly class AddVehicleCommand
      */
     public function __invoke(
         SymfonyStyle $io,
-
         #[Argument(description: 'The 17 characters VIN')]
         string $vin,
-
         #[Argument(description: 'A name to recognise the vehicle')]
         string $name,
-
         #[Option(description: 'The email of the owner. Optional when there is a single user')]
         ?string $email = null,
     ): int {

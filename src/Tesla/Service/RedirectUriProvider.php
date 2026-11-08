@@ -19,7 +19,6 @@ final readonly class RedirectUriProvider
     public function __construct(
         #[Autowire(env: 'POLARIS_TESLA_REDIRECT_URI')]
         private string $configured,
-
         #[Autowire(env: 'DEFAULT_URI')]
         private string $defaultUri,
     ) {
