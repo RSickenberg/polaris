@@ -118,13 +118,21 @@ final readonly class TeslaFleetClient implements VehicleClient
 
         /* @var FleetRegion $region */
         if (!\is_int($miles) && !\is_float($miles)) {
-            throw FleetApiError::unexpected(FleetApiOperation::VehicleData, $region, 'the answer has no vehicle_state.odometer');
+            throw FleetApiError::unexpected(
+                FleetApiOperation::VehicleData,
+                $region,
+                'the answer has no vehicle_state.odometer',
+            );
         }
 
         try {
             $odometer = Distance::fromMiles($miles);
         } catch (\InvalidArgumentException $invalid) {
-            throw FleetApiError::unexpected(FleetApiOperation::VehicleData, $region, 'the odometer is not a valid distance');
+            throw FleetApiError::unexpected(
+                FleetApiOperation::VehicleData,
+                $region,
+                'the odometer is not a valid distance',
+            );
         }
 
         $timestamp = $state['timestamp'] ?? null;
@@ -189,7 +197,11 @@ final readonly class TeslaFleetClient implements VehicleClient
         $state = \is_string($value) ? VehicleState::tryFrom($value) : null;
 
         if (null === $state) {
-            throw FleetApiError::unexpected($operation, $region, \sprintf('unknown vehicle state "%s"', \is_scalar($value) ? (string) $value : get_debug_type($value)));
+            throw FleetApiError::unexpected(
+                $operation,
+                $region,
+                \sprintf('unknown vehicle state "%s"', \is_scalar($value) ? (string) $value : get_debug_type($value)),
+            );
         }
 
         return $state;
@@ -198,7 +210,11 @@ final readonly class TeslaFleetClient implements VehicleClient
     private function summary(mixed $item, FleetRegion $region): VehicleSummary
     {
         if (!\is_array($item)) {
-            throw FleetApiError::unexpected(FleetApiOperation::ListVehicles, $region, 'a vehicle entry is not an object');
+            throw FleetApiError::unexpected(
+                FleetApiOperation::ListVehicles,
+                $region,
+                'a vehicle entry is not an object',
+            );
         }
 
         try {

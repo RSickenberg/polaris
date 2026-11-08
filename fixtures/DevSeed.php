@@ -28,13 +28,15 @@ use Random\Randomizer;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
- * Development data to try the app by hand (`make seed`), owned by the development user. Dates are relative to now, so the
- * projections stay meaningful whenever it is loaded, and every load differs: lease starts, the number and the dates of the
- * readings and the distance between two of them are random. What stays fixed is each vehicle's outcome. The VINs are fake.
+ * Development data to try the app by hand (`make seed`), owned by the development user. Dates are relative to now, so
+ * the projections stay meaningful whenever it is loaded, and every load differs: lease starts, the number and the dates
+ * of the readings and the distance between two of them are random. What stays fixed is each vehicle's outcome. The VINs
+ * are fake.
  *
- * The distance driven is chosen from a ratio of the allowance and the readings follow that pace, with irregular gaps and
- * noise between two readings, except at the instant 30 days before the last reading, where they sit on the straight line.
- * So the recent pace equals the overall one and the projected end is the ratio of the allowance, whatever the noise.
+ * The distance driven is chosen from a ratio of the allowance and the readings follow that pace, with irregular gaps
+ * and noise between two readings, except at the instant 30 days before the last reading, where they sit on the straight
+ * line. So the recent pace equals the overall one and the projected end is the ratio of the allowance, whatever the
+ * noise.
  *
  * - Model 3: 36-month lease, 15 000 km a year, projected 12 to 35 % over the allowance (over).
  * - Model Y: 24-month lease in miles, projected 55 to 90 % of the allowance, Tesla readings in miles (ok).
@@ -73,7 +75,14 @@ final class DevSeed extends Fixture
         $manager->persist($modelThree);
         $start = $today->subMonths($this->random->getInt(10, 18));
         $startKm = $this->random->getInt(0, 40);
-        $contract = $this->lease($modelThree, $start, 36, Allowance::ofTotal(Distance::fromKilometres(45_000)), Distance::fromKilometres($startKm), 5);
+        $contract = $this->lease(
+            $modelThree,
+            $start,
+            36,
+            Allowance::ofTotal(Distance::fromKilometres(45_000)),
+            Distance::fromKilometres($startKm),
+            5,
+        );
         $manager->persist($contract);
         foreach ($this->readings($contract, $now, 45_000, $this->ratio(1.12, 1.35), true) as [$at, $driven]) {
             $manager->persist(OdometerReading::manual($modelThree, $at, Distance::fromKilometres($startKm + $driven)));
@@ -83,15 +92,33 @@ final class DevSeed extends Fixture
         $manager->persist($modelY);
         $start = $today->subMonths($this->random->getInt(4, 9));
         $startMiles = $this->random->getInt(0, 30);
-        $contract = $this->lease($modelY, $start, 24, Allowance::ofTotal(Distance::fromMiles(20_000)), Distance::fromMiles($startMiles), 0);
+        $contract = $this->lease(
+            $modelY,
+            $start,
+            24,
+            Allowance::ofTotal(Distance::fromMiles(20_000)),
+            Distance::fromMiles($startMiles),
+            0,
+        );
         $manager->persist($contract);
         foreach ($this->readings($contract, $now, 20_000, $this->ratio(0.55, 0.9), true) as [$at, $driven]) {
-            $manager->persist(OdometerReading::fromTesla($modelY, $at, (string) ($startMiles + $driven), DistanceUnit::Mile));
+            $manager->persist(
+                OdometerReading::fromTesla($modelY, $at, (string) ($startMiles + $driven), DistanceUnit::Mile)
+            );
         }
 
         $cybertruck = new Vehicle(new Vin('7G2CEHED0RA000003'), 'Cybertruck', $owner);
         $manager->persist($cybertruck);
-        $manager->persist($this->lease($cybertruck, $today->subMonths($this->random->getInt(1, 3)), 36, Allowance::ofTotal(Distance::fromKilometres(60_000)), Distance::fromKilometres(0), 5));
+        $manager->persist(
+            $this->lease(
+                $cybertruck,
+                $today->subMonths($this->random->getInt(1, 3)),
+                36,
+                Allowance::ofTotal(Distance::fromKilometres(60_000)),
+                Distance::fromKilometres(0),
+                5,
+            )
+        );
 
         $modelS = new Vehicle(new Vin('5YJSA1E26NF000004'), 'Model S', $owner);
         $manager->persist($modelS);
@@ -107,7 +134,14 @@ final class DevSeed extends Fixture
         $manager->persist($modelX);
         $start = $today->subMonths($this->random->getInt(9, 15));
         $startKm = $this->random->getInt(0, 40);
-        $contract = $this->lease($modelX, $start, 24, Allowance::ofTotal(Distance::fromKilometres(30_000)), Distance::fromKilometres($startKm), 10);
+        $contract = $this->lease(
+            $modelX,
+            $start,
+            24,
+            Allowance::ofTotal(Distance::fromKilometres(30_000)),
+            Distance::fromKilometres($startKm),
+            10,
+        );
         $manager->persist($contract);
         foreach ($this->readings($contract, $now, 30_000, $this->ratio(0.93, 0.97), true) as [$at, $driven]) {
             $manager->persist(OdometerReading::manual($modelX, $at, Distance::fromKilometres($startKm + $driven)));
@@ -117,9 +151,25 @@ final class DevSeed extends Fixture
         $manager->persist($roadster);
         $start = $today->subMonths(12 + $this->random->getInt(2, 8));
         $startKm = $this->random->getInt(0, 40);
-        $contract = $this->lease($roadster, $start, 12, Allowance::ofTotal(Distance::fromKilometres(15_000)), Distance::fromKilometres($startKm), 0);
+        $contract = $this->lease(
+            $roadster,
+            $start,
+            12,
+            Allowance::ofTotal(Distance::fromKilometres(15_000)),
+            Distance::fromKilometres($startKm),
+            0,
+        );
         $manager->persist($contract);
-        foreach ($this->readings($contract, $now, 15_000, null, false, 15_000 + $this->random->getInt(300, 2_500)) as [$at, $driven]) {
+        foreach (
+            $this->readings(
+                $contract,
+                $now,
+                15_000,
+                null,
+                false,
+                15_000 + $this->random->getInt(300, 2_500),
+            ) as [$at, $driven]
+        ) {
             $manager->persist(OdometerReading::manual($roadster, $at, Distance::fromKilometres($startKm + $driven)));
         }
 
@@ -144,11 +194,12 @@ final class DevSeed extends Fixture
     }
 
     /**
-     * The readings of a lease: irregular instants after the lease start, each with the distance driven since it began (in
-     * the unit of the allowance, whole numbers), ending in the past.
+     * The readings of a lease: irregular instants after the lease start, each with the distance driven since it began
+     * (in the unit of the allowance, whole numbers), ending in the past.
      *
      * With a ratio the total follows the pace that projects to that share of the allowance, and the readings sit on the
-     * straight line 30 days before the last one. Without it the total is given and the last reading follows the lease end.
+     * straight line 30 days before the last one. Without it the total is given and the last reading follows the lease
+     * end.
      *
      * @param int      $allowance the whole allowance, in the unit of the readings
      * @param int|null $total     the distance driven at the last reading, when no ratio gives it
@@ -156,8 +207,14 @@ final class DevSeed extends Fixture
      *
      * @return list<array{CarbonImmutable, int}>
      */
-    private function readings(LeaseContract $contract, CarbonImmutable $now, int $allowance, ?float $ratio, bool $running, ?int $total = null): array
-    {
+    private function readings(
+        LeaseContract $contract,
+        CarbonImmutable $now,
+        int $allowance,
+        ?float $ratio,
+        bool $running,
+        ?int $total = null,
+    ): array {
         $start = $contract->getTerm()->start();
         $end = $contract->getTerm()->exclusiveEnd();
 
@@ -168,7 +225,8 @@ final class DevSeed extends Fixture
         $term = $end->getTimestamp() - $start->getTimestamp();
         $total ??= (int) round((float) $ratio * $allowance * $elapsed / $term);
 
-        $anchor = $running && $elapsed > 2 * self::RECENT_WINDOW_DAYS * 86_400 ? $last->subDays(self::RECENT_WINDOW_DAYS) : null;
+        $longEnough = $elapsed > 2 * self::RECENT_WINDOW_DAYS * 86_400;
+        $anchor = $running && $longEnough ? $last->subDays(self::RECENT_WINDOW_DAYS) : null;
         $instants = [$last->getTimestamp() => $last];
         if (null !== $anchor) {
             $instants[$anchor->getTimestamp()] = $anchor;
@@ -187,8 +245,8 @@ final class DevSeed extends Fixture
             $previous = $at;
         }
 
-        // The readings up to the anchor share out the part of the total that the straight line gives it, the rest share out
-        // what is left, so the anchor itself sits on the line.
+        // The readings up to the anchor share out the part of the total that the straight line gives it, the rest share
+        // out what is left, so the anchor itself sits on the line.
         $groups = [$weights];
         $parts = [$total];
         if (null !== $anchor) {
@@ -244,9 +302,19 @@ final class DevSeed extends Fixture
         return $this->instantBetween($after->addMinute(), $after->addDays($this->random->getInt(1, 6))->min($before));
     }
 
-    private function lease(Vehicle $vehicle, CarbonImmutable $start, int $months, Allowance $allowance, Distance $startOdometer, int $tolerancePercent): LeaseContract
-    {
-        $term = LeaseTerm::fromCalendarDates($start, $start->addMonthsNoOverflow($months), EndDateConvention::Exclusive);
+    private function lease(
+        Vehicle $vehicle,
+        CarbonImmutable $start,
+        int $months,
+        Allowance $allowance,
+        Distance $startOdometer,
+        int $tolerancePercent,
+    ): LeaseContract {
+        $term = LeaseTerm::fromCalendarDates(
+            $start,
+            $start->addMonthsNoOverflow($months),
+            EndDateConvention::Exclusive,
+        );
 
         return new LeaseContract(
             $vehicle,

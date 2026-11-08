@@ -38,7 +38,9 @@ final class TeslaAppSettingsType extends AbstractType
                 'help' => $secretStored ? 'form.client_secret.help_stored' : 'form.client_secret.help_new',
                 'required' => !$secretStored,
                 // The stored secret is never sent back to the page: dots in the empty field show that one exists.
-                'attr' => ['autocomplete' => 'new-password'] + ($secretStored ? ['placeholder' => self::STORED_SECRET_PLACEHOLDER] : []),
+                'attr' => $secretStored
+                    ? ['autocomplete' => 'new-password', 'placeholder' => self::STORED_SECRET_PLACEHOLDER]
+                    : ['autocomplete' => 'new-password'],
             ])
             ->add('domain', TextType::class, [
                 'label' => 'form.domain.label',
@@ -53,7 +55,9 @@ final class TeslaAppSettingsType extends AbstractType
                 'expanded' => true,
                 'choice_label' => static fn (FleetRegion $region): string => 'region.' . $region->value,
                 // China is listed so that the choice is visible, but it cannot be enabled.
-                'choice_attr' => static fn (FleetRegion $region): array => $region->isSupported() ? [] : ['disabled' => 'disabled'],
+                'choice_attr' => static fn (FleetRegion $region): array => $region->isSupported()
+                    ? []
+                    : ['disabled' => 'disabled'],
             ])
             ->add('dailyWakeCap', IntegerType::class, [
                 'label' => 'form.wake_cap.label',

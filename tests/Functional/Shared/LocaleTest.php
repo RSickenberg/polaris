@@ -36,7 +36,13 @@ final class LocaleTest extends WebTestCase
         $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000050'), 'Model 3', self::createUser());
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->persist($vehicle);
-        $entityManager->persist(OdometerReading::manual($vehicle, new \Carbon\CarbonImmutable('2026-10-01 08:00', 'UTC'), Distance::fromKilometres(12_345)));
+        $entityManager->persist(
+            OdometerReading::manual(
+                $vehicle,
+                new \Carbon\CarbonImmutable('2026-10-01 08:00', 'UTC'),
+                Distance::fromKilometres(12_345),
+            )
+        );
         $entityManager->flush();
         $this->url = \sprintf('/vehicles/%s/readings', $vehicle->getId()->toBase32());
     }
@@ -51,7 +57,9 @@ final class LocaleTest extends WebTestCase
         self::assertSelectorTextContains('h1', 'Historique du compteur | Model 3');
         self::assertSelectorTextContains('main h2', 'Ajouter un relevé');
         self::assertSelectorExists('button:contains("Ajouter le relevé")');
-        $cells = $this->client->getCrawler()->filter('tbody td')->each(static fn ($cell): string => self::text($cell->text()));
+        $cells = $this->client->getCrawler()->filter('tbody td')->each(
+            static fn ($cell): string => self::text($cell->text())
+        );
         self::assertSame(['1 oct. 2026, 08:00 UTC', '12 345', 'Manuelle'], $cells);
     }
 
@@ -62,7 +70,9 @@ final class LocaleTest extends WebTestCase
         self::assertResponseHeaderSame('Content-Language', 'en');
         self::assertSelectorExists('html[lang="en"]');
         self::assertSelectorTextContains('h1', 'Odometer history | Model 3');
-        $cells = $this->client->getCrawler()->filter('tbody td')->each(static fn ($cell): string => self::text($cell->text()));
+        $cells = $this->client->getCrawler()->filter('tbody td')->each(
+            static fn ($cell): string => self::text($cell->text())
+        );
         self::assertSame(['Oct 1, 2026, 8:00 AM UTC', '12,345', 'Manual'], $cells);
     }
 
@@ -78,10 +88,20 @@ final class LocaleTest extends WebTestCase
     {
         $this->client->setServerParameter('HTTP_ACCEPT_LANGUAGE', 'fr');
         $this->client->request('GET', $this->url);
-        $this->client->submitForm('Ajouter le relevé', ['odometer_reading[readAt]' => '2026-10-02T08:00', 'odometer_reading[odometer]' => '9000', 'odometer_reading[distanceUnit]' => 'km']);
+        $this->client->submitForm(
+            'Ajouter le relevé',
+            [
+                'odometer_reading[readAt]' => '2026-10-02T08:00',
+                'odometer_reading[odometer]' => '9000',
+                'odometer_reading[distanceUnit]' => 'km',
+            ],
+        );
 
         self::assertResponseStatusCodeSame(422);
-        self::assertStringContainsString('Inférieur au relevé précédent (12 345 km le 1 oct. 2026 à 08:00 UTC).', self::text($this->client->getCrawler()->filter('body')->text()));
+        self::assertStringContainsString(
+            'Inférieur au relevé précédent (12 345 km le 1 oct. 2026 à 08:00 UTC).',
+            self::text($this->client->getCrawler()->filter('body')->text()),
+        );
     }
 
     private static function text(string $text): string

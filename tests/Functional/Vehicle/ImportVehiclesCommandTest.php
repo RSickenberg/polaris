@@ -51,7 +51,10 @@ final class ImportVehiclesCommandTest extends KernelTestCase
 
         self::assertStringContainsString('would be added', $tester->getDisplay());
         self::assertStringContainsString('Raven', $tester->getDisplay());
-        self::assertSame([], self::getContainer()->get(EntityManagerInterface::class)->getRepository(Vehicle::class)->findAll());
+        self::assertSame(
+            [],
+            self::getContainer()->get(EntityManagerInterface::class)->getRepository(Vehicle::class)->findAll(),
+        );
     }
 
     public function testImportsAndThenFindsNothingNew(): void
@@ -90,7 +93,10 @@ final class ImportVehiclesCommandTest extends KernelTestCase
     {
         $app = self::createConfiguredApp(self::createUser());
         self::createToken($app, CarbonImmutable::now()->addHours(2));
-        self::getContainer()->set('http_client', new MockHttpClient(array_fill(0, $responses * 2, new MockResponse(FleetApiResponses::vehicleList()))));
+        self::getContainer()->set(
+            'http_client',
+            new MockHttpClient(array_fill(0, $responses * 2, new MockResponse(FleetApiResponses::vehicleList()))),
+        );
     }
 
     private function tester(): CommandTester

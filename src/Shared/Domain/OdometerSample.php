@@ -17,7 +17,9 @@ final readonly class OdometerSample
         private Distance $odometer,
     ) {
         if (0 !== $readAt->getOffset()) {
-            throw new \InvalidArgumentException(\sprintf('An odometer sample must be read at a UTC instant, got %s.', $readAt->toIso8601String()));
+            throw new \InvalidArgumentException(
+                \sprintf('An odometer sample must be read at a UTC instant, got %s.', $readAt->toIso8601String())
+            );
         }
     }
 

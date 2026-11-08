@@ -26,7 +26,10 @@ final class LocaleListenerTest extends TestCase
 
     public function testBrowserIsUsedWithoutPreference(): void
     {
-        self::assertSame('fr', $this->handle(self::request('fr-CH,fr;q=0.9,en;q=0.8'), new NullPreferredLocaleProvider())->getLocale());
+        self::assertSame(
+            'fr',
+            $this->handle(self::request('fr-CH,fr;q=0.9,en;q=0.8'), new NullPreferredLocaleProvider())->getLocale(),
+        );
     }
 
     public function testUnsupportedBrowserLanguageFallsBackToEnglish(): void
@@ -46,7 +49,9 @@ final class LocaleListenerTest extends TestCase
     {
         $request = self::request('fr');
         $listener = new LocaleListener(new NullPreferredLocaleProvider(), ['en', 'fr'], 'en');
-        $listener(new RequestEvent($this->createStub(KernelInterface::class), $request, HttpKernelInterface::SUB_REQUEST));
+        $listener(
+            new RequestEvent($this->createStub(KernelInterface::class), $request, HttpKernelInterface::SUB_REQUEST)
+        );
 
         self::assertSame('en', $request->getLocale());
     }
@@ -54,7 +59,9 @@ final class LocaleListenerTest extends TestCase
     private function handle(Request $request, PreferredLocaleProvider $preference): Request
     {
         $listener = new LocaleListener($preference, ['en', 'fr'], 'en');
-        $listener(new RequestEvent($this->createStub(KernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST));
+        $listener(
+            new RequestEvent($this->createStub(KernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST)
+        );
 
         return $request;
     }

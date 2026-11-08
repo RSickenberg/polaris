@@ -29,19 +29,24 @@ final class TeslaOdometerReaderTest extends KernelTestCase
         $app = self::createConfiguredApp(self::createUser());
         self::createToken($app, CarbonImmutable::now()->addHours(2));
         $urls = [];
-        self::getContainer()->set('http_client', new MockHttpClient(static function (string $method, string $url) use (&$urls): MockResponse {
+        $respond = static function (string $method, string $url) use (&$urls): MockResponse {
             $urls[] = $method . ' ' . $url;
 
-            return new MockResponse(str_ends_with($url, '/vehicle_data') ? FleetApiResponses::vehicleData(100) : FleetApiResponses::vehicle('online'));
-        }));
+            $answer = str_ends_with($url, '/vehicle_data')
+                ? FleetApiResponses::vehicleData(100)
+                : FleetApiResponses::vehicle('online');
+
+            return new MockResponse($answer);
+        };
+        self::getContainer()->set('http_client', new MockHttpClient($respond));
 
         $result = self::getContainer()->get(TeslaOdometerReader::class)->read($app, new Vin(FleetApiResponses::VIN));
 
         self::assertSame(160_934, $result->reading?->odometer->metres());
         self::assertSame(
             [
-                'GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . FleetApiResponses::VIN,
-                'GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . FleetApiResponses::VIN . '/vehicle_data',
+                'GET ' . FleetApiResponses::EU_VEHICLES . '/' . FleetApiResponses::VIN,
+                'GET ' . FleetApiResponses::EU_VEHICLES . '/' . FleetApiResponses::VIN . '/vehicle_data',
             ],
             $urls,
         );

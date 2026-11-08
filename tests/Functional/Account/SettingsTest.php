@@ -29,7 +29,9 @@ final class SettingsTest extends WebTestCase
     protected function setUp(): void
     {
         $this->client = self::createClient();
-        $this->user = self::getContainer()->get(UserCreator::class)->create(new NewUser('jane.doe@example.test', self::PASSWORD));
+        $this->user = self::getContainer()->get(UserCreator::class)->create(
+            new NewUser('jane.doe@example.test', self::PASSWORD)
+        );
         $this->client->loginUser($this->user);
     }
 
@@ -110,7 +112,12 @@ final class SettingsTest extends WebTestCase
         $this->changePassword('not the password', self::NEW_PASSWORD, self::NEW_PASSWORD);
 
         self::assertResponseStatusCodeSame(422);
-        self::assertTrue(self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid($this->stored(), self::PASSWORD));
+        self::assertTrue(
+            self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid(
+                $this->stored(),
+                self::PASSWORD,
+            )
+        );
     }
 
     public function testTwoDifferentNewPasswordsAreRefused(): void
@@ -119,7 +126,12 @@ final class SettingsTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(422);
         self::assertSelectorTextContains('[data-slot=field-error]', 'The two passwords do not match.');
-        self::assertTrue(self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid($this->stored(), self::PASSWORD));
+        self::assertTrue(
+            self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid(
+                $this->stored(),
+                self::PASSWORD,
+            )
+        );
     }
 
     public function testATooShortNewPasswordIsRefused(): void
@@ -127,7 +139,12 @@ final class SettingsTest extends WebTestCase
         $this->changePassword(self::PASSWORD, 'short', 'short');
 
         self::assertResponseStatusCodeSame(422);
-        self::assertTrue(self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid($this->stored(), self::PASSWORD));
+        self::assertTrue(
+            self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid(
+                $this->stored(),
+                self::PASSWORD,
+            )
+        );
     }
 
     public function testANewUserStartsOptedInBecauseTheSelfHostedPolicySaysSo(): void
@@ -142,7 +159,10 @@ final class SettingsTest extends WebTestCase
         self::assertCheckboxChecked('reporting[enabled]');
         self::assertCheckboxNotChecked('reporting[details]');
 
-        $this->client->submitForm('Save error reporting', ['reporting[enabled]' => false, 'reporting[details]' => true]);
+        $this->client->submitForm(
+            'Save error reporting',
+            ['reporting[enabled]' => false, 'reporting[details]' => true],
+        );
 
         self::assertResponseRedirects('/settings');
         $this->client->followRedirect();
@@ -161,8 +181,14 @@ final class SettingsTest extends WebTestCase
 
         self::assertSelectorTextContains('[data-slot=sidebar-footer] [data-slot=avatar-fallback]', 'JD');
         self::assertSelectorExists('[data-slot=sidebar-footer] [data-dropdown-menu-target=trigger]');
-        self::assertSelectorTextContains('[data-slot=sidebar-footer] [data-slot=dropdown-menu-content] a[href="/settings"]', 'Settings');
-        self::assertSelectorTextContains('[data-slot=sidebar-footer] [data-slot=dropdown-menu-content] a[href^="/logout"]', 'Sign out');
+        self::assertSelectorTextContains(
+            '[data-slot=sidebar-footer] [data-slot=dropdown-menu-content] a[href="/settings"]',
+            'Settings',
+        );
+        self::assertSelectorTextContains(
+            '[data-slot=sidebar-footer] [data-slot=dropdown-menu-content] a[href^="/logout"]',
+            'Sign out',
+        );
     }
 
     private function changePassword(string $current, string $new, string $repeat): void

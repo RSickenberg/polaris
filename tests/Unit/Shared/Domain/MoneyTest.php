@@ -90,7 +90,9 @@ final class MoneyTest extends TestCase
 
     public function testMultiply(): void
     {
-        self::assertTrue(Money::ofMinor(12, Currency::CHF)->multiply(1500)->equals(Money::ofMinor(18_000, Currency::CHF)));
+        self::assertTrue(
+            Money::ofMinor(12, Currency::CHF)->multiply(1500)->equals(Money::ofMinor(18_000, Currency::CHF))
+        );
     }
 
     public function testEqualsComparesTheCurrency(): void

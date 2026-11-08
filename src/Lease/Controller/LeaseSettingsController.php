@@ -39,11 +39,11 @@ final class LeaseSettingsController extends AbstractController
     }
 
     // Not found rather than forbidden: another user's vehicle must not even be known to exist.
-    #[IsGranted(VehiclePermission::Manage->value, 'vehicle', statusCode: Response::HTTP_NOT_FOUND)]
-    #[Route('/vehicles/{id}/lease', name: 'lease_settings', methods: ['GET', 'POST'])]
     /**
      * @throws ORMException
      */
+    #[IsGranted(VehiclePermission::Manage->value, 'vehicle', statusCode: Response::HTTP_NOT_FOUND)]
+    #[Route('/vehicles/{id}/lease', name: 'lease_settings', methods: ['GET', 'POST'])]
     public function settings(Request $request, #[MapEntity(id: 'id')] Vehicle $vehicle): Response
     {
         $contract = $this->leaseTerms->find($vehicle);

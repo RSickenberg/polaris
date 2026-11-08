@@ -25,8 +25,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * Saves the data of a vehicle to a file and brings a file back: the lease, the odometer readings and the daily snapshots.
- * See {@see VehicleDataExporter} and {@see VehicleDataImporter}.
+ * Saves the data of a vehicle to a file and brings a file back: the lease, the odometer readings and the daily
+ * snapshots. See {@see VehicleDataExporter} and {@see VehicleDataImporter}.
  */
 final class VehicleDataController extends AbstractController
 {
@@ -58,8 +58,8 @@ final class VehicleDataController extends AbstractController
 
                 return $this->redirectToRoute('vehicle_data', ['id' => $vehicle->getId()->toBase32()]);
             } catch (VehicleDataRejected $rejected) {
-                $parameters = ['%detail%' => $rejected->getMessage()];
-                $message = $this->translator->trans($rejected->reason, $parameters, 'vehicle');
+                $parameters = ['%detail%' => $rejected->detail];
+                $message = $this->translator->trans($rejected->reason->value, $parameters, 'vehicle');
                 $form->get('file')->addError(new FormError($message));
             }
         }

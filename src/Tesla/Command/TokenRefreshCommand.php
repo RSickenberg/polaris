@@ -21,7 +21,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * the connection by hand. It never prints a token, only the new expiry. Without --force nothing is sent
  * to Tesla unless the token is within POLARIS_TESLA_REFRESH_MARGIN seconds of expiry.
  */
-#[AsCommand(name: 'polaris:tesla:token:refresh', description: 'Refresh the Tesla access token (only when due, unless --force)')]
+#[AsCommand(
+    name: 'polaris:tesla:token:refresh',
+    description: 'Refresh the Tesla access token (only when due, unless --force)',
+)]
 final readonly class TokenRefreshCommand
 {
     public function __construct(
@@ -34,7 +37,10 @@ final readonly class TokenRefreshCommand
 
     public function __invoke(
         SymfonyStyle $io,
-        #[Option(description: 'Refresh even when the token is not due. A refresh token is single use, so do not repeat it needlessly')]
+        #[Option(
+            description: 'Refresh even when the token is not due. A refresh token is single use, so do not repeat it '
+                . 'needlessly'
+        )]
         bool $force = false,
         #[Option(description: 'The email of the owner. Optional when there is a single user')]
         ?string $email = null,
@@ -71,7 +77,10 @@ final readonly class TokenRefreshCommand
 
         $token = $this->connection->findToken($app);
         $refreshed = null !== $token && $before?->getTimestamp() !== $token->getRefreshedAt()->getTimestamp();
-        $io->success($refreshed ? 'Refreshed the Tesla tokens.' : 'The access token is still valid, nothing was sent to Tesla. Use --force to refresh anyway.');
+        $io->success(
+            $refreshed ? 'Refreshed the Tesla tokens.' : 'The access token is still valid, nothing was sent to Tesla. '
+                . 'Use --force to refresh anyway.'
+        );
         $io->definitionList(
             ['Expires at (UTC)' => $token?->getExpiresAt()->format('Y-m-d H:i:s')],
             ['Status' => $token?->getStatus()->value],

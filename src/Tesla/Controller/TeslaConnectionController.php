@@ -17,6 +17,7 @@ use Polaris\Tesla\Form\Model\PasteRefreshTokenFormData;
 use Polaris\Tesla\Form\PasteCallbackType;
 use Polaris\Tesla\Form\PasteRefreshTokenType;
 use Polaris\Tesla\Service\Dto\ConnectionResult;
+use Polaris\Tesla\Service\Enum\ConnectionRejection;
 use Polaris\Tesla\Service\Exception\ConnectionRejected;
 use Polaris\Tesla\Service\RedirectUriProvider;
 use Polaris\Tesla\Service\TeslaConnectionService;
@@ -28,6 +29,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -48,10 +50,10 @@ final class TeslaConnectionController extends AbstractController
     ) {
     }
 
-    #[Route('/settings/tesla/consent', name: 'tesla_consent', methods: ['GET', 'POST'])]
     /**
      * @throws ORMException
      */
+    #[Route('/settings/tesla/consent', name: 'tesla_consent', methods: ['GET', 'POST'])]
     public function consent(Request $request, #[CurrentUser] User $user): Response
     {
         $app = $this->app($user);
@@ -86,10 +88,10 @@ final class TeslaConnectionController extends AbstractController
         return $this->renderConnect($app, $this->createPasteCallbackForm(), $this->createPasteRefreshTokenForm());
     }
 
-    #[Route('/settings/tesla/connect/authorize', name: 'tesla_authorize', methods: ['POST'])]
     /**
      * @throws RandomException
      */
+    #[Route('/settings/tesla/connect/authorize', name: 'tesla_authorize', methods: ['POST'])]
     public function authorize(Request $request, #[CurrentUser] User $user): Response
     {
         $app = $this->app($user);
@@ -131,26 +133,35 @@ final class TeslaConnectionController extends AbstractController
         return new RedirectResponse($authorization->url);
     }
 
-    #[Route(RedirectUriProvider::CALLBACK_PATH, name: 'tesla_callback', methods: ['GET'])]
     /**
      * @throws \SodiumException
      * @throws ORMException
      * @throws RandomException
      */
-    public function callback(Request $request, #[CurrentUser] User $user): Response
-    {
+    #[Route(RedirectUriProvider::CALLBACK_PATH, name: 'tesla_callback', methods: ['GET'])]
+    public function callback(
+        Request $request,
+        #[CurrentUser]
+        User $user,
+        #[MapQueryParameter]
+        ?string $code = null,
+        #[MapQueryParameter]
+        ?string $state = null,
+        #[MapQueryParameter]
+        ?string $error = null,
+    ): Response {
         $app = $this->app($user);
         // One try per authorization request, whatever the outcome.
         $expectedState = $request->getSession()->remove(self::STATE_KEY);
 
-        $callback = new CallbackParameters(
-            $this->queryValue($request, 'code'),
-            $this->queryValue($request, 'state'),
-            $this->queryValue($request, 'error'),
-        );
+        $callback = new CallbackParameters(self::nonEmpty($code), self::nonEmpty($state), self::nonEmpty($error));
 
         try {
-            $result = $this->connection->completeFromCallback($app, $callback, \is_string($expectedState) ? $expectedState : null);
+            $result = $this->connection->completeFromCallback(
+                $app,
+                $callback,
+                \is_string($expectedState) ? $expectedState : null,
+            );
         } catch (ConnectionRejected $rejected) {
             return $this->reject($rejected);
         }
@@ -158,12 +169,12 @@ final class TeslaConnectionController extends AbstractController
         return $this->connected($result);
     }
 
-    #[Route('/settings/tesla/connect/callback-url', name: 'tesla_paste_callback', methods: ['POST'])]
     /**
      * @throws \SodiumException
      * @throws ORMException
      * @throws RandomException
      */
+    #[Route('/settings/tesla/connect/callback-url', name: 'tesla_paste_callback', methods: ['POST'])]
     public function pasteCallback(Request $request, #[CurrentUser] User $user): Response
     {
         $app = $this->app($user);
@@ -179,13 +190,19 @@ final class TeslaConnectionController extends AbstractController
         $state = $session->get(self::STATE_KEY);
 
         try {
-            $result = $this->connection->completeFromPastedUrl($app, (string) $data->url, \is_string($state) ? $state : null);
+            $result = $this->connection->completeFromPastedUrl(
+                $app,
+                (string) $data->url,
+                \is_string($state) ? $state : null,
+            );
         } catch (ConnectionRejected $rejected) {
-            if (ConnectionRejected::NO_CONSENT === $rejected->key) {
+            if (ConnectionRejection::NoConsent === $rejected->reason) {
                 return $this->reject($rejected);
             }
 
-            $form->get('url')->addError(new FormError($this->translator->trans($rejected->key, domain: 'tesla')));
+            $form->get('url')->addError(
+                new FormError($this->translator->trans($rejected->reason->value, domain: 'tesla'))
+            );
 
             return $this->renderConnect($app, $form, $this->createPasteRefreshTokenForm());
         }
@@ -195,12 +212,12 @@ final class TeslaConnectionController extends AbstractController
         return $this->connected($result);
     }
 
-    #[Route('/settings/tesla/connect/refresh-token', name: 'tesla_paste_token', methods: ['POST'])]
     /**
      * @throws ORMException
      * @throws RandomException
      * @throws \SodiumException
      */
+    #[Route('/settings/tesla/connect/refresh-token', name: 'tesla_paste_token', methods: ['POST'])]
     public function pasteRefreshToken(Request $request, #[CurrentUser] User $user): Response
     {
         $app = $this->app($user);
@@ -215,11 +232,13 @@ final class TeslaConnectionController extends AbstractController
         try {
             $result = $this->connection->connectWithRefreshToken($app, (string) $data->refreshToken);
         } catch (ConnectionRejected $rejected) {
-            if (ConnectionRejected::NO_CONSENT === $rejected->key) {
+            if (ConnectionRejection::NoConsent === $rejected->reason) {
                 return $this->reject($rejected);
             }
 
-            $form->get('refreshToken')->addError(new FormError($this->translator->trans($rejected->key, domain: 'tesla')));
+            $form->get('refreshToken')->addError(
+                new FormError($this->translator->trans($rejected->reason->value, domain: 'tesla'))
+            );
 
             return $this->renderConnect($app, $this->createPasteCallbackForm(), $form);
         }
@@ -227,10 +246,10 @@ final class TeslaConnectionController extends AbstractController
         return $this->connected($result);
     }
 
-    #[Route('/settings/tesla/disconnect', name: 'tesla_disconnect', methods: ['POST'])]
     /**
      * @throws ORMException
      */
+    #[Route('/settings/tesla/disconnect', name: 'tesla_disconnect', methods: ['POST'])]
     public function disconnect(Request $request, #[CurrentUser] User $user): Response
     {
         $app = $this->app($user);
@@ -239,7 +258,10 @@ final class TeslaConnectionController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->connection->disconnect($app);
-            $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.disconnected', domain: 'tesla'));
+            $this->addFlash(
+                ToastVariant::Success->value,
+                $this->translator->trans('flash.disconnected', domain: 'tesla'),
+            );
         }
 
         return $this->redirectToRoute('tesla_settings');
@@ -314,7 +336,10 @@ final class TeslaConnectionController extends AbstractController
         $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.connected', domain: 'tesla'));
 
         if ($result->regionDiffers) {
-            $this->addFlash(ToastVariant::Danger->value, $this->translator->trans('flash.region_differs', domain: 'tesla'));
+            $this->addFlash(
+                ToastVariant::Danger->value,
+                $this->translator->trans('flash.region_differs', domain: 'tesla'),
+            );
         }
 
         return $this->redirectToRoute('tesla_settings');
@@ -322,15 +347,21 @@ final class TeslaConnectionController extends AbstractController
 
     private function reject(ConnectionRejected $rejected): Response
     {
-        $this->addFlash(ToastVariant::Danger->value, $this->translator->trans($rejected->key, domain: 'tesla'));
+        $this->addFlash(
+            ToastVariant::Danger->value,
+            $this->translator->trans($rejected->reason->value, domain: 'tesla'),
+        );
 
-        return $this->redirectToRoute(ConnectionRejected::NO_CONSENT === $rejected->key ? 'tesla_consent' : 'tesla_connect');
+        return $this->redirectToRoute(
+            ConnectionRejection::NoConsent === $rejected->reason ? 'tesla_consent' : 'tesla_connect'
+        );
     }
 
-    private function queryValue(Request $request, string $name): ?string
+    /**
+     * A query parameter that is present but empty counts as missing.
+     */
+    private static function nonEmpty(?string $value): ?string
     {
-        $value = $request->query->get($name);
-
-        return \is_string($value) && '' !== $value ? $value : null;
+        return '' === $value ? null : $value;
     }
 }

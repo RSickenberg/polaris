@@ -40,12 +40,12 @@ final class TeslaSettingsController extends AbstractController
     ) {
     }
 
-    #[Route('/settings/tesla', name: 'tesla_settings', methods: ['GET', 'POST'])]
     /**
      * @throws RandomException
      * @throws \SodiumException
      * @throws ORMException
      */
+    #[Route('/settings/tesla', name: 'tesla_settings', methods: ['GET', 'POST'])]
     public function __invoke(Request $request, #[CurrentUser] User $user): Response
     {
         $app = $this->settings->find($user);

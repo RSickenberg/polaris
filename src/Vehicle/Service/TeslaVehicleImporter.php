@@ -43,7 +43,10 @@ final readonly class TeslaVehicleImporter
         $known = $this->knownVins();
 
         return array_map(
-            static fn ($summary): ImportCandidate => new ImportCandidate($summary, isset($known[$summary->vin->value()])),
+            static fn ($summary): ImportCandidate => new ImportCandidate(
+                $summary,
+                isset($known[$summary->vin->value()]),
+            ),
             $this->tesla->listVehicles($app),
         );
     }

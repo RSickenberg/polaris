@@ -17,7 +17,12 @@ final class TeslaAppTest extends TestCase
 {
     public function testSerializationNeverIncludesThePrivateKey(): void
     {
-        $app = new TeslaApp(Owner::user(), 'the public key', 'v1:ciphertext', CarbonImmutable::parse('2026-10-20 12:00:00 UTC'));
+        $app = new TeslaApp(
+            Owner::user(),
+            'the public key',
+            'v1:ciphertext',
+            CarbonImmutable::parse('2026-10-20 12:00:00 UTC'),
+        );
 
         $serialized = serialize($app);
 
@@ -39,7 +44,12 @@ final class TeslaAppTest extends TestCase
     public function testSerializationNeverIncludesTheClientSecret(): void
     {
         $app = $this->app();
-        $app->configure('client-id', 'v1:secret-ciphertext', AppDomain::fromString('polaris.example.com'), [FleetRegion::EuropeMiddleEastAfrica]);
+        $app->configure(
+            'client-id',
+            'v1:secret-ciphertext',
+            AppDomain::fromString('polaris.example.com'),
+            [FleetRegion::EuropeMiddleEastAfrica],
+        );
 
         $serialized = serialize($app);
 
@@ -65,7 +75,11 @@ final class TeslaAppTest extends TestCase
             'client-id',
             'v1:secret',
             AppDomain::fromString('polaris.example.com'),
-            [FleetRegion::EuropeMiddleEastAfrica, FleetRegion::NorthAmericaAsiaPacific, FleetRegion::EuropeMiddleEastAfrica],
+            [
+                FleetRegion::EuropeMiddleEastAfrica,
+                FleetRegion::NorthAmericaAsiaPacific,
+                FleetRegion::EuropeMiddleEastAfrica,
+            ],
         );
 
         self::assertTrue($app->isConfigured());
@@ -78,6 +92,11 @@ final class TeslaAppTest extends TestCase
 
     private function app(): TeslaApp
     {
-        return new TeslaApp(Owner::user(), 'the public key', 'v1:ciphertext', CarbonImmutable::parse('2026-10-20 12:00:00 UTC'));
+        return new TeslaApp(
+            Owner::user(),
+            'the public key',
+            'v1:ciphertext',
+            CarbonImmutable::parse('2026-10-20 12:00:00 UTC'),
+        );
     }
 }

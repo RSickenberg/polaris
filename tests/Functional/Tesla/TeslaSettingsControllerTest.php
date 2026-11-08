@@ -57,7 +57,10 @@ final class TeslaSettingsControllerTest extends WebTestCase
 
         self::assertSelectorExists('a[href="/settings/tesla"][role=menuitem][aria-current=page]');
         self::assertSelectorNotExists('a[href="/settings"][role=menuitem][aria-current]');
-        self::assertSelectorExists('[data-slot=dropdown-menu-content].flex.flex-col.gap-1', 'The items of the account menu are spaced.');
+        self::assertSelectorExists(
+            '[data-slot=dropdown-menu-content].flex.flex-col.gap-1',
+            'The items of the account menu are spaced.',
+        );
         self::assertSelectorExists('[data-slot=dropdown-menu-content] a[href="/settings/tesla"].py-2');
         self::assertSelectorNotExists('main .max-w-3xl, #main-content .max-w-3xl');
         self::assertCount(0, $crawler->filter('[class*="max-w-3xl"]'));
@@ -92,7 +95,10 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertSelectorExists('input[name="' . self::FORM . '[regions][]"][value=eu][checked]');
         self::assertSelectorNotExists('input[name="' . self::FORM . '[regions][]"][value=na][checked]');
         self::assertSelectorExists('#status');
-        self::assertSelectorTextContains('#status', 'https://polaris.example.com/.well-known/appspecific/com.tesla.3p.public-key.pem');
+        self::assertSelectorTextContains(
+            '#status',
+            'https://polaris.example.com/.well-known/appspecific/com.tesla.3p.public-key.pem',
+        );
 
         $html = (string) $this->client->getResponse()->getContent();
         self::assertStringNotContainsString(self::SECRET, $html);
@@ -109,16 +115,34 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertSelectorTextContains('#token-storage h2', 'How your Tesla tokens are stored');
         self::assertSelectorTextContains('#token-storage', 'libsodium');
         self::assertSelectorTextContains('#token-storage', 'a copy of the database alone is useless');
-        self::assertStringNotContainsString('POLARIS_ENCRYPTION_KEY', (string) $this->client->getResponse()->getContent(), 'How the key is kept is for the installation guide, not for the page.');
+        self::assertStringNotContainsString(
+            'POLARIS_ENCRYPTION_KEY',
+            (string) $this->client->getResponse()->getContent(),
+            'How the key is kept is for the installation guide, not for the page.',
+        );
         foreach (['encrypted', 'key', 'rotation', 'hidden', 'scopes', 'disconnect', 'audit'] as $section) {
-            self::assertSelectorExists('#token-storage [data-storage=' . $section . '] svg[aria-hidden=true]', 'Each paragraph has a glyph: ' . $section);
+            self::assertSelectorExists(
+                '#token-storage [data-storage=' . $section . '] svg[aria-hidden=true]',
+                'Each paragraph has a glyph: ' . $section,
+            );
         }
         $links = $crawler->filter('#token-storage a')->each(static fn ($link): string => (string) $link->attr('href'));
         self::assertContains('https://github.com/RSickenberg/polaris', $links);
-        self::assertContains('https://github.com/RSickenberg/polaris/blob/main/src/Shared/Service/SecretEncrypter.php', $links);
-        self::assertContains('https://github.com/RSickenberg/polaris/blob/main/src/Tesla/Service/LockedTokenProvider.php', $links);
-        self::assertContains('https://github.com/RSickenberg/polaris/blob/main/docs/adr/0007-secrets-encrypted-at-rest.md', $links);
-        self::assertSelectorExists('#token-storage a[href^="https://github.com"][rel="noopener noreferrer"][target=_blank]');
+        self::assertContains(
+            'https://github.com/RSickenberg/polaris/blob/main/src/Shared/Service/SecretEncrypter.php',
+            $links,
+        );
+        self::assertContains(
+            'https://github.com/RSickenberg/polaris/blob/main/src/Tesla/Service/LockedTokenProvider.php',
+            $links,
+        );
+        self::assertContains(
+            'https://github.com/RSickenberg/polaris/blob/main/docs/adr/0007-secrets-encrypted-at-rest.md',
+            $links,
+        );
+        self::assertSelectorExists(
+            '#token-storage a[href^="https://github.com"][rel="noopener noreferrer"][target=_blank]'
+        );
         self::assertSelectorExists('#status ~ #token-storage', 'The card is the last one of the page.');
         self::assertSelectorNotExists('#token-storage ~ [data-slot=card]');
     }
@@ -162,7 +186,10 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertInstanceOf(TeslaApp::class, $app);
         self::assertSame('client-id', $app->getClientId());
         self::assertSame('polaris.example.com', $app->getDomain()?->toString());
-        self::assertSame([FleetRegion::NorthAmericaAsiaPacific, FleetRegion::EuropeMiddleEastAfrica], $app->getEnabledRegions());
+        self::assertSame(
+            [FleetRegion::NorthAmericaAsiaPacific, FleetRegion::EuropeMiddleEastAfrica],
+            $app->getEnabledRegions(),
+        );
         $ciphertext = (string) $app->getEncryptedClientSecret();
         self::assertStringStartsWith('v1:', $ciphertext);
         self::assertSame(self::SECRET, self::getContainer()->get(SecretEncrypter::class)->decrypt($ciphertext));
@@ -182,7 +209,11 @@ final class TeslaSettingsControllerTest extends WebTestCase
         $this->submit(['dailyWakeCap' => '0']);
         self::assertResponseRedirects('/settings/tesla');
         $this->entityManager->clear();
-        self::assertSame(0, $this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->getDailyWakeCap(), '0 turns waking off.');
+        self::assertSame(
+            0,
+            $this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->getDailyWakeCap(),
+            '0 turns waking off.',
+        );
 
         $this->submit(['dailyWakeCap' => '21']);
         self::assertResponseStatusCodeSame(422);
@@ -197,7 +228,10 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertSelectorExists('input[type=checkbox][name="' . self::FORM . '[keepVehicleData]"][checked]');
         self::assertSelectorTextContains('label[for=' . self::FORM . '_keepVehicleData]', 'Keep what the car reports');
         self::assertSelectorTextContains('[id$=keepVehicleData_help]', 'never the location');
-        self::assertSelectorExists('[id$=keepVehicleData_help] br', 'The last sentence of the help is on its own line.');
+        self::assertSelectorExists(
+            '[id$=keepVehicleData_help] br',
+            'The last sentence of the help is on its own line.',
+        );
 
         $this->submit(['clientSecret' => self::SECRET, 'keepVehicleData' => false]);
         self::assertResponseRedirects('/settings/tesla');
@@ -250,7 +284,9 @@ final class TeslaSettingsControllerTest extends WebTestCase
         $this->submit(['clientSecret' => self::SECRET, 'domain' => 'https://polaris.example.com/key', 'regions' => []]);
 
         self::assertResponseStatusCodeSame(422);
-        $errors = $this->client->getCrawler()->filter('[data-slot=field-error]')->each(static fn ($node): string => trim($node->text()));
+        $errors = $this->client->getCrawler()->filter('[data-slot=field-error]')->each(
+            static fn ($node): string => trim($node->text())
+        );
         self::assertContains('Enter the domain only, e.g. polaris.example.com, without https:// or a path.', $errors);
         self::assertContains('Enable at least one region.', $errors);
     }
@@ -324,7 +360,10 @@ final class TeslaSettingsControllerTest extends WebTestCase
             $values,
         );
         // An unticked box is not posted at all: a value of false removes the field.
-        $posted[self::FORM] = array_filter((array) $posted[self::FORM], static fn (mixed $value): bool => false !== $value);
+        $posted[self::FORM] = array_filter(
+            (array) $posted[self::FORM],
+            static fn (mixed $value): bool => false !== $value,
+        );
         $this->client->request('POST', '/settings/tesla', $posted);
     }
 

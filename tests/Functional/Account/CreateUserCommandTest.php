@@ -47,7 +47,9 @@ final class CreateUserCommandTest extends KernelTestCase
         self::assertSame('UTC', $user->getTimeZone());
         self::assertNotSame(self::PASSWORD, $user->getPassword());
         self::assertStringNotContainsString(self::PASSWORD, $user->getPassword());
-        self::assertTrue(self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid($user, self::PASSWORD));
+        self::assertTrue(
+            self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid($user, self::PASSWORD)
+        );
         self::assertStringContainsString('driver@example.test', $tester->getDisplay());
         self::assertStringNotContainsString(self::PASSWORD, $tester->getDisplay());
     }
@@ -60,7 +62,12 @@ final class CreateUserCommandTest extends KernelTestCase
         $status = $tester->execute(['email' => 'driver@example.test'], ['interactive' => false]);
 
         self::assertSame(Command::SUCCESS, $status);
-        self::assertTrue(self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid($this->users()->findOneBy([]) ?? self::fail(), self::PASSWORD));
+        self::assertTrue(
+            self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid(
+                $this->users()->findOneBy([]) ?? self::fail(),
+                self::PASSWORD,
+            )
+        );
         self::assertStringNotContainsString(self::PASSWORD, $tester->getDisplay());
     }
 
@@ -77,7 +84,10 @@ final class CreateUserCommandTest extends KernelTestCase
         $tester = $this->tester();
         $tester->setInputs(['']);
 
-        self::assertSame(Command::INVALID, $tester->execute(['email' => 'driver@example.test'], ['interactive' => false]));
+        self::assertSame(
+            Command::INVALID,
+            $tester->execute(['email' => 'driver@example.test'], ['interactive' => false]),
+        );
         self::assertCount(0, $this->users()->findAll());
     }
 
@@ -131,7 +141,9 @@ final class CreateUserCommandTest extends KernelTestCase
         $tester = $this->tester();
         $tester->setInputs([self::PASSWORD, self::PASSWORD]);
 
-        $status = $tester->execute(['email' => 'driver@example.test', '--locale' => 'fr', '--time-zone' => 'Europe/Zurich']);
+        $status = $tester->execute(
+            ['email' => 'driver@example.test', '--locale' => 'fr', '--time-zone' => 'Europe/Zurich']
+        );
 
         self::assertSame(Command::SUCCESS, $status);
         $user = $this->users()->findOneBy([]) ?? self::fail();
@@ -145,7 +157,10 @@ final class CreateUserCommandTest extends KernelTestCase
         $tester->setInputs([self::PASSWORD, self::PASSWORD, self::PASSWORD, self::PASSWORD]);
 
         self::assertSame(Command::INVALID, $tester->execute(['email' => 'driver@example.test', '--locale' => 'de']));
-        self::assertSame(Command::INVALID, $tester->execute(['email' => 'driver@example.test', '--time-zone' => 'Mars/Olympus']));
+        self::assertSame(
+            Command::INVALID,
+            $tester->execute(['email' => 'driver@example.test', '--time-zone' => 'Mars/Olympus']),
+        );
         self::assertCount(0, $this->users()->findAll());
     }
 

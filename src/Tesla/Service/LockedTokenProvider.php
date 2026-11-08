@@ -72,7 +72,10 @@ final readonly class LockedTokenProvider implements TokenProvider
             return $usable;
         }
 
-        $lock = $this->lockFactory->createLock('tesla_oauth_refresh_' . $app->getId()->toBase32(), self::LOCK_TTL_SECONDS);
+        $lock = $this->lockFactory->createLock(
+            'tesla_oauth_refresh_' . $app->getId()->toBase32(),
+            self::LOCK_TTL_SECONDS,
+        );
         $lock->acquire(true);
 
         try {
@@ -150,7 +153,7 @@ final readonly class LockedTokenProvider implements TokenProvider
         $encryptedRefresh = $this->encrypter->encrypt($tokens->refreshToken);
 
         // The previous refresh token is spent: commit the new one before anything else uses the access token.
-        $this->entityManager->wrapInTransaction(static function () use ($token, $encryptedAccess, $encryptedRefresh, $tokens, $now): void {
+        $rotate = static function () use ($token, $encryptedAccess, $encryptedRefresh, $tokens, $now): void {
             $token->rotate(
                 $encryptedAccess,
                 $encryptedRefresh,
@@ -158,7 +161,8 @@ final readonly class LockedTokenProvider implements TokenProvider
                 $tokens->scopes,
                 $now,
             );
-        });
+        };
+        $this->entityManager->wrapInTransaction($rotate);
 
         return $tokens->accessToken;
     }

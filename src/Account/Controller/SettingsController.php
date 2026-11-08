@@ -42,15 +42,19 @@ final class SettingsController extends AbstractController
     ) {
     }
 
-    #[Route('/settings', name: 'account_settings', methods: ['GET', 'POST'])]
     /**
      * @throws ORMException
      */
+    #[Route('/settings', name: 'account_settings', methods: ['GET', 'POST'])]
     public function settings(Request $request, #[CurrentUser] User $user): Response
     {
         $profile = $this->forms->createNamed('profile', ProfileType::class, ProfileData::fromUser($user));
         $password = $this->forms->createNamed('password', PasswordChangeType::class, new PasswordChangeData());
-        $reporting = $this->forms->createNamed('reporting', ErrorReportingType::class, ErrorReportingData::fromUser($user));
+        $reporting = $this->forms->createNamed(
+            'reporting',
+            ErrorReportingType::class,
+            ErrorReportingData::fromUser($user),
+        );
         $profile->handleRequest($request);
         $password->handleRequest($request);
         $reporting->handleRequest($request);
@@ -63,7 +67,9 @@ final class SettingsController extends AbstractController
 
                 return $this->savedAndSignedInAgain($user, 'flash.profile_saved');
             } catch (UserSettingsRejected $rejected) {
-                $profile->get('email')->addError(new FormError($this->translator->trans($rejected->getMessage(), domain: 'validators')));
+                $profile->get('email')->addError(
+                    new FormError($this->translator->trans($rejected->reason->value, domain: 'validators'))
+                );
             }
         }
 
@@ -79,16 +85,26 @@ final class SettingsController extends AbstractController
             /** @var ErrorReportingData $data */
             $data = $reporting->getData();
             $this->settings->changeErrorReporting($user, $data->enabled, $data->details);
-            $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.reporting_saved', domain: 'account'));
+            $this->addFlash(
+                ToastVariant::Success->value,
+                $this->translator->trans('flash.reporting_saved', domain: 'account'),
+            );
 
             return $this->redirectToRoute('account_settings');
         }
 
-        return $this->render('account/settings.html.twig', [
-            'profileForm' => $profile,
-            'passwordForm' => $password,
-            'reportingForm' => $reporting,
-        ], new Response(status: $profile->isSubmitted() || $password->isSubmitted() || $reporting->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
+        // A submitted form that did not redirect above had errors.
+        $submittedWithErrors = $profile->isSubmitted() || $password->isSubmitted() || $reporting->isSubmitted();
+
+        return $this->render(
+            'account/settings.html.twig',
+            [
+                'profileForm' => $profile,
+                'passwordForm' => $password,
+                'reportingForm' => $reporting,
+            ],
+            new Response(status: $submittedWithErrors ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK),
+        );
     }
 
     /**
@@ -99,7 +115,10 @@ final class SettingsController extends AbstractController
     {
         $this->security->login($user, self::AUTHENTICATOR, self::FIREWALL);
         // In the language the user just chose, which is the one of the next page.
-        $this->addFlash(ToastVariant::Success->value, $this->translator->trans($flash, domain: 'account', locale: $user->getLocale()));
+        $this->addFlash(
+            ToastVariant::Success->value,
+            $this->translator->trans($flash, domain: 'account', locale: $user->getLocale()),
+        );
 
         return $this->redirectToRoute('account_settings');
     }

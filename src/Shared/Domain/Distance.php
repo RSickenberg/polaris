@@ -45,7 +45,9 @@ final readonly class Distance
 
         // Checked before the cast: PHP 8.5 deprecates casting an out-of-range float to int.
         if ($metres < 0) {
-            throw new \InvalidArgumentException(\sprintf('A distance cannot be negative, got %s %s.', $value, $unit->value));
+            throw new \InvalidArgumentException(
+                \sprintf('A distance cannot be negative, got %s %s.', $value, $unit->value)
+            );
         }
 
         if ($metres >= (float) \PHP_INT_MAX) {

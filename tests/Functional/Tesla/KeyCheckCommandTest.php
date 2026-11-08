@@ -24,7 +24,9 @@ final class KeyCheckCommandTest extends KernelTestCase
 {
     use SignsIn;
 
-    private const string KEY = "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE\n-----END PUBLIC KEY-----\n";
+    private const string KEY = "-----BEGIN PUBLIC KEY-----\n"
+        . "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE\n"
+        . "-----END PUBLIC KEY-----\n";
 
     public function testFailsWithoutAUser(): void
     {
@@ -50,7 +52,10 @@ final class KeyCheckCommandTest extends KernelTestCase
         $tester = $this->tester(new MockHttpClient(new MockResponse(self::KEY)));
 
         self::assertSame(Command::SUCCESS, $tester->execute([]));
-        self::assertStringContainsString('https://polaris.example.com/.well-known/appspecific/com.tesla.3p.public-key.pem', $tester->getDisplay());
+        self::assertStringContainsString(
+            'https://polaris.example.com/.well-known/appspecific/com.tesla.3p.public-key.pem',
+            $tester->getDisplay(),
+        );
     }
 
     public function testFailsWhenTheKeyIsNotServed(): void
@@ -67,7 +72,9 @@ final class KeyCheckCommandTest extends KernelTestCase
         self::bootKernel();
         $owner = self::createUser();
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        $entityManager->persist(new TeslaApp($owner, self::KEY, 'v1:private', CarbonImmutable::parse('2026-10-20 12:00:00 UTC')));
+        $entityManager->persist(
+            new TeslaApp($owner, self::KEY, 'v1:private', CarbonImmutable::parse('2026-10-20 12:00:00 UTC'))
+        );
         $entityManager->flush();
         $client = new MockHttpClient([]);
         $tester = $this->tester($client);
@@ -90,7 +97,12 @@ final class KeyCheckCommandTest extends KernelTestCase
         self::bootKernel();
         $owner = self::createUser();
         $app = new TeslaApp($owner, self::KEY, 'v1:private', CarbonImmutable::parse('2026-10-20 12:00:00 UTC'));
-        $app->configure('client-id', 'v1:secret', AppDomain::fromString('polaris.example.com'), [FleetRegion::EuropeMiddleEastAfrica]);
+        $app->configure(
+            'client-id',
+            'v1:secret',
+            AppDomain::fromString('polaris.example.com'),
+            [FleetRegion::EuropeMiddleEastAfrica],
+        );
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->persist($app);
         $entityManager->flush();

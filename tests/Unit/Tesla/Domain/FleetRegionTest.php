@@ -13,7 +13,10 @@ final class FleetRegionTest extends TestCase
 {
     public function testEachRegionHasItsBaseUrl(): void
     {
-        self::assertSame('https://fleet-api.prd.na.vn.cloud.tesla.com', FleetRegion::NorthAmericaAsiaPacific->baseUrl());
+        self::assertSame(
+            'https://fleet-api.prd.na.vn.cloud.tesla.com',
+            FleetRegion::NorthAmericaAsiaPacific->baseUrl(),
+        );
         self::assertSame('https://fleet-api.prd.eu.vn.cloud.tesla.com', FleetRegion::EuropeMiddleEastAfrica->baseUrl());
         self::assertSame('https://fleet-api.prd.cn.vn.cloud.tesla.cn', FleetRegion::China->baseUrl());
     }
@@ -43,8 +46,14 @@ final class FleetRegionTest extends TestCase
 
     public function testARegionIsFoundByItsBaseUrl(): void
     {
-        self::assertSame(FleetRegion::EuropeMiddleEastAfrica, FleetRegion::fromBaseUrl('https://fleet-api.prd.eu.vn.cloud.tesla.com'));
-        self::assertSame(FleetRegion::NorthAmericaAsiaPacific, FleetRegion::fromBaseUrl('https://fleet-api.prd.na.vn.cloud.tesla.com/'));
+        self::assertSame(
+            FleetRegion::EuropeMiddleEastAfrica,
+            FleetRegion::fromBaseUrl('https://fleet-api.prd.eu.vn.cloud.tesla.com'),
+        );
+        self::assertSame(
+            FleetRegion::NorthAmericaAsiaPacific,
+            FleetRegion::fromBaseUrl('https://fleet-api.prd.na.vn.cloud.tesla.com/'),
+        );
         self::assertNull(FleetRegion::fromBaseUrl('https://example.com'));
     }
 }

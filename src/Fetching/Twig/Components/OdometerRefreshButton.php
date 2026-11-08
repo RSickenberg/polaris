@@ -210,7 +210,7 @@ final class OdometerRefreshButton
     {
         $offer = $this->wakeOffer();
         $offerStatus = $offer?->status;
-        $offerRefused = WakeRequestStatus::CapReached === $offerStatus || WakeRequestStatus::RateLimited === $offerStatus;
+        $offerRefused = \in_array($offerStatus, [WakeRequestStatus::CapReached, WakeRequestStatus::RateLimited], true);
         $wakeStatus = $this->wakeRefusal ?? ($offerRefused ? $offerStatus : null);
 
         if (null !== $wakeStatus) {

@@ -35,11 +35,11 @@ final class PasswordResetController extends AbstractController
     ) {
     }
 
-    #[Route('/forgot-password', name: 'account_forgot_password', methods: ['GET', 'POST'])]
     /**
      * @throws ORMException
      * @throws RandomException
      */
+    #[Route('/forgot-password', name: 'account_forgot_password', methods: ['GET', 'POST'])]
     public function forgot(Request $request): Response
     {
         $form = $this->createForm(ForgotPasswordType::class, new ForgotPasswordData());
@@ -50,7 +50,11 @@ final class PasswordResetController extends AbstractController
             if (!$this->limiter->create($request->getClientIp())->consume()->isAccepted()) {
                 $form->addError(new FormError($this->translator->trans('error.too_many_requests', domain: 'account')));
 
-                return $this->render('account/forgot_password.html.twig', ['form' => $form], new Response(status: Response::HTTP_TOO_MANY_REQUESTS));
+                return $this->render(
+                    'account/forgot_password.html.twig',
+                    ['form' => $form],
+                    new Response(status: Response::HTTP_TOO_MANY_REQUESTS),
+                );
             }
 
             /** @var ForgotPasswordData $data */
@@ -60,7 +64,11 @@ final class PasswordResetController extends AbstractController
             return $this->redirectToRoute('account_forgot_password_sent');
         }
 
-        return $this->render('account/forgot_password.html.twig', ['form' => $form], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
+        return $this->render(
+            'account/forgot_password.html.twig',
+            ['form' => $form],
+            new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK),
+        );
     }
 
     #[Route('/forgot-password/sent', name: 'account_forgot_password_sent', methods: ['GET'])]
@@ -69,15 +77,21 @@ final class PasswordResetController extends AbstractController
         return $this->render('account/forgot_password_sent.html.twig');
     }
 
-    #[Route('/reset-password/{token}', name: 'account_reset_password', methods: ['GET', 'POST'])]
     /**
      * @throws ORMException
      */
+    #[Route('/reset-password/{token}', name: 'account_reset_password', methods: ['GET', 'POST'])]
     public function reset(Request $request, string $token): Response
     {
         $pending = $this->reset->find($token);
         if (null === $pending) {
-            return $this->noReferrer($this->render('account/reset_password_invalid.html.twig', [], new Response(status: Response::HTTP_NOT_FOUND)));
+            return $this->noReferrer(
+                $this->render(
+                    'account/reset_password_invalid.html.twig',
+                    [],
+                    new Response(status: Response::HTTP_NOT_FOUND),
+                )
+            );
         }
 
         $form = $this->createForm(ResetPasswordType::class, new ResetPasswordData());
@@ -87,12 +101,21 @@ final class PasswordResetController extends AbstractController
             /** @var ResetPasswordData $data */
             $data = $form->getData();
             $this->reset->reset($pending, $data->newPassword);
-            $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.password_reset', domain: 'account'));
+            $this->addFlash(
+                ToastVariant::Success->value,
+                $this->translator->trans('flash.password_reset', domain: 'account'),
+            );
 
             return $this->noReferrer($this->redirectToRoute('account_login'));
         }
 
-        return $this->noReferrer($this->render('account/reset_password.html.twig', ['form' => $form], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK)));
+        return $this->noReferrer(
+            $this->render(
+                'account/reset_password.html.twig',
+                ['form' => $form],
+                new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK),
+            )
+        );
     }
 
     /**

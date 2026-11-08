@@ -6,6 +6,10 @@ namespace Polaris\Tesla\Service\Exception;
 
 use Polaris\Tesla\Domain\FleetRegion;
 
+/**
+ * The Tesla app settings are refused. The message is English, for the console (`polaris:tesla:configure`): the
+ * settings page validates the same rules with its form and shows a generic error if the service still refuses.
+ */
 final class TeslaSettingsRejected extends \RuntimeException
 {
     public static function keyPairMissing(): self
@@ -26,7 +30,8 @@ final class TeslaSettingsRejected extends \RuntimeException
     public static function regionNotSupported(FleetRegion $region): self
     {
         return new self(\sprintf(
-            'The region "%s" is not supported: China needs a separate Tesla account and developer app, and Polaris does not handle it yet.',
+            'The region "%s" is not supported: China needs a separate Tesla account and developer app, and Polaris '
+                . 'does not handle it yet.',
             $region->value,
         ));
     }

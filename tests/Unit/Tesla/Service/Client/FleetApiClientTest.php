@@ -24,13 +24,18 @@ final class FleetApiClientTest extends TestCase
     public function testThePartnerTokenIsAskedWithClientCredentialsAndTheRegionAudience(): void
     {
         $seen = null;
-        $client = new MockHttpClient(static function (string $method, string $url, array $options) use (&$seen): MockResponse {
+        $respond = static function (string $method, string $url, array $options) use (&$seen): MockResponse {
             $seen = [$method, $url, $options['body'], $options['headers']];
 
             return new MockResponse('{"access_token":"partner-token","token_type":"Bearer"}');
-        });
+        };
+        $client = new MockHttpClient($respond);
 
-        $token = new FleetApiClient($client)->partnerToken(FleetRegion::EuropeMiddleEastAfrica, 'client-id', self::SECRET);
+        $token = new FleetApiClient($client)->partnerToken(
+            FleetRegion::EuropeMiddleEastAfrica,
+            'client-id',
+            self::SECRET,
+        );
 
         self::assertSame('partner-token', $token);
         self::assertNotNull($seen);
@@ -56,13 +61,18 @@ final class FleetApiClientTest extends TestCase
     public function testTheDomainIsRegisteredWithTheBearerToken(): void
     {
         $seen = null;
-        $client = new MockHttpClient(static function (string $method, string $url, array $options) use (&$seen): MockResponse {
+        $respond = static function (string $method, string $url, array $options) use (&$seen): MockResponse {
             $seen = [$method, $url, $options['body'], $options['headers']];
 
             return new MockResponse('{"response":{}}');
-        });
+        };
+        $client = new MockHttpClient($respond);
 
-        new FleetApiClient($client)->registerPartner(FleetRegion::NorthAmericaAsiaPacific, 'partner-token', AppDomain::fromString('polaris.example.com'));
+        new FleetApiClient($client)->registerPartner(
+            FleetRegion::NorthAmericaAsiaPacific,
+            'partner-token',
+            AppDomain::fromString('polaris.example.com'),
+        );
 
         self::assertNotNull($seen);
         [$method, $url, $body, $headers] = $seen;
@@ -82,11 +92,19 @@ final class FleetApiClientTest extends TestCase
             return new MockResponse('{"response":{"public_key":"04abcd"}}');
         });
 
-        $key = new FleetApiClient($client)->registeredPublicKey(FleetRegion::EuropeMiddleEastAfrica, 'partner-token', AppDomain::fromString('polaris.example.com'));
+        $key = new FleetApiClient($client)->registeredPublicKey(
+            FleetRegion::EuropeMiddleEastAfrica,
+            'partner-token',
+            AppDomain::fromString('polaris.example.com'),
+        );
 
         self::assertSame('04abcd', $key);
         self::assertSame(
-            ['GET', 'https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/partner_accounts/public_key?domain=polaris.example.com'],
+            [
+                'GET',
+                'https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/partner_accounts/public_key'
+                    . '?domain=polaris.example.com',
+            ],
             $seen,
         );
     }
@@ -101,12 +119,20 @@ final class FleetApiClientTest extends TestCase
     }
 
     #[DataProvider('errorResponses')]
-    public function testTeslaErrorsBecomeClearMessages(int $status, string $body, string $expectedHint, string $expectedDetail): void
-    {
+    public function testTeslaErrorsBecomeClearMessages(
+        int $status,
+        string $body,
+        string $expectedHint,
+        string $expectedDetail,
+    ): void {
         $client = new MockHttpClient(new MockResponse($body, ['http_code' => $status]));
 
         try {
-            new FleetApiClient($client)->registerPartner(FleetRegion::EuropeMiddleEastAfrica, 'partner-token', AppDomain::fromString('polaris.example.com'));
+            new FleetApiClient($client)->registerPartner(
+                FleetRegion::EuropeMiddleEastAfrica,
+                'partner-token',
+                AppDomain::fromString('polaris.example.com'),
+            );
             self::fail('A FleetApiError was expected.');
         } catch (FleetApiError $error) {
             self::assertSame(FleetApiOperation::Register, $error->operation);
@@ -124,9 +150,19 @@ final class FleetApiClientTest extends TestCase
      */
     public static function errorResponses(): iterable
     {
-        yield '400 oauth error' => [400, '{"error":"invalid_request","error_description":"Missing domain"}', 'rejected the request', 'invalid_request, Missing domain'];
+        yield '400 oauth error' => [
+            400,
+            '{"error":"invalid_request","error_description":"Missing domain"}',
+            'rejected the request',
+            'invalid_request, Missing domain',
+        ];
         yield '401' => [401, '{"error":"invalid_client"}', 'did not accept the credentials', 'invalid_client'];
-        yield '403' => [403, '{"error":"forbidden","message":"Domain not allowed"}', 'allowed origin', 'Domain not allowed'];
+        yield '403' => [
+            403,
+            '{"error":"forbidden","message":"Domain not allowed"}',
+            'allowed origin',
+            'Domain not allowed',
+        ];
         yield '404' => [404, '', 'does not know this endpoint', ''];
         yield '422' => [422, '{"error_message":"key not found"}', 'could not validate', 'key not found'];
         yield '429' => [429, '{"error":"rate_limited"}', 'rate-limiting', 'rate_limited'];
@@ -139,7 +175,11 @@ final class FleetApiClientTest extends TestCase
         $client = new MockHttpClient(new MockResponse(str_repeat('x', 5000), ['http_code' => 500]));
 
         try {
-            new FleetApiClient($client)->registerPartner(FleetRegion::EuropeMiddleEastAfrica, 'partner-token', AppDomain::fromString('polaris.example.com'));
+            new FleetApiClient($client)->registerPartner(
+                FleetRegion::EuropeMiddleEastAfrica,
+                'partner-token',
+                AppDomain::fromString('polaris.example.com'),
+            );
             self::fail('A FleetApiError was expected.');
         } catch (FleetApiError $error) {
             self::assertLessThan(400, \strlen($error->getMessage()));
@@ -195,6 +235,10 @@ final class FleetApiClientTest extends TestCase
         $this->expectException(FleetApiError::class);
         $this->expectExceptionMessage('no public key');
 
-        new FleetApiClient($client)->registeredPublicKey(FleetRegion::EuropeMiddleEastAfrica, 'partner-token', AppDomain::fromString('polaris.example.com'));
+        new FleetApiClient($client)->registeredPublicKey(
+            FleetRegion::EuropeMiddleEastAfrica,
+            'partner-token',
+            AppDomain::fromString('polaris.example.com'),
+        );
     }
 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Polaris\Account\Service\Exception;
 
 /**
- * The user cannot be created.
+ * The user cannot be created. The message is English: `polaris:user:create` is the only caller.
  */
 final class UserCreationRejected extends \RuntimeException
 {

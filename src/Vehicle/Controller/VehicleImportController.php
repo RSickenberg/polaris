@@ -57,7 +57,9 @@ final class VehicleImportController extends AbstractController
             return $this->page(self::STATUS_ERROR);
         }
 
-        $new = array_values(array_filter($candidates, static fn (ImportCandidate $candidate): bool => !$candidate->added));
+        $new = array_values(
+            array_filter($candidates, static fn (ImportCandidate $candidate): bool => !$candidate->added)
+        );
 
         if ([] === $new) {
             return $this->page(self::STATUS_NOTHING_NEW);
@@ -71,7 +73,10 @@ final class VehicleImportController extends AbstractController
             $data = $form->getData();
 
             try {
-                $result = $this->importer->import($user, array_map(static fn (string $vin): Vin => new Vin($vin), $data->vins));
+                $result = $this->importer->import(
+                    $user,
+                    array_map(static fn (string $vin): Vin => new Vin($vin), $data->vins),
+                );
             } catch (TeslaNotConnected) {
                 return $this->page(self::STATUS_NOT_CONNECTED);
             } catch (FleetApiError $error) {
@@ -80,7 +85,10 @@ final class VehicleImportController extends AbstractController
                 return $this->page(self::STATUS_ERROR);
             }
 
-            $this->addFlash(ToastVariant::Success->value, $this->translator->trans('flash.imported', ['count' => \count($result->added)], 'vehicle'));
+            $this->addFlash(
+                ToastVariant::Success->value,
+                $this->translator->trans('flash.imported', ['count' => \count($result->added)], 'vehicle'),
+            );
 
             return $this->redirectToRoute('dashboard_home');
         }
@@ -97,6 +105,10 @@ final class VehicleImportController extends AbstractController
      */
     private function page(string $status, array $parameters = [], int $code = Response::HTTP_OK): Response
     {
-        return $this->render('vehicle/import.html.twig', ['status' => $status] + $parameters, new Response(status: $code));
+        return $this->render(
+            'vehicle/import.html.twig',
+            ['status' => $status] + $parameters,
+            new Response(status: $code),
+        );
     }
 }

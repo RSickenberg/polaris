@@ -17,7 +17,12 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 final class PublicKeyController extends AbstractController
 {
-    #[Route('/.well-known/appspecific/com.tesla.3p.public-key.pem', name: 'tesla_public_key', methods: ['GET'], stateless: true)]
+    #[Route(
+        '/.well-known/appspecific/com.tesla.3p.public-key.pem',
+        name: 'tesla_public_key',
+        methods: ['GET'],
+        stateless: true,
+    )]
     public function __invoke(PublicKeyHosting $hosting, EntityManagerInterface $entityManager): Response
     {
         if (!$hosting->servesPublicKey()) {

@@ -36,19 +36,29 @@ final readonly class PartnerRegistrationService
         $encryptedSecret = $app->getEncryptedClientSecret();
 
         if (null === $domain || null === $clientId || null === $encryptedSecret || [] === $app->getEnabledRegions()) {
-            return RegistrationReport::blocked('The app is not configured yet. Store the client ID, client secret, domain and regions with polaris:tesla:configure.');
+            return RegistrationReport::blocked(
+                'The app is not configured yet. Store the client ID, client secret, domain and regions with '
+                    . 'polaris:tesla:configure.'
+            );
         }
 
         $keyCheck = $this->keyChecker->check($app);
 
         if (!$keyCheck->isMatch()) {
-            return RegistrationReport::blocked('Tesla cannot read the public key, so the app was not registered. ' . $keyCheck->message, $keyCheck);
+            return RegistrationReport::blocked(
+                'Tesla cannot read the public key, so the app was not registered. ' . $keyCheck->message,
+                $keyCheck,
+            );
         }
 
         try {
             $clientSecret = $this->encrypter->decrypt($encryptedSecret);
         } catch (DecryptionFailed|\SodiumException $failure) {
-            return RegistrationReport::blocked('The stored client secret cannot be decrypted: ' . $failure->getMessage() . ' Store it again with polaris:tesla:configure.', $keyCheck);
+            return RegistrationReport::blocked(
+                'The stored client secret cannot be decrypted: ' . $failure->getMessage()
+                    . ' Store it again with polaris:tesla:configure.',
+                $keyCheck,
+            );
         }
 
         $results = [];
@@ -58,7 +68,8 @@ final readonly class PartnerRegistrationService
                 $results[] = new RegionRegistrationResult(
                     $region,
                     RegistrationStatus::Refused,
-                    'This region is not supported: it needs a separate Tesla developer app, which Polaris does not handle yet.',
+                    'This region is not supported: it needs a separate Tesla developer app, which Polaris does not '
+                        . 'handle yet.',
                 );
 
                 continue;
@@ -75,8 +86,16 @@ final readonly class PartnerRegistrationService
             }
 
             $results[] = $this->keyFormat->sameKey($app->getPublicKey(), $registered)
-                ? new RegionRegistrationResult($region, RegistrationStatus::Registered, 'Registered, and Tesla returns the stored public key.')
-                : new RegionRegistrationResult($region, RegistrationStatus::Failed, 'Registered, but the public key Tesla returns for the domain is not the stored one.');
+                ? new RegionRegistrationResult(
+                    $region,
+                    RegistrationStatus::Registered,
+                    'Registered, and Tesla returns the stored public key.',
+                )
+                : new RegionRegistrationResult(
+                    $region,
+                    RegistrationStatus::Failed,
+                    'Registered, but the public key Tesla returns for the domain is not the stored one.',
+                );
         }
 
         return RegistrationReport::completed($keyCheck, $results);

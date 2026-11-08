@@ -60,9 +60,16 @@ final class OwnerMidnightDispatcherTest extends KernelTestCase
         $sent = $this->sentFor($this->zurich);
         self::assertCount(1, $sent);
         self::assertSame('2026-11-08', $sent[0]->localDay);
-        self::assertSame(CarbonImmutable::parse('2026-11-07 23:00:00', 'UTC')->getTimestamp(), $sent[0]->midnightTimestamp);
+        self::assertSame(
+            CarbonImmutable::parse('2026-11-07 23:00:00', 'UTC')->getTimestamp(),
+            $sent[0]->midnightTimestamp,
+        );
         // 23:05 UTC is 15:05 in Los Angeles: their midnight of the 7th (08:00 UTC) ran earlier, and nothing is due now.
-        self::assertSame(['2026-11-07'], $this->daysFor($this->losAngeles), 'Their own midnight of the 7th, queued the first time the tick ran, not at 23:05.');
+        self::assertSame(
+            ['2026-11-07'],
+            $this->daysFor($this->losAngeles),
+            'Their own midnight of the 7th, queued the first time the tick ran, not at 23:05.',
+        );
     }
 
     public function testAMinuteLaterOrAnHourLaterRunsNothingMore(): void
@@ -100,7 +107,10 @@ final class OwnerMidnightDispatcherTest extends KernelTestCase
 
         self::assertTrue($users->claimMidnight($this->zurich, $day));
         self::assertFalse($users->claimMidnight($this->zurich, $day));
-        self::assertFalse($users->claimMidnight($this->zurich, CarbonImmutable::parse('2026-11-07', 'UTC')), 'An older day is never claimed.');
+        self::assertFalse(
+            $users->claimMidnight($this->zurich, CarbonImmutable::parse('2026-11-07', 'UTC')),
+            'An older day is never claimed.',
+        );
         self::assertTrue($users->claimMidnight($this->zurich, CarbonImmutable::parse('2026-11-09', 'UTC')));
     }
 
@@ -143,7 +153,14 @@ final class OwnerMidnightDispatcherTest extends KernelTestCase
 
     public function testBothDaylightSavingDaysOfZurichRunOnceEach(): void
     {
-        foreach ([['2026-10-24 22:05:00', '2026-10-25'], ['2026-10-25 23:05:00', '2026-10-26'], ['2027-03-27 23:05:00', '2027-03-28'], ['2027-03-28 22:05:00', '2027-03-29']] as [$now, $day]) {
+        foreach (
+            [
+                ['2026-10-24 22:05:00', '2026-10-25'],
+                ['2026-10-25 23:05:00', '2026-10-26'],
+                ['2027-03-27 23:05:00', '2027-03-28'],
+                ['2027-03-28 22:05:00', '2027-03-29'],
+            ] as [$now, $day]
+        ) {
             $this->transport()->reset();
             self::mockTime($now . ' UTC');
             $this->dispatch();
@@ -158,7 +175,12 @@ final class OwnerMidnightDispatcherTest extends KernelTestCase
         self::mockTime('2026-11-07 23:05:00 UTC');
         $failing = $this->createStub(MessageBusInterface::class);
         $failing->method('dispatch')->willThrowException(new TransportException('Redis is down.'));
-        $dispatcher = new OwnerMidnightDispatcher(self::getContainer()->get(UserRepository::class), $failing, self::getContainer()->get(ClockInterface::class), new NullLogger());
+        $dispatcher = new OwnerMidnightDispatcher(
+            self::getContainer()->get(UserRepository::class),
+            $failing,
+            self::getContainer()->get(ClockInterface::class),
+            new NullLogger(),
+        );
 
         try {
             $dispatcher->dispatch();
@@ -167,7 +189,11 @@ final class OwnerMidnightDispatcherTest extends KernelTestCase
         }
 
         $this->entityManager->clear();
-        self::assertNull($this->entityManager->getRepository(User::class)->findOneBy(['email' => 'zurich@example.test'])?->getLastMidnightDay());
+        self::assertNull(
+            $this->entityManager->getRepository(User::class)
+                ->findOneBy(['email' => 'zurich@example.test'])
+                ?->getLastMidnightDay()
+        );
         $this->dispatch();
         self::assertCount(1, $this->sentFor($this->zurich), 'The next tick tries again.');
     }

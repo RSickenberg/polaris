@@ -15,7 +15,9 @@ final class CallbackUrlParserTest extends TestCase
 {
     public function testReadsTheCodeAndTheState(): void
     {
-        $callback = CallbackUrlParser::parse(' https://polaris.local/tesla/callback?code=fake-code&state=fake-state&issuer=https%3A%2F%2Fauth.tesla.com ');
+        $callback = CallbackUrlParser::parse(
+            ' https://polaris.local/tesla/callback?code=fake-code&state=fake-state&issuer=https%3A%2F%2Fauth.tesla.com '
+        );
 
         self::assertSame('fake-code', $callback->code);
         self::assertSame('fake-state', $callback->state);
@@ -24,7 +26,9 @@ final class CallbackUrlParserTest extends TestCase
 
     public function testReadsAnOAuthError(): void
     {
-        $callback = CallbackUrlParser::parse('http://localhost:8000/tesla/callback?error=access_denied&state=fake-state');
+        $callback = CallbackUrlParser::parse(
+            'http://localhost:8000/tesla/callback?error=access_denied&state=fake-state'
+        );
 
         self::assertNull($callback->code);
         self::assertSame('access_denied', $callback->error);

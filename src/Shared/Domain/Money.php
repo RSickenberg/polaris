@@ -29,7 +29,9 @@ final readonly class Money
         $digits = $currency->minorUnits();
 
         if (1 !== preg_match('/^(-?)(\d{1,15})(?:\.(\d{1,' . $digits . '}))?$/', $amount, $matches)) {
-            throw new \InvalidArgumentException(\sprintf('"%s" is not a valid %s amount with at most %d decimals.', $amount, $currency->value, $digits));
+            throw new \InvalidArgumentException(
+                \sprintf('"%s" is not a valid %s amount with at most %d decimals.', $amount, $currency->value, $digits)
+            );
         }
 
         $minorAmount = (int) $matches[2] * 10 ** $digits + (int) str_pad($matches[3] ?? '', $digits, '0');

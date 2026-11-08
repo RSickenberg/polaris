@@ -34,6 +34,7 @@ final class PartnerRegistrationServiceTest extends TestCase
     private const string TOKEN_URL = 'https://fleet-auth.prd.vn.cloud.tesla.com/oauth2/v3/token';
     private const string NA = 'https://fleet-api.prd.na.vn.cloud.tesla.com';
     private const string EU = 'https://fleet-api.prd.eu.vn.cloud.tesla.com';
+    private const string KEY_READ_BACK = '/api/1/partner_accounts/public_key?domain=polaris.example.com';
 
     private KeyPair $keyPair;
 
@@ -52,19 +53,22 @@ final class PartnerRegistrationServiceTest extends TestCase
         $this->requests = [];
         $this->answers = [
             'GET ' . self::KEY_URL => fn (): MockResponse => new MockResponse($this->keyPair->publicKeyPem),
-            'POST ' . self::TOKEN_URL => static fn (): MockResponse => new MockResponse('{"access_token":"partner-token"}'),
+            'POST ' . self::TOKEN_URL => static fn (): MockResponse => new MockResponse(
+                '{"access_token":"partner-token"}',
+            ),
         ];
         foreach ([self::NA, self::EU] as $base) {
-            $this->answers['POST ' . $base . '/api/1/partner_accounts'] = static fn (): MockResponse => new MockResponse('{"response":{}}');
-            $this->answers['GET ' . $base . '/api/1/partner_accounts/public_key?domain=polaris.example.com'] = fn (): MockResponse => new MockResponse(
-                json_encode(['response' => ['public_key' => new PublicKeyFormat(new PemComparer())->uncompressedPointHex($this->keyPair->publicKeyPem)]], \JSON_THROW_ON_ERROR),
-            );
+            $registered = static fn (): MockResponse => new MockResponse('{"response":{}}');
+            $this->answers['POST ' . $base . '/api/1/partner_accounts'] = $registered;
+            $this->answers['GET ' . $base . self::KEY_READ_BACK] = fn (): MockResponse => $this->registeredKey();
         }
     }
 
     public function testItRegistersEveryEnabledRegionAfterTheKeyCheck(): void
     {
-        $report = $this->service()->register($this->app([FleetRegion::NorthAmericaAsiaPacific, FleetRegion::EuropeMiddleEastAfrica]));
+        $report = $this->service()->register(
+            $this->app([FleetRegion::NorthAmericaAsiaPacific, FleetRegion::EuropeMiddleEastAfrica])
+        );
 
         self::assertTrue($report->isSuccess());
         self::assertNull($report->blocker);
@@ -89,7 +93,10 @@ final class PartnerRegistrationServiceTest extends TestCase
 
     public function testNothingIsSentToTeslaWhenTheKeyCheckFails(): void
     {
-        $this->answers['GET ' . self::KEY_URL] = static fn (): MockResponse => new MockResponse('', ['http_code' => 404]);
+        $this->answers['GET ' . self::KEY_URL] = static fn (): MockResponse => new MockResponse(
+            '',
+            ['http_code' => 404],
+        );
 
         $report = $this->service()->register($this->app([FleetRegion::EuropeMiddleEastAfrica]));
 
@@ -102,9 +109,13 @@ final class PartnerRegistrationServiceTest extends TestCase
 
     public function testAFailingRegionDoesNotStopTheOthers(): void
     {
-        $this->answers['POST ' . self::EU . '/api/1/partner_accounts'] = static fn (): MockResponse => new MockResponse('{"error":"forbidden"}', ['http_code' => 403]);
+        $this->answers[
+            'POST ' . self::EU . '/api/1/partner_accounts'
+        ] = static fn (): MockResponse => new MockResponse('{"error":"forbidden"}', ['http_code' => 403]);
 
-        $report = $this->service()->register($this->app([FleetRegion::EuropeMiddleEastAfrica, FleetRegion::NorthAmericaAsiaPacific]));
+        $report = $this->service()->register(
+            $this->app([FleetRegion::EuropeMiddleEastAfrica, FleetRegion::NorthAmericaAsiaPacific])
+        );
 
         self::assertFalse($report->isSuccess());
         self::assertSame(RegistrationStatus::Failed, $report->results[0]->status);
@@ -130,7 +141,7 @@ final class PartnerRegistrationServiceTest extends TestCase
     public function testAnotherKeyAtTeslaIsAFailure(): void
     {
         $other = new KeyPairGenerator()->generate();
-        $this->answers['GET ' . self::EU . '/api/1/partner_accounts/public_key?domain=polaris.example.com'] = static fn (): MockResponse => new MockResponse(
+        $this->answers['GET ' . self::EU . self::KEY_READ_BACK] = static fn (): MockResponse => new MockResponse(
             json_encode(['response' => ['public_key' => $other->publicKeyPem]], \JSON_THROW_ON_ERROR),
         );
 
@@ -152,7 +163,12 @@ final class PartnerRegistrationServiceTest extends TestCase
 
     public function testAnUnconfiguredAppIsBlockedBeforeAnyRequest(): void
     {
-        $app = new TeslaApp(Owner::user(), $this->keyPair->publicKeyPem, 'v1:private', CarbonImmutable::parse('2026-10-20 12:00:00 UTC'));
+        $app = new TeslaApp(
+            Owner::user(),
+            $this->keyPair->publicKeyPem,
+            'v1:private',
+            CarbonImmutable::parse('2026-10-20 12:00:00 UTC'),
+        );
 
         $report = $this->service()->register($app);
 
@@ -164,7 +180,12 @@ final class PartnerRegistrationServiceTest extends TestCase
     public function testAnUnreadableSecretIsBlockedAfterTheKeyCheck(): void
     {
         $app = $this->app([FleetRegion::EuropeMiddleEastAfrica]);
-        $app->configure('client-id', 'v1:not-a-valid-box', AppDomain::fromString('polaris.example.com'), [FleetRegion::EuropeMiddleEastAfrica]);
+        $app->configure(
+            'client-id',
+            'v1:not-a-valid-box',
+            AppDomain::fromString('polaris.example.com'),
+            [FleetRegion::EuropeMiddleEastAfrica],
+        );
 
         $report = $this->service()->register($app);
 
@@ -177,8 +198,18 @@ final class PartnerRegistrationServiceTest extends TestCase
      */
     private function app(array $regions): TeslaApp
     {
-        $app = new TeslaApp(Owner::user(), $this->keyPair->publicKeyPem, 'v1:private', CarbonImmutable::parse('2026-10-20 12:00:00 UTC'));
-        $app->configure('client-id', $this->encrypter->encrypt(self::SECRET), AppDomain::fromString('polaris.example.com'), $regions);
+        $app = new TeslaApp(
+            Owner::user(),
+            $this->keyPair->publicKeyPem,
+            'v1:private',
+            CarbonImmutable::parse('2026-10-20 12:00:00 UTC'),
+        );
+        $app->configure(
+            'client-id',
+            $this->encrypter->encrypt(self::SECRET),
+            AppDomain::fromString('polaris.example.com'),
+            $regions,
+        );
 
         return $app;
     }
@@ -198,5 +229,15 @@ final class PartnerRegistrationServiceTest extends TestCase
             $this->encrypter,
             new PublicKeyFormat(new PemComparer()),
         );
+    }
+
+    /**
+     * Tesla's answer for the registered key: the public key of the test, as the hex of its uncompressed point.
+     */
+    private function registeredKey(): MockResponse
+    {
+        $hex = new PublicKeyFormat(new PemComparer())->uncompressedPointHex($this->keyPair->publicKeyPem);
+
+        return new MockResponse(json_encode(['response' => ['public_key' => $hex]], \JSON_THROW_ON_ERROR));
     }
 }

@@ -105,7 +105,12 @@ final class KeyImportCommandTest extends KernelTestCase
         $owner = self::createUser();
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $existing = new TeslaApp($owner, 'old public key', 'v1:old', CarbonImmutable::parse('2026-10-20 12:00:00 UTC'));
-        $existing->configure('client-id', 'v1:secret', AppDomain::fromString('polaris.example.com'), [FleetRegion::EuropeMiddleEastAfrica]);
+        $existing->configure(
+            'client-id',
+            'v1:secret',
+            AppDomain::fromString('polaris.example.com'),
+            [FleetRegion::EuropeMiddleEastAfrica],
+        );
         $entityManager->persist($existing);
         $entityManager->flush();
 
@@ -136,7 +141,9 @@ final class KeyImportCommandTest extends KernelTestCase
 
         self::assertSame(Command::INVALID, $status);
         self::assertStringContainsString('not a PEM private key', $tester->getDisplay());
-        self::assertNull(self::getContainer()->get(EntityManagerInterface::class)->getRepository(TeslaApp::class)->findOneBy([]));
+        self::assertNull(
+            self::getContainer()->get(EntityManagerInterface::class)->getRepository(TeslaApp::class)->findOneBy([])
+        );
     }
 
     public function testNeedsAKeyOnTheInputOrAFile(): void
@@ -159,6 +166,9 @@ final class KeyImportCommandTest extends KernelTestCase
 
     private function app(): TeslaApp
     {
-        return self::getContainer()->get(EntityManagerInterface::class)->getRepository(TeslaApp::class)->findOneBy([]) ?? throw new \LogicException('No Tesla app.');
+        return self::getContainer()
+            ->get(EntityManagerInterface::class)
+            ->getRepository(TeslaApp::class)
+            ->findOneBy([]) ?? throw new \LogicException('No Tesla app.');
     }
 }

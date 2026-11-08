@@ -49,7 +49,10 @@ final readonly class OwnerMidnightDispatcher
             try {
                 $midnight = OwnerMidnight::latestDue($now, $user->getTimeZone());
             } catch (\InvalidArgumentException $e) {
-                $this->logger->warning('An owner has a time zone that is not valid; their daily jobs are skipped.', ['exception' => $e]);
+                $this->logger->warning(
+                    'An owner has a time zone that is not valid; their daily jobs are skipped.',
+                    ['exception' => $e],
+                );
 
                 continue;
             }
@@ -74,7 +77,13 @@ final readonly class OwnerMidnightDispatcher
         }
 
         try {
-            $this->bus->dispatch(new OwnerMidnightPassed($user->getId()->toRfc4122(), $midnight->localDay->format('Y-m-d'), $midnight->at->getTimestamp()));
+            $this->bus->dispatch(
+                new OwnerMidnightPassed(
+                    $user->getId()->toRfc4122(),
+                    $midnight->localDay->format('Y-m-d'),
+                    $midnight->at->getTimestamp(),
+                )
+            );
         } catch (ExceptionInterface $e) {
             $this->users->releaseMidnight($user, $midnight->localDay, $previous);
 

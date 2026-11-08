@@ -12,12 +12,15 @@ use Carbon\CarbonImmutable;
  * daylight saving needs no restart (a day of 23 or 25 hours has its midnight like any other).
  *
  * The midnight is the first instant of the local day. Where midnight does not exist that day (the clocks jump over it),
- * it is the first instant that does, as PHP resolves it. The local day is the calendar date the midnight opens, kept as midnight UTC so
- * that it fits a date column; it is a label, not an instant.
+ * it is the first instant that does, as PHP resolves it. The local day is the calendar date the midnight opens, kept as
+ * midnight UTC so that it fits a date column; it is a label, not an instant.
  */
 final readonly class OwnerMidnight
 {
-    /** How long after the midnight a job is due: a reading stamped just before it can still be on its way to the database. */
+    /**
+     * How long after the midnight a job is due: a reading stamped just before it can still be on its way to the
+     * database.
+     */
     public const int DELAY_SECONDS = 300;
 
     private function __construct(
@@ -36,7 +39,9 @@ final readonly class OwnerMidnight
     public static function of(CarbonImmutable $at, CarbonImmutable $localDay): self
     {
         if (0 !== $localDay->getOffset() || '00:00:00' !== $localDay->format('H:i:s')) {
-            throw new \InvalidArgumentException(\sprintf('A local day must be midnight UTC, got %s.', $localDay->toIso8601String()));
+            throw new \InvalidArgumentException(
+                \sprintf('A local day must be midnight UTC, got %s.', $localDay->toIso8601String())
+            );
         }
 
         return new self($at->utc(), $localDay);

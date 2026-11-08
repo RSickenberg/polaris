@@ -52,7 +52,9 @@ final readonly class TeslaOdometerReader
      */
     public function noReading(VehicleState $state): OdometerReadResult
     {
-        return OdometerReadResult::none(VehicleState::Asleep === $state ? NoReadingReason::Asleep : NoReadingReason::Offline);
+        return OdometerReadResult::none(
+            VehicleState::Asleep === $state ? NoReadingReason::Asleep : NoReadingReason::Offline
+        );
     }
 
     /**

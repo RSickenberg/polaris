@@ -10,9 +10,9 @@ use Symfony\Contracts\Service\ResetInterface;
  * Whose data the code running now acts on, so that an error report can be held back for a user who opted out.
  *
  * Three states: no user (a boot error, the scheduler, a console command: the instance switch alone decides), a user
- * (a signed-in request, a message about one of their vehicles) and a user that could not be found (the report is dropped,
- * never sent). The web and the worker set it; a message never inherits the state of the previous one, as the worker
- * sets it again on every message it receives.
+ * (a signed-in request, a message about one of their vehicles) and a user that could not be found (the report is
+ * dropped, never sent). The web and the worker set it; a message never inherits the state of the previous one, as the
+ * worker sets it again on every message it receives.
  */
 final class ReportingContext implements ResetInterface
 {

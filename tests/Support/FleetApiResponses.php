@@ -12,6 +12,11 @@ namespace Polaris\Tests\Support;
 final class FleetApiResponses
 {
     public const string VIN = 'LRW0000000000TEST';
+
+    /**
+     * The vehicles endpoint of the EU Fleet API host, where the test tokens point.
+     */
+    public const string EU_VEHICLES = 'https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles';
     public const string OTHER_VIN = 'LRW0000000001TEST';
 
     public static function vehicleList(): string
@@ -42,7 +47,14 @@ final class FleetApiResponses
                     'share_type_s' => 'ADD_DRIVER_EXTERNAL',
                 ],
             ],
-            'pagination' => ['previous' => null, 'next' => null, 'current' => 1, 'per_page' => 2, 'count' => 2, 'pages' => 1],
+            'pagination' => [
+                'previous' => null,
+                'next' => null,
+                'current' => 1,
+                'per_page' => 2,
+                'count' => 2,
+                'pages' => 1,
+            ],
             'count' => 2,
         ]);
     }
@@ -82,7 +94,12 @@ final class FleetApiResponses
                 'state' => 'online',
                 'charge_state' => ['battery_level' => 76, 'timestamp' => self::VEHICLE_DATA_TIMESTAMP_MS],
                 // Fake coordinates: an answer can carry them even though Polaris never asks for the location.
-                'drive_state' => ['latitude' => 12.3456, 'longitude' => 65.4321, 'heading' => 90, 'shift_state' => null],
+                'drive_state' => [
+                    'latitude' => 12.3456,
+                    'longitude' => 65.4321,
+                    'heading' => 90,
+                    'shift_state' => null,
+                ],
                 'vehicle_state' => $vehicleState,
             ],
         ]);

@@ -99,17 +99,21 @@ final class LockedTokenProviderTest extends KernelTestCase
         $app = $this->app();
         self::createToken($app, CarbonImmutable::parse(self::NOW)->subMinute());
         $body = null;
-        $provider = $this->providerWith(new MockHttpClient(function (string $method, string $url, array $options) use (&$body): MockResponse {
+        $respond = function (string $method, string $url, array $options) use (&$body): MockResponse {
             $body = $options['body'];
 
             return $this->tokens('new-access', 'new-refresh', 28800);
-        }));
+        };
+        $provider = $this->providerWith(new MockHttpClient($respond));
 
         $provider->accessToken($app);
 
         self::assertIsString($body);
         parse_str($body, $fields);
-        self::assertSame(['grant_type' => 'refresh_token', 'client_id' => 'fake-client-id', 'refresh_token' => 'stored-refresh'], $fields);
+        self::assertSame(
+            ['grant_type' => 'refresh_token', 'client_id' => 'fake-client-id', 'refresh_token' => 'stored-refresh'],
+            $fields,
+        );
     }
 
     public function testTwoRefreshesOfTheSameAppCallTeslaOnce(): void
@@ -140,7 +144,8 @@ final class LockedTokenProviderTest extends KernelTestCase
 
         // The other process refreshed and committed: the managed entity of this one is now stale.
         $this->entityManager->getConnection()->executeStatement(
-            'UPDATE oauth_token SET encrypted_access_token = :access, encrypted_refresh_token = :refresh, expires_at = :expires WHERE id = :id',
+            'UPDATE oauth_token SET encrypted_access_token = :access, encrypted_refresh_token = :refresh, expires_at = '
+                . ':expires WHERE id = :id',
             [
                 'access' => $this->encrypter->encrypt('other-access'),
                 'refresh' => $this->encrypter->encrypt('other-refresh'),
@@ -153,7 +158,11 @@ final class LockedTokenProviderTest extends KernelTestCase
         $access = $this->provider([])->accessToken($app);
 
         self::assertSame('other-access', $access);
-        self::assertSame([], $this->calls, 'Tesla must not be called: the other process already spent the refresh token.');
+        self::assertSame(
+            [],
+            $this->calls,
+            'Tesla must not be called: the other process already spent the refresh token.',
+        );
     }
 
     public function testTheLockIsHeldWhileTeslaIsCalledAndReleasedAfterwards(): void
@@ -282,11 +291,16 @@ final class LockedTokenProviderTest extends KernelTestCase
     private function providerWith(MockHttpClient $inner, ?LockFactory $factory = null): LockedTokenProvider
     {
         $calls = &$this->calls;
-        $client = new MockHttpClient(static function (string $method, string $url, array $options) use ($inner, &$calls): \Symfony\Contracts\HttpClient\ResponseInterface {
+        $respond = static function (
+            string $method,
+            string $url,
+            array $options,
+        ) use ($inner, &$calls): \Symfony\Contracts\HttpClient\ResponseInterface {
             $calls[] = [$method, $url];
 
             return $inner->request($method, $url, $options);
-        });
+        };
+        $client = new MockHttpClient($respond);
 
         return new LockedTokenProvider(
             $this->entityManager,

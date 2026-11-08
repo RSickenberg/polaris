@@ -38,7 +38,13 @@ final class CarbonDateTimeImmutableTypeTest extends TestCase
         $zurich = CarbonImmutable::parse('2026-07-01 10:30:00.123456', 'Europe/Zurich');
 
         self::assertSame('2026-07-01 08:30:00.123456', $this->type->convertToDatabaseValue($zurich, $this->platform));
-        self::assertSame('2026-07-01 08:30:00.000000', $this->type->convertToDatabaseValue(new \DateTimeImmutable('2026-07-01 10:30', new \DateTimeZone('Europe/Zurich')), $this->platform));
+        self::assertSame(
+            '2026-07-01 08:30:00.000000',
+            $this->type->convertToDatabaseValue(
+                new \DateTimeImmutable('2026-07-01 10:30', new \DateTimeZone('Europe/Zurich')),
+                $this->platform,
+            ),
+        );
     }
 
     public function testReadsAsUtcWhateverTheDefaultTimeZone(): void
@@ -54,7 +60,10 @@ final class CarbonDateTimeImmutableTypeTest extends TestCase
 
     public function testConvertsADateTimeToUtc(): void
     {
-        $instant = $this->type->convertToPHPValue(new \DateTimeImmutable('2026-07-01 10:30', new \DateTimeZone('Europe/Zurich')), $this->platform);
+        $instant = $this->type->convertToPHPValue(
+            new \DateTimeImmutable('2026-07-01 10:30', new \DateTimeZone('Europe/Zurich')),
+            $this->platform,
+        );
 
         self::assertInstanceOf(CarbonImmutable::class, $instant);
         self::assertSame('2026-07-01T08:30:00+00:00', $instant->toIso8601String());

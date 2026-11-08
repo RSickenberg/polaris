@@ -21,15 +21,39 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * Prints the raw answer of one read-only Fleet API call, whole by default. With --redact the VIN, ids, car names,
- * tokens and location are removed, so that it can be pasted into an issue or used as a test fixture. Only GET, only the vehicle reads
- * (list, state, vehicle_data, vehicle_data_cached), no location_data, never wake_up. `data` is a billed
+ * tokens and location are removed, so that it can be pasted into an issue or used as a test fixture. Only GET, only the
+ * vehicle reads (list, state, vehicle_data, vehicle_data_cached), no location_data, never wake_up. `data` is a billed
  * live call and answers 408 when the car is not online.
  */
-#[AsCommand(name: 'polaris:tesla:debug:fetch', description: 'Print the answer of a read-only Fleet API vehicle call (--redact to remove the VIN, ids and names)')]
+#[AsCommand(
+    name: 'polaris:tesla:debug:fetch',
+    description: 'Print the answer of a read-only Fleet API vehicle call (--redact to remove the VIN, ids and names)',
+)]
 final readonly class DebugFetchCommand
 {
-    private const array ENDPOINTS = ['list' => '', 'state' => '', 'data' => '/vehicle_data', 'cached' => '/vehicle_data_cached'];
-    private const array REDACTED_KEYS = ['id', 'id_s', 'vehicle_id', 'user_id', 'vin', 'display_name', 'vehicle_name', 'tokens', 'access_type', 'latitude', 'longitude', 'heading', 'drive_state', 'granular_access', 'vehicle_config'];
+    private const array ENDPOINTS = [
+        'list' => '',
+        'state' => '',
+        'data' => '/vehicle_data',
+        'cached' => '/vehicle_data_cached',
+    ];
+    private const array REDACTED_KEYS = [
+        'id',
+        'id_s',
+        'vehicle_id',
+        'user_id',
+        'vin',
+        'display_name',
+        'vehicle_name',
+        'tokens',
+        'access_type',
+        'latitude',
+        'longitude',
+        'heading',
+        'drive_state',
+        'granular_access',
+        'vehicle_config',
+    ];
 
     public function __construct(
         private TokenProvider $tokens,
@@ -76,7 +100,8 @@ final readonly class DebugFetchCommand
         }
 
         $region = FleetRegion::fromBaseUrl($token->getFleetApiBaseUrl());
-        $path = '/api/1/vehicles' . ('list' === $what ? '' : '/' . rawurlencode((string) $vin)) . self::ENDPOINTS[$what];
+        $vehiclePath = 'list' === $what ? '' : '/' . rawurlencode((string) $vin);
+        $path = '/api/1/vehicles' . $vehiclePath . self::ENDPOINTS[$what];
         $response = $this->client->request('GET', $token->getFleetApiBaseUrl() . $path, [
             'auth_bearer' => $access,
             'timeout' => 15,
@@ -86,7 +111,10 @@ final readonly class DebugFetchCommand
         $body = $response->getContent(false);
         $data = json_decode($body, true);
         $io->writeln(\sprintf('HTTP %d (region %s)', $response->getStatusCode(), $region->value ?? '?'));
-        $text = json_encode($redact && \is_array($data) ? $this->redact($data) : ($data ?? $body), \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
+        $text = json_encode(
+            $redact && \is_array($data) ? $this->redact($data) : ($data ?? $body),
+            \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR,
+        );
         $io->writeln($redact ? str_replace((string) $vin, 'VIN', $text) : $text);
 
         return Command::SUCCESS;

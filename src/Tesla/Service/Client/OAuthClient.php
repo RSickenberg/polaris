@@ -36,8 +36,12 @@ final readonly class OAuthClient
     /**
      * @param bool $promptMissingScopes asks Tesla to show the consent again for the scopes the user has not granted yet
      */
-    public function authorizationUrl(string $clientId, string $redirectUri, string $state, bool $promptMissingScopes = false): string
-    {
+    public function authorizationUrl(
+        string $clientId,
+        string $redirectUri,
+        string $state,
+        bool $promptMissingScopes = false,
+    ): string {
         return self::AUTHORIZE_URL . '?' . http_build_query(
             [
                 'response_type' => 'code',
@@ -137,7 +141,11 @@ final readonly class OAuthClient
         $userRegion ??= \is_string($code) ? FleetRegion::tryFrom(strtolower($code)) : null;
 
         if (null === $userRegion || !\is_string($baseUrl) || '' === $baseUrl) {
-            throw FleetApiError::unexpected(FleetApiOperation::UserRegion, $region, 'the answer has no known region and Fleet API base URL');
+            throw FleetApiError::unexpected(
+                FleetApiOperation::UserRegion,
+                $region,
+                'the answer has no known region and Fleet API base URL',
+            );
         }
 
         return new UserRegion($userRegion, rtrim($baseUrl, '/'));

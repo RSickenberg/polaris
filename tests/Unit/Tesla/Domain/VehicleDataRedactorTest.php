@@ -15,8 +15,21 @@ final class VehicleDataRedactorTest extends TestCase
     {
         $data = [
             'state' => 'online',
-            'drive_state' => ['latitude' => 12.3456, 'longitude' => 65.4321, 'heading' => 90, 'speed' => null, 'shift_state' => null],
-            'nested' => ['deeper' => ['native_latitude' => 1.0, 'native_longitude' => 2.0, 'gps_as_of' => 1792864425, 'kept' => true]],
+            'drive_state' => [
+                'latitude' => 12.3456,
+                'longitude' => 65.4321,
+                'heading' => 90,
+                'speed' => null,
+                'shift_state' => null,
+            ],
+            'nested' => [
+                'deeper' => [
+                    'native_latitude' => 1.0,
+                    'native_longitude' => 2.0,
+                    'gps_as_of' => 1792864425,
+                    'kept' => true,
+                ],
+            ],
             'location_data' => ['anything' => 1],
             'vehicle_state' => ['odometer' => 100.5, 'locked' => true],
             'list' => [['latitude' => 1.0, 'name' => 'a'], ['name' => 'b']],

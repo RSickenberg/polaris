@@ -37,11 +37,11 @@ final class OdometerReadingController extends AbstractController
     }
 
     // Not found rather than forbidden: another user's vehicle must not even be known to exist.
-    #[IsGranted(VehiclePermission::Manage->value, 'vehicle', statusCode: Response::HTTP_NOT_FOUND)]
-    #[Route('/vehicles/{id}/readings', name: 'reading_history', methods: ['GET', 'POST'])]
     /**
      * @throws ORMException
      */
+    #[IsGranted(VehiclePermission::Manage->value, 'vehicle', statusCode: Response::HTTP_NOT_FOUND)]
+    #[Route('/vehicles/{id}/readings', name: 'reading_history', methods: ['GET', 'POST'])]
     public function history(
         Request $request,
         #[MapEntity(id: 'id')]

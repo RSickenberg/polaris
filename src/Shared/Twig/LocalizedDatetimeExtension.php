@@ -35,11 +35,22 @@ final class LocalizedDatetimeExtension extends AbstractExtension
      * @param string $timeZone an IANA time zone name
      * @param bool   $withZone false leaves the zone out, where the page already states it
      */
-    public function format(\DateTimeInterface $date, string $timeZone, ?string $locale = null, bool $withZone = true): string
-    {
+    public function format(
+        \DateTimeInterface $date,
+        string $timeZone,
+        ?string $locale = null,
+        bool $withZone = true,
+    ): string {
         $locale ??= \Locale::getDefault();
         $pattern = new \IntlDatePatternGenerator($locale)->getBestPattern(self::SKELETON . ($withZone ? 'z' : ''));
-        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, $timeZone, \IntlDateFormatter::GREGORIAN, false === $pattern ? null : $pattern);
+        $formatter = new \IntlDateFormatter(
+            $locale,
+            \IntlDateFormatter::NONE,
+            \IntlDateFormatter::NONE,
+            $timeZone,
+            \IntlDateFormatter::GREGORIAN,
+            false === $pattern ? null : $pattern,
+        );
 
         return (string) $formatter->format($date->getTimestamp());
     }
@@ -56,10 +67,15 @@ final class LocalizedDatetimeExtension extends AbstractExtension
         $locale ??= \Locale::getDefault();
         $now = CarbonImmutable::instance($this->clock->now())->setTimezone($timeZone);
 
-        $at = CarbonImmutable::instance($date)->setTimezone($timeZone)->locale(\Locale::getPrimaryLanguage($locale) ?? 'en');
+        $at = CarbonImmutable::instance($date)->setTimezone($timeZone)->locale(
+            \Locale::getPrimaryLanguage($locale) ?? 'en'
+        );
         \assert($at instanceof CarbonImmutable);
 
         // Carbon reads what the callback returns as a format: the brackets keep the text as it is.
-        return $at->calendar($now, ['sameElse' => fn (): string => '[' . $this->format($date, $timeZone, $locale, false) . ']']);
+        return $at->calendar(
+            $now,
+            ['sameElse' => fn (): string => '[' . $this->format($date, $timeZone, $locale, false) . ']'],
+        );
     }
 }

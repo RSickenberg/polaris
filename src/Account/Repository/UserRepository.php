@@ -37,8 +37,11 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     /**
      * @throws ORMException
      */
-    public function upgradePassword(PasswordAuthenticatedUserInterface $user, #[\SensitiveParameter] string $newHashedPassword): void
-    {
+    public function upgradePassword(
+        PasswordAuthenticatedUserInterface $user,
+        #[\SensitiveParameter]
+        string $newHashedPassword,
+    ): void {
         if (!$user instanceof User) {
             throw new UnsupportedUserException(\sprintf('Instances of "%s" are not supported.', $user::class));
         }
@@ -48,8 +51,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * Claims the midnight jobs of a local day: moves `lastMidnightDay` to $day only if it is older (or never set), in one
-     * UPDATE, so of two writers exactly one gets true.
+     * Claims the midnight jobs of a local day: moves `lastMidnightDay` to $day only if it is older (or never set), in
+     * one UPDATE, so of two writers exactly one gets true.
      */
     public function claimMidnight(User $user, CarbonImmutable $day): bool
     {

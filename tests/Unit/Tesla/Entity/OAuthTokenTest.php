@@ -57,6 +57,15 @@ final class OAuthTokenTest extends TestCase
         $now = CarbonImmutable::parse(self::NOW);
         $app = new TeslaApp(new User('driver@example.test', 'not-a-real-hash', $now), 'public', 'v1:private', $now);
 
-        return new OAuthToken($app, 'v1:access', 'v1:refresh', $expiresAt, 'openid', ConnectionMethod::OAuth, 'https://fleet-api.prd.eu.vn.cloud.tesla.com', $now);
+        return new OAuthToken(
+            $app,
+            'v1:access',
+            'v1:refresh',
+            $expiresAt,
+            'openid',
+            ConnectionMethod::OAuth,
+            'https://fleet-api.prd.eu.vn.cloud.tesla.com',
+            $now,
+        );
     }
 }
