@@ -10,7 +10,8 @@
     ## string|null The translated explanation of the panel, shown in a dialog behind an info button.
     help = null
 -%}
-{# A card with one row per period: the period with the two figures under it (what happened, what was expected), and the gap on the right, as large as the period. A positive gap is more than expected. Only the digits are monospaced; a French number groups its thousands with a narrow no-break space, which looks like no space at this size: a regular no-break space reads better. #}
+{# A card with one row per period: the period with the two figures under it (what happened, what was expected), and the gap on the right, as large as the period. A positive gap is more than expected. Only the digits are monospaced. Before any period has history (the first days after deploy), one line says so instead of four empty rows. #}
+{% set withHistory = rows|filter(row => row.figures is not null)|length > 0 %}
 {% set unit = 'unit.km'|trans(domain='shared') %}
 <twig:Card data-comparison="{{ key }}" {{ ...attributes }}>
     <twig:Card:Header>
@@ -21,49 +22,53 @@
         {% endif %}
     </twig:Card:Header>
     <twig:Card:Content>
-        <twig:Table>
-            <twig:Table:Header>
-                {# The header row is not a row to point at: no hover colour (the kit row has one). #}
-                <twig:Table:Row class="hover:bg-transparent!">
-                    <twig:Table:Head class="ps-0 px-1 whitespace-normal">{{ 'compare.column.period'|trans(domain='dashboard') }}</twig:Table:Head>
-                    <twig:Table:Head class="pe-0 px-1 whitespace-normal text-end">{{ 'compare.column.difference'|trans(domain='dashboard') }}</twig:Table:Head>
-                </twig:Table:Row>
-            </twig:Table:Header>
-            <twig:Table:Body>
-                {% for row in rows %}
-                    {% set figures = row.figures %}
-                    <twig:Table:Row data-period="{{ row.period.value }}">
-                        <twig:Table:Cell class="ps-0 py-3 px-1 whitespace-normal">
-                            <span class="block">{{ ('compare.period.' ~ row.period.value)|trans(domain='dashboard') }}</span>
-                            {% if figures is not null %}
-                                <span class="mt-1 block text-xs text-muted-foreground" data-figure="figures">
-                                    {%- set actual = (figures.actual.metres / 1000)|format_number({max_fraction_digit: 0})|replace({" ": " "}) -%}
-                                    {%- set expected = (figures.expected.metres / 1000)|format_number({max_fraction_digit: 0})|replace({" ": " "}) -%}
-                                    <span class="font-mono">{{ actual }}</span> / <span class="font-mono">{{ expected }}</span> {{ unit }}
-                                </span>
-                            {% endif %}
-                        </twig:Table:Cell>
-                        {% if figures is null %}
-                            <twig:Table:Cell class="pe-0 py-3 px-1 whitespace-normal text-end text-muted-foreground" data-no-history>{{ 'compare.no_history'|trans(domain='dashboard') }}</twig:Table:Cell>
-                        {% else %}
-                            {% set sign = '' %}
-                            {% if figures.delta.isNegative %}
-                                {% set sign = '−' %}
-                            {% elseif figures.delta.metres > 0 %}
-                                {% set sign = '+' %}
-                            {% endif %}
-                            <twig:Table:Cell class="pe-0 py-3 px-1 whitespace-normal text-end">
-                                <span class="block text-base font-medium" data-figure="delta">
-                                    <span class="font-mono">{{ sign }}{{ (figures.delta.absolute.metres / 1000)|format_number({max_fraction_digit: 0})|replace({" ": " "}) }}</span> {{ unit }}
-                                </span>
-                                {% if figures.ratio is not null %}
-                                    <span class="mt-1 block text-xs text-muted-foreground" data-figure="ratio">{{ sign }}{{ figures.ratio|abs|format_number({}, 'percent') }}</span>
+        {% if not withHistory %}
+            <p class="text-sm text-muted-foreground" data-no-history>{{ 'compare.no_history_yet'|trans(domain='dashboard') }}</p>
+        {% else %}
+            <twig:Table>
+                <twig:Table:Header>
+                    {# The header row is not a row to point at: no hover colour (the kit row has one). #}
+                    <twig:Table:Row class="hover:bg-transparent!">
+                        <twig:Table:Head class="ps-0 px-1 whitespace-normal">{{ 'compare.column.period'|trans(domain='dashboard') }}</twig:Table:Head>
+                        <twig:Table:Head class="pe-0 px-1 whitespace-normal text-end">{{ 'compare.column.difference'|trans(domain='dashboard') }}</twig:Table:Head>
+                    </twig:Table:Row>
+                </twig:Table:Header>
+                <twig:Table:Body>
+                    {% for row in rows %}
+                        {% set figures = row.figures %}
+                        <twig:Table:Row data-period="{{ row.period.value }}">
+                            <twig:Table:Cell class="ps-0 py-3 px-1 whitespace-normal">
+                                <span class="block">{{ ('compare.period.' ~ row.period.value)|trans(domain='dashboard') }}</span>
+                                {% if figures is not null %}
+                                    <span class="mt-1 block text-xs text-muted-foreground" data-figure="figures">
+                                        {%- set actual = figures.actual|km -%}
+                                        {%- set expected = figures.expected|km -%}
+                                        <span class="font-mono">{{ actual }}</span> / <span class="font-mono">{{ expected }}</span> {{ unit }}
+                                    </span>
                                 {% endif %}
                             </twig:Table:Cell>
-                        {% endif %}
-                    </twig:Table:Row>
-                {% endfor %}
-            </twig:Table:Body>
-        </twig:Table>
+                            {% if figures is null %}
+                                <twig:Table:Cell class="pe-0 py-3 px-1 whitespace-normal text-end text-muted-foreground" data-no-history>{{ 'compare.no_history'|trans(domain='dashboard') }}</twig:Table:Cell>
+                            {% else %}
+                                {% set sign = '' %}
+                                {% if figures.delta.isNegative %}
+                                    {% set sign = '−' %}
+                                {% elseif figures.delta.metres > 0 %}
+                                    {% set sign = '+' %}
+                                {% endif %}
+                                <twig:Table:Cell class="pe-0 py-3 px-1 whitespace-normal text-end">
+                                    <span class="block text-base font-medium" data-figure="delta">
+                                        <span class="font-mono">{{ sign }}{{ figures.delta.absolute|km }}</span> {{ unit }}
+                                    </span>
+                                    {% if figures.ratio is not null %}
+                                        <span class="mt-1 block text-xs text-muted-foreground" data-figure="ratio">{{ sign }}{{ figures.ratio|abs|percent }}</span>
+                                    {% endif %}
+                                </twig:Table:Cell>
+                            {% endif %}
+                        </twig:Table:Row>
+                    {% endfor %}
+                </twig:Table:Body>
+            </twig:Table>
+        {% endif %}
     </twig:Card:Content>
 </twig:Card>

@@ -28,7 +28,7 @@
       </trans-unit>
       <trans-unit id="end_date_convention.exclusive">
         <source>end_date_convention.exclusive</source>
-        <target>Le lendemain du dernier jour (ce jour ne fait pas partie du leasing)</target>
+        <target>Le lendemain du dernier jour</target>
       </trans-unit>
       <trans-unit id="end_date_convention.inclusive">
         <source>end_date_convention.inclusive</source>

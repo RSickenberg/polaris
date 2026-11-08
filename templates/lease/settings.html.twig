@@ -3,8 +3,7 @@
 {% block title %}{{ 'page.settings.title'|trans(domain='lease') }} | {{ vehicle.name }}{% endblock %}
 
 {% block main %}
-    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.settings.title'|trans(domain='lease') }} <span class="font-normal text-muted-foreground">| {{ vehicle.name }}</span></h1>
-
+    <twig:Shared:PageHeader title="{{ 'page.settings.title'|trans(domain='lease') }}" subject="{{ vehicle.name }}" />
 
     {# The form and, from the large breakpoint, the projection stacked on its right; on a phone one below the other. #}
     <div class="my-4 grid items-start gap-8 lg:grid-cols-[minmax(0,48rem)_20rem]">
@@ -12,36 +11,38 @@
             {{ form(form) }}
         </div>
 
-        <aside class="lg:sticky lg:top-4">
-            <h2 class="mb-3 text-lg font-semibold">{{ 'page.settings.assessment'|trans(domain='lease') }}</h2>
-            {% if not hasContract %}
-                <twig:Card>
-                    <twig:Card:Content>
+        <aside class="flex flex-col gap-6 lg:sticky lg:top-4">
+            <twig:Card>
+                <twig:Card:Header>
+                    <twig:Card:Title><h2>{{ 'page.settings.assessment'|trans(domain='lease') }}</h2></twig:Card:Title>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    {% if not hasContract %}
                         <p class="text-sm text-muted-foreground">{{ 'assessment.no_contract'|trans(domain='lease') }}</p>
-                    </twig:Card:Content>
-                </twig:Card>
-            {% elseif assessment is null %}
-                <twig:Card>
-                    <twig:Card:Content>
+                    {% elseif assessment is null %}
                         <p class="text-sm text-muted-foreground">{{ 'assessment.no_data'|trans(domain='lease') }}</p>
-                    </twig:Card:Content>
-                </twig:Card>
-            {% else %}
-                <twig:Card>
-                    <twig:Card:Content>
-                        <dl id="assessment" class="grid grid-cols-[1fr_auto] gap-x-6 gap-y-3 text-sm">
+                    {% else %}
+                        {% set level = assessment.riskLevel.value %}
+                        {% set unit = 'unit.km'|trans(domain='shared') %}
+                        <dl id="assessment" class="grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-3 text-sm">
                             <dt class="text-muted-foreground">{{ 'assessment.risk'|trans(domain='lease') }}</dt>
-                            <dd class="text-end font-medium" data-risk="{{ assessment.riskLevel.value }}">{{ ('risk.' ~ assessment.riskLevel.value)|trans(domain='lease') }}</dd>
+                            {# The level in words with its icon and color, like the alert of the dashboard. #}
+                            <dd class="text-end" data-risk="{{ level }}">
+                                <twig:Badge variant="outline" class="{{ {ok: 'border-risk-ok text-risk-ok', watch: 'border-risk-watch text-risk-watch', over: 'border-risk-over text-risk-over'}[level] }}">
+                                    <twig:ux:icon name="{{ {ok: 'lucide:circle-check', watch: 'lucide:triangle-alert', over: 'lucide:circle-alert'}[level] }}" aria-hidden="true" data-icon="inline-start" />
+                                    {{ ('risk.' ~ level)|trans(domain='lease') }}
+                                </twig:Badge>
+                            </dd>
                             <dt class="text-muted-foreground">{{ 'assessment.allowed_to_date'|trans(domain='lease') }}</dt>
-                            <dd class="text-end font-medium">{{ (assessment.projection.allowedToDate.metres / 1000)|format_number({fraction_digit: 1}) }}&nbsp;{{ 'unit.km'|trans(domain='shared') }}</dd>
+                            <dd class="text-end font-medium">{{ assessment.projection.allowedToDate|km }}&nbsp;{{ unit }}</dd>
                             <dt class="text-muted-foreground">{{ 'assessment.projected_end'|trans(domain='lease') }}</dt>
-                            <dd class="text-end font-medium">{{ (assessment.projection.projectedAtEnd.metres / 1000)|format_number({fraction_digit: 1}) }}&nbsp;{{ 'unit.km'|trans(domain='shared') }}</dd>
+                            <dd class="text-end font-medium">{{ assessment.projection.projectedAtEnd|km }}&nbsp;{{ unit }}</dd>
                             <dt class="text-muted-foreground">{{ 'assessment.projected_excess'|trans(domain='lease') }}</dt>
-                            <dd class="text-end font-medium">{{ (assessment.projectedExcess.metres / 1000)|format_number({fraction_digit: 1}) }}&nbsp;{{ 'unit.km'|trans(domain='shared') }}</dd>
+                            <dd class="text-end font-medium">{{ assessment.projectedExcess|km }}&nbsp;{{ unit }}</dd>
                         </dl>
-                    </twig:Card:Content>
-                </twig:Card>
-            {% endif %}
+                    {% endif %}
+                </twig:Card:Content>
+            </twig:Card>
 
             {# Under the projection, in the same sticky column. #}
             {% if hasContract %}

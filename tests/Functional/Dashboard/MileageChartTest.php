@@ -175,7 +175,8 @@ final class MileageChartTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         $chart = $crawler->filter(self::CHART);
-        self::assertSame('fr', $chart->attr('data-chart-locale-value'));
+        self::assertSame('fr-CH', $chart->attr('data-chart-locale-value'));
+        self::assertSame('’', $chart->attr('data-chart-grouping-value'));
         self::assertSame(
             ['Parcouru', 'Projection', 'Autorisé'],
             array_column($this->series($chart->attr('data-chart-series-value')), 'name'),

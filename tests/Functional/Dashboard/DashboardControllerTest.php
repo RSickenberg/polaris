@@ -113,8 +113,8 @@ final class DashboardControllerTest extends WebTestCase
         $alert = '[data-slot=alert][data-risk=' . $level . ']';
         self::assertSelectorExists($alert);
         self::assertSelectorExists($alert . ' svg[aria-hidden=true]');
-        $color = ['ok' => 'green', 'watch' => 'amber', 'over' => 'red'][$level];
-        self::assertSelectorExists($alert . '.bg-' . $color . '-50');
+        $tone = ['ok' => 'success', 'watch' => 'warning', 'over' => 'danger'][$level];
+        self::assertSelectorExists($alert . '.bg-' . $tone . '-surface');
         self::assertSelectorTextContains(
             $alert . ' [data-slot=alert-title]',
             ['ok' => 'OK', 'watch' => 'Watch', 'over' => 'Over the allowance'][$level],
@@ -139,7 +139,7 @@ final class DashboardControllerTest extends WebTestCase
         self::assertStringContainsString('Current pace', $text);
         self::assertStringContainsString('From now on', $text);
         self::assertStringContainsString('Normal pace', $text);
-        self::assertStringContainsString('km / week', $text);
+        self::assertStringContainsString('km/week', $text);
         self::assertStringContainsString(
             'Allowed to date ' . $km($assessment->projection->allowedToDate->metres()),
             $text,
@@ -198,7 +198,7 @@ final class DashboardControllerTest extends WebTestCase
         self::assertSame('Share of the allowance driven', $bar->attr('aria-label'));
         self::assertSame('67% of the allowance driven', $bar->attr('aria-valuetext'));
         self::assertSelectorTextContains('main', '67%');
-        self::assertSelectorExists('main span.bg-red-600[style="left: 50%"][aria-hidden=true]');
+        self::assertSelectorExists('main span.bg-foreground[style="left: 50%"][aria-hidden=true]');
     }
 
     public function testOnceTheAllowanceIsUsedUpTheBarStopsAt100AndThereIsNoBudget(): void
@@ -285,7 +285,7 @@ final class DashboardControllerTest extends WebTestCase
         );
     }
 
-    public function testARunningLeaseShowsTheThreeComparisonPanelsOfFourPeriods(): void
+    public function testARunningLeaseWithoutSnapshotsShowsTheThreePanelsWithOneLineEach(): void
     {
         $this->lease('2026-01-01', 12, 15_000, 0);
         $this->reading('2026-07-02 11:00:00', 10_000);
@@ -296,14 +296,13 @@ final class DashboardControllerTest extends WebTestCase
 
         foreach (['budget', 'pace', 'projected_end'] as $panel) {
             self::assertSelectorExists(\sprintf('[data-comparison=%s]', $panel));
-            self::assertSelectorCount(4, \sprintf('[data-comparison=%s] tr[data-period]', $panel));
-            // No snapshot has been saved yet: every period lacks history.
-            self::assertSelectorCount(4, \sprintf('[data-comparison=%s] [data-no-history]', $panel));
+            // No snapshot has been saved yet: one line says so instead of four rows without figures.
+            self::assertSelectorCount(0, \sprintf('[data-comparison=%s] tr[data-period]', $panel));
+            self::assertSelectorCount(1, \sprintf('[data-comparison=%s] [data-no-history]', $panel));
         }
 
         self::assertSelectorTextContains('[data-comparison=budget]', 'Budget');
-        self::assertSelectorTextContains('[data-comparison=budget] [data-period=week]', 'Last 7 days');
-        self::assertSelectorTextContains('[data-comparison=budget] [data-period=week]', 'Not enough history');
+        self::assertSelectorTextContains('[data-comparison=budget] [data-no-history]', 'Not enough history yet.');
     }
 
     public function testASnapshotOfTodayGivesFiguresToThePanels(): void
@@ -376,14 +375,15 @@ final class DashboardControllerTest extends WebTestCase
         self::assertSelectorExists('[role=progressbar][aria-label="Part du kilométrage autorisé parcourue"]');
         $text = $this->text();
         self::assertStringContainsString('Parcouru 10', $text);
-        self::assertStringContainsString('km / jour', $text);
-        self::assertStringContainsString('km / semaine', $text);
-        self::assertStringContainsString('km / mois', $text);
+        self::assertStringContainsString('km/jour', $text);
+        self::assertStringContainsString('km/semaine', $text);
+        self::assertStringContainsString('km/mois', $text);
         self::assertStringContainsString('Dernier relevé', $text);
         self::assertMatchesRegularExpression('/\d\s€|\d\sCHF/u', $text);
+        self::assertMatchesRegularExpression('/\d\.\d\d\sCHF/u', $text, 'Swiss amounts have a decimal point.');
     }
 
-    public function testFrenchThousandsAreSeparatedByARegularNoBreakSpace(): void
+    public function testFrenchThousandsAreGroupedWithAnApostrophe(): void
     {
         $this->lease('2026-01-01', 12, 15_000, 0);
         $this->reading('2026-07-02 11:00:00', 10_000);
@@ -396,7 +396,7 @@ final class DashboardControllerTest extends WebTestCase
                 ->filter('main dl dd.text-2xl')
                 ->each(static fn ($figure): string => $figure->text()),
         );
-        self::assertMatchesRegularExpression('/\\d\x{00A0}\\d{3}/u', $figures);
+        self::assertMatchesRegularExpression('/\\d’\\d{3}/u', $figures, 'The Swiss way: 12’345.');
         self::assertStringNotContainsString("\u{202F}", $figures, 'The narrow space looks like no space at this size.');
     }
 

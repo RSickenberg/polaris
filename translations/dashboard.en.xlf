@@ -168,15 +168,15 @@
       </trans-unit>
       <trans-unit id="pace.day">
         <source>pace.day</source>
-        <target>km / day</target>
+        <target>km/day</target>
       </trans-unit>
       <trans-unit id="pace.week">
         <source>pace.week</source>
-        <target>km / week</target>
+        <target>km/week</target>
       </trans-unit>
       <trans-unit id="pace.month">
         <source>pace.month</source>
-        <target>km / month</target>
+        <target>km/month</target>
       </trans-unit>
       <trans-unit id="returned.cta">
         <source>returned.cta</source>
@@ -233,6 +233,10 @@
       <trans-unit id="compare.column.difference">
         <source>compare.column.difference</source>
         <target>Gap</target>
+      </trans-unit>
+      <trans-unit id="compare.no_history_yet">
+        <source>compare.no_history_yet</source>
+        <target>Not enough history yet. The rows fill in over the next 30 days.</target>
       </trans-unit>
       <trans-unit id="compare.no_history">
         <source>compare.no_history</source>

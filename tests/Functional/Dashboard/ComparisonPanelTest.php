@@ -57,14 +57,14 @@ final class ComparisonPanelTest extends KernelTestCase
         self::assertCount(0, $row->filter('[data-figure]'));
     }
 
-    public function testTheFrenchPanelUsesFrenchWordsAndAFrenchPercentage(): void
+    public function testTheFrenchPanelUsesFrenchWordsAndASwissPercentage(): void
     {
         $panel = $this->panel('fr');
 
         $period = $panel->filter('[data-period=today] td')->first()->filter('span')->first();
 
         self::assertSame('Aujourd’hui', $this->text($period));
-        self::assertSame('+11 %', $this->text($panel->filter('[data-period=today] [data-figure=ratio]')));
+        self::assertSame('+11%', $this->text($panel->filter('[data-period=today] [data-figure=ratio]')));
     }
 
     protected function tearDown(): void

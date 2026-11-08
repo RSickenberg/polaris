@@ -38,6 +38,7 @@ const TOKEN = /^var\((--[\w-]+)\)$/;
  *                 it a series with few points (a projection, a target line) is missing while hovering between them.
  *                 The original points keep their markers, the others only show one under the cursor.
  * @value locale   BCP 47 locale for number and date formats.
+ * @value grouping The character between groups of thousands, empty to keep the one of the locale (see NumberConvention).
  * @value timeZone IANA time zone for date formats.
  */
 export default class extends Controller {
@@ -49,6 +50,7 @@ export default class extends Controller {
         options: { type: Object, default: {} },
         align: { type: Number, default: 0 },
         locale: { type: String, default: 'en' },
+        grouping: { type: String, default: '' },
         timeZone: { type: String, default: 'UTC' },
     };
 
@@ -213,8 +215,10 @@ export default class extends Controller {
     _formatters() {
         const number = (fraction) => {
             const format = new Intl.NumberFormat(this.localeValue, { maximumFractionDigits: fraction });
+            // The same grouping as the figures of the page: Intl writes a (narrow) no-break space where Polaris may not.
+            const group = (text) => ('' === this.groupingValue ? text : text.replace(/(?<=\d)[\u00a0\u202f](?=\d{3})/g, this.groupingValue));
 
-            return (value) => (Number.isFinite(value) ? format.format(value) : '');
+            return (value) => (Number.isFinite(value) ? group(format.format(value)) : '');
         };
         const date = (options) => {
             const format = new Intl.DateTimeFormat(this.localeValue, { timeZone: this.timeZoneValue, ...options });

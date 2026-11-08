@@ -27,9 +27,10 @@
         {% else %}
             <dl class="grid grid-cols-3 divide-x">
                 {% for period, distance in {day: budget.perDay, week: budget.perWeek, month: budget.perMonth} %}
-                    <div class="px-2 text-center">
-                        <dd class="text-2xl font-light" data-figure>{{ (distance.metres / 1000)|format_number({max_fraction_digit: 0})|replace({" ": " "}) }}</dd>
-                        <dt class="text-sm text-muted-foreground">{{ ('pace.' ~ period)|trans(domain='dashboard') }}</dt>
+                    {# The term comes first for a screen reader; flex order shows the figure above it. #}
+                    <div class="flex flex-col px-2 text-center">
+                        <dt class="order-2 text-sm text-muted-foreground">{{ ('pace.' ~ period)|trans(domain='dashboard') }}</dt>
+                        <dd class="order-1 text-2xl font-light" data-figure>{{ distance|km }}</dd>
                     </div>
                 {% endfor %}
             </dl>

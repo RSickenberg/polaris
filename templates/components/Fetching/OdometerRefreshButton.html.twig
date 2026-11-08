@@ -3,7 +3,7 @@
 {% set toast = this.toast %}
 {# Inside a child component tag, `this` is the child: anything taken from this component is set before. #}
 {% set dialogKey = this.wakeDialogKey %}
-{% set wakeCost = this.wakeCost|format_currency(this.wakeCurrency) %}
+{% set wakeCost = this.wakeCost|amount(this.wakeCurrency) %}
 {% set toastMessage = null %}
 {% if toast is not null %}
     {# Every message takes the parameters it needs among these. #}

@@ -28,7 +28,7 @@
       </trans-unit>
       <trans-unit id="end_date_convention.exclusive">
         <source>end_date_convention.exclusive</source>
-        <target>The day after the last day (that day is not part of the lease)</target>
+        <target>The day after the last day</target>
       </trans-unit>
       <trans-unit id="end_date_convention.inclusive">
         <source>end_date_convention.inclusive</source>
