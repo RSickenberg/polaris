@@ -58,6 +58,10 @@
         <source>tesla.wake_cap.range</source>
         <target>The wake limit must be between 0 and 20.</target>
       </trans-unit>
+      <trans-unit id="vehicle.data.file_required">
+        <source>vehicle.data.file_required</source>
+        <target>Choose a file to import.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

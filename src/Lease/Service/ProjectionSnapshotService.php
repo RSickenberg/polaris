@@ -14,6 +14,8 @@ use Polaris\Lease\Domain\NoData;
 use Polaris\Lease\Domain\SnapshotPolicy;
 use Polaris\Lease\Entity\ProjectionSnapshot;
 use Polaris\Lease\Repository\ProjectionSnapshotRepository;
+use Polaris\Lease\Service\Dto\ProjectionSnapshotPoint;
+use Polaris\Lease\Service\Dto\SnapshotsImportResult;
 use Polaris\Lease\Service\Enum\SnapshotOutcome;
 use Polaris\Lease\Service\Exception\LeaseTermsRejected;
 use Polaris\Shared\Domain\OwnerMidnight;
@@ -72,6 +74,51 @@ final readonly class ProjectionSnapshotService
         } finally {
             $lock->release();
         }
+    }
+
+    /**
+     * Brings back snapshots exported earlier, as they were. A local day that already has a snapshot keeps it, a snapshot
+     * saved before the cutoff and the pace were stored cannot be kept (the entity needs them), and without a lease there
+     * is nothing to attach them to.
+     *
+     * @param list<ProjectionSnapshotPoint> $points
+     *
+     * @throws ORMException
+     */
+    public function import(Vehicle $vehicle, array $points): SnapshotsImportResult
+    {
+        $contract = $this->leases->find($vehicle);
+
+        if (null === $contract) {
+            return new SnapshotsImportResult(0, 0, \count($points));
+        }
+
+        $added = 0;
+        $alreadyThere = 0;
+        $skipped = 0;
+
+        foreach ($points as $point) {
+            if (null === $point->cutoffAt || null === $point->overallPace || null === $point->blendedPace) {
+                ++$skipped;
+
+                continue;
+            }
+
+            if (null !== $this->snapshots->findForDay($contract, $point->localDay)) {
+                ++$alreadyThere;
+
+                continue;
+            }
+
+            $this->entityManager->persist(new ProjectionSnapshot($contract, $point->localDay, $point->cutoffAt, $point->computedAt, $point->asOf, $point->driven, $point->allowedToDate, $point->projectedAtEnd, $point->dailyBudget, $point->riskLevel, $point->overallPace, $point->recentPace, $point->blendedPace));
+            ++$added;
+        }
+
+        if ($added > 0) {
+            $this->entityManager->flush();
+        }
+
+        return new SnapshotsImportResult($added, $alreadyThere, $skipped);
     }
 
     /**

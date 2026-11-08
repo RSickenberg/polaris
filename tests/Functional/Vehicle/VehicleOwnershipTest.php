@@ -53,6 +53,9 @@ final class VehicleOwnershipTest extends WebTestCase
         yield 'add a reading' => ['POST', '/readings'];
         yield 'lease' => ['GET', '/lease'];
         yield 'save the lease' => ['POST', '/lease'];
+        yield 'data' => ['GET', '/data'];
+        yield 'import data' => ['POST', '/data'];
+        yield 'export data' => ['GET', '/data/export'];
     }
 
     #[DataProvider('pages')]
@@ -71,6 +74,8 @@ final class VehicleOwnershipTest extends WebTestCase
         yield 'dashboard' => [''];
         yield 'readings' => ['/readings'];
         yield 'lease' => ['/lease'];
+        yield 'data' => ['/data'];
+        yield 'export data' => ['/data/export'];
     }
 
     #[DataProvider('ownPages')]

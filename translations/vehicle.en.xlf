@@ -50,6 +50,54 @@
         <source>import.error.description</source>
         <target>Could not read your vehicle list from Tesla. Try again shortly.</target>
       </trans-unit>
+      <trans-unit id="page.data.title">
+        <source>page.data.title</source>
+        <target>Data</target>
+      </trans-unit>
+      <trans-unit id="data.export.title">
+        <source>data.export.title</source>
+        <target>Export</target>
+      </trans-unit>
+      <trans-unit id="data.export.description">
+        <source>data.export.description</source>
+        <target>Download the lease, the odometer readings and the daily projection snapshots of this vehicle as one JSON file. It holds no VIN and no Tesla token.</target>
+      </trans-unit>
+      <trans-unit id="data.export.button">
+        <source>data.export.button</source>
+        <target>Download</target>
+      </trans-unit>
+      <trans-unit id="data.import.title">
+        <source>data.import.title</source>
+        <target>Import</target>
+      </trans-unit>
+      <trans-unit id="data.import.description">
+        <source>data.import.description</source>
+        <target>Add the data of an export to this vehicle. Nothing is replaced or deleted: the readings and snapshots already there are kept, and so is an existing lease.</target>
+      </trans-unit>
+      <trans-unit id="form.data.file.label">
+        <source>form.data.file.label</source>
+        <target>Export file</target>
+      </trans-unit>
+      <trans-unit id="form.data.submit">
+        <source>form.data.submit</source>
+        <target>Import</target>
+      </trans-unit>
+      <trans-unit id="data.rejected.not_json">
+        <source>data.rejected.not_json</source>
+        <target>The file is not valid JSON.</target>
+      </trans-unit>
+      <trans-unit id="data.rejected.not_an_export">
+        <source>data.rejected.not_an_export</source>
+        <target>The file is not an export of Polaris.</target>
+      </trans-unit>
+      <trans-unit id="data.rejected.unknown_version">
+        <source>data.rejected.unknown_version</source>
+        <target>This export has a format version that this Polaris does not know.</target>
+      </trans-unit>
+      <trans-unit id="data.rejected.invalid">
+        <source>data.rejected.invalid</source>
+        <target>The file has an invalid value: %detail%</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

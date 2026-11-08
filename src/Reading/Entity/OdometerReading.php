@@ -93,6 +93,26 @@ class OdometerReading
         return new self($vehicle, $readAt, Distance::from((float) $raw, $unit), $raw, $unit, ReadingSource::Api);
     }
 
+    /**
+     * A reading brought back from an export, as it was: the Tesla raw value and unit go together, and only with the API.
+     *
+     * @throws \InvalidArgumentException when the raw value and its unit do not fit the source
+     */
+    public static function restore(Vehicle $vehicle, CarbonImmutable $readAt, Distance $odometer, ReadingSource $source, ?string $odometerRaw, ?DistanceUnit $odometerRawUnit, ?CarbonImmutable $confirmedAt): self
+    {
+        if (ReadingSource::Api === $source ? (null === $odometerRaw || null === $odometerRawUnit) : (null !== $odometerRaw || null !== $odometerRawUnit)) {
+            throw new \InvalidArgumentException('The raw odometer and its unit belong to a reading of the API, and only to it.');
+        }
+
+        $reading = new self($vehicle, $readAt, $odometer, $odometerRaw, $odometerRawUnit, $source);
+
+        if (null !== $confirmedAt) {
+            $reading->confirm($confirmedAt);
+        }
+
+        return $reading;
+    }
+
     public function getId(): Ulid
     {
         return $this->id;

@@ -16,6 +16,8 @@ use Polaris\Reading\Event\ReadingStored;
 use Polaris\Reading\Form\Model\OdometerReadingData;
 use Polaris\Reading\Repository\OdometerReadingRepository;
 use Polaris\Reading\Service\Dto\ApiRecording;
+use Polaris\Reading\Service\Dto\ReadingImport;
+use Polaris\Reading\Service\Dto\ReadingsImportResult;
 use Polaris\Reading\Service\Exception\ReadingRejected;
 use Polaris\Shared\Domain\Distance;
 use Polaris\Shared\Domain\DistanceUnit;
@@ -85,6 +87,57 @@ final readonly class OdometerReadingService
         $this->events->dispatch(new ReadingStored($vehicle));
 
         return $reading;
+    }
+
+    /**
+     * Brings back readings exported earlier, merging them with the ones already there: a reading at an instant that is
+     * already stored is left alone, a reading in the future or one that would break the order of the stored readings is
+     * counted as rejected, and nothing is deleted. Give the readings oldest first and in non-decreasing order, as an
+     * export has them (the caller checks the file), so that each one only has to fit the stored readings around it.
+     *
+     * @param list<ReadingImport> $readings
+     *
+     * @throws \InvalidArgumentException when a reading's raw odometer does not fit its source
+     * @throws ORMException
+     */
+    public function import(Vehicle $vehicle, array $readings): ReadingsImportResult
+    {
+        $now = CarbonImmutable::instance($this->clock->now());
+        $added = 0;
+        $alreadyThere = 0;
+        $rejected = 0;
+
+        foreach ($readings as $import) {
+            if ($import->readAt->greaterThan($now)) {
+                ++$rejected;
+
+                continue;
+            }
+
+            if (null !== $this->readings->findAt($vehicle, $import->readAt)) {
+                ++$alreadyThere;
+
+                continue;
+            }
+
+            $reading = OdometerReading::restore($vehicle, $import->readAt, $import->odometer, $import->source, $import->odometerRaw, $import->odometerRawUnit, $import->confirmedAt?->min($now));
+
+            if (null !== $this->order->check($reading->toSample(), $this->readings->findBefore($vehicle, $import->readAt)?->toSample(), $this->readings->findAfter($vehicle, $import->readAt)?->toSample())) {
+                ++$rejected;
+
+                continue;
+            }
+
+            $this->entityManager->persist($reading);
+            ++$added;
+        }
+
+        if ($added > 0) {
+            $this->entityManager->flush();
+            $this->events->dispatch(new ReadingStored($vehicle));
+        }
+
+        return new ReadingsImportResult($added, $alreadyThere, $rejected);
     }
 
     /**

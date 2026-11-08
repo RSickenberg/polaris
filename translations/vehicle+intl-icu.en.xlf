@@ -6,6 +6,10 @@
         <source>flash.imported</source>
         <target>{count, plural, =0 {No vehicle imported} one {# vehicle imported} other {# vehicles imported}}</target>
       </trans-unit>
+      <trans-unit id="flash.data_imported">
+        <source>flash.data_imported</source>
+        <target>Import done. Lease: {lease, select, created {created from the file} kept {the vehicle already has one, kept} other {none in the file}}. Readings: {readingsAdded, number} added, {readingsAlreadyThere, number} already there, {readingsRejected, number} refused. Snapshots: {snapshotsAdded, number} added, {snapshotsAlreadyThere, number} already there, {snapshotsSkipped, number} left out.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
