@@ -56,31 +56,37 @@ final readonly class DashboardService
             LeaseStatus::Returned => DashboardState::Returned,
         };
 
+        // A lease that has not started has no curve and no zoom presets.
+        $mileage = null;
+        $ranges = [];
+
+        if (DashboardState::Draft !== $state) {
+            $forecast = DashboardState::Active === $state
+                ? new MileageForecast($projection->asOf, $projection->driven, $projection->projectedAtEnd)
+                : null;
+            $mileage = $this->mileageBuilder->build(
+                $contract->getTerm()->start(),
+                $contract->getTerm()->exclusiveEnd(),
+                $contract->getStartOdometer(),
+                $allowance,
+                $this->leaseSamples($vehicle, $returnedAt),
+                $forecast,
+            );
+            $ranges = $this->rangeBuilder->build(
+                $contract->getTerm()->start(),
+                $contract->getTerm()->exclusiveEnd(),
+                CarbonImmutable::instance($this->clock->now()),
+                DashboardState::Active === $state,
+            );
+        }
+
         return new DashboardView(
             $state,
             $assessment,
             $allowance,
             AllowanceProgress::of($projection->driven, $projection->allowedToDate, $allowance),
-            DashboardState::Draft === $state
-                ? null
-                : $this->mileageBuilder->build(
-                    $contract->getTerm()->start(),
-                    $contract->getTerm()->exclusiveEnd(),
-                    $contract->getStartOdometer(),
-                    $allowance,
-                    $this->leaseSamples($vehicle, $returnedAt),
-                    DashboardState::Active === $state
-                        ? new MileageForecast($projection->asOf, $projection->driven, $projection->projectedAtEnd)
-                        : null,
-                ),
-            DashboardState::Draft === $state
-                ? []
-                : $this->rangeBuilder->build(
-                    $contract->getTerm()->start(),
-                    $contract->getTerm()->exclusiveEnd(),
-                    CarbonImmutable::instance($this->clock->now()),
-                    DashboardState::Active === $state,
-                ),
+            $mileage,
+            $ranges,
             $contract->getStartOdometer(),
             Budget::evenPace($allowance, $contract->getTerm()),
             $this->leaseTerms->returnedOn($vehicle),

@@ -99,7 +99,12 @@ final class FormThemeTest extends WebTestCase
         self::assertCount(1, $crawler->filter('form input[type=hidden][name$="[_token]"]'));
         $button = $crawler->filter('form button[type=submit][data-slot=button]');
         self::assertCount(1, $button);
-        self::assertSame('fr' === $locale ? ('readings' === $page ? 'Ajouter le relevé' : 'Enregistrer les conditions') : ('readings' === $page ? 'Add reading' : 'Save lease terms'), trim($button->text()));
+        $labels = [
+            'fr' => ['readings' => 'Ajouter le relevé', 'lease' => 'Enregistrer les conditions'],
+            'en' => ['readings' => 'Add reading', 'lease' => 'Save lease terms'],
+        ];
+
+        self::assertSame($labels[$locale][$page], trim($button->text()));
     }
 
     #[DataProvider('locales')]
