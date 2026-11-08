@@ -55,13 +55,13 @@ Templates live in `templates/<module>/` (for example `templates/lease/settings.h
 2. A module calls another module only through that module's `Service/` classes, its entities (read access and Doctrine relations), its `Domain/` types, or Messenger messages and events. Services and entities return and hold `Domain/` types (for example `Lease\Domain\RiskLevel` or a projection result), so callers must be able to reference them without mirror DTOs. Never through another module's controllers, forms, repositories or handlers.
 3. `Dashboard` may read from every module; no module depends on `Dashboard`.
 4. The hosted layer (`polaris-backend`) hooks into Polaris only through `Extension/` interfaces, replaced with service decoration.
-5. The rules are enforced by Deptrac in CI (issue #11), so a violation fails the build instead of relying on review.
+5. The rules are enforced by Deptrac in CI (`deptrac.yaml`), so a violation fails the build instead of relying on review.
 
 ### Framework wiring (deviations from recipe defaults)
 
 - Doctrine: one attribute mapping over `src/` with prefix `Polaris` instead of the recipe's `src/Entity` and `App\Entity`.
 - Services: `config/services.yaml` loads `Polaris\` from `../src/` and excludes `Kernel.php` and `../src/*/Entity/`.
-- Routes: the Symfony 8.1 recipe imports attribute routes from controller services (`resource: routing.controllers`), not from a directory; controllers anywhere in `src/` should be picked up. To confirm with the first controller.
+- Routes: the Symfony 8.1 recipe imports attribute routes from controller services (`resource: routing.controllers`), not from a directory; controllers anywhere in `src/` are picked up (confirmed since the first controller).
 - MakerBundle: pass absolute class names, for example `bin/console make:entity '\Polaris\Lease\Entity\LeaseContract'`.
 
 ## Consequences

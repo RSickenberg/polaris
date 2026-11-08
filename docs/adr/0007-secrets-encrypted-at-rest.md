@@ -18,7 +18,7 @@
 ## Consequences
 
 - A leaked database dump alone does not expose a Tesla secret. A host compromise that exposes both the key and the database does.
-- The same service will encrypt the client secret and the tokens (#24, #25).
+- The same service encrypts the client secret and the Tesla tokens.
 
 ## Alternatives considered
 
