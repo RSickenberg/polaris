@@ -267,7 +267,7 @@ final class DashboardControllerTest extends WebTestCase
             self::assertSelectorCount(4, \sprintf('[data-comparison=%s] [data-no-history]', $panel));
         }
 
-        self::assertSelectorTextContains('[data-comparison=budget]', 'Driving vs budget');
+        self::assertSelectorTextContains('[data-comparison=budget]', 'Budget');
         self::assertSelectorTextContains('[data-comparison=budget] [data-period=week]', 'Last 7 days');
         self::assertSelectorTextContains('[data-comparison=budget] [data-period=week]', 'Not enough history');
     }

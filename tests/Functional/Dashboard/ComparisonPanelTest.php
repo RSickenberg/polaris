@@ -25,9 +25,9 @@ final class ComparisonPanelTest extends KernelTestCase
         $panel = $this->panel('en');
 
         $today = $panel->filter('[data-period=today]');
-        self::assertSame('Today', trim($today->filter('td')->first()->text()));
+        self::assertSame('Today', $this->text($today->filter('td')->first()->filter('span')->first()));
         self::assertSame('50 / 45 km', $this->text($today->filter('[data-figure=figures]')));
-        self::assertSame('+5 km', $this->text($today->filter('[data-figure=delta] .font-mono')));
+        self::assertSame('+5 km', $this->text($today->filter('[data-figure=delta]')));
         self::assertSame('+11%', $this->text($today->filter('[data-figure=ratio]')));
     }
 
@@ -35,16 +35,16 @@ final class ComparisonPanelTest extends KernelTestCase
     {
         $panel = $this->panel('en');
 
-        self::assertSame('−2 km', $this->text($panel->filter('[data-period=week] [data-figure=delta] .font-mono')));
+        self::assertSame('−2 km', $this->text($panel->filter('[data-period=week] [data-figure=delta]')));
         self::assertSame('−5%', $this->text($panel->filter('[data-period=week] [data-figure=ratio]')));
-        self::assertSame('0 km', $this->text($panel->filter('[data-period=month] [data-figure=delta] .font-mono')));
+        self::assertSame('0 km', $this->text($panel->filter('[data-period=month] [data-figure=delta]')));
     }
 
     public function testNothingExpectedShowsTheDifferenceWithoutAPercentage(): void
     {
         $panel = $this->panel('en');
 
-        self::assertSame('+3 km', $this->text($panel->filter('[data-period=two_weeks] [data-figure=delta] .font-mono')));
+        self::assertSame('+3 km', $this->text($panel->filter('[data-period=two_weeks] [data-figure=delta]')));
         self::assertCount(0, $panel->filter('[data-period=two_weeks] [data-figure=ratio]'));
     }
 
@@ -61,8 +61,14 @@ final class ComparisonPanelTest extends KernelTestCase
     {
         $panel = $this->panel('fr');
 
-        self::assertSame('Aujourd’hui', trim($panel->filter('[data-period=today] td')->first()->text()));
+        self::assertSame('Aujourd’hui', $this->text($panel->filter('[data-period=today] td')->first()->filter('span')->first()));
         self::assertSame('+11 %', $this->text($panel->filter('[data-period=today] [data-figure=ratio]')));
+    }
+
+    protected function tearDown(): void
+    {
+        \Locale::setDefault('en');
+        parent::tearDown();
     }
 
     private function panel(string $locale, bool $withHistory = true): Crawler
@@ -70,6 +76,8 @@ final class ComparisonPanelTest extends KernelTestCase
         self::bootKernel();
         $translator = self::getContainer()->get('translator');
         $translator->setLocale($locale);
+        // The number formats of Twig follow the default locale of PHP, which a request sets in the application.
+        \Locale::setDefault($locale);
         $rows = [
             new ComparisonRow(ComparisonPeriod::Today, $this->figures(50_000, 45_000)),
             new ComparisonRow(ComparisonPeriod::LastWeek, $withHistory ? $this->figures(38_000, 40_000) : null),
@@ -78,7 +86,7 @@ final class ComparisonPanelTest extends KernelTestCase
         ];
 
         $html = self::getContainer()->get(Environment::class)
-            ->createTemplate("{{ component('Dashboard:ComparisonPanel', {key: 'budget', title: 'Title', basis: 'Basis', figuresLabel: 'Figures', rows: rows}) }}")
+            ->createTemplate("{{ component('Dashboard:ComparisonPanel', {key: 'budget', title: 'Title', basis: 'Basis', rows: rows}) }}")
             ->render(['rows' => $rows]);
 
         return new Crawler($html);
