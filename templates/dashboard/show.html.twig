@@ -68,53 +68,6 @@
                 {%- endif -%}
             </twig:Dashboard:RiskAlert>
 
-            {% if not ended %}
-                <div class="grid gap-4 lg:grid-cols-3">
-                    <twig:Dashboard:PaceCard
-                        key="current"
-                        title="{{ 'current_pace.title'|trans(domain='dashboard') }}"
-                        basis="{{ 'current_pace.basis'|trans(domain='dashboard') }}"
-                        :budget="assessment.currentPace"
-                    />
-                    <twig:Dashboard:PaceCard
-                        key="budget"
-                        title="{{ 'budget.title'|trans(domain='dashboard') }}"
-                        basis="{{ 'budget.basis'|trans(domain='dashboard') }}"
-                        :budget="assessment.budget"
-                        fallback="{{ 'budget.none'|trans(domain='dashboard') }}"
-                    />
-                    <twig:Dashboard:PaceCard
-                        key="even"
-                        title="{{ 'even_pace.title'|trans(domain='dashboard') }}"
-                        basis="{{ 'even_pace.basis'|trans(domain='dashboard') }}"
-                        :budget="dashboard.evenPace"
-                    />
-                </div>
-            {% endif %}
-
-            {% if dashboard.comparison is not null %}
-                <div class="grid gap-4 lg:grid-cols-3">
-                    <twig:Dashboard:ComparisonPanel
-                        key="budget"
-                        title="{{ 'compare.budget.title'|trans(domain='dashboard') }}"
-                        basis="{{ 'compare.budget.basis'|trans(domain='dashboard') }}"
-                        :rows="dashboard.comparison.budget"
-                    />
-                    <twig:Dashboard:ComparisonPanel
-                        key="pace"
-                        title="{{ 'compare.pace.title'|trans(domain='dashboard') }}"
-                        basis="{{ 'compare.pace.basis'|trans(domain='dashboard') }}"
-                        :rows="dashboard.comparison.pace"
-                    />
-                    <twig:Dashboard:ComparisonPanel
-                        key="projected_end"
-                        title="{{ 'compare.projected_end.title'|trans(domain='dashboard') }}"
-                        basis="{{ 'compare.projected_end.basis'|trans(domain='dashboard') }}"
-                        :rows="dashboard.comparison.projectedEnd"
-                    />
-                </div>
-            {% endif %}
-
             <twig:Card>
                 <twig:Card:Content>
                     <twig:Dashboard:LeaseProgress
@@ -127,6 +80,59 @@
                     />
                 </twig:Card:Content>
             </twig:Card>
+
+            {% if not ended %}
+                <div class="grid gap-4 lg:grid-cols-3">
+                    <twig:Dashboard:PaceCard
+                        key="current"
+                        title="{{ 'current_pace.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'current_pace.basis'|trans(domain='dashboard') }}"
+                        :budget="assessment.currentPace"
+                        help="{{ 'help.current_pace'|trans(domain='dashboard') }}"
+                    />
+                    <twig:Dashboard:PaceCard
+                        key="budget"
+                        title="{{ 'budget.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'budget.basis'|trans(domain='dashboard') }}"
+                        :budget="assessment.budget"
+                        fallback="{{ 'budget.none'|trans(domain='dashboard') }}"
+                        help="{{ 'help.budget'|trans(domain='dashboard') }}"
+                    />
+                    <twig:Dashboard:PaceCard
+                        key="even"
+                        title="{{ 'even_pace.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'even_pace.basis'|trans(domain='dashboard') }}"
+                        :budget="dashboard.evenPace"
+                        help="{{ 'help.even_pace'|trans(domain='dashboard') }}"
+                    />
+                </div>
+            {% endif %}
+
+            {% if dashboard.comparison is not null %}
+                <div class="grid gap-4 lg:grid-cols-3">
+                    <twig:Dashboard:ComparisonPanel
+                        key="budget"
+                        title="{{ 'compare.budget.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'compare.budget.basis'|trans(domain='dashboard') }}"
+                        :rows="dashboard.comparison.budget"
+                        help="{{ 'help.compare_budget'|trans(domain='dashboard') }}"
+                    />
+                    <twig:Dashboard:ComparisonPanel
+                        key="pace"
+                        title="{{ 'compare.pace.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'compare.pace.basis'|trans(domain='dashboard') }}"
+                        :rows="dashboard.comparison.pace"
+                        help="{{ 'help.compare_pace'|trans(domain='dashboard') }}"
+                    />
+                    <twig:Dashboard:ComparisonPanel
+                        key="projected_end"
+                        title="{{ 'compare.projected_end.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'compare.projected_end.basis'|trans(domain='dashboard') }}"
+                        :rows="dashboard.comparison.projectedEnd"
+                        help="{{ 'help.compare_projected_end'|trans(domain='dashboard') }}"
+                    />
+                </div>
+            {% endif %}
 
             <twig:Card>
                 <twig:Card:Header>
