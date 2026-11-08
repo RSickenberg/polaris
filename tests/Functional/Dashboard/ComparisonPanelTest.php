@@ -86,6 +86,17 @@ final class ComparisonPanelTest extends KernelTestCase
         self::assertCount(1, $panel->filter('dialog br'));
     }
 
+    public function testTheFirstParagraphOfTheExplanationIsItsLeadAndTheOthersFollow(): void
+    {
+        $panel = $this->panel('en', help: 'The answer.\\n\\nHow it works.\\n\\nHow to read it.');
+
+        self::assertSame('The answer.', $panel->filter('dialog [data-slot=dialog-description]')->text());
+        self::assertSame(
+            ['How it works.', 'How to read it.'],
+            $panel->filter('dialog [data-help-details] p')->each(static fn ($p): string => $p->text()),
+        );
+    }
+
     public function testWithoutAnExplanationThereIsNoInfoButton(): void
     {
         self::assertCount(0, $this->panel('en')->filter('[data-help]'));

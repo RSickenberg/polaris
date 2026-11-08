@@ -148,15 +148,15 @@
       </trans-unit>
       <trans-unit id="even_pace.title">
         <source>even_pace.title</source>
-        <target>Normal pace</target>
+        <target>Even pace</target>
       </trans-unit>
       <trans-unit id="budget.basis">
         <source>budget.basis</source>
-        <target>To land exactly on the contract.</target>
+        <target>To end exactly on your allowance.</target>
       </trans-unit>
       <trans-unit id="even_pace.basis">
         <source>even_pace.basis</source>
-        <target>Contract mileage, spread evenly.</target>
+        <target>Your allowance, spread evenly.</target>
       </trans-unit>
       <trans-unit id="current_pace.title">
         <source>current_pace.title</source>
@@ -164,7 +164,7 @@
       </trans-unit>
       <trans-unit id="current_pace.basis">
         <source>current_pace.basis</source>
-        <target>Projected until the lease ends.</target>
+        <target>If you keep driving like now.</target>
       </trans-unit>
       <trans-unit id="pace.day">
         <source>pace.day</source>
@@ -192,7 +192,7 @@
       </trans-unit>
       <trans-unit id="compare.budget.basis">
         <source>compare.budget.basis</source>
-        <target>Driven / expected, from the daily budget</target>
+        <target>Driven / allowed by the daily budget</target>
       </trans-unit>
       <trans-unit id="compare.pace.title">
         <source>compare.pace.title</source>
@@ -200,7 +200,7 @@
       </trans-unit>
       <trans-unit id="compare.pace.basis">
         <source>compare.pace.basis</source>
-        <target>Driven / expected, from the forecast pace</target>
+        <target>Driven / expected at your usual pace</target>
       </trans-unit>
       <trans-unit id="compare.projected_end.title">
         <source>compare.projected_end.title</source>
@@ -208,7 +208,7 @@
       </trans-unit>
       <trans-unit id="compare.projected_end.basis">
         <source>compare.projected_end.basis</source>
-        <target>Now / forecast, at lease end</target>
+        <target>Projected now / projected then, at lease end</target>
       </trans-unit>
       <trans-unit id="compare.period.today">
         <source>compare.period.today</source>
@@ -248,27 +248,27 @@
       </trans-unit>
       <trans-unit id="help.current_pace">
         <source>help.current_pace</source>
-        <target>This is how far you would drive each day, week and month if you keep driving the way you do now until the lease ends.\n\nIt takes your whole lease so far into account, plus your last 30 days once the lease is more than 30 days old. If your habits change, you will see it here.</target>
+        <target>Where your driving habits lead.\n\nThese are the kilometres you drive right now per day, week and month. Polaris looks at your whole lease and gives more weight to the last 30 days, so a change in your habits shows here within a few weeks.\n\nCompare it with “From now on”: if this card is higher, you are on course to go over your allowance.</target>
       </trans-unit>
       <trans-unit id="help.budget">
         <source>help.budget</source>
-        <target>This is how far you can drive each day, week and month from now on to end the lease exactly on your contract mileage.\n\nIt is the kilometres you have left, spread over the time you have left. Drive less than planned and it goes up. Drive more and it goes down.</target>
+        <target>What you can still drive.\n\nThese are the kilometres per day, week and month that use up your allowance exactly at the end of the lease: the kilometres you have left, spread over the time you have left.\n\nThey go up when you drive less and down when you drive more. Stay at or below them and you will not pay for extra kilometres.</target>
       </trans-unit>
       <trans-unit id="help.even_pace">
         <source>help.even_pace</source>
-        <target>This is how far you would drive each day, week and month if your contract mileage were spread evenly over the whole lease.\n\nIt never changes with the way you drive. It is the reference to compare the other two cards with.</target>
+        <target>Your allowance, spread evenly.\n\nThese are the kilometres per day, week and month your contract allows on average, from the first day of the lease to the last. They never change, whatever you drive.\n\nUse them as the yardstick for the other two cards.</target>
       </trans-unit>
       <trans-unit id="help.compare_budget">
         <source>help.compare_budget</source>
-        <target>This compares what you drove over each period with what your daily budget allowed for it. The budget is the one Polaris had at the start of the period, not today’s.\n\nUnder each period you read: driven / expected. On the right is the gap, with a percentage of what was expected. A plus sign means you drove more than expected.\n\n“Today” is counted from midnight, local time, up to the latest odometer reading. The expected distance therefore covers only the part of the day that has passed.\nThat is why it can look smaller.</target>
+        <target>Did you stay within your budget?\n\nFor each period, Polaris compares what you drove with what your daily budget allowed. It uses the budget as it was when the period started, not today’s.\n\nHow to read a row: driven / allowed, and the difference on the right. A plus means you drove more than allowed, a minus that you drove less.\n\n“Today” runs from midnight to your latest reading, so it only counts the part of the day that has passed.</target>
       </trans-unit>
       <trans-unit id="help.compare_pace">
         <source>help.compare_pace</source>
-        <target>This compares what you drove over each period with what your usual pace predicted for it. The pace is the one Polaris had at the start of the period.\n\nUnder each period you read: driven / expected. On the right is the gap, with a percentage of what was expected. A plus sign means you drove more than expected.\n\nPolaris saves one snapshot a day. A period says “Not enough history” until a snapshot exists for the day it starts.</target>
+        <target>Are you driving more or less than usual?\n\nFor each period, Polaris compares what you drove with what your usual pace predicted when the period started.\n\nHow to read a row: driven / expected, and the difference on the right. A plus means you drove more than usual, a minus that you drove less.\n\nPolaris records its prediction once a day, at midnight. A row says “Not enough history” until the day it starts has one.</target>
       </trans-unit>
       <trans-unit id="help.compare_projected_end">
         <source>help.compare_projected_end</source>
-        <target>This compares where your lease is headed now with where it was headed at the start of each period.\n\nUnder each period you read: now / predicted, both at the end of the lease. On the right is the gap. A plus sign means you are now on course for more kilometres than predicted back then.\n\nPolaris saves one snapshot a day. A period says “Not enough history” until a snapshot exists for the day it starts.</target>
+        <target>Is your end-of-lease projection getting better or worse?\n\nFor each period, Polaris compares the total it projects today for the end of the lease with the total it projected when the period started.\n\nHow to read a row: projected now / projected then, and the difference on the right. A plus means you are now heading for more kilometres than before, a minus for fewer.\n\nPolaris records its projection once a day, at midnight. A row says “Not enough history” until the day it starts has one.</target>
       </trans-unit>
     </body>
   </file>

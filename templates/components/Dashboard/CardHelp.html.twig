@@ -3,7 +3,7 @@
     name,
     ## string The translated title of the card the help is about.
     title,
-    ## string The translated explanation; a written \n becomes a line break.
+    ## string The translated explanation: a one-line answer, then paragraphs, separated by a written \n\n; a single written \n becomes a line break.
     text
 -%}
 {# The info button at the top right of a card header, which opens a dialog that explains the card. #}
@@ -22,11 +22,20 @@
                 <twig:ux:icon name="lucide:info" aria-hidden="true" />
             </twig:Button>
         </twig:Dialog:Trigger>
+        {# The first paragraph is the answer in one line, in the text color; the others explain, one block each. #}
+        {% set paragraphs = text|split('\\n\\n') %}
         <twig:Dialog:Content>
             <twig:Dialog:Header>
                 <twig:Dialog:Title>{{ title }}</twig:Dialog:Title>
-                <twig:Dialog:Description class="text-pretty">{{ text|replace({'\\n': "\n"})|nl2br }}</twig:Dialog:Description>
+                <twig:Dialog:Description class="text-pretty font-medium text-foreground">{{ paragraphs|first|replace({'\\n': "\n"})|nl2br }}</twig:Dialog:Description>
             </twig:Dialog:Header>
+            {% if paragraphs|length > 1 %}
+                <div class="flex flex-col gap-3 text-sm text-pretty text-muted-foreground" data-help-details>
+                    {% for paragraph in paragraphs|slice(1) %}
+                        <p>{{ paragraph|replace({'\\n': "\n"})|nl2br }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </twig:Dialog:Content>
     </twig:Dialog>
 </twig:Card:Action>

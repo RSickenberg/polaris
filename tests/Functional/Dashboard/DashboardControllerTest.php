@@ -138,7 +138,7 @@ final class DashboardControllerTest extends WebTestCase
         self::assertStringContainsString(', minus 0 km at the start', $text);
         self::assertStringContainsString('Current pace', $text);
         self::assertStringContainsString('From now on', $text);
-        self::assertStringContainsString('Normal pace', $text);
+        self::assertStringContainsString('Even pace', $text);
         self::assertStringContainsString('km/week', $text);
         self::assertStringContainsString(
             'Allowed to date ' . $km($assessment->projection->allowedToDate->metres()),
