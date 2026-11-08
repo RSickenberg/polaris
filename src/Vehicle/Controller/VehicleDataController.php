@@ -57,7 +57,9 @@ final class VehicleDataController extends AbstractController
 
                 return $this->redirectToRoute('vehicle_data', ['id' => $vehicle->getId()->toBase32()]);
             } catch (VehicleDataRejected $rejected) {
-                $form->get('file')->addError(new FormError($this->translator->trans($rejected->reason, ['%detail%' => $rejected->getMessage()], 'vehicle')));
+                $parameters = ['%detail%' => $rejected->getMessage()];
+                $message = $this->translator->trans($rejected->reason, $parameters, 'vehicle');
+                $form->get('file')->addError(new FormError($message));
             }
         }
 
@@ -76,7 +78,10 @@ final class VehicleDataController extends AbstractController
     {
         return new Response($this->exporter->export($vehicle), Response::HTTP_OK, [
             'Content-Type' => 'application/json',
-            'Content-Disposition' => HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $this->exporter->fileName($vehicle)),
+            'Content-Disposition' => HeaderUtils::makeDisposition(
+                HeaderUtils::DISPOSITION_ATTACHMENT,
+                $this->exporter->fileName($vehicle),
+            ),
         ]);
     }
 

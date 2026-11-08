@@ -14,7 +14,9 @@ final class JsonObjectTest extends TestCase
 {
     public function testTypedValuesAreRead(): void
     {
-        $object = JsonObject::parse('{"name": "Model 3", "count": 3, "pace": 12, "ratio": 0.5, "nested": {"a": "b"}, "empty": null}');
+        $object = JsonObject::parse(
+            '{"name": "Model 3", "count": 3, "pace": 12, "ratio": 0.5, "nested": {"a": "b"}, "empty": null}',
+        );
 
         self::assertSame('Model 3', $object->string('name'));
         self::assertSame(3, $object->int('count'));
@@ -40,15 +42,51 @@ final class JsonObjectTest extends TestCase
      */
     public static function invalid(): iterable
     {
-        yield 'a string that is a number' => ['{"a": 1}', static fn (JsonObject $o): string => $o->string('a'), 'a must be a string.'];
-        yield 'an integer that is text' => ['{"a": "1"}', static fn (JsonObject $o): int => $o->int('a'), 'a must be an integer.'];
-        yield 'an integer that is a float' => ['{"a": 1.5}', static fn (JsonObject $o): int => $o->int('a'), 'a must be an integer.'];
-        yield 'a number that is text' => ['{"a": "x"}', static fn (JsonObject $o): float => $o->float('a'), 'a must be a number.'];
-        yield 'a missing value' => ['{}', static fn (JsonObject $o): string => $o->string('a'), 'a must be a string.'];
-        yield 'an object that is a list' => ['{"a": [1]}', static fn (JsonObject $o): JsonObject => $o->object('a'), 'a must be an object.'];
-        yield 'a list that is an object' => ['{"a": {"b": 1}}', static fn (JsonObject $o): array => $o->objects('a'), 'a must be a list.'];
-        yield 'an item that is not an object' => ['{"a": [{"b": 1}, 2]}', static fn (JsonObject $o): array => $o->objects('a'), 'a[1] must be an object.'];
-        yield 'a nested value' => ['{"a": {"b": [{"c": "x"}]}}', static fn (JsonObject $o): int => $o->object('a')->objects('b')[0]->int('c'), 'a.b[0].c must be an integer.'];
+        yield 'a string that is a number' => [
+            '{"a": 1}',
+            static fn (JsonObject $o): string => $o->string('a'),
+            'a must be a string.',
+        ];
+        yield 'an integer that is text' => [
+            '{"a": "1"}',
+            static fn (JsonObject $o): int => $o->int('a'),
+            'a must be an integer.',
+        ];
+        yield 'an integer that is a float' => [
+            '{"a": 1.5}',
+            static fn (JsonObject $o): int => $o->int('a'),
+            'a must be an integer.',
+        ];
+        yield 'a number that is text' => [
+            '{"a": "x"}',
+            static fn (JsonObject $o): float => $o->float('a'),
+            'a must be a number.',
+        ];
+        yield 'a missing value' => [
+            '{}',
+            static fn (JsonObject $o): string => $o->string('a'),
+            'a must be a string.',
+        ];
+        yield 'an object that is a list' => [
+            '{"a": [1]}',
+            static fn (JsonObject $o): JsonObject => $o->object('a'),
+            'a must be an object.',
+        ];
+        yield 'a list that is an object' => [
+            '{"a": {"b": 1}}',
+            static fn (JsonObject $o): array => $o->objects('a'),
+            'a must be a list.',
+        ];
+        yield 'an item that is not an object' => [
+            '{"a": [{"b": 1}, 2]}',
+            static fn (JsonObject $o): array => $o->objects('a'),
+            'a[1] must be an object.',
+        ];
+        yield 'a nested value' => [
+            '{"a": {"b": [{"c": "x"}]}}',
+            static fn (JsonObject $o): int => $o->object('a')->objects('b')[0]->int('c'),
+            'a.b[0].c must be an integer.',
+        ];
     }
 
     /**

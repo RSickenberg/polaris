@@ -21,7 +21,10 @@ use Symfony\Component\Filesystem\Filesystem;
  * Writes the lease, the odometer readings and the daily snapshots of a vehicle as JSON, to a file or to the output (so it
  * can be piped). The file holds no VIN and no Tesla token. See {@see VehicleDataExporter}.
  */
-#[AsCommand(name: 'polaris:vehicle:data:export', description: 'Export the lease, readings and snapshots of a vehicle as JSON')]
+#[AsCommand(
+    name: 'polaris:vehicle:data:export',
+    description: 'Export the lease, readings and snapshots of a vehicle as JSON',
+)]
 final readonly class ExportVehicleDataCommand
 {
     public function __construct(
@@ -46,7 +49,9 @@ final readonly class ExportVehicleDataCommand
         ?string $file = null,
     ): int {
         try {
-            $vehicle = $this->entityManager->getRepository(Vehicle::class)->findOneBy(['vin' => new Vin($vin)->value()]);
+            $vehicle = $this->entityManager->getRepository(Vehicle::class)->findOneBy([
+                'vin' => new Vin($vin)->value(),
+            ]);
         } catch (\InvalidArgumentException $invalid) {
             $io->error($invalid->getMessage());
 

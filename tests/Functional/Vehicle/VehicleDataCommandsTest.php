@@ -45,7 +45,11 @@ final class VehicleDataCommandsTest extends KernelTestCase
         $this->target = new Vehicle(new Vin(self::TARGET_VIN), 'Target', $owner);
         $this->entityManager->persist($this->source);
         $this->entityManager->persist($this->target);
-        $this->entityManager->persist(OdometerReading::manual($this->source, CarbonImmutable::parse('2026-06-01 10:00:00', 'UTC'), Distance::fromKilometres(10_000)));
+        $this->entityManager->persist(OdometerReading::manual(
+            $this->source,
+            CarbonImmutable::parse('2026-06-01 10:00:00', 'UTC'),
+            Distance::fromKilometres(10_000),
+        ));
         $this->entityManager->flush();
     }
 
@@ -100,7 +104,8 @@ final class VehicleDataCommandsTest extends KernelTestCase
     {
         $tester = $this->tester('polaris:vehicle:data:import');
 
-        self::assertSame(Command::FAILURE, $tester->execute(['vin' => self::TARGET_VIN, 'file' => '/no/such/file.json']));
+        $missing = ['vin' => self::TARGET_VIN, 'file' => '/no/such/file.json'];
+        self::assertSame(Command::FAILURE, $tester->execute($missing));
         self::assertStringContainsString('cannot be read', $tester->getDisplay());
 
         $file = sys_get_temp_dir() . '/polaris-test-' . bin2hex(random_bytes(6)) . '.json';

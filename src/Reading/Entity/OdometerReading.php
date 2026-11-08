@@ -113,8 +113,10 @@ class OdometerReading
         ?DistanceUnit $odometerRawUnit,
         ?CarbonImmutable $confirmedAt,
     ): self {
-        if (ReadingSource::Api === $source ? (null === $odometerRaw || null === $odometerRawUnit) : (null !== $odometerRaw || null !== $odometerRawUnit)) {
-            throw new \InvalidArgumentException('The raw odometer and its unit belong to a reading of the API, and only to it.');
+        if (!self::rawFitsSource($source, $odometerRaw, $odometerRawUnit)) {
+            $message = 'The raw odometer and its unit belong to a reading of the API, and only to it.';
+
+            throw new \InvalidArgumentException($message);
         }
 
         $reading = new self($vehicle, $readAt, $odometer, $odometerRaw, $odometerRawUnit, $source);
@@ -124,6 +126,21 @@ class OdometerReading
         }
 
         return $reading;
+    }
+
+    /**
+     * Whether the raw odometer and its unit fit the source: both for a reading of the API, neither for any other.
+     */
+    public static function rawFitsSource(
+        ReadingSource $source,
+        ?string $odometerRaw,
+        ?DistanceUnit $odometerRawUnit,
+    ): bool {
+        if (ReadingSource::Api === $source) {
+            return null !== $odometerRaw && null !== $odometerRawUnit;
+        }
+
+        return null === $odometerRaw && null === $odometerRawUnit;
     }
 
     public function getId(): Ulid

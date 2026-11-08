@@ -57,7 +57,9 @@ final readonly class VehicleDataExporter
     {
         $name = new AsciiSlugger()->slug($vehicle->getName())->lower()->toString();
 
-        return \sprintf('polaris-%s-%s.json', '' === $name ? 'vehicle' : $name, CarbonImmutable::instance($this->clock->now())->utc()->format('Y-m-d'));
+        $day = CarbonImmutable::instance($this->clock->now())->utc()->format('Y-m-d');
+
+        return \sprintf('polaris-%s-%s.json', '' === $name ? 'vehicle' : $name, $day);
     }
 
     /**

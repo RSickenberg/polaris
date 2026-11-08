@@ -120,7 +120,14 @@ final readonly class LeaseTermsService
             throw new LeaseTermsRejected(LeaseTermsRejected::START_AFTER_RETURN);
         }
 
-        $contract = new LeaseContract($vehicle, $terms->term, $terms->allowance, $terms->startOdometer, $terms->excessCostPerKm, $terms->tolerance);
+        $contract = new LeaseContract(
+            $vehicle,
+            $terms->term,
+            $terms->allowance,
+            $terms->startOdometer,
+            $terms->excessCostPerKm,
+            $terms->tolerance,
+        );
 
         if (null !== $returnedAt) {
             $contract->markReturned($returnedAt->utc());
@@ -281,8 +288,12 @@ final readonly class LeaseTermsService
     /**
      * @param list<OdometerSample> $samples
      */
-    private function assessTerms(LeaseTerms $terms, array $samples, ?CarbonImmutable $returnedAt, ?CarbonImmutable $at = null): LeaseAssessment|NoData
-    {
+    private function assessTerms(
+        LeaseTerms $terms,
+        array $samples,
+        ?CarbonImmutable $returnedAt,
+        ?CarbonImmutable $at = null,
+    ): LeaseAssessment|NoData {
         try {
             return $this->assessor->assess(
                 $terms->term,

@@ -57,7 +57,11 @@ final class VehicleDataControllerTest extends WebTestCase
         $data->currency = Currency::CHF;
         $data->tolerancePercent = 0;
         self::getContainer()->get(LeaseTermsService::class)->save($this->source, $data);
-        $this->entityManager->persist(OdometerReading::manual($this->source, CarbonImmutable::parse('2026-06-01 10:00:00', 'UTC'), Distance::fromKilometres(10_000)));
+        $this->entityManager->persist(OdometerReading::manual(
+            $this->source,
+            CarbonImmutable::parse('2026-06-01 10:00:00', 'UTC'),
+            Distance::fromKilometres(10_000),
+        ));
         $this->entityManager->flush();
     }
 
@@ -84,7 +88,10 @@ final class VehicleDataControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('Content-Type', 'application/json');
-        self::assertStringContainsString('attachment; filename=polaris-model-3-2026-07-03.json', (string) $this->client->getResponse()->headers->get('Content-Disposition'));
+        self::assertStringContainsString(
+            'attachment; filename=polaris-model-3-2026-07-03.json',
+            (string) $this->client->getResponse()->headers->get('Content-Disposition'),
+        );
         $content = (string) $this->client->getResponse()->getContent();
         self::assertStringNotContainsString('5YJ3E7EB2NF000601', $content);
         self::assertStringContainsString('"format": "polaris.vehicle-data"', $content);
@@ -116,10 +123,21 @@ final class VehicleDataControllerTest extends WebTestCase
 
     public function testAFileWithAnInvalidValueNamesIt(): void
     {
-        $this->upload($this->target, $this->temporaryFile('{"format": "polaris.vehicle-data", "version": 1, "lease": null, "readings": [{"readAt": "later", "odometerMetres": 1, "source": "manual"}], "snapshots": []}'));
+        $file = $this->temporaryFile(json_encode([
+            'format' => 'polaris.vehicle-data',
+            'version' => 1,
+            'lease' => null,
+            'readings' => [['readAt' => 'later', 'odometerMetres' => 1, 'source' => 'manual']],
+            'snapshots' => [],
+        ], \JSON_THROW_ON_ERROR));
+
+        $this->upload($this->target, $file);
 
         self::assertResponseStatusCodeSame(422);
-        self::assertSelectorTextContains('[data-data=import]', 'The file has an invalid value: readAt is not a date and time');
+        self::assertSelectorTextContains(
+            '[data-data=import]',
+            'The file has an invalid value: readAt is not a date and time',
+        );
     }
 
     public function testSubmittingWithoutAFileAsksForOne(): void
@@ -151,7 +169,14 @@ final class VehicleDataControllerTest extends WebTestCase
     {
         $crawler = $this->client->request('GET', $this->url($vehicle));
         $form = $crawler->selectButton('Import')->form();
-        $this->client->request($form->getMethod(), $form->getUri(), $form->getPhpValues(), ['vehicle_data_import' => ['file' => new UploadedFile($file, 'export.json', 'application/json', null, true)]]);
+        $upload = new UploadedFile($file, 'export.json', 'application/json', null, true);
+
+        $this->client->request(
+            $form->getMethod(),
+            $form->getUri(),
+            $form->getPhpValues(),
+            ['vehicle_data_import' => ['file' => $upload]],
+        );
     }
 
     private function url(Vehicle $vehicle): string

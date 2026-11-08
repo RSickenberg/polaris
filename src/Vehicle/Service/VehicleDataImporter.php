@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polaris\Vehicle\Service;
 
 use Carbon\CarbonImmutable;
+use Carbon\Exceptions\InvalidFormatException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Polaris\Lease\Domain\Allowance;
@@ -19,6 +20,7 @@ use Polaris\Lease\Service\Exception\LeaseTermsRejected;
 use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Lease\Service\ProjectionSnapshotService;
 use Polaris\Reading\Domain\ReadingSource;
+use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Reading\Service\Dto\ReadingImport;
 use Polaris\Reading\Service\OdometerReadingService;
 use Polaris\Shared\Domain\Currency;
@@ -62,12 +64,16 @@ final readonly class VehicleDataImporter
             throw new VehicleDataRejected(VehicleDataRejected::NOT_JSON, $e->getMessage(), $e);
         }
 
-        if (!$file->has('format') || !$file->has('version') || VehicleDataExporter::FORMAT !== $file->string('format')) {
+        if (!$this->isExport($file)) {
             throw new VehicleDataRejected(VehicleDataRejected::NOT_AN_EXPORT, 'The file is not an export of Polaris.');
         }
 
         if (VehicleDataExporter::VERSION !== $file->int('version')) {
-            $detail = \sprintf('The format version %d is not supported (only %d).', $file->int('version'), VehicleDataExporter::VERSION);
+            $detail = \sprintf(
+                'The format version %d is not supported (only %d).',
+                $file->int('version'),
+                VehicleDataExporter::VERSION,
+            );
 
             throw new VehicleDataRejected(VehicleDataRejected::UNKNOWN_VERSION, $detail);
         }
@@ -77,9 +83,10 @@ final readonly class VehicleDataImporter
             $terms = null === $lease ? null : $this->terms($lease);
             $returnedAt = null === $lease ? null : $this->nullableInstant($lease, 'returnedAt');
 
-            if (null !== $terms && null !== $returnedAt && $returnedAt->getTimestamp() <= $terms->term->start()->getTimestamp()) {
-                throw new \InvalidArgumentException('lease.returnedAt is not after the start of the lease.');
+            if (null !== $terms && null !== $returnedAt) {
+                $this->assertReturnedAfterStart($terms, $returnedAt);
             }
+
             $readings = $this->readingsOf($file);
             $points = $this->snapshotsOf($file);
         } catch (\InvalidArgumentException $e) {
@@ -87,22 +94,50 @@ final readonly class VehicleDataImporter
         }
 
         try {
-            return $this->entityManager->wrapInTransaction(function () use ($vehicle, $terms, $returnedAt, $readings, $points): VehicleDataImportResult {
-                $lease = LeaseImportOutcome::None;
-
-                if (null !== $terms) {
-                    $lease = $this->leases->import($vehicle, $terms, $returnedAt) ? LeaseImportOutcome::Created : LeaseImportOutcome::Kept;
-                }
-
-                return new VehicleDataImportResult(
-                    $lease,
+            return $this->entityManager->wrapInTransaction(
+                fn (): VehicleDataImportResult => new VehicleDataImportResult(
+                    $this->importLease($vehicle, $terms, $returnedAt),
                     $this->readings->import($vehicle, $readings),
                     $this->snapshots->import($vehicle, $points),
-                );
-            });
+                ),
+            );
         } catch (LeaseTermsRejected|\InvalidArgumentException $e) {
             throw new VehicleDataRejected(VehicleDataRejected::INVALID, $e->getMessage(), $e);
         }
+    }
+
+    private function isExport(JsonObject $file): bool
+    {
+        return $file->has('format')
+            && $file->has('version')
+            && VehicleDataExporter::FORMAT === $file->string('format');
+    }
+
+    /**
+     * @throws \InvalidArgumentException
+     */
+    private function assertReturnedAfterStart(LeaseTerms $terms, CarbonImmutable $returnedAt): void
+    {
+        if ($returnedAt->getTimestamp() <= $terms->term->start()->getTimestamp()) {
+            throw new \InvalidArgumentException('lease.returnedAt is not after the start of the lease.');
+        }
+    }
+
+    /**
+     * @throws LeaseTermsRejected
+     * @throws ORMException
+     */
+    private function importLease(Vehicle $vehicle, ?LeaseTerms $terms, ?CarbonImmutable $returnedAt): LeaseImportOutcome
+    {
+        if (null === $terms) {
+            return LeaseImportOutcome::None;
+        }
+
+        if ($this->leases->import($vehicle, $terms, $returnedAt)) {
+            return LeaseImportOutcome::Created;
+        }
+
+        return LeaseImportOutcome::Kept;
     }
 
     /**
@@ -136,12 +171,15 @@ final readonly class VehicleDataImporter
         $readings = [];
 
         foreach ($file->objects('readings') as $reading) {
-            $source = ReadingSource::tryFrom($reading->string('source')) ?? throw new \InvalidArgumentException('A reading has an unknown source.');
-            $unit = $reading->nullableString('odometerRawUnit');
+            $source = ReadingSource::tryFrom($reading->string('source'))
+                ?? throw new \InvalidArgumentException('A reading has an unknown source.');
             $raw = $reading->nullableString('odometerRaw');
+            $unit = $this->rawUnit($reading);
 
-            if (ReadingSource::Api === $source ? (null === $raw || null === $unit) : (null !== $raw || null !== $unit)) {
-                throw new \InvalidArgumentException('The raw odometer and its unit belong to a reading of the API, and only to it.');
+            if (!OdometerReading::rawFitsSource($source, $raw, $unit)) {
+                $message = 'The raw odometer and its unit belong to a reading of the API, and only to it.';
+
+                throw new \InvalidArgumentException($message);
             }
 
             $readings[] = new ReadingImport(
@@ -149,7 +187,7 @@ final readonly class VehicleDataImporter
                 Distance::fromMetres($reading->int('odometerMetres')),
                 $source,
                 $raw,
-                null === $unit ? null : (DistanceUnit::tryFrom($unit) ?? throw new \InvalidArgumentException('A reading has an unknown odometer unit.')),
+                $unit,
                 $this->nullableInstant($reading, 'confirmedAt'),
             );
         }
@@ -194,7 +232,8 @@ final readonly class VehicleDataImporter
                 Distance::fromMetres($snapshot->int('allowedToDateMetres')),
                 Distance::fromMetres($snapshot->int('projectedAtEndMetres')),
                 Distance::fromMetres($snapshot->int('dailyBudgetMetres')),
-                RiskLevel::tryFrom($snapshot->string('riskLevel')) ?? throw new \InvalidArgumentException('A snapshot has an unknown risk level.'),
+                RiskLevel::tryFrom($snapshot->string('riskLevel'))
+                    ?? throw new \InvalidArgumentException('A snapshot has an unknown risk level.'),
                 $this->nullablePace($snapshot, 'overallPaceMetresPerDay'),
                 $this->nullablePace($snapshot, 'recentPaceMetresPerDay'),
                 $this->nullablePace($snapshot, 'blendedPaceMetresPerDay'),
@@ -202,6 +241,21 @@ final readonly class VehicleDataImporter
         }
 
         return $points;
+    }
+
+    /**
+     * @throws \InvalidArgumentException
+     */
+    private function rawUnit(JsonObject $reading): ?DistanceUnit
+    {
+        $unit = $reading->nullableString('odometerRawUnit');
+
+        if (null === $unit) {
+            return null;
+        }
+
+        return DistanceUnit::tryFrom($unit)
+            ?? throw new \InvalidArgumentException('A reading has an unknown odometer unit.');
     }
 
     private function nullablePace(JsonObject $object, string $key): ?Pace
@@ -217,7 +271,12 @@ final readonly class VehicleDataImporter
     private function day(JsonObject $object, string $key): CarbonImmutable
     {
         $value = $object->string($key);
-        $day = CarbonImmutable::createFromFormat('!Y-m-d', $value, TimeZone::UTC);
+
+        try {
+            $day = CarbonImmutable::createFromFormat('!Y-m-d', $value, TimeZone::UTC);
+        } catch (InvalidFormatException) {
+            $day = null;
+        }
 
         if (!$day instanceof CarbonImmutable || $day->format('Y-m-d') !== $value) {
             throw new \InvalidArgumentException(\sprintf('%s is not a date (Y-m-d): %s.', $key, $value));
@@ -232,7 +291,12 @@ final readonly class VehicleDataImporter
     private function instant(JsonObject $object, string $key): CarbonImmutable
     {
         $value = $object->string($key);
-        $instant = CarbonImmutable::createFromFormat(\DATE_ATOM, $value);
+
+        try {
+            $instant = CarbonImmutable::createFromFormat(\DATE_ATOM, $value);
+        } catch (InvalidFormatException) {
+            $instant = null;
+        }
 
         if (!$instant instanceof CarbonImmutable) {
             throw new \InvalidArgumentException(\sprintf('%s is not a date and time (ISO 8601): %s.', $key, $value));

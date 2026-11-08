@@ -108,7 +108,11 @@ final class VehicleOwnershipTest extends WebTestCase
 
     public function testTheRefreshActionOfAnotherUsersVehicleIsNotFound(): void
     {
-        $component = $this->createLiveComponent('Fetching:OdometerRefreshButton', ['vehicleId' => $this->theirs->getId()->toRfc4122()], $this->client);
+        $component = $this->createLiveComponent(
+            'Fetching:OdometerRefreshButton',
+            ['vehicleId' => $this->theirs->getId()->toRfc4122()],
+            $this->client,
+        );
 
         $this->expectException(NotFoundHttpException::class);
 
@@ -117,7 +121,11 @@ final class VehicleOwnershipTest extends WebTestCase
 
     public function testTheRefreshActionOfTheOwnVehicleIsAccepted(): void
     {
-        $component = $this->createLiveComponent('Fetching:OdometerRefreshButton', ['vehicleId' => $this->mine->getId()->toRfc4122()], $this->client);
+        $component = $this->createLiveComponent(
+            'Fetching:OdometerRefreshButton',
+            ['vehicleId' => $this->mine->getId()->toRfc4122()],
+            $this->client,
+        );
 
         self::assertSame(200, $component->call('refresh')->response()->getStatusCode());
     }

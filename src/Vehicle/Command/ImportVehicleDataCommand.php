@@ -20,7 +20,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * Adds the data of an export file to a vehicle: the lease only when it has none, the readings and snapshots that are not
  * there yet. Nothing is replaced or deleted. See {@see VehicleDataImporter}.
  */
-#[AsCommand(name: 'polaris:vehicle:data:import', description: 'Import the lease, readings and snapshots of an export file into a vehicle')]
+#[AsCommand(
+    name: 'polaris:vehicle:data:import',
+    description: 'Import the lease, readings and snapshots of an export file into a vehicle',
+)]
 final readonly class ImportVehicleDataCommand
 {
     public function __construct(
@@ -42,7 +45,9 @@ final readonly class ImportVehicleDataCommand
         string $file,
     ): int {
         try {
-            $vehicle = $this->entityManager->getRepository(Vehicle::class)->findOneBy(['vin' => new Vin($vin)->value()]);
+            $vehicle = $this->entityManager->getRepository(Vehicle::class)->findOneBy([
+                'vin' => new Vin($vin)->value(),
+            ]);
         } catch (\InvalidArgumentException $invalid) {
             $io->error($invalid->getMessage());
 
@@ -77,7 +82,12 @@ final readonly class ImportVehicleDataCommand
                 LeaseImportOutcome::Kept => 'kept (the vehicle already has one)',
                 LeaseImportOutcome::None => 'none in the file',
             }],
-            ['Readings' => \sprintf('%d added, %d already there, %d refused', $result->readings->added, $result->readings->alreadyThere, $result->readings->rejected)],
+            ['Readings' => \sprintf(
+                '%d added, %d already there, %d refused',
+                $result->readings->added,
+                $result->readings->alreadyThere,
+                $result->readings->rejected,
+            )],
             ['Snapshots' => \sprintf(
                 '%d added, %d already there, %d left out',
                 $result->snapshots->added,
