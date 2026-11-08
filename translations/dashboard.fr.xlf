@@ -140,7 +140,7 @@
       </trans-unit>
       <trans-unit id="chart.range.all">
         <source>chart.range.all</source>
-        <target>Tout le bail</target>
+        <target>Tout le leasing</target>
       </trans-unit>
       <trans-unit id="home.import">
         <source>home.import</source>
@@ -204,11 +204,11 @@
       </trans-unit>
       <trans-unit id="compare.projected_end.title">
         <source>compare.projected_end.title</source>
-        <target>Fin de bail</target>
+        <target>Fin du leasing</target>
       </trans-unit>
       <trans-unit id="compare.projected_end.basis">
         <source>compare.projected_end.basis</source>
-        <target>Maintenant / prévu, à la fin du bail</target>
+        <target>Maintenant / prévu, à la fin du leasing</target>
       </trans-unit>
       <trans-unit id="compare.period.today">
         <source>compare.period.today</source>
@@ -237,6 +237,34 @@
       <trans-unit id="compare.no_history">
         <source>compare.no_history</source>
         <target>Historique insuffisant</target>
+      </trans-unit>
+      <trans-unit id="help.open">
+        <source>help.open</source>
+        <target>À propos de « %title% »</target>
+      </trans-unit>
+      <trans-unit id="help.current_pace">
+        <source>help.current_pace</source>
+        <target>Voici la distance que vous parcourriez chaque jour, semaine et mois si vous continuez à rouler comme maintenant jusqu’à la fin du leasing.\n\nElle tient compte de tout votre leasing jusqu’ici, et de vos 30 derniers jours dès que le leasing a plus de 30 jours. Si vos habitudes changent, vous le verrez ici.</target>
+      </trans-unit>
+      <trans-unit id="help.budget">
+        <source>help.budget</source>
+        <target>Voici la distance que vous pouvez parcourir chaque jour, semaine et mois à partir de maintenant pour finir pile sur le kilométrage de votre contrat.\n\nC’est le kilométrage qu’il vous reste, réparti sur le temps qu’il vous reste. Roulez moins que prévu et il augmente. Roulez plus et il diminue.</target>
+      </trans-unit>
+      <trans-unit id="help.even_pace">
+        <source>help.even_pace</source>
+        <target>Voici la distance que vous parcourriez chaque jour, semaine et mois si le kilométrage du contrat était réparti également sur tout le leasing.\n\nElle ne change jamais selon votre façon de rouler. C’est la référence à laquelle comparer les deux autres cartes.</target>
+      </trans-unit>
+      <trans-unit id="help.compare_budget">
+        <source>help.compare_budget</source>
+        <target>Vous voyez ici ce que vous avez parcouru sur chaque période, à côté de ce que votre budget quotidien permettait. Le budget est celui que Polaris avait au début de la période, pas celui d’aujourd’hui.\n\nSous chaque période, vous lisez : parcourus / prévus. À droite, l’écart, avec un pourcentage de ce qui était prévu. Un plus veut dire que vous avez roulé plus que prévu.\n\n« Aujourd’hui » est compté à partir de minuit, heure locale, jusqu’au dernier relevé du compteur. La distance prévue ne couvre donc que la partie de la journée écoulée.\nC’est pourquoi elle peut sembler plus petite.</target>
+      </trans-unit>
+      <trans-unit id="help.compare_pace">
+        <source>help.compare_pace</source>
+        <target>Vous voyez ici ce que vous avez parcouru sur chaque période, à côté de ce que votre rythme habituel annonçait. Le rythme est celui que Polaris avait au début de la période.\n\nSous chaque période, vous lisez : parcourus / prévus. À droite, l’écart, avec un pourcentage de ce qui était prévu. Un plus veut dire que vous avez roulé plus que prévu.\n\nPolaris garde un instantané par jour. Une période affiche « Historique insuffisant » tant qu’il n’y en a pas pour le jour où elle commence.</target>
+      </trans-unit>
+      <trans-unit id="help.compare_projected_end">
+        <source>help.compare_projected_end</source>
+        <target>Vous voyez ici où votre leasing se dirige maintenant, à côté de où il se dirigeait au début de chaque période.\n\nSous chaque période, vous lisez : maintenant / prévu, tous deux à la fin du leasing. À droite, l’écart. Un plus veut dire que vous êtes maintenant parti pour plus de kilomètres que ce qui était prévu à l’époque.\n\nPolaris garde un instantané par jour. Une période affiche « Historique insuffisant » tant qu’il n’y en a pas pour le jour où elle commence.</target>
       </trans-unit>
     </body>
   </file>

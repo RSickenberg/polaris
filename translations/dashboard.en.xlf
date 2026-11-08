@@ -238,6 +238,34 @@
         <source>compare.no_history</source>
         <target>Not enough history</target>
       </trans-unit>
+      <trans-unit id="help.open">
+        <source>help.open</source>
+        <target>About “%title%”</target>
+      </trans-unit>
+      <trans-unit id="help.current_pace">
+        <source>help.current_pace</source>
+        <target>This is how far you would drive each day, week and month if you keep driving the way you do now until the lease ends.\n\nIt takes your whole lease so far into account, plus your last 30 days once the lease is more than 30 days old. If your habits change, you will see it here.</target>
+      </trans-unit>
+      <trans-unit id="help.budget">
+        <source>help.budget</source>
+        <target>This is how far you can drive each day, week and month from now on to end the lease exactly on your contract mileage.\n\nIt is the kilometres you have left, spread over the time you have left. Drive less than planned and it goes up. Drive more and it goes down.</target>
+      </trans-unit>
+      <trans-unit id="help.even_pace">
+        <source>help.even_pace</source>
+        <target>This is how far you would drive each day, week and month if your contract mileage were spread evenly over the whole lease.\n\nIt never changes with the way you drive. It is the reference to compare the other two cards with.</target>
+      </trans-unit>
+      <trans-unit id="help.compare_budget">
+        <source>help.compare_budget</source>
+        <target>This compares what you drove over each period with what your daily budget allowed for it. The budget is the one Polaris had at the start of the period, not today’s.\n\nUnder each period you read: driven / expected. On the right is the gap, with a percentage of what was expected. A plus sign means you drove more than expected.\n\n“Today” is counted from midnight, local time, up to the latest odometer reading. The expected distance therefore covers only the part of the day that has passed.\nThat is why it can look smaller.</target>
+      </trans-unit>
+      <trans-unit id="help.compare_pace">
+        <source>help.compare_pace</source>
+        <target>This compares what you drove over each period with what your usual pace predicted for it. The pace is the one Polaris had at the start of the period.\n\nUnder each period you read: driven / expected. On the right is the gap, with a percentage of what was expected. A plus sign means you drove more than expected.\n\nPolaris saves one snapshot a day. A period says “Not enough history” until a snapshot exists for the day it starts.</target>
+      </trans-unit>
+      <trans-unit id="help.compare_projected_end">
+        <source>help.compare_projected_end</source>
+        <target>This compares where your lease is headed now with where it was headed at the start of each period.\n\nUnder each period you read: now / predicted, both at the end of the lease. On the right is the gap. A plus sign means you are now on course for more kilometres than predicted back then.\n\nPolaris saves one snapshot a day. A period says “Not enough history” until a snapshot exists for the day it starts.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

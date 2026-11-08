@@ -8,13 +8,18 @@
     ## \Polaris\Lease\Domain\Budget The distances to drive per day, week and month.
     budget,
     ## string|null The translated message shown instead of the figures when there are none (a budget of zero everywhere).
-    fallback = null
+    fallback = null,
+    ## string|null The translated explanation of the card, shown in a dialog behind an info button.
+    help = null
 -%}
 {# A card with the distance to drive per day, week and month, the figures as large as the other KPIs, three equal columns with a vertical separator between them. #}
 <twig:Card data-pace="{{ key }}" {{ ...attributes }}>
     <twig:Card:Header>
         <twig:Card:Title><h2>{{ title }}</h2></twig:Card:Title>
         <twig:Card:Description>{{ basis }}</twig:Card:Description>
+        {% if help is not null %}
+            <twig:Dashboard:CardHelp name="pace-{{ key }}" :title="title" :text="help" />
+        {% endif %}
     </twig:Card:Header>
     <twig:Card:Content class="mt-auto">
         {% if fallback is not null and budget.perDay.metres == 0 and budget.perWeek.metres == 0 and budget.perMonth.metres == 0 %}

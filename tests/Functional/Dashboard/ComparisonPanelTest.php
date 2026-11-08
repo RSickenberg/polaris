@@ -73,7 +73,25 @@ final class ComparisonPanelTest extends KernelTestCase
         parent::tearDown();
     }
 
-    private function panel(string $locale, bool $withHistory = true): Crawler
+    public function testAnInfoButtonOpensTheExplanationOfThePanel(): void
+    {
+        $panel = $this->panel('en', help: 'First line.\\nSecond line.');
+
+        $button = $panel->filter('[data-help=compare-budget]');
+        self::assertCount(1, $button);
+        self::assertSame('About “Title”', $button->attr('aria-label'));
+        self::assertStringContainsString('First line.', $panel->filter('dialog')->text());
+        self::assertStringContainsString('Second line.', $panel->filter('dialog')->text());
+        self::assertStringNotContainsString('\\n', $panel->filter('dialog')->text());
+        self::assertCount(1, $panel->filter('dialog br'));
+    }
+
+    public function testWithoutAnExplanationThereIsNoInfoButton(): void
+    {
+        self::assertCount(0, $this->panel('en')->filter('[data-help]'));
+    }
+
+    private function panel(string $locale, bool $withHistory = true, ?string $help = null): Crawler
     {
         self::bootKernel();
         $translator = self::getContainer()->get('translator');
@@ -87,10 +105,10 @@ final class ComparisonPanelTest extends KernelTestCase
             new ComparisonRow(ComparisonPeriod::LastMonth, $withHistory ? $this->figures(9_000, 9_000) : null),
         ];
 
-        $template = "{{ component('Dashboard:ComparisonPanel', {key: 'budget', title: 'Title', basis: 'Basis', rows: rows}) }}";
+        $template = "{{ component('Dashboard:ComparisonPanel', {key: 'budget', title: 'Title', basis: 'Basis', rows: rows, help: help}) }}";
         $html = self::getContainer()->get(Environment::class)
             ->createTemplate($template)
-            ->render(['rows' => $rows]);
+            ->render(['rows' => $rows, 'help' => $help]);
 
         return new Crawler($html);
     }
