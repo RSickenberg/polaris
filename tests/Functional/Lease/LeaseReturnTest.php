@@ -240,7 +240,7 @@ final class LeaseReturnTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('main', 'Returned on June 30, 2026. Final figures.');
         // 9,000 km driven of 15,000: the later 20,000 km reading is not counted.
-        self::assertSelectorTextContains('[data-slot=alert]', 'Returned within the 15,000 km allowance.');
+        self::assertSelectorTextContains('[data-slot=alert]', "Returned within the 15,000\u{00A0}km allowance.");
         self::assertSelectorNotExists('[data-live-name-value="Fetching:OdometerRefreshButton"]');
         self::assertStringNotContainsString(
             'Projected at lease end',
@@ -260,7 +260,7 @@ final class LeaseReturnTest extends WebTestCase
         );
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('[data-slot=alert]', 'Rendu avec');
+        self::assertSelectorTextContains('[data-slot=alert]', 'Rendue avec');
         self::assertSelectorTextContains('[data-slot=alert]', 'de coût définitif');
     }
 

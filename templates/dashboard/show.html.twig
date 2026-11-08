@@ -34,8 +34,6 @@
             {% set unit = 'unit.km'|trans(domain='shared') %}
             {% set returned = states.Returned == state %}
             {% set ended = state.hasEnded %}
-            {% set excess = assessment.projectedExcess.metres / 1000 %}
-            {% set cost = assessment.projectedExcessCost|money %}
             {% set cut = assessment.weeklyCut %}
 
             {% if returned %}
@@ -44,17 +42,17 @@
                 {{ include('dashboard/_empty.html.twig', {text: 'ended.text'|trans(domain='dashboard'), cta: 'ended.cta'|trans(domain='dashboard'), href: path('lease_settings', {id: id})}) }}
             {% endif %}
 
-            {# Every risk message takes the same parameters and uses the ones it needs. #}
+            {# Every risk message takes the same parameters and uses the ones it needs: the figures, already formatted
+               and escaped, in bold. The message is our translation around them, so it is printed raw. #}
             {% set riskParameters = {
-                excess: excess,
-                cost: cost,
-                cut: cut is null ? 0 : cut.metres / 1000,
-                projected: projection.projectedAtEnd.metres / 1000,
-                allowance: dashboard.allowance.metres / 1000,
-                unit: unit,
+                excess: '<strong>' ~ assessment.projectedExcess|km|e ~ '&nbsp;' ~ unit|e ~ '</strong>',
+                cost: '<strong>' ~ assessment.projectedExcessCost|money|e ~ '</strong>',
+                cut: cut is null ? '' : '<strong>' ~ cut|km|e ~ '&nbsp;' ~ unit|e ~ '</strong>',
+                projected: '<strong>' ~ projection.projectedAtEnd|km|e ~ '&nbsp;' ~ unit|e ~ '</strong>',
+                allowance: '<strong>' ~ dashboard.allowance|km|e ~ '&nbsp;' ~ unit|e ~ '</strong>',
             } %}
             <twig:Dashboard:RiskAlert :level="assessment.riskLevel.value">
-                {{- dashboard.riskMessage.value|trans(riskParameters, 'dashboard') -}}
+                {{- dashboard.riskMessage.value|trans(riskParameters, 'dashboard')|raw -}}
             </twig:Dashboard:RiskAlert>
 
             {# The figures the page is for, first: where the lease ends up, then where it stands and how fresh that is. #}

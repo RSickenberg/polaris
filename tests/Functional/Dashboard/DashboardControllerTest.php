@@ -342,6 +342,19 @@ final class DashboardControllerTest extends WebTestCase
         }
     }
 
+    public function testTheFiguresOfTheRiskMessageAreBold(): void
+    {
+        $this->lease('2026-01-01', 12, 15_000, 0);
+        $this->reading('2026-07-02 11:00:00', 10_000);
+
+        $this->client->request('GET', $this->url());
+
+        $figures = $this->client->getCrawler()
+            ->filter('[data-slot=alert-description] strong')
+            ->each(static fn ($figure): string => $figure->text());
+        self::assertSame(["5,005\u{00A0}km", "CHF\u{00A0}600.55", "192\u{00A0}km"], $figures);
+    }
+
     public function testAnEndedLeaseShowsTheCostSoFarAndNoBudget(): void
     {
         $this->lease('2025-01-01', 12, 15_000, 0);
@@ -354,7 +367,7 @@ final class DashboardControllerTest extends WebTestCase
         self::assertSelectorTextContains('main', 'The lease has ended');
         self::assertSelectorNotExists('[data-comparison]');
         self::assertSelectorExists(\sprintf('main a[data-slot=button][href="/vehicles/%s/lease"]', $this->id()));
-        self::assertSelectorTextContains('[data-slot=alert][data-risk=over]', 'Ended 1,000 km over,');
+        self::assertSelectorTextContains('[data-slot=alert][data-risk=over]', "Ended 1,000\u{00A0}km over,");
         self::assertStringContainsString('CHF 120.00', $this->text());
         self::assertSelectorNotExists('main [data-slot=badge]');
         self::assertStringNotContainsString('What you can drive from now on', $this->text());
