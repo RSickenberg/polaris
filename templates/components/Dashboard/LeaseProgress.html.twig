@@ -9,11 +9,12 @@
     valueText,
     ## string The legend of the tick, already translated.
     tickLabel,
-    ## 'ok'|'watch'|'over' The risk level of the lease: it colors the bar.
+    ## 'ok'|'watch'|'over' The risk level of the lease: it colors the bar and the tick.
     level
 -%}
-{# The kit Progress paints its fill bg-primary; a child selector on the bar recolors it with the risk color, solid so it stands out from the track. The tick is in the text color, so it stays visible over the fill. #}
-{% set barColor = {ok: '[&>[data-slot=progress-indicator]]:bg-risk-ok', watch: '[&>[data-slot=progress-indicator]]:bg-risk-watch', over: '[&>[data-slot=progress-indicator]]:bg-risk-over'}[level] %}
+{# The kit Progress paints its fill bg-primary; a child selector on the bar recolors it with the risk color at half strength, so the tick, in the full risk color, stands out over the fill. #}
+{% set barColor = {ok: '[&>[data-slot=progress-indicator]]:bg-risk-ok/50', watch: '[&>[data-slot=progress-indicator]]:bg-risk-watch/50', over: '[&>[data-slot=progress-indicator]]:bg-risk-over/50'}[level] %}
+{% set tickColor = {ok: 'bg-risk-ok', watch: 'bg-risk-watch', over: 'bg-risk-over'}[level] %}
 <div {{ attributes.defaults({class: 'flex flex-col gap-2'}) }}>
     <div class="flex items-baseline justify-between gap-2 text-sm">
         <span class="text-muted-foreground">{{ label }}</span>
@@ -21,10 +22,10 @@
     </div>
     <div class="relative flex items-center">
         <twig:Progress :value="min(used, 100)" class="h-2 {{ barColor }}" aria-label="{{ label }}" aria-valuetext="{{ valueText }}" />
-        <span class="absolute h-5 w-1 -translate-x-1/2 rounded-full bg-foreground ring-2 ring-background" style="left: {{ earned }}%" aria-hidden="true"></span>
+        <span class="absolute h-5 w-1 -translate-x-1/2 rounded-full ring-2 ring-background {{ tickColor }}" style="left: {{ earned }}%" aria-hidden="true"></span>
     </div>
     <p class="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <span class="inline-block h-3 w-1 rounded-full bg-foreground" aria-hidden="true"></span>
+        <span class="inline-block h-3 w-1 rounded-full {{ tickColor }}" aria-hidden="true"></span>
         {{ tickLabel }}
     </p>
 </div>
