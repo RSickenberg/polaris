@@ -168,8 +168,8 @@ final readonly class LeaseTermsService
     }
 
     /**
-     * The projection as it stood at $cutoff (an owner's midnight): only readings and confirmations up to it count, a
-     * confirmation running past it is cut there, and the lease is judged (ended or not, time left) at that instant.
+     * The projection as it stood at $cutoff (an owner's midnight): only readings and verifications up to it count, a
+     * verification running past it is cut there, and the lease is judged (ended or not, time left) at that instant.
      * A car returned at or before $cutoff is a returned lease, as in {@see self::assess()}; a return after it is
      * ignored, as the car was still leased then. Null without a contract.
      *
@@ -340,11 +340,11 @@ final readonly class LeaseTermsService
     }
 
     /**
-     * The readings as samples, and the confirmations: a reading that the car still had later (it had not moved) adds a
-     * sample with the same odometer at that instant, so the projection goes on from there. A confirmation is dropped
+     * The readings as samples, and the verifications: a reading that the car still had later (it had not moved) adds a
+     * sample with the same odometer at that instant, so the projection goes on from there. A verification is dropped
      * when a later reading comes first (it would contradict it).
      *
-     * Nothing counts after $returnedAt (inclusive): a later reading is left out, and a confirmation that runs past it
+     * Nothing counts after $returnedAt (inclusive): a later reading is left out, and a verification that runs past it
      * is cut there, as the car still had that odometer at the return.
      *
      * @return list<OdometerSample>
@@ -360,12 +360,12 @@ final readonly class LeaseTermsService
             }
 
             $samples[] = $reading->toSample();
-            $confirmedAt = $reading->getConfirmedAt();
+            $lastVerifiedAt = $reading->getLastVerifiedAt();
             $next = $readings[$index + 1] ?? null;
 
-            if (null !== $confirmedAt && (null === $next || $confirmedAt->lessThan($next->getReadAt()))) {
+            if (null !== $lastVerifiedAt && (null === $next || $lastVerifiedAt->lessThan($next->getReadAt()))) {
                 $samples[] = new OdometerSample(
-                    null !== $returnedAt && $confirmedAt->greaterThan($returnedAt) ? $returnedAt : $confirmedAt,
+                    null !== $returnedAt && $lastVerifiedAt->greaterThan($returnedAt) ? $returnedAt : $lastVerifiedAt,
                     $reading->getOdometer()
                 );
             }

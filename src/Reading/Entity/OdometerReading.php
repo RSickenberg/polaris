@@ -58,7 +58,7 @@ class OdometerReading
      * moved (the same value is not stored twice). Null when it never was.
      */
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
-    private ?CarbonImmutable $confirmedAt = null;
+    private ?CarbonImmutable $lastVerifiedAt = null;
 
     private function __construct(
         Vehicle $vehicle,
@@ -111,7 +111,7 @@ class OdometerReading
         ReadingSource $source,
         ?string $odometerRaw,
         ?DistanceUnit $odometerRawUnit,
-        ?CarbonImmutable $confirmedAt,
+        ?CarbonImmutable $lastVerifiedAt,
     ): self {
         if (!self::rawFitsSource($source, $odometerRaw, $odometerRawUnit)) {
             $message = 'The raw odometer and its unit belong to a reading of the API, and only to it.';
@@ -121,8 +121,8 @@ class OdometerReading
 
         $reading = new self($vehicle, $readAt, $odometer, $odometerRaw, $odometerRawUnit, $source);
 
-        if (null !== $confirmedAt) {
-            $reading->confirm($confirmedAt);
+        if (null !== $lastVerifiedAt) {
+            $reading->verify($lastVerifiedAt);
         }
 
         return $reading;
@@ -178,22 +178,22 @@ class OdometerReading
         return $this->source;
     }
 
-    public function getConfirmedAt(): ?CarbonImmutable
+    public function getLastVerifiedAt(): ?CarbonImmutable
     {
-        return $this->confirmedAt;
+        return $this->lastVerifiedAt;
     }
 
     /**
      * Notes that the car still had this odometer at $at. It only moves forward in time.
      */
-    public function confirm(CarbonImmutable $at): void
+    public function verify(CarbonImmutable $at): void
     {
         if (0 !== $at->getOffset()) {
-            throw new \InvalidArgumentException(\sprintf('A confirmation must be a UTC instant, got %s.', $at->toIso8601String()));
+            throw new \InvalidArgumentException(\sprintf('A verification must be a UTC instant, got %s.', $at->toIso8601String()));
         }
 
-        if ($at->greaterThan($this->confirmedAt ?? $this->readAt)) {
-            $this->confirmedAt = $at;
+        if ($at->greaterThan($this->lastVerifiedAt ?? $this->readAt)) {
+            $this->lastVerifiedAt = $at;
         }
     }
 

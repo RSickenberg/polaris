@@ -126,7 +126,7 @@ final class LeaseTermsServiceTest extends KernelTestCase
         $before = $this->service->assess($this->vehicle);
         self::assertInstanceOf(LeaseAssessment::class, $before);
 
-        // The car is read again the next day and has not moved: only the confirmation is stored.
+        // The car is read again the next day and has not moved: only the verification is stored.
         self::mockTime('2026-07-03 12:00:00 UTC');
         $recording = self::getContainer()->get(OdometerReadingService::class)->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-07-03 12:00:00', 'UTC'), Distance::fromKilometres(10_000));
         self::assertSame(RecordOutcome::Unchanged, $recording->outcome);
@@ -139,12 +139,12 @@ final class LeaseTermsServiceTest extends KernelTestCase
         self::assertGreaterThan($before->projection->margin->metres(), $after->projection->margin->metres(), 'A day without driving: the margin grows.');
     }
 
-    public function testAConfirmationThatALaterReadingContradictsIsIgnored(): void
+    public function testAVerificationThatALaterReadingContradictsIsIgnored(): void
     {
         $readings = self::getContainer()->get(OdometerReadingService::class);
         self::mockTime('2026-07-03 12:00:00 UTC');
         $readings->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-07-03 12:00:00', 'UTC'), Distance::fromKilometres(10_000));
-        // A reading typed in between, at a higher odometer, makes the confirmation impossible.
+        // A reading typed in between, at a higher odometer, makes the verification impossible.
         $data = new OdometerReadingData();
         $data->readAt = CarbonImmutable::parse('2026-07-03 08:00:00', 'UTC');
         $data->odometer = 10_100;

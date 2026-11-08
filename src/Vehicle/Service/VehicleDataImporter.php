@@ -188,7 +188,7 @@ final readonly class VehicleDataImporter
                 $source,
                 $raw,
                 $unit,
-                $this->nullableInstant($reading, 'confirmedAt'),
+                $this->nullableInstant($reading, 'lastVerifiedAt'),
             );
         }
 

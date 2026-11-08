@@ -7,8 +7,8 @@ namespace Polaris\Alert\EventListener;
 use Polaris\Alert\Message\CheckRiskLevel;
 use Polaris\Lease\Event\LeaseReturnUndone;
 use Polaris\Lease\Event\LeaseTermsSaved;
-use Polaris\Reading\Event\ReadingConfirmed;
 use Polaris\Reading\Event\ReadingStored;
+use Polaris\Reading\Event\ReadingVerified;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
@@ -37,7 +37,7 @@ final readonly class QueueRiskLevelCheck
      * @throws ExceptionInterface
      */
     #[AsEventListener]
-    public function onReadingConfirmed(ReadingConfirmed $event): void
+    public function onReadingVerified(ReadingVerified $event): void
     {
         $this->queue($event->vehicle);
     }

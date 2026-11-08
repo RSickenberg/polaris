@@ -22,7 +22,7 @@ final readonly class ReadingImport
         public ?string $odometerRaw = null,
         public ?DistanceUnit $odometerRawUnit = null,
         /** The latest instant the car was seen with this odometer, when it did not move. */
-        public ?CarbonImmutable $confirmedAt = null,
+        public ?CarbonImmutable $lastVerifiedAt = null,
     ) {
     }
 }

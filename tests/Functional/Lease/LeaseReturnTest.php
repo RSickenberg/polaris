@@ -245,11 +245,11 @@ final class LeaseReturnTest extends WebTestCase
         self::assertSelectorTextContains('[data-slot=alert]', 'de coût définitif');
     }
 
-    public function testTheCutoffDropsReadingsAndConfirmationsAfterTheReturn(): void
+    public function testTheCutoffDropsReadingsAndVerificationsAfterTheReturn(): void
     {
         $service = $this->service();
         $last = $this->reading('2026-06-30 10:00:00', 9_000, flush: false, existing: true);
-        $last->confirm(CarbonImmutable::parse('2026-07-01 07:00:00', 'UTC'));
+        $last->verify(CarbonImmutable::parse('2026-07-01 07:00:00', 'UTC'));
         $this->reading('2026-07-01 08:00:00', 9_500);
         $this->entityManager->flush();
 
@@ -258,7 +258,7 @@ final class LeaseReturnTest extends WebTestCase
 
         self::assertInstanceOf(LeaseAssessment::class, $returned);
         self::assertSame(LeaseStatus::Returned, $returned->status);
-        // The confirmation of 2026-07-01 07:00 is cut at the return (2026-06-30 22:00 UTC): the car still had 9,000 km.
+        // The verification of 2026-07-01 07:00 is cut at the return (2026-06-30 22:00 UTC): the car still had 9,000 km.
         self::assertSame(9_000_000, $returned->projection->driven->metres());
         self::assertSame('2026-06-30T22:00:00+00:00', $returned->projection->asOf->toIso8601String());
 

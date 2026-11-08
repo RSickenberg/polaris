@@ -113,7 +113,7 @@ final readonly class VehicleDataExporter
             'source' => $reading->getSource()->value,
             'odometerRaw' => $reading->getOdometerRaw(),
             'odometerRawUnit' => $reading->getOdometerRawUnit()?->value,
-            'confirmedAt' => $reading->getConfirmedAt()?->utc()->toIso8601String(),
+            'lastVerifiedAt' => $reading->getLastVerifiedAt()?->utc()->toIso8601String(),
         ];
     }
 

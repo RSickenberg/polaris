@@ -11,8 +11,8 @@ use Doctrine\ORM\Exception\ORMException;
 use Polaris\Reading\Domain\ReadingOrder;
 use Polaris\Reading\Domain\ReadingRejection;
 use Polaris\Reading\Entity\OdometerReading;
-use Polaris\Reading\Event\ReadingConfirmed;
 use Polaris\Reading\Event\ReadingStored;
+use Polaris\Reading\Event\ReadingVerified;
 use Polaris\Reading\Form\Model\OdometerReadingData;
 use Polaris\Reading\Repository\OdometerReadingRepository;
 use Polaris\Reading\Service\Dto\ApiRecording;
@@ -133,7 +133,7 @@ final readonly class OdometerReadingService
                 source: $import->source,
                 odometerRaw: $import->odometerRaw,
                 odometerRawUnit: $import->odometerRawUnit,
-                confirmedAt: $import->confirmedAt?->min($now),
+                lastVerifiedAt: $import->lastVerifiedAt?->min($now),
             );
             $before = $this->readings->findBefore($vehicle, $import->readAt);
             $after = $this->readings->findAfter($vehicle, $import->readAt);
@@ -187,9 +187,9 @@ final readonly class OdometerReadingService
             // The car has not moved: it is noted on the reading, so that the projection goes on from now. Only for the
             // latest reading (a later one would contradict it), and never later than the clock.
             if (null === $next) {
-                $previous->confirm($readAt->min(CarbonImmutable::instance($this->clock->now())->utc()));
+                $previous->verify($readAt->min(CarbonImmutable::instance($this->clock->now())->utc()));
                 $this->entityManager->flush();
-                $this->events->dispatch(new ReadingConfirmed($vehicle));
+                $this->events->dispatch(new ReadingVerified($vehicle));
             }
 
             return ApiRecording::unchanged();

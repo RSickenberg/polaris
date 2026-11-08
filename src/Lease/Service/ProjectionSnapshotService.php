@@ -28,7 +28,7 @@ use Symfony\Component\Lock\LockFactory;
 
 /**
  * Keeps what Polaris projected for a vehicle's lease at the owner's midnight ({@see OwnerMidnight}): one snapshot per
- * lease and local day, the last run for the same midnight winning. Only the readings and confirmations up to that midnight count
+ * lease and local day, the last run for the same midnight winning. Only the readings and verifications up to that midnight count
  * ({@see LeaseTermsService::assessAt()}), so the figures are the same whenever the job runs; `computedAt` is the clock
  * of the run. Nothing is saved without a contract, without data, or for a car returned at or before that midnight. The scheduler,
  * the console command and any listener only call this class.

@@ -348,12 +348,12 @@ final class ProjectionSnapshotTest extends KernelTestCase
         self::assertSame(10_100_000, $this->rows()[0]->getDriven()->metres());
     }
 
-    public function testAConfirmationRunningPastTheMidnightIsCutThere(): void
+    public function testAVerificationRunningPastTheMidnightIsCutThere(): void
     {
         $reading = $this->entityManager->getRepository(OdometerReading::class)->findOneBy(['vehicle' => $this->vehicle]);
         \assert($reading instanceof OdometerReading);
         self::mockTime('2026-07-03 09:00:00 UTC');
-        $reading->confirm(CarbonImmutable::parse('2026-07-03 08:00:00', 'UTC'));
+        $reading->verify(CarbonImmutable::parse('2026-07-03 08:00:00', 'UTC'));
         $this->entityManager->flush();
 
         $this->snapshots->save($this->vehicle, $this->midnight());

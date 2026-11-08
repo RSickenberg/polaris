@@ -85,7 +85,7 @@ final class VehicleDataTransferTest extends KernelTestCase
             '7000.000',
             DistanceUnit::Mile,
         );
-        $api->confirm(CarbonImmutable::parse('2026-07-02T06:00:00+00:00'));
+        $api->verify(CarbonImmutable::parse('2026-07-02T06:00:00+00:00'));
         $this->entityManager->persist($api);
         $this->entityManager->flush();
         $container->get(ProjectionSnapshotService::class)->save(
@@ -124,7 +124,7 @@ final class VehicleDataTransferTest extends KernelTestCase
         );
         self::assertSame('7000.000', $file['readings'][1]['odometerRaw']);
         self::assertSame('mi', $file['readings'][1]['odometerRawUnit']);
-        self::assertSame('2026-07-02T06:00:00+00:00', $file['readings'][1]['confirmedAt']);
+        self::assertSame('2026-07-02T06:00:00+00:00', $file['readings'][1]['lastVerifiedAt']);
         self::assertCount(1, $file['snapshots']);
         self::assertSame('2026-07-03', $file['snapshots'][0]['localDay']);
     }
@@ -332,7 +332,7 @@ final class VehicleDataTransferTest extends KernelTestCase
                     'source' => 'manual',
                     'odometerRaw' => null,
                     'odometerRawUnit' => null,
-                    'confirmedAt' => null,
+                    'lastVerifiedAt' => null,
                 ];
             }
         }

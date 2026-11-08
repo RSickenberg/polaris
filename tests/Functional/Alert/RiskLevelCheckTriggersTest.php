@@ -68,7 +68,7 @@ final class RiskLevelCheckTriggersTest extends KernelTestCase
         $this->assertOneCheck();
     }
 
-    public function testAConfirmationQueuesACheck(): void
+    public function testAVerificationQueuesACheck(): void
     {
         self::mockTime('2026-07-03 12:00:00 UTC');
 
