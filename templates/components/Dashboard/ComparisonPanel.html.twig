@@ -41,13 +41,18 @@
                         {% if figures is null %}
                             <twig:Table:Cell class="pe-0 whitespace-normal text-end text-muted-foreground" data-no-history>{{ 'compare.no_history'|trans(domain='dashboard') }}</twig:Table:Cell>
                         {% else %}
-                            {% set sign = figures.delta.isNegative ? '−' : (figures.delta.metres > 0 ? '+' : '') %}
+                            {% set sign = '' %}
+                            {% if figures.delta.isNegative %}
+                                {% set sign = '−' %}
+                            {% elseif figures.delta.metres > 0 %}
+                                {% set sign = '+' %}
+                            {% endif %}
                             <twig:Table:Cell class="pe-0 whitespace-normal text-end">
                                 <span class="block text-base font-medium" data-figure="delta">
                                     <span class="font-mono">{{ sign }}{{ (figures.delta.absolute.metres / 1000)|format_number({max_fraction_digit: 0})|replace({" ": " "}) }}</span> {{ unit }}
                                 </span>
                                 {% if figures.ratio is not null %}
-                                    <span class="block text-xs text-muted-foreground" data-figure="ratio">{{ sign }}{{ (figures.ratio < 0 ? -figures.ratio : figures.ratio)|format_number({}, 'percent') }}</span>
+                                    <span class="block text-xs text-muted-foreground" data-figure="ratio">{{ sign }}{{ figures.ratio|abs|format_number({}, 'percent') }}</span>
                                 {% endif %}
                             </twig:Table:Cell>
                         {% endif %}
