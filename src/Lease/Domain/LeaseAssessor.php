@@ -66,7 +66,11 @@ final readonly class LeaseAssessor
         $excess = Distance::fromMetres(max(0, $projected - $allowed));
 
         return new LeaseAssessment(
-            status: $returned ? LeaseStatus::Returned : ($ended ? LeaseStatus::Ended : LeaseStatus::Active),
+            status: match (true) {
+                $returned => LeaseStatus::Returned,
+                $ended => LeaseStatus::Ended,
+                default => LeaseStatus::Active,
+            },
             projection: $projection,
             riskLevel: self::riskLevel($projected, $allowed, $tolerance),
             remaining: $remaining,

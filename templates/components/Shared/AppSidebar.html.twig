@@ -45,6 +45,12 @@
                                 <span>{{ 'nav.lease'|trans(domain='shared') }}</span>
                             </twig:Sidebar:MenuButton>
                         </twig:Sidebar:MenuItem>
+                        <twig:Sidebar:MenuItem>
+                            <twig:Sidebar:MenuButton as="a" href="{{ path('vehicle_data', {id: vehicle.id.toBase32()}) }}" :active="'vehicle_data' == route">
+                                <twig:ux:icon name="lucide:download" aria-hidden="true" />
+                                <span>{{ 'nav.data'|trans(domain='shared') }}</span>
+                            </twig:Sidebar:MenuButton>
+                        </twig:Sidebar:MenuItem>
                     </twig:Sidebar:Menu>
                 </nav>
             </twig:Sidebar:Group>

@@ -29,7 +29,6 @@ final readonly class KeyCheckCommand
 
     public function __invoke(
         SymfonyStyle $io,
-
         #[Option(description: 'The email of the owner. Optional when there is a single user')]
         ?string $email = null,
     ): int {

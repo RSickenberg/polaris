@@ -14,6 +14,8 @@ use Polaris\Lease\Domain\NoData;
 use Polaris\Lease\Domain\SnapshotPolicy;
 use Polaris\Lease\Entity\ProjectionSnapshot;
 use Polaris\Lease\Repository\ProjectionSnapshotRepository;
+use Polaris\Lease\Service\Dto\ProjectionSnapshotPoint;
+use Polaris\Lease\Service\Dto\SnapshotsImportResult;
 use Polaris\Lease\Service\Enum\SnapshotOutcome;
 use Polaris\Lease\Service\Exception\LeaseTermsRejected;
 use Polaris\Shared\Domain\OwnerMidnight;
@@ -75,6 +77,65 @@ final readonly class ProjectionSnapshotService
     }
 
     /**
+     * Brings back snapshots exported earlier, as they were. A local day that already has a snapshot keeps it, a snapshot
+     * saved before the cutoff and the pace were stored cannot be kept (the entity needs them), and without a lease there
+     * is nothing to attach them to.
+     *
+     * @param list<ProjectionSnapshotPoint> $points
+     *
+     * @throws ORMException
+     */
+    public function import(Vehicle $vehicle, array $points): SnapshotsImportResult
+    {
+        $contract = $this->leases->find($vehicle);
+
+        if (null === $contract) {
+            return new SnapshotsImportResult(0, 0, \count($points));
+        }
+
+        $added = 0;
+        $alreadyThere = 0;
+        $skipped = 0;
+
+        foreach ($points as $point) {
+            if (null === $point->cutoffAt || null === $point->overallPace || null === $point->blendedPace) {
+                ++$skipped;
+
+                continue;
+            }
+
+            if (null !== $this->snapshots->findForDay($contract, $point->localDay)) {
+                ++$alreadyThere;
+
+                continue;
+            }
+
+            $this->entityManager->persist(new ProjectionSnapshot(
+                leaseContract: $contract,
+                localDay: $point->localDay,
+                cutoffAt: $point->cutoffAt,
+                computedAt: $point->computedAt,
+                asOf: $point->asOf,
+                driven: $point->driven,
+                allowedToDate: $point->allowedToDate,
+                projectedAtEnd: $point->projectedAtEnd,
+                dailyBudget: $point->dailyBudget,
+                riskLevel: $point->riskLevel,
+                overallPace: $point->overallPace,
+                recentPace: $point->recentPace,
+                blendedPace: $point->blendedPace,
+            ));
+            ++$added;
+        }
+
+        if ($added > 0) {
+            $this->entityManager->flush();
+        }
+
+        return new SnapshotsImportResult($added, $alreadyThere, $skipped);
+    }
+
+    /**
      * @throws ORMException
      */
     private function saveLocked(Vehicle $vehicle, OwnerMidnight $midnight): SnapshotOutcome
@@ -113,14 +174,40 @@ final readonly class ProjectionSnapshotService
         $existing = $this->snapshots->findForDay($contract, $midnight->localDay);
 
         if (null !== $existing) {
-            $existing->replace($midnight->at, $computedAt, $projection->asOf, $projection->driven, $projection->allowedToDate, $projection->projectedAtEnd, $assessment->budget->perDay, $assessment->riskLevel, $projection->overallPace, $projection->recentPace, $projection->blendedPace);
+            $existing->replace(
+                cutoffAt: $midnight->at,
+                computedAt: $computedAt,
+                asOf: $projection->asOf,
+                driven: $projection->driven,
+                allowedToDate: $projection->allowedToDate,
+                projectedAtEnd: $projection->projectedAtEnd,
+                dailyBudget: $assessment->budget->perDay,
+                riskLevel: $assessment->riskLevel,
+                overallPace: $projection->overallPace,
+                recentPace: $projection->recentPace,
+                blendedPace: $projection->blendedPace,
+            );
             $this->entityManager->flush();
 
             return SnapshotOutcome::Updated;
         }
 
         try {
-            $this->entityManager->persist(new ProjectionSnapshot($contract, $midnight->localDay, $midnight->at, $computedAt, $projection->asOf, $projection->driven, $projection->allowedToDate, $projection->projectedAtEnd, $assessment->budget->perDay, $assessment->riskLevel, $projection->overallPace, $projection->recentPace, $projection->blendedPace));
+            $this->entityManager->persist(new ProjectionSnapshot(
+                leaseContract: $contract,
+                localDay: $midnight->localDay,
+                cutoffAt: $midnight->at,
+                computedAt: $computedAt,
+                asOf: $projection->asOf,
+                driven: $projection->driven,
+                allowedToDate: $projection->allowedToDate,
+                projectedAtEnd: $projection->projectedAtEnd,
+                dailyBudget: $assessment->budget->perDay,
+                riskLevel: $assessment->riskLevel,
+                overallPace: $projection->overallPace,
+                recentPace: $projection->recentPace,
+                blendedPace: $projection->blendedPace,
+            ));
             $this->entityManager->flush();
         } catch (UniqueConstraintViolationException) {
             // Another writer stored the row of the day after the lookup above. The entity manager is closed after this.

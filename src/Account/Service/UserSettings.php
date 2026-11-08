@@ -25,13 +25,9 @@ final readonly class UserSettings
      */
     public function __construct(
         private EntityManagerInterface $entityManager,
-
         private UserRepository $users,
-
         private PasswordResetRequestRepository $resetRequests,
-
         private UserPasswordHasherInterface $hasher,
-
         #[Autowire('%kernel.enabled_locales%')]
         private array $enabledLocales,
     ) {

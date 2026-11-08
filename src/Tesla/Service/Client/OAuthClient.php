@@ -57,15 +57,11 @@ final readonly class OAuthClient
      */
     public function exchangeCode(
         FleetRegion $audience,
-
         string $clientId,
-
         #[\SensitiveParameter]
         string $clientSecret,
-
         #[\SensitiveParameter]
         string $code,
-
         string $redirectUri,
     ): TokenSet {
         $data = $this->send(
@@ -94,9 +90,7 @@ final readonly class OAuthClient
      */
     public function refresh(
         FleetRegion $region,
-
         string $clientId,
-
         #[\SensitiveParameter]
         string $refreshToken,
     ): TokenSet {
@@ -123,7 +117,6 @@ final readonly class OAuthClient
      */
     public function userRegion(
         FleetRegion $region,
-
         #[\SensitiveParameter]
         string $accessToken,
     ): UserRegion {

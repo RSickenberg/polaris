@@ -106,6 +106,44 @@ final readonly class LeaseTermsService
     }
 
     /**
+     * Brings back the lease of an export, only when the vehicle has none: an existing contract is never replaced.
+     *
+     * @return bool whether the contract was created (false: the vehicle already had one)
+     *
+     * @throws LeaseTermsRejected when the return is not after the lease start
+     * @throws ORMException
+     */
+    public function import(Vehicle $vehicle, LeaseTerms $terms, ?CarbonImmutable $returnedAt): bool
+    {
+        if (null !== $this->contracts->findForVehicle($vehicle)) {
+            return false;
+        }
+
+        if (null !== $returnedAt && $returnedAt->getTimestamp() <= $terms->term->start()->getTimestamp()) {
+            throw new LeaseTermsRejected(LeaseTermsRejected::START_AFTER_RETURN);
+        }
+
+        $contract = new LeaseContract(
+            $vehicle,
+            $terms->term,
+            $terms->allowance,
+            $terms->startOdometer,
+            $terms->excessCostPerKm,
+            $terms->tolerance,
+        );
+
+        if (null !== $returnedAt) {
+            $contract->markReturned($returnedAt->utc());
+        }
+
+        $this->entityManager->persist($contract);
+        $this->entityManager->flush();
+        $this->events->dispatch(new LeaseTermsSaved($vehicle));
+
+        return true;
+    }
+
+    /**
      * The projection of the stored contract with the recorded readings; null without a contract.
      */
     public function assess(Vehicle $vehicle): LeaseAssessment|NoData|null
@@ -283,7 +321,7 @@ final readonly class LeaseTermsService
         LeaseTerms $terms,
         array $samples,
         ?CarbonImmutable $returnedAt,
-        ?CarbonImmutable $at = null
+        ?CarbonImmutable $at = null,
     ): LeaseAssessment|NoData {
         try {
             return $this->assessor->assess(

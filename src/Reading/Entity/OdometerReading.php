@@ -60,8 +60,14 @@ class OdometerReading
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?CarbonImmutable $confirmedAt = null;
 
-    private function __construct(Vehicle $vehicle, CarbonImmutable $readAt, Distance $odometer, ?string $odometerRaw, ?DistanceUnit $odometerRawUnit, ReadingSource $source)
-    {
+    private function __construct(
+        Vehicle $vehicle,
+        CarbonImmutable $readAt,
+        Distance $odometer,
+        ?string $odometerRaw,
+        ?DistanceUnit $odometerRawUnit,
+        ReadingSource $source,
+    ) {
         if (0 !== $readAt->getOffset()) {
             throw new \InvalidArgumentException(\sprintf('An odometer reading must be read at a UTC instant, got %s.', $readAt->toIso8601String()));
         }
@@ -91,6 +97,50 @@ class OdometerReading
         }
 
         return new self($vehicle, $readAt, Distance::from((float) $raw, $unit), $raw, $unit, ReadingSource::Api);
+    }
+
+    /**
+     * A reading brought back from an export, as it was: the Tesla raw value and unit go together, and only with the API.
+     *
+     * @throws \InvalidArgumentException when the raw value and its unit do not fit the source
+     */
+    public static function restore(
+        Vehicle $vehicle,
+        CarbonImmutable $readAt,
+        Distance $odometer,
+        ReadingSource $source,
+        ?string $odometerRaw,
+        ?DistanceUnit $odometerRawUnit,
+        ?CarbonImmutable $confirmedAt,
+    ): self {
+        if (!self::rawFitsSource($source, $odometerRaw, $odometerRawUnit)) {
+            $message = 'The raw odometer and its unit belong to a reading of the API, and only to it.';
+
+            throw new \InvalidArgumentException($message);
+        }
+
+        $reading = new self($vehicle, $readAt, $odometer, $odometerRaw, $odometerRawUnit, $source);
+
+        if (null !== $confirmedAt) {
+            $reading->confirm($confirmedAt);
+        }
+
+        return $reading;
+    }
+
+    /**
+     * Whether the raw odometer and its unit fit the source: both for a reading of the API, neither for any other.
+     */
+    public static function rawFitsSource(
+        ReadingSource $source,
+        ?string $odometerRaw,
+        ?DistanceUnit $odometerRawUnit,
+    ): bool {
+        if (ReadingSource::Api === $source) {
+            return null !== $odometerRaw && null !== $odometerRawUnit;
+        }
+
+        return null === $odometerRaw && null === $odometerRawUnit;
     }
 
     public function getId(): Ulid

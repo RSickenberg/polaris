@@ -106,6 +106,10 @@
         <source>nav.home_label</source>
         <target>Navigation de l’accueil</target>
       </trans-unit>
+      <trans-unit id="nav.data">
+        <source>nav.data</source>
+        <target>Données</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -6,6 +6,10 @@
         <source>flash.imported</source>
         <target>{count, plural, =0 {Aucun véhicule importé} one {# véhicule importé} other {# véhicules importés}}</target>
       </trans-unit>
+      <trans-unit id="flash.data_imported">
+        <source>flash.data_imported</source>
+        <target>Import terminé. Bail : {lease, select, created {créé à partir du fichier} kept {le véhicule en a déjà un, conservé} other {aucun dans le fichier}}. Relevés : {readingsAdded, number} ajoutés, {readingsAlreadyThere, number} déjà présents, {readingsRejected, number} refusés. Relevés de projection : {snapshotsAdded, number} ajoutés, {snapshotsAlreadyThere, number} déjà présents, {snapshotsSkipped, number} écartés.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

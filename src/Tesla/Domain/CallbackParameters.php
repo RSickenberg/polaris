@@ -12,9 +12,7 @@ final readonly class CallbackParameters
     public function __construct(
         #[\SensitiveParameter]
         public ?string $code,
-
         public ?string $state,
-
         public ?string $error = null,
     ) {
     }
