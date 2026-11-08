@@ -302,8 +302,9 @@ final class DashboardControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
 
         foreach (['budget', 'pace', 'projected_end'] as $panel) {
-            self::assertSelectorExists(\sprintf('[data-comparison=%s] [data-period=today] [data-figure=delta]', $panel));
-            self::assertSelectorNotExists(\sprintf('[data-comparison=%s] [data-period=today] [data-no-history]', $panel));
+            $today = \sprintf('[data-comparison=%s] [data-period=today]', $panel);
+            self::assertSelectorExists($today . ' [data-figure=delta]');
+            self::assertSelectorNotExists($today . ' [data-no-history]');
             self::assertSelectorExists(\sprintf('[data-comparison=%s] [data-period=week] [data-no-history]', $panel));
         }
     }

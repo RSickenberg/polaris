@@ -13,6 +13,7 @@ use Polaris\Lease\Domain\ComparisonWindow;
 use Polaris\Lease\Domain\OdometerTimeline;
 use Polaris\Lease\Domain\Pace;
 use Polaris\Lease\Domain\PredictionComparer;
+use Polaris\Lease\Domain\PredictionComparison;
 use Polaris\Lease\Domain\Projection;
 use Polaris\Lease\Domain\SnapshotFigures;
 use Polaris\Lease\Domain\WindowComparison;
@@ -36,14 +37,14 @@ final class PredictionComparerTest extends TestCase
     {
         // 2026-07-10 12:00 UTC is 190.5 days into the lease: 19,050,000 m.
         $latest = '2026-07-10 12:00:00';
-        $comparison = new PredictionComparer()->compare($this->timeline($latest), $this->projection($latest, 36_000_000), 'UTC', [
+        $comparison = $this->compare($latest, 36_000_000, [
             // Today started at 00:00, 12 hours ago: 50,000 m driven.
-            '2026-07-10' => new SnapshotFigures(Distance::fromMetres(36_500_000), Distance::fromMetres(90_000), Pace::fromMetresPerDay(80_000.0)),
+            '2026-07-10' => self::snapshot(36_500_000, 90_000, 80_000.0),
             // 7 days before: 7.5 days driven, 750,000 m; budget of 100,000 m a day expects exactly that, and no pace was stored.
-            '2026-07-03' => new SnapshotFigures(Distance::fromMetres(36_000_000), Distance::fromMetres(100_000), null),
+            '2026-07-03' => self::snapshot(36_000_000, 100_000, null),
             // 14 days before: no snapshot.
             // 30 days before: 30.5 days driven, 3,050,000 m; a budget of zero expects nothing.
-            '2026-06-10' => new SnapshotFigures(Distance::fromMetres(35_000_000), Distance::fromMetres(0), Pace::fromMetresPerDay(0.0)),
+            '2026-06-10' => self::snapshot(35_000_000, 0, 0.0),
         ]);
 
         // Budget: 90,000 m a day over 12 hours expects 45,000 m; 50,000 m were driven.
@@ -73,11 +74,22 @@ final class PredictionComparerTest extends TestCase
     {
         $latest = '2026-07-10 12:00:00';
 
-        $comparison = new PredictionComparer()->compare($this->timeline($latest), $this->projection($latest, 36_000_000), 'UTC', []);
+        $comparison = $this->compare($latest, 36_000_000, []);
 
         foreach ([$comparison->budget, $comparison->pace, $comparison->projectedEnd] as $rows) {
-            self::assertSame([ComparisonWindow::Today, ComparisonWindow::LastWeek, ComparisonWindow::LastTwoWeeks, ComparisonWindow::LastMonth], array_map(static fn (WindowComparison $row): ComparisonWindow => $row->window, $rows));
-            self::assertSame([null, null, null, null], array_map(static fn (WindowComparison $row): ?Comparison => $row->comparison, $rows));
+            self::assertSame(
+                [
+                    ComparisonWindow::Today,
+                    ComparisonWindow::LastWeek,
+                    ComparisonWindow::LastTwoWeeks,
+                    ComparisonWindow::LastMonth,
+                ],
+                array_map(static fn (WindowComparison $row): ComparisonWindow => $row->window, $rows),
+            );
+            self::assertSame(
+                [null, null, null, null],
+                array_map(static fn (WindowComparison $row): ?Comparison => $row->comparison, $rows),
+            );
         }
     }
 
@@ -85,9 +97,9 @@ final class PredictionComparerTest extends TestCase
     {
         // 5 days into the lease: the 7 day window starts before it, even with a snapshot for that day.
         $latest = '2026-01-06 12:00:00';
-        $snapshots = ['2025-12-30' => new SnapshotFigures(Distance::fromMetres(1), Distance::fromMetres(100_000), Pace::fromMetresPerDay(100_000.0))];
+        $snapshots = ['2025-12-30' => self::snapshot(1, 100_000, 100_000.0)];
 
-        $comparison = new PredictionComparer()->compare($this->timeline($latest), $this->projection($latest, 1), 'UTC', $snapshots);
+        $comparison = $this->compare($latest, 1, $snapshots);
 
         self::assertNull($comparison->budget[1]->comparison);
         self::assertNull($comparison->pace[1]->comparison);
@@ -98,9 +110,9 @@ final class PredictionComparerTest extends TestCase
         // The latest reading is from 3 July, days before "now": today is the 3rd.
         $latest = '2026-07-03 06:00:00';
 
-        $comparison = new PredictionComparer()->compare($this->timeline($latest), $this->projection($latest, 1), 'UTC', [
-            '2026-07-03' => new SnapshotFigures(Distance::fromMetres(1), Distance::fromMetres(100_000), null),
-            '2026-07-10' => new SnapshotFigures(Distance::fromMetres(1), Distance::fromMetres(1), null),
+        $comparison = $this->compare($latest, 1, [
+            '2026-07-03' => self::snapshot(1, 100_000, null),
+            '2026-07-10' => self::snapshot(1, 1, null),
         ]);
 
         // 6 hours since midnight: 25,000 m driven, 25,000 m expected.
@@ -120,7 +132,8 @@ final class PredictionComparerTest extends TestCase
         $snapshots = [];
 
         foreach (ComparisonWindow::cases() as $window) {
-            $snapshots[$today->localDay->subDays($window->days())->format('Y-m-d')] = new SnapshotFigures(Distance::fromMetres(1), Distance::fromMetres(self::METRES_PER_DAY), null);
+            $day = $today->localDay->subDays($window->days())->format('Y-m-d');
+            $snapshots[$day] = self::snapshot(1, self::METRES_PER_DAY, null);
         }
 
         $comparison = new PredictionComparer()->compare($timeline, $projection, $timeZone, $snapshots);
@@ -150,7 +163,31 @@ final class PredictionComparerTest extends TestCase
     {
         self::assertNotNull($row->comparison);
 
-        return [$row->comparison->actual->metres(), $row->comparison->expected->metres(), $row->comparison->delta->metres()];
+        $comparison = $row->comparison;
+
+        return [$comparison->actual->metres(), $comparison->expected->metres(), $comparison->delta->metres()];
+    }
+
+    /**
+     * @param array<string, SnapshotFigures> $snapshots
+     */
+    private function compare(string $latest, int $projectedAtEnd, array $snapshots): PredictionComparison
+    {
+        return new PredictionComparer()->compare(
+            $this->timeline($latest),
+            $this->projection($latest, $projectedAtEnd),
+            'UTC',
+            $snapshots,
+        );
+    }
+
+    private static function snapshot(int $projectedAtEnd, int $dailyBudget, ?float $metresPerDay): SnapshotFigures
+    {
+        return new SnapshotFigures(
+            Distance::fromMetres($projectedAtEnd),
+            Distance::fromMetres($dailyBudget),
+            null === $metresPerDay ? null : Pace::fromMetresPerDay($metresPerDay),
+        );
     }
 
     private function timeline(string $latest): OdometerTimeline
@@ -159,7 +196,9 @@ final class PredictionComparerTest extends TestCase
         $at = CarbonImmutable::parse($latest, 'UTC');
         $metres = (int) round(($at->getTimestamp() - $start->getTimestamp()) / 86_400 * self::METRES_PER_DAY);
 
-        return OdometerTimeline::fromSamples($start, Distance::fromMetres(0), [new OdometerSample($at, Distance::fromMetres($metres))], $at->addDay());
+        $sample = new OdometerSample($at, Distance::fromMetres($metres));
+
+        return OdometerTimeline::fromSamples($start, Distance::fromMetres(0), [$sample], $at->addDay());
     }
 
     private function projection(string $latest, int $projectedAtEnd): Projection

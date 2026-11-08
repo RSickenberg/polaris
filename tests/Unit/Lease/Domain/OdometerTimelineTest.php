@@ -89,7 +89,13 @@ final class OdometerTimelineTest extends TestCase
         return OdometerTimeline::fromSamples(
             CarbonImmutable::parse(self::START, 'UTC'),
             Distance::fromMetres(0),
-            array_map(static fn (array $sample): OdometerSample => new OdometerSample(CarbonImmutable::parse($sample[0], 'UTC'), Distance::fromMetres($sample[1])), $samples),
+            array_map(
+                static fn (array $sample): OdometerSample => new OdometerSample(
+                    CarbonImmutable::parse($sample[0], 'UTC'),
+                    Distance::fromMetres($sample[1]),
+                ),
+                $samples,
+            ),
             CarbonImmutable::parse('2026-07-01 00:00:00', 'UTC'),
         );
     }

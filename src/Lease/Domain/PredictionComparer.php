@@ -23,8 +23,12 @@ final readonly class PredictionComparer
      *
      * @throws \InvalidArgumentException when the time zone is not an IANA name
      */
-    public function compare(OdometerTimeline $timeline, Projection $latest, string $timeZone, array $snapshots): PredictionComparison
-    {
+    public function compare(
+        OdometerTimeline $timeline,
+        Projection $latest,
+        string $timeZone,
+        array $snapshots,
+    ): PredictionComparison {
         $lastMidnight = OwnerMidnight::latestAt($latest->asOf, $timeZone);
         $budget = [];
         $pace = [];
@@ -37,18 +41,43 @@ final readonly class PredictionComparer
             $driven = $this->drivenSince($timeline, $start, $latest->asOf);
             $seconds = $latest->asOf->getTimestamp() - $start->getTimestamp();
 
-            $budget[] = new WindowComparison($window, null === $figures || null === $driven ? null : Comparison::of(
-                $driven,
-                Distance::fromMetres(HalfUp::scale($figures->dailyBudget->metres(), $seconds, Pace::SECONDS_PER_DAY)),
-            ));
-            $pace[] = new WindowComparison($window, null === $figures?->blendedPace || null === $driven ? null : Comparison::of(
-                $driven,
-                Distance::fromMetres((int) round($figures->blendedPace->metresIn($seconds))),
-            ));
-            $projectedEnd[] = new WindowComparison($window, null === $figures ? null : Comparison::of($latest->projectedAtEnd, $figures->projectedAtEnd));
+            $budget[] = new WindowComparison($window, $this->againstBudget($figures, $driven, $seconds));
+            $pace[] = new WindowComparison($window, $this->againstPace($figures, $driven, $seconds));
+            $projectedEnd[] = new WindowComparison($window, $this->againstProjectedEnd($figures, $latest));
         }
 
         return new PredictionComparison($budget, $pace, $projectedEnd);
+    }
+
+    private function againstBudget(?SnapshotFigures $figures, ?Distance $driven, int $seconds): ?Comparison
+    {
+        if (null === $figures || null === $driven) {
+            return null;
+        }
+
+        $expected = HalfUp::scale($figures->dailyBudget->metres(), $seconds, Pace::SECONDS_PER_DAY);
+
+        return Comparison::of($driven, Distance::fromMetres($expected));
+    }
+
+    private function againstPace(?SnapshotFigures $figures, ?Distance $driven, int $seconds): ?Comparison
+    {
+        if (null === $figures?->blendedPace || null === $driven) {
+            return null;
+        }
+
+        $expected = (int) round($figures->blendedPace->metresIn($seconds));
+
+        return Comparison::of($driven, Distance::fromMetres($expected));
+    }
+
+    private function againstProjectedEnd(?SnapshotFigures $figures, Projection $latest): ?Comparison
+    {
+        if (null === $figures) {
+            return null;
+        }
+
+        return Comparison::of($latest->projectedAtEnd, $figures->projectedAtEnd);
     }
 
     /**
@@ -61,6 +90,8 @@ final readonly class PredictionComparer
             return null;
         }
 
-        return Distance::fromMetres((int) round($timeline->odometerAt($latest->getTimestamp()) - $timeline->odometerAt($start->getTimestamp())));
+        $driven = $timeline->odometerAt($latest->getTimestamp()) - $timeline->odometerAt($start->getTimestamp());
+
+        return Distance::fromMetres((int) round($driven));
     }
 }

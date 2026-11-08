@@ -7,6 +7,7 @@ namespace Polaris\Tests\Functional\Lease;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Polaris\Lease\Domain\Comparison;
 use Polaris\Lease\Domain\Pace;
 use Polaris\Lease\Domain\RiskLevel;
 use Polaris\Lease\Entity\LeaseContract;
@@ -64,11 +65,11 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
 
         self::assertNotNull($result);
         $today = $result->budget[0]->comparison;
-        self::assertSame([50_000, 45_000, 5_000], [$today?->actual->metres(), $today?->expected->metres(), $today?->delta->metres()]);
+        self::assertSame([50_000, 45_000, 5_000], $this->figures($today));
         $pace = $result->pace[0]->comparison;
-        self::assertSame([50_000, 40_000, 10_000], [$pace?->actual->metres(), $pace?->expected->metres(), $pace?->delta->metres()]);
+        self::assertSame([50_000, 40_000, 10_000], $this->figures($pace));
         $week = $result->budget[1]->comparison;
-        self::assertSame([750_000, 750_000, 0], [$week?->actual->metres(), $week?->expected->metres(), $week?->delta->metres()]);
+        self::assertSame([750_000, 750_000, 0], $this->figures($week));
         // The projection now is 36,500 km; this morning's said 36,000 km.
         self::assertSame(500_000, $result->projectedEnd[0]->comparison?->delta->metres());
         self::assertNull($result->budget[2]->comparison, 'No snapshot 14 days before.');
@@ -123,6 +124,14 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
         self::assertNull($this->comparison->compare($this->vehicle));
     }
 
+    /**
+     * @return array{int|null, int|null, int|null} actual, expected and delta in metres
+     */
+    private function figures(?Comparison $comparison): array
+    {
+        return [$comparison?->actual->metres(), $comparison?->expected->metres(), $comparison?->delta->metres()];
+    }
+
     private function lease(): void
     {
         $data = new LeaseContractData();
@@ -138,12 +147,18 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
 
     private function reading(string $at, int $km): void
     {
-        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse($at, 'UTC'), Distance::fromKilometres($km)));
+        $this->entityManager->persist(
+            OdometerReading::manual($this->vehicle, CarbonImmutable::parse($at, 'UTC'), Distance::fromKilometres($km)),
+        );
         $this->entityManager->flush();
     }
 
-    private function snapshot(string $localDay, int $projectedAtEndKm, int $dailyBudgetKm, ?float $paceMetresPerDay): void
-    {
+    private function snapshot(
+        string $localDay,
+        int $projectedAtEndKm,
+        int $dailyBudgetKm,
+        ?float $paceMetresPerDay,
+    ): void {
         $contract = $this->leases->find($this->vehicle);
         self::assertInstanceOf(LeaseContract::class, $contract);
         $midnight = CarbonImmutable::parse($localDay, 'UTC');
@@ -168,7 +183,10 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
 
         if (null === $paceMetresPerDay) {
             // A row saved before the pace and the cutoff were stored has neither.
-            $this->entityManager->getConnection()->executeStatement('UPDATE projection_snapshot SET cutoff_at = NULL, overall_pace_metres_per_day = NULL, recent_pace_metres_per_day = NULL, blended_pace_metres_per_day = NULL');
+            $this->entityManager->getConnection()->executeStatement(
+                'UPDATE projection_snapshot SET cutoff_at = NULL, overall_pace_metres_per_day = NULL, '
+                . 'recent_pace_metres_per_day = NULL, blended_pace_metres_per_day = NULL',
+            );
             $this->entityManager->clear();
             $vehicle = $this->entityManager->find(Vehicle::class, $this->vehicle->getId());
             self::assertInstanceOf(Vehicle::class, $vehicle);

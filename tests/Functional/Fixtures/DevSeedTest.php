@@ -108,7 +108,9 @@ final class DevSeedTest extends KernelTestCase
             $counts[$vehicle->getName()] = \count($points);
 
             if ([] !== $points) {
-                self::assertSame('2026-07-02', $points[array_key_last($points)]->localDay->format('Y-m-d'), $vehicle->getName() . ': the last snapshot is today\'s.');
+                $lastDay = $points[array_key_last($points)]->localDay->format('Y-m-d');
+
+                self::assertSame('2026-07-02', $lastDay, $vehicle->getName() . ': the last snapshot is today\'s.');
                 self::assertNotNull($points[0]->blendedPace, $vehicle->getName() . ': the snapshots keep the pace.');
             }
         }

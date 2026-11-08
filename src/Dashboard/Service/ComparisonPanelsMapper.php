@@ -8,6 +8,7 @@ use Polaris\Dashboard\Service\Dto\ComparisonFigures;
 use Polaris\Dashboard\Service\Dto\ComparisonPanels;
 use Polaris\Dashboard\Service\Dto\ComparisonRow;
 use Polaris\Dashboard\Service\Enum\ComparisonPeriod;
+use Polaris\Lease\Domain\Comparison;
 use Polaris\Lease\Domain\ComparisonWindow;
 use Polaris\Lease\Domain\PredictionComparison;
 use Polaris\Lease\Domain\WindowComparison;
@@ -39,11 +40,16 @@ final readonly class ComparisonPanelsMapper
             $result = $window->comparison;
             $rows[] = new ComparisonRow(
                 self::period($window->window),
-                null === $result ? null : new ComparisonFigures($result->actual, $result->expected, $result->delta, $result->ratio),
+                null === $result ? null : $this->figures($result),
             );
         }
 
         return $rows;
+    }
+
+    private function figures(Comparison $result): ComparisonFigures
+    {
+        return new ComparisonFigures($result->actual, $result->expected, $result->delta, $result->ratio);
     }
 
     private static function period(ComparisonWindow $window): ComparisonPeriod

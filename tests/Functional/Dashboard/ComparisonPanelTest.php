@@ -61,7 +61,9 @@ final class ComparisonPanelTest extends KernelTestCase
     {
         $panel = $this->panel('fr');
 
-        self::assertSame('Aujourd’hui', $this->text($panel->filter('[data-period=today] td')->first()->filter('span')->first()));
+        $period = $panel->filter('[data-period=today] td')->first()->filter('span')->first();
+
+        self::assertSame('Aujourd’hui', $this->text($period));
         self::assertSame('+11 %', $this->text($panel->filter('[data-period=today] [data-figure=ratio]')));
     }
 
@@ -85,8 +87,9 @@ final class ComparisonPanelTest extends KernelTestCase
             new ComparisonRow(ComparisonPeriod::LastMonth, $withHistory ? $this->figures(9_000, 9_000) : null),
         ];
 
+        $template = "{{ component('Dashboard:ComparisonPanel', {key: 'budget', title: 'Title', basis: 'Basis', rows: rows}) }}";
         $html = self::getContainer()->get(Environment::class)
-            ->createTemplate("{{ component('Dashboard:ComparisonPanel', {key: 'budget', title: 'Title', basis: 'Basis', rows: rows}) }}")
+            ->createTemplate($template)
             ->render(['rows' => $rows]);
 
         return new Crawler($html);
@@ -96,7 +99,9 @@ final class ComparisonPanelTest extends KernelTestCase
     {
         $delta = DistanceDelta::between(Distance::fromMetres($expected), Distance::fromMetres($actual));
 
-        return new ComparisonFigures(Distance::fromMetres($actual), Distance::fromMetres($expected), $delta, 0 === $expected ? null : $delta->metres() / $expected);
+        $ratio = 0 === $expected ? null : $delta->metres() / $expected;
+
+        return new ComparisonFigures(Distance::fromMetres($actual), Distance::fromMetres($expected), $delta, $ratio);
     }
 
     private function text(Crawler $node): string

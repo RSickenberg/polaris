@@ -43,8 +43,9 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
  * - Model X: 24-month lease with a 10 % tolerance, projected 93 to 97 % of the allowance (watch).
  * - Roadster: 12-month lease that ended 2 to 8 months ago, 300 to 2 500 km over its allowance (ended).
  *
- * The running leases (Model 3, Model Y, Model X) also get the daily projection snapshots of the last 30 days and today, as
- * the owner's midnights would have saved them, so the comparison panels of the dashboard have figures in every row.
+ * The running leases (Model 3, Model Y, Model X) also get the daily projection snapshots of the last 30 days and
+ * today, as the owner's midnights would have saved them, so the comparison panels of the dashboard have figures in
+ * every row.
  */
 final class DevSeed extends Fixture
 {
@@ -130,8 +131,8 @@ final class DevSeed extends Fixture
     }
 
     /**
-     * The snapshots the owner's midnights of the last 30 days and of today would have saved, each with only the readings
-     * up to its midnight. A midnight before the first reading has no data and saves nothing.
+     * The snapshots the owner's midnights of the last 30 days and of today would have saved, each with only the
+     * readings up to its midnight. A midnight before the first reading has no data and saves nothing.
      */
     private function saveSnapshots(Vehicle $vehicle, CarbonImmutable $today): void
     {
