@@ -188,27 +188,27 @@
       </trans-unit>
       <trans-unit id="compare.budget.title">
         <source>compare.budget.title</source>
-        <target>Par rapport au budget</target>
+        <target>Conduite et budget</target>
       </trans-unit>
       <trans-unit id="compare.budget.basis">
         <source>compare.budget.basis</source>
-        <target>Distance parcourue par rapport au budget quotidien du relevé de ce jour.</target>
+        <target>Distance parcourue, comparée au budget quotidien fixé ce jour-là.</target>
       </trans-unit>
       <trans-unit id="compare.pace.title">
         <source>compare.pace.title</source>
-        <target>Par rapport au rythme prévu</target>
+        <target>Conduite et rythme prévu</target>
       </trans-unit>
       <trans-unit id="compare.pace.basis">
         <source>compare.pace.basis</source>
-        <target>Distance parcourue par rapport au rythme prévu ce jour-là.</target>
+        <target>Distance parcourue, comparée au rythme prévu ce jour-là.</target>
       </trans-unit>
       <trans-unit id="compare.projected_end.title">
         <source>compare.projected_end.title</source>
-        <target>Fin de bail projetée</target>
+        <target>Fin de bail et prévision</target>
       </trans-unit>
       <trans-unit id="compare.projected_end.basis">
         <source>compare.projected_end.basis</source>
-        <target>Distance projetée à la fin du bail, maintenant par rapport à la prévision de ce jour.</target>
+        <target>Distance projetée à la fin du bail, comparée à la prévision de ce jour-là.</target>
       </trans-unit>
       <trans-unit id="compare.period.today">
         <source>compare.period.today</source>
@@ -236,7 +236,7 @@
       </trans-unit>
       <trans-unit id="compare.column.projected">
         <source>compare.column.projected</source>
-        <target>Maintenant / avant</target>
+        <target>Maintenant / prévu</target>
       </trans-unit>
       <trans-unit id="compare.column.difference">
         <source>compare.column.difference</source>

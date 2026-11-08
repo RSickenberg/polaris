@@ -188,27 +188,27 @@
       </trans-unit>
       <trans-unit id="compare.budget.title">
         <source>compare.budget.title</source>
-        <target>Against the budget</target>
+        <target>Driving vs budget</target>
       </trans-unit>
       <trans-unit id="compare.budget.basis">
         <source>compare.budget.basis</source>
-        <target>Distance driven against the daily budget of that day's snapshot.</target>
+        <target>Distance driven, compared with the daily budget set that day.</target>
       </trans-unit>
       <trans-unit id="compare.pace.title">
         <source>compare.pace.title</source>
-        <target>Against the forecast pace</target>
+        <target>Driving vs forecast pace</target>
       </trans-unit>
       <trans-unit id="compare.pace.basis">
         <source>compare.pace.basis</source>
-        <target>Distance driven against the pace forecast on that day.</target>
+        <target>Distance driven, compared with the pace forecast that day.</target>
       </trans-unit>
       <trans-unit id="compare.projected_end.title">
         <source>compare.projected_end.title</source>
-        <target>Projected end</target>
+        <target>Projected end vs forecast</target>
       </trans-unit>
       <trans-unit id="compare.projected_end.basis">
         <source>compare.projected_end.basis</source>
-        <target>Projected distance at lease end, now against the forecast of that day.</target>
+        <target>Distance projected at lease end, compared with the forecast of that day.</target>
       </trans-unit>
       <trans-unit id="compare.period.today">
         <source>compare.period.today</source>
@@ -236,11 +236,11 @@
       </trans-unit>
       <trans-unit id="compare.column.projected">
         <source>compare.column.projected</source>
-        <target>Now / then</target>
+        <target>Now / forecast</target>
       </trans-unit>
       <trans-unit id="compare.column.difference">
         <source>compare.column.difference</source>
-        <target>Difference</target>
+        <target>Gap</target>
       </trans-unit>
       <trans-unit id="compare.no_history">
         <source>compare.no_history</source>

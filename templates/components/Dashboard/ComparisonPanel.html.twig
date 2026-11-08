@@ -20,7 +20,8 @@
     <twig:Card:Content class="mt-auto">
         <twig:Table>
             <twig:Table:Header>
-                <twig:Table:Row>
+                {# The header row is not a row to point at: no hover colour (the kit row has one). #}
+                <twig:Table:Row class="hover:bg-transparent!">
                     <twig:Table:Head class="ps-0 whitespace-normal">{{ 'compare.column.period'|trans(domain='dashboard') }}</twig:Table:Head>
                     <twig:Table:Head class="whitespace-normal text-end">{{ figuresLabel }}</twig:Table:Head>
                     <twig:Table:Head class="pe-0 whitespace-normal text-end">{{ 'compare.column.difference'|trans(domain='dashboard') }}</twig:Table:Head>
