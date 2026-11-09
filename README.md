@@ -8,7 +8,7 @@ Polaris tracks your Tesla's odometer against your lease allowance, projects the 
 
 > **Status:** pre-1.0 (0.x). Read the release notes before you upgrade.
 
-This is the self-hostable edition: one user, personal and noncommercial use. You connect your own Tesla developer app, so Tesla bills API usage to your own developer account.
+This is the self-hostable edition: one user and one vehicle, personal and noncommercial use. You connect your own Tesla developer app, so Tesla bills API usage to your own developer account.
 
 ## Screenshots
 
