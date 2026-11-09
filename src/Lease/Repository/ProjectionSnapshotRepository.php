@@ -35,19 +35,30 @@ class ProjectionSnapshotRepository extends ServiceEntityRepository
      *
      * @return list<ProjectionSnapshot>
      */
-    public function findHistory(LeaseContract $contract, ?CarbonImmutable $from = null, ?CarbonImmutable $to = null): array
-    {
+    public function findHistory(
+        LeaseContract $contract,
+        ?CarbonImmutable $from = null,
+        ?CarbonImmutable $to = null,
+    ): array {
         $query = $this->createQueryBuilder('s')
             ->andWhere('s.leaseContract = :contract')
             ->setParameter('contract', $contract->getId(), UlidType::NAME)
             ->orderBy('s.localDay', \SortDirection::Ascending);
 
         if (null !== $from) {
-            $query->andWhere('s.localDay >= :from')->setParameter('from', self::calendarDate($from), CarbonDateImmutableType::NAME);
+            $query->andWhere('s.localDay >= :from')->setParameter(
+                'from',
+                self::calendarDate($from),
+                CarbonDateImmutableType::NAME,
+            );
         }
 
         if (null !== $to) {
-            $query->andWhere('s.localDay <= :to')->setParameter('to', self::calendarDate($to), CarbonDateImmutableType::NAME);
+            $query->andWhere('s.localDay <= :to')->setParameter(
+                'to',
+                self::calendarDate($to),
+                CarbonDateImmutableType::NAME,
+            );
         }
 
         /* @var list<ProjectionSnapshot> */

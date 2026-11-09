@@ -33,9 +33,15 @@ final class AddVehicleCommandTest extends KernelTestCase
         $tester = $this->tester();
         $owner = self::createUser();
 
-        self::assertSame(Command::SUCCESS, $tester->execute(['vin' => strtolower(FleetApiResponses::VIN), 'name' => ' Model 3 ']));
+        self::assertSame(
+            Command::SUCCESS,
+            $tester->execute(['vin' => strtolower(FleetApiResponses::VIN), 'name' => ' Model 3 ']),
+        );
 
-        $vehicle = self::getContainer()->get(EntityManagerInterface::class)->getRepository(Vehicle::class)->findOneBy([]);
+        $vehicle = self::getContainer()
+            ->get(EntityManagerInterface::class)
+            ->getRepository(Vehicle::class)
+            ->findOneBy([]);
         self::assertInstanceOf(Vehicle::class, $vehicle);
         self::assertSame(FleetApiResponses::VIN, $vehicle->getVin()->value());
         self::assertSame('Model 3', $vehicle->getName());
@@ -48,9 +54,15 @@ final class AddVehicleCommandTest extends KernelTestCase
         self::createUser();
         $other = self::createUser('other@example.test');
 
-        self::assertSame(Command::SUCCESS, $tester->execute(['vin' => FleetApiResponses::VIN, 'name' => 'Model 3', '--email' => 'OTHER@example.test']));
+        self::assertSame(
+            Command::SUCCESS,
+            $tester->execute(['vin' => FleetApiResponses::VIN, 'name' => 'Model 3', '--email' => 'OTHER@example.test']),
+        );
 
-        $vehicle = self::getContainer()->get(EntityManagerInterface::class)->getRepository(Vehicle::class)->findOneBy([]);
+        $vehicle = self::getContainer()
+            ->get(EntityManagerInterface::class)
+            ->getRepository(Vehicle::class)
+            ->findOneBy([]);
         self::assertSame($other->getId()->toRfc4122(), $vehicle?->getOwner()->getId()->toRfc4122());
     }
 

@@ -33,7 +33,9 @@ final readonly class SecretEncrypter
         $key = base64_decode($encryptionKey, true);
 
         if (false === $key || \SODIUM_CRYPTO_SECRETBOX_KEYBYTES !== \strlen($key)) {
-            throw new \InvalidArgumentException('POLARIS_ENCRYPTION_KEY must be 32 random bytes encoded in base64 (openssl rand -base64 32).');
+            throw new \InvalidArgumentException(
+                'POLARIS_ENCRYPTION_KEY must be 32 random bytes encoded in base64 (openssl rand -base64 32).'
+            );
         }
 
         $this->key = $key;

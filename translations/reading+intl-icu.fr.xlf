@@ -4,11 +4,11 @@
     <body>
       <trans-unit id="rejected.lower_than_previous">
         <source>rejected.lower_than_previous</source>
-        <target>Inférieur au relevé précédent ({limit, number, ::.#} {unit} le {at, date, medium} à {at, time, short} UTC).</target>
+        <target>Inférieur au relevé précédent ({limit, number, ::.#} {unit} le {at}).</target>
       </trans-unit>
       <trans-unit id="rejected.higher_than_next">
         <source>rejected.higher_than_next</source>
-        <target>Supérieur au relevé suivant ({limit, number, ::.#} {unit} le {at, date, medium} à {at, time, short} UTC).</target>
+        <target>Supérieur au relevé suivant ({limit, number, ::.#} {unit} le {at}).</target>
       </trans-unit>
       <trans-unit id="rejected.duplicate_instant">
         <source>rejected.duplicate_instant</source>
@@ -20,7 +20,7 @@
       </trans-unit>
       <trans-unit id="flash.reading_added_after_return">
         <source>flash.reading_added_after_return</source>
-        <target>Relevé enregistré, mais non pris en compte : le véhicule a été rendu le {on, date, long}.</target>
+        <target>Relevé enregistré, mais non pris en compte : la voiture a été rendue le {on, date, long}.</target>
       </trans-unit>
     </body>
   </file>

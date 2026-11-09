@@ -2,14 +2,18 @@
     ## 'ok'|'watch'|'over' The risk level of the lease.
     level
 -%}
-{# The level is told by the icon and the title as well as by the color. The message is the content of the tag. #}
+{# The level is told by the icon and the title as well as by the color (tokens --risk-* and the tones of app.css). The message is the content of the tag; it takes the color of the title, its bold figures included. #}
 {# A block cannot sit inside a <twig:...> tag, so the message is rendered here and placed below. #}
 {% set message %}{% block content %}{% endblock %}{% endset %}
 {% set icons = {ok: 'lucide:circle-check', watch: 'lucide:triangle-alert', over: 'lucide:circle-alert'} %}
 <twig:Alert
     :variant="'over' == level ? 'destructive' : 'default'"
     data-risk="{{ level }}"
-    class="{{ {ok: 'border-green-600/50 bg-green-50 text-green-900 dark:border-green-400/40 dark:bg-green-950/40 dark:text-green-200', watch: 'border-amber-500/60 bg-amber-50 text-amber-900 dark:border-amber-400/40 dark:bg-amber-950/40 dark:text-amber-200', over: 'border-red-500/60 bg-red-50 text-red-900 dark:border-red-400/40 dark:bg-red-950/40 dark:text-red-200 *:data-[slot=alert-description]:text-red-900/90 dark:*:data-[slot=alert-description]:text-red-200/90'}[level] ?? '' }}"
+    class="{{ {
+        ok: 'border-risk-ok bg-success-surface text-success-foreground *:data-[slot=alert-description]:text-success-foreground',
+        watch: 'border-risk-watch bg-warning-surface text-warning-foreground *:data-[slot=alert-description]:text-warning-foreground',
+        over: 'border-risk-over bg-danger-surface text-danger-foreground *:data-[slot=alert-description]:text-danger-foreground',
+    }[level] ?? '' }}"
     {{ ...attributes }}
 >
     <twig:ux:icon :name="icons[level]" aria-hidden="true" />

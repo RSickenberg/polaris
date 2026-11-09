@@ -10,10 +10,6 @@
         <source>unit.mi</source>
         <target>mi</target>
       </trans-unit>
-      <trans-unit id="toast.dismiss">
-        <source>toast.dismiss</source>
-        <target>Dismiss</target>
-      </trans-unit>
       <trans-unit id="layout.skip">
         <source>layout.skip</source>
         <target>Skip to the main content</target>
@@ -96,7 +92,7 @@
       </trans-unit>
       <trans-unit id="account.tesla">
         <source>account.tesla</source>
-        <target>Tesla app</target>
+        <target>Tesla settings</target>
       </trans-unit>
       <trans-unit id="nav.vehicles">
         <source>nav.vehicles</source>

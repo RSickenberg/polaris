@@ -64,9 +64,18 @@ final class KeyPairImporterTest extends TestCase
         yield 'text' => ['hello', 'not a PEM private key'];
         yield 'public key' => [new KeyPairGenerator()->generate()->publicKeyPem, 'not a PEM private key'];
         yield 'truncated' => ["-----BEGIN PRIVATE KEY-----\nabcd\n-----END PRIVATE KEY-----\n", 'cannot be read'];
-        yield 'passphrase' => ["-----BEGIN ENCRYPTED PRIVATE KEY-----\nabcd\n-----END ENCRYPTED PRIVATE KEY-----\n", 'passphrase'];
-        yield 'other curve' => [self::export(['curve_name' => 'secp384r1', 'private_key_type' => \OPENSSL_KEYTYPE_EC]), 'prime256v1'];
-        yield 'rsa' => [self::export(['private_key_bits' => 2048, 'private_key_type' => \OPENSSL_KEYTYPE_RSA]), 'elliptic curve'];
+        yield 'passphrase' => [
+            "-----BEGIN ENCRYPTED PRIVATE KEY-----\nabcd\n-----END ENCRYPTED PRIVATE KEY-----\n",
+            'passphrase',
+        ];
+        yield 'other curve' => [
+            self::export(['curve_name' => 'secp384r1', 'private_key_type' => \OPENSSL_KEYTYPE_EC]),
+            'prime256v1',
+        ];
+        yield 'rsa' => [
+            self::export(['private_key_bits' => 2048, 'private_key_type' => \OPENSSL_KEYTYPE_RSA]),
+            'elliptic curve',
+        ];
     }
 
     /**
@@ -96,6 +105,8 @@ final class KeyPairImporterTest extends TestCase
             . "\xa1\x44\x03\x42\x00\x04" . $pad($ec['x']) . $pad($ec['y']);
         $sec1 = "\x30" . pack('C', \strlen($body)) . $body;
 
-        return "-----BEGIN EC PRIVATE KEY-----\n" . chunk_split(base64_encode($sec1), 64, "\n") . "-----END EC PRIVATE KEY-----\n";
+        $base64 = chunk_split(base64_encode($sec1), 64, "\n");
+
+        return "-----BEGIN EC PRIVATE KEY-----\n" . $base64 . "-----END EC PRIVATE KEY-----\n";
     }
 }

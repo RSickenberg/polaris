@@ -14,6 +14,7 @@ use Polaris\Lease\Entity\LeaseContract;
 use Polaris\Lease\Entity\ProjectionSnapshot;
 use Polaris\Lease\Form\Model\LeaseContractData;
 use Polaris\Lease\Service\ActualVersusPredictedService;
+use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Currency;
@@ -111,7 +112,10 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
         $this->reading('2026-07-10 12:00:00', 19_050);
         self::assertNotNull($this->comparison->compare($this->vehicle));
 
-        $this->leases->markReturned($this->vehicle, new \DateTimeImmutable('2026-07-10'));
+        self::getContainer()->get(LeaseReturnService::class)->markReturned(
+            $this->vehicle,
+            new \DateTimeImmutable('2026-07-10'),
+        );
         self::assertNull($this->comparison->compare($this->vehicle), 'Returned.');
     }
 

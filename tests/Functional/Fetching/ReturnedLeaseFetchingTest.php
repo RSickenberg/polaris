@@ -22,7 +22,7 @@ use Polaris\Lease\Domain\EndDateConvention;
 use Polaris\Lease\Domain\LeaseTerm;
 use Polaris\Lease\Domain\Tolerance;
 use Polaris\Lease\Entity\LeaseContract;
-use Polaris\Lease\Service\LeaseTermsService;
+use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Currency;
 use Polaris\Shared\Domain\Distance;
@@ -66,29 +66,44 @@ final class ReturnedLeaseFetchingTest extends KernelTestCase
         $owner = self::createUser();
         $app = self::createConfiguredApp($owner);
         self::createToken($app, CarbonImmutable::parse('2026-10-26 12:00:00', 'UTC'));
-        self::getContainer()->set('http_client', new MockHttpClient(function (string $method, string $url): MockResponse {
+        $client = new MockHttpClient(function (string $method, string $url): MockResponse {
             $this->requests[] = $method . ' ' . $url;
 
-            return new MockResponse(str_ends_with($url, '/vehicle_data') ? FleetApiResponses::vehicleData(100.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS) : FleetApiResponses::vehicle('online'));
-        }));
+            $answer = str_ends_with($url, '/vehicle_data')
+                ? FleetApiResponses::vehicleData(100.0, FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS)
+                : FleetApiResponses::vehicle('online');
+
+            return new MockResponse($answer);
+        });
+        self::getContainer()->set('http_client', $client);
 
         $this->vehicle = new Vehicle(new Vin(FleetApiResponses::VIN), 'Model 3', $owner);
         $this->entityManager()->persist($this->vehicle);
         $this->entityManager()->persist(new LeaseContract(
             $this->vehicle,
-            LeaseTerm::fromCalendarDates(CarbonImmutable::parse('2026-01-01', 'UTC'), CarbonImmutable::parse('2027-01-01', 'UTC'), EndDateConvention::Exclusive),
+            LeaseTerm::fromCalendarDates(
+                CarbonImmutable::parse('2026-01-01', 'UTC'),
+                CarbonImmutable::parse('2027-01-01', 'UTC'),
+                EndDateConvention::Exclusive,
+            ),
             Allowance::ofTotal(Distance::fromKilometres(15_000)),
             Distance::fromKilometres(0),
             Money::fromDecimal('0.12', Currency::CHF),
             Tolerance::fromPercent(0),
         ));
-        $this->entityManager()->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-10-20 10:00:00', 'UTC'), Distance::fromKilometres(9_000)));
+        $this->entityManager()->persist(
+            OdometerReading::manual(
+                $this->vehicle,
+                CarbonImmutable::parse('2026-10-20 10:00:00', 'UTC'),
+                Distance::fromKilometres(9_000),
+            )
+        );
         $this->entityManager()->flush();
     }
 
     public function testTheDispatcherQueuesNothingAndWritesNoSlotForAReturnedVehicle(): void
     {
-        $this->leases()->markReturned($this->vehicle, new \DateTimeImmutable('2026-10-24'));
+        $this->leaseReturns()->markReturned($this->vehicle, new \DateTimeImmutable('2026-10-24'));
 
         self::assertSame(0, $this->dispatcher()->dispatch());
         self::assertSame([], $this->queued());
@@ -97,12 +112,12 @@ final class ReturnedLeaseFetchingTest extends KernelTestCase
 
     public function testFetchingResumesAtTheNextSlotOnceTheReturnIsUndone(): void
     {
-        $this->leases()->markReturned($this->vehicle, new \DateTimeImmutable('2026-10-24'));
+        $this->leaseReturns()->markReturned($this->vehicle, new \DateTimeImmutable('2026-10-24'));
         self::assertSame(0, $this->dispatcher()->dispatch());
 
         // The window of the slot of the day closed (3 hours): no catch-up, the next slot is the next day.
         self::mockTime('2026-10-26 00:30:00 UTC');
-        $this->leases()->undoReturn($this->vehicle);
+        $this->leaseReturns()->undoReturn($this->vehicle);
         self::assertSame(0, $this->dispatcher()->dispatch());
 
         self::mockTime('2026-10-26 21:01:00 UTC');
@@ -112,7 +127,7 @@ final class ReturnedLeaseFetchingTest extends KernelTestCase
 
     public function testAManualRefreshIsRefusedAndAsksNothing(): void
     {
-        $this->leases()->markReturned($this->vehicle, new \DateTimeImmutable('2026-10-24'));
+        $this->leaseReturns()->markReturned($this->vehicle, new \DateTimeImmutable('2026-10-24'));
 
         $result = $this->refreshes()->request($this->vehicle);
 
@@ -129,7 +144,7 @@ final class ReturnedLeaseFetchingTest extends KernelTestCase
         $attempt->settle(RefreshOutcome::Asleep, CarbonImmutable::parse('2026-10-25 21:01:00', 'UTC'));
         $this->entityManager()->persist($attempt);
         $this->entityManager()->flush();
-        $this->leases()->markReturned($this->vehicle, new \DateTimeImmutable('2026-10-24'));
+        $this->leaseReturns()->markReturned($this->vehicle, new \DateTimeImmutable('2026-10-24'));
         $id = $attempt->getId()->toRfc4122();
 
         self::assertSame(WakeRequestStatus::Returned, $this->refreshes()->wakeOffer($this->vehicle, $id)->status);
@@ -142,9 +157,11 @@ final class ReturnedLeaseFetchingTest extends KernelTestCase
         $slot = CarbonImmutable::parse('2026-10-25 21:00:00', 'UTC');
         $this->entityManager()->persist(new FetchSlotRun($this->vehicle, $slot, $slot));
         $this->entityManager()->flush();
-        $this->leases()->markReturned($this->vehicle, new \DateTimeImmutable('2026-10-24'));
+        $this->leaseReturns()->markReturned($this->vehicle, new \DateTimeImmutable('2026-10-24'));
 
-        $status = self::getContainer()->get(OdometerFetcher::class)->fetch(new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), $slot->getTimestamp()));
+        $status = self::getContainer()->get(OdometerFetcher::class)->fetch(
+            new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), $slot->getTimestamp())
+        );
 
         self::assertSame(SlotRunStatus::Skipped, $status);
         self::assertSame([], $this->requests);
@@ -160,9 +177,11 @@ final class ReturnedLeaseFetchingTest extends KernelTestCase
         self::assertTrue($accepted->isAccepted());
         $attemptId = $accepted->attemptId?->toRfc4122();
         self::assertNotNull($attemptId);
-        $this->leases()->markReturned($this->vehicle, new \DateTimeImmutable('2026-10-24'));
+        $this->leaseReturns()->markReturned($this->vehicle, new \DateTimeImmutable('2026-10-24'));
 
-        $status = self::getContainer()->get(OdometerFetcher::class)->fetch(new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), null, 0, $attemptId));
+        $status = self::getContainer()->get(OdometerFetcher::class)->fetch(
+            new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), null, 0, $attemptId)
+        );
 
         self::assertSame(SlotRunStatus::Skipped, $status);
         self::assertSame([], $this->requests);
@@ -172,9 +191,9 @@ final class ReturnedLeaseFetchingTest extends KernelTestCase
         self::assertTrue($attempt->getOutcome()->isSettled());
     }
 
-    private function leases(): LeaseTermsService
+    private function leaseReturns(): LeaseReturnService
     {
-        return self::getContainer()->get(LeaseTermsService::class);
+        return self::getContainer()->get(LeaseReturnService::class);
     }
 
     private function dispatcher(): DueFetchDispatcher

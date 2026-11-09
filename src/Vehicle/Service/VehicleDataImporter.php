@@ -32,15 +32,17 @@ use Polaris\Vehicle\Domain\JsonObject;
 use Polaris\Vehicle\Entity\Vehicle;
 use Polaris\Vehicle\Service\Dto\VehicleDataImportResult;
 use Polaris\Vehicle\Service\Enum\LeaseImportOutcome;
+use Polaris\Vehicle\Service\Enum\VehicleDataRejection;
 use Polaris\Vehicle\Service\Exception\VehicleDataRejected;
 
 /**
- * Reads back a file written by {@see VehicleDataExporter} into a vehicle, merging with what it has: the lease is created
- * only when the vehicle has none, a reading at an instant already stored is left alone, and so is a snapshot of a local day
- * that has one. Nothing is replaced or deleted, so importing the same file twice changes nothing the second time.
+ * Reads back a file written by {@see VehicleDataExporter} into a vehicle, merging with what it has: the lease is
+ * created only when the vehicle has none, a reading at an instant already stored is left alone, and so is a snapshot of
+ * a local day that has one. Nothing is replaced or deleted, so importing the same file twice changes nothing the second
+ * time.
  *
- * The whole file is read and checked before anything is written, and the writes are one transaction: a file that does not
- * fit imports nothing. The vehicle is the one the caller chooses; the file does not say which car it is.
+ * The whole file is read and checked before anything is written, and the writes are one transaction: a file that does
+ * not fit imports nothing. The vehicle is the one the caller chooses; the file does not say which car it is.
  */
 final readonly class VehicleDataImporter
 {
@@ -61,11 +63,11 @@ final readonly class VehicleDataImporter
         try {
             $file = JsonObject::parse($json);
         } catch (\InvalidArgumentException $e) {
-            throw new VehicleDataRejected(VehicleDataRejected::NOT_JSON, $e->getMessage(), $e);
+            throw new VehicleDataRejected(VehicleDataRejection::NotJson, $e->getMessage(), $e);
         }
 
         if (!$this->isExport($file)) {
-            throw new VehicleDataRejected(VehicleDataRejected::NOT_AN_EXPORT, 'The file is not an export of Polaris.');
+            throw new VehicleDataRejected(VehicleDataRejection::NotAnExport, 'The file is not an export of Polaris.');
         }
 
         if (VehicleDataExporter::VERSION !== $file->int('version')) {
@@ -75,7 +77,7 @@ final readonly class VehicleDataImporter
                 VehicleDataExporter::VERSION,
             );
 
-            throw new VehicleDataRejected(VehicleDataRejected::UNKNOWN_VERSION, $detail);
+            throw new VehicleDataRejected(VehicleDataRejection::UnknownVersion, $detail);
         }
 
         try {
@@ -90,7 +92,7 @@ final readonly class VehicleDataImporter
             $readings = $this->readingsOf($file);
             $points = $this->snapshotsOf($file);
         } catch (\InvalidArgumentException $e) {
-            throw new VehicleDataRejected(VehicleDataRejected::INVALID, $e->getMessage(), $e);
+            throw new VehicleDataRejected(VehicleDataRejection::Invalid, $e->getMessage(), $e);
         }
 
         try {
@@ -101,8 +103,10 @@ final readonly class VehicleDataImporter
                     $this->snapshots->import($vehicle, $points),
                 ),
             );
-        } catch (LeaseTermsRejected|\InvalidArgumentException $e) {
-            throw new VehicleDataRejected(VehicleDataRejected::INVALID, $e->getMessage(), $e);
+        } catch (LeaseTermsRejected $e) {
+            throw new VehicleDataRejected(VehicleDataRejection::Invalid, $e->reason->value, $e);
+        } catch (\InvalidArgumentException $e) {
+            throw new VehicleDataRejected(VehicleDataRejection::Invalid, $e->getMessage(), $e);
         }
     }
 

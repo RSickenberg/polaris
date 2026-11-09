@@ -18,7 +18,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * Registers the Tesla app in every enabled Fleet API region, after checking that the public key is
  * served on the app domain.
  */
-#[AsCommand(name: 'polaris:tesla:register', description: 'Register the Tesla app with the Fleet API in each enabled region')]
+#[AsCommand(
+    name: 'polaris:tesla:register',
+    description: 'Register the Tesla app with the Fleet API in each enabled region',
+)]
 final readonly class RegisterCommand
 {
     public function __construct(
@@ -64,11 +67,17 @@ final readonly class RegisterCommand
         foreach ($report->results as $result) {
             $line = \sprintf('[%s] %s', $result->region->value, $result->message);
 
-            RegistrationStatus::Registered === $result->status ? $io->writeln($line) : $io->getErrorStyle()->writeln('<error>' . $line . '</error>');
+            if (RegistrationStatus::Registered === $result->status) {
+                $io->writeln($line);
+            } else {
+                $io->getErrorStyle()->writeln('<error>' . $line . '</error>');
+            }
         }
 
         if (!$report->isSuccess()) {
-            $io->error('The app is not registered in every enabled region. Fix the errors above and run the command again.');
+            $io->error(
+                'The app is not registered in every enabled region. Fix the errors above and run the command again.'
+            );
 
             return Command::FAILURE;
         }

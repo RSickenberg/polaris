@@ -12,6 +12,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -35,15 +36,19 @@ final class LocaleController extends AbstractController
     }
 
     #[Route('/locale/{locale}', name: 'shared_locale', methods: ['GET'])]
-    public function switch(Request $request, string $locale): RedirectResponse
-    {
+    public function switch(
+        Request $request,
+        string $locale,
+        #[MapQueryParameter]
+        string $redirect = '',
+    ): RedirectResponse {
         if (!\in_array($locale, $this->enabledLocales, true)) {
             throw new NotFoundHttpException();
         }
 
         $this->dispatcher->dispatch(new LocaleSwitched($locale));
 
-        $response = new RedirectResponse($this->localPath($request->query->getString('redirect')));
+        $response = new RedirectResponse($this->localPath($redirect));
         $response->headers->setCookie(Cookie::create(
             name: CookiePreferredLocaleProvider::COOKIE,
             value: $locale,

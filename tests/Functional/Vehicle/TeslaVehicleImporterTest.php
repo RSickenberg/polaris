@@ -43,7 +43,10 @@ final class TeslaVehicleImporterTest extends KernelTestCase
 
         $candidates = self::importer()->candidates($this->owner);
 
-        self::assertSame([FleetApiResponses::VIN, FleetApiResponses::OTHER_VIN], array_map(static fn (ImportCandidate $c): string => $c->summary->vin->value(), $candidates));
+        self::assertSame(
+            [FleetApiResponses::VIN, FleetApiResponses::OTHER_VIN],
+            array_map(static fn (ImportCandidate $c): string => $c->summary->vin->value(), $candidates),
+        );
         self::assertSame([true, false], array_map(static fn (ImportCandidate $c): bool => $c->added, $candidates));
         self::assertSame('Raven', $candidates[1]->name());
     }
@@ -56,7 +59,10 @@ final class TeslaVehicleImporterTest extends KernelTestCase
 
         self::assertCount(2, $result->added);
         self::assertSame(0, $result->alreadyAdded);
-        $vehicles = self::entityManager()->getRepository(Vehicle::class)->findBy(['owner' => $this->owner], ['name' => 'ASC']);
+        $vehicles = self::entityManager()->getRepository(Vehicle::class)->findBy(
+            ['owner' => $this->owner],
+            ['name' => 'ASC'],
+        );
         self::assertSame(['Lucia', 'Raven'], array_map(static fn (Vehicle $v): string => $v->getName(), $vehicles));
     }
 
@@ -85,7 +91,12 @@ final class TeslaVehicleImporterTest extends KernelTestCase
 
     public function testAVehicleWithoutADisplayNameGetsTheEndOfItsVin(): void
     {
-        $this->connect(json_encode(['response' => [['vin' => FleetApiResponses::VIN, 'display_name' => null, 'state' => 'asleep']]], \JSON_THROW_ON_ERROR));
+        $this->connect(
+            json_encode(
+                ['response' => [['vin' => FleetApiResponses::VIN, 'display_name' => null, 'state' => 'asleep']]],
+                \JSON_THROW_ON_ERROR,
+            )
+        );
 
         self::importer()->import($this->owner);
 
@@ -122,7 +133,16 @@ final class TeslaVehicleImporterTest extends KernelTestCase
     {
         $app = self::createConfiguredApp($this->owner);
         self::createToken($app, CarbonImmutable::now()->addHours(2));
-        self::getContainer()->set('http_client', new MockHttpClient(array_fill(0, $responses, new MockResponse($body ?? FleetApiResponses::vehicleList(), ['http_code' => $status]))));
+        self::getContainer()->set(
+            'http_client',
+            new MockHttpClient(
+                array_fill(
+                    0,
+                    $responses,
+                    new MockResponse($body ?? FleetApiResponses::vehicleList(), ['http_code' => $status]),
+                )
+            ),
+        );
     }
 
     private function add(string $vin, string $name): void

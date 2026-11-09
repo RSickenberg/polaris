@@ -12,8 +12,8 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
- * Tells the error reporting who the request acts for, once the firewall has run. An error before the controller, or on a
- * page nobody signed in to, belongs to no user.
+ * Tells the error reporting who the request acts for, once the firewall has run. An error before the controller, or on
+ * a page nobody signed in to, belongs to no user.
  */
 final readonly class BindReportingUser
 {

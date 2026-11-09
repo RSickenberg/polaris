@@ -23,8 +23,12 @@ final class VehicleVoter extends Voter
         return VehiclePermission::Manage->value === $attribute && $subject instanceof Vehicle;
     }
 
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
-    {
+    protected function voteOnAttribute(
+        string $attribute,
+        mixed $subject,
+        TokenInterface $token,
+        ?Vote $vote = null,
+    ): bool {
         $user = $token->getUser();
 
         return $user instanceof User && $subject->getOwner()->getId()->equals($user->getId());

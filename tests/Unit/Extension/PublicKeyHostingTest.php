@@ -113,7 +113,12 @@ final class PublicKeyHostingTest extends TestCase
     public function testTheConfiguredHostingFollowsTheMode(): void
     {
         $polaris = new ConfiguredPublicKeyHosting(new Filesystem(), PublicKeyHostingMode::Polaris, '', '');
-        $external = new ConfiguredPublicKeyHosting(new Filesystem(), PublicKeyHostingMode::External, $this->directory, 'https://keys.example.org/key.pem');
+        $external = new ConfiguredPublicKeyHosting(
+            new Filesystem(),
+            PublicKeyHostingMode::External,
+            $this->directory,
+            'https://keys.example.org/key.pem',
+        );
 
         self::assertTrue($polaris->servesPublicKey());
         self::assertFalse($external->servesPublicKey());

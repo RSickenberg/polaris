@@ -18,6 +18,7 @@ use Sentry\Tracing\SpanContext;
 final class ScrubberTest extends TestCase
 {
     private const string VIN = '5YJ3E7EB2NF000091';
+    private const string VEHICLES = 'https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles';
     private const string KEY = 'c2VjcmV0LWtleS1mb3ItdGhlLXRlc3Q=';
 
     private Scrubber $scrubber;
@@ -29,10 +30,10 @@ final class ScrubberTest extends TestCase
 
     public function testAVinIsRemovedAlsoInsideAFleetApiUrl(): void
     {
-        $url = 'https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . self::VIN . '/vehicle_data?endpoints=vehicle_state';
+        $url = self::VEHICLES . '/' . self::VIN . '/vehicle_data?endpoints=vehicle_state';
 
         self::assertSame(
-            'https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/[Filtered]/vehicle_data?endpoints=vehicle_state',
+            self::VEHICLES . '/[Filtered]/vehicle_data?endpoints=vehicle_state',
             $this->scrubber->scrubString($url),
         );
     }
@@ -46,11 +47,20 @@ final class ScrubberTest extends TestCase
 
     public function testTokensSecretsKeysAndEmailsAreRemovedFromText(): void
     {
-        $pem = "-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg\n-----END PRIVATE KEY-----";
+        $pem = "-----BEGIN PRIVATE KEY-----\n"
+            . "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg\n"
+            . '-----END PRIVATE KEY-----';
         $text = implode(' | ', [
             'Authorization: Bearer abc.def-123',
             // Built at run time: a literal token would trip secret scanners.
-            'jwt ' . implode('.', [rtrim(base64_encode('{"alg":"none"}'), '='), rtrim(base64_encode('{"sub":"test"}'), '='), 'c2lnbmF0dXJl']),
+            'jwt ' . implode(
+                '.',
+                [
+                    rtrim(base64_encode('{"alg":"none"}'), '='),
+                    rtrim(base64_encode('{"sub":"test"}'), '='),
+                    'c2lnbmF0dXJl',
+                ],
+            ),
             'code=secret-code&state=abc',
             'mail jane.doe@example.test',
             $pem,
@@ -60,7 +70,17 @@ final class ScrubberTest extends TestCase
 
         $clean = $this->scrubber->scrubString($text);
 
-        foreach (['abc.def-123', 'eyJhbGci', 'secret-code', 'jane.doe@example.test', 'MIGHAgEA', self::KEY, 'AAAAAAAAAAAAAAAA'] as $leak) {
+        foreach (
+            [
+                'abc.def-123',
+                'eyJhbGci',
+                'secret-code',
+                'jane.doe@example.test',
+                'MIGHAgEA',
+                self::KEY,
+                'AAAAAAAAAAAAAAAA',
+            ] as $leak
+        ) {
             self::assertStringNotContainsString($leak, $clean);
         }
     }
@@ -86,17 +106,39 @@ final class ScrubberTest extends TestCase
 
     public function testVehicleDataGoesUnlessTheUserAllowedIt(): void
     {
-        $context = ['vehicle_data' => ['vehicle_state' => ['odometer' => 1234.5], 'charge_state' => ['battery_level' => 80]], 'rule' => 'LowerThanStored'];
+        $context = [
+            'vehicle_data' => ['vehicle_state' => ['odometer' => 1234.5], 'charge_state' => ['battery_level' => 80]],
+            'rule' => 'LowerThanStored',
+        ];
 
-        self::assertSame(['vehicle_data' => '[Filtered]', 'rule' => 'LowerThanStored'], $this->scrubber->scrub($context, false));
+        self::assertSame(
+            ['vehicle_data' => '[Filtered]', 'rule' => 'LowerThanStored'],
+            $this->scrubber->scrub($context, false),
+        );
         self::assertSame($context, $this->scrubber->scrub($context, true));
     }
 
     public function testLocationStaysOutEvenWhenTheUserAllowedVehicleData(): void
     {
-        $clean = $this->scrubber->scrub(['vehicle_data' => ['drive_state' => ['latitude' => 1.0, 'longitude' => 2.0, 'shift_state' => null], 'vin' => self::VIN]], true);
+        $clean = $this->scrubber->scrub(
+            [
+                'vehicle_data' => [
+                    'drive_state' => ['latitude' => 1.0, 'longitude' => 2.0, 'shift_state' => null],
+                    'vin' => self::VIN,
+                ],
+            ],
+            true,
+        );
 
-        self::assertSame(['vehicle_data' => ['drive_state' => ['latitude' => null, 'longitude' => null, 'shift_state' => null], 'vin' => '[Filtered]']], $clean);
+        self::assertSame(
+            [
+                'vehicle_data' => [
+                    'drive_state' => ['latitude' => null, 'longitude' => null, 'shift_state' => null],
+                    'vin' => '[Filtered]',
+                ],
+            ],
+            $clean,
+        );
     }
 
     public function testAnEventAndItsSpansAreScrubbed(): void
@@ -106,11 +148,23 @@ final class ScrubberTest extends TestCase
         $event->setTransaction('GET /vehicles/' . self::VIN);
         $event->setExtra(['token' => 'abc', 'attempts' => 2]);
         $event->setTags(['vin' => self::VIN]);
-        $event->setBreadcrumb([new Breadcrumb(Breadcrumb::LEVEL_INFO, Breadcrumb::TYPE_HTTP, 'http', 'GET /vehicles/' . self::VIN, ['url' => 'https://x.test/?refresh_token=zzz'])]);
+        $event->setBreadcrumb(
+            [
+                new Breadcrumb(
+                    Breadcrumb::LEVEL_INFO,
+                    Breadcrumb::TYPE_HTTP,
+                    'http',
+                    'GET /vehicles/' . self::VIN,
+                    ['url' => 'https://x.test/?refresh_token=zzz'],
+                ),
+            ]
+        );
 
         $context = new SpanContext();
         $context->setOp('http.client');
-        $context->setDescription('GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . self::VIN . '/vehicle_data');
+        $context->setDescription(
+            'GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . self::VIN . '/vehicle_data'
+        );
         $span = new Span($context);
         $span->setData(['http.url' => 'https://x.test/?access_token=zzz', 'http.response.status_code' => 200]);
         $event->setSpans([$span]);
@@ -119,7 +173,10 @@ final class ScrubberTest extends TestCase
 
         $json = json_encode([
             $clean->getMessage(), $clean->getTransaction(), $clean->getExtra(), $clean->getTags(),
-            array_map(static fn (Breadcrumb $b): array => [$b->getMessage(), $b->getMetadata()], $clean->getBreadcrumbs()),
+            array_map(
+                static fn (Breadcrumb $b): array => [$b->getMessage(), $b->getMetadata()],
+                $clean->getBreadcrumbs(),
+            ),
             array_map(static fn (Span $s): array => [$s->getDescription(), $s->getData()], $clean->getSpans()),
         ], \JSON_THROW_ON_ERROR);
 

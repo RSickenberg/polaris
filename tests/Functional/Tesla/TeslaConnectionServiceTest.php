@@ -13,6 +13,7 @@ use Polaris\Tesla\Domain\ConnectionMethod;
 use Polaris\Tesla\Entity\OAuthToken;
 use Polaris\Tesla\Entity\TeslaApp;
 use Polaris\Tesla\Service\Client\OAuthClient;
+use Polaris\Tesla\Service\Enum\ConnectionRejection;
 use Polaris\Tesla\Service\Exception\ConnectionRejected;
 use Polaris\Tesla\Service\RedirectUriProvider;
 use Polaris\Tesla\Service\TeslaConnectionService;
@@ -34,8 +35,10 @@ final class TeslaConnectionServiceTest extends KernelTestCase
     private const string NOW = '2026-10-24 12:00:00 UTC';
     private const string REDIRECT = 'https://polaris.example.com/tesla/callback';
     private const string STATE = 'fake-state';
-    private const string EU_REGION = '{"response":{"region":"eu","fleet_api_base_url":"https://fleet-api.prd.eu.vn.cloud.tesla.com"}}';
-    private const string NA_REGION = '{"response":{"region":"na","fleet_api_base_url":"https://fleet-api.prd.na.vn.cloud.tesla.com"}}';
+    private const string EU_REGION = '{"response":{"region":"eu",'
+        . '"fleet_api_base_url":"https://fleet-api.prd.eu.vn.cloud.tesla.com"}}';
+    private const string NA_REGION = '{"response":{"region":"na",'
+        . '"fleet_api_base_url":"https://fleet-api.prd.na.vn.cloud.tesla.com"}}';
 
     private EntityManagerInterface $entityManager;
     private SecretEncrypter $encrypter;
@@ -52,11 +55,23 @@ final class TeslaConnectionServiceTest extends KernelTestCase
 
     public function testTheRedirectUriFallsBackToTheDefaultUri(): void
     {
-        self::assertSame('https://polaris.example.com/tesla/callback', new RedirectUriProvider('', 'https://polaris.example.com/')->get());
-        self::assertSame('http://localhost:8000/tesla/callback', new RedirectUriProvider(' http://localhost:8000/tesla/callback ', 'https://other.example.com')->get());
-        self::assertSame('https://localhost/tesla/callback', new RedirectUriProvider('', 'https://localhost:443')->get());
+        self::assertSame(
+            'https://polaris.example.com/tesla/callback',
+            new RedirectUriProvider('', 'https://polaris.example.com/')->get(),
+        );
+        self::assertSame(
+            'http://localhost:8000/tesla/callback',
+            new RedirectUriProvider(' http://localhost:8000/tesla/callback ', 'https://other.example.com')->get(),
+        );
+        self::assertSame(
+            'https://localhost/tesla/callback',
+            new RedirectUriProvider('', 'https://localhost:443')->get(),
+        );
         self::assertSame('http://localhost/tesla/callback', new RedirectUriProvider('', 'http://localhost:80/')->get());
-        self::assertSame('https://localhost:8443/tesla/callback', new RedirectUriProvider('', 'https://localhost:8443')->get());
+        self::assertSame(
+            'https://localhost:8443/tesla/callback',
+            new RedirectUriProvider('', 'https://localhost:8443')->get(),
+        );
     }
 
     public function testTheAuthorizationRequestUsesTheConfiguredRedirectUriAndARandomState(): void
@@ -82,15 +97,23 @@ final class TeslaConnectionServiceTest extends KernelTestCase
 
         foreach ([
             static fn () => $service->startAuthorization($app),
-            static fn () => $service->completeFromCallback($app, new CallbackParameters('code', self::STATE), self::STATE),
-            static fn () => $service->completeFromPastedUrl($app, 'https://x.test/cb?code=code&state=' . self::STATE, self::STATE),
+            static fn () => $service->completeFromCallback(
+                $app,
+                new CallbackParameters('code', self::STATE),
+                self::STATE,
+            ),
+            static fn () => $service->completeFromPastedUrl(
+                $app,
+                'https://x.test/cb?code=code&state=' . self::STATE,
+                self::STATE,
+            ),
             static fn () => $service->connectWithRefreshToken($app, 'fake-refresh'),
         ] as $attempt) {
             try {
                 $attempt();
                 self::fail('The attempt should be refused.');
             } catch (ConnectionRejected $rejected) {
-                self::assertSame(ConnectionRejected::NO_CONSENT, $rejected->key);
+                self::assertSame(ConnectionRejection::NoConsent, $rejected->reason);
             }
         }
 
@@ -148,12 +171,19 @@ final class TeslaConnectionServiceTest extends KernelTestCase
         $app = $this->app();
         $service = $this->service([]);
 
-        foreach ([[self::STATE, 'other-state'], [self::STATE, null], [null, self::STATE], [null, null]] as [$expected, $received]) {
+        foreach (
+            [
+                [self::STATE, 'other-state'],
+                [self::STATE, null],
+                [null, self::STATE],
+                [null, null],
+            ] as [$expected, $received]
+        ) {
             try {
                 $service->completeFromCallback($app, new CallbackParameters('fake-code', $received), $expected);
                 self::fail('The state should be refused.');
             } catch (ConnectionRejected $rejected) {
-                self::assertSame(ConnectionRejected::BAD_STATE, $rejected->key);
+                self::assertSame(ConnectionRejection::BadState, $rejected->reason);
             }
         }
 
@@ -166,17 +196,21 @@ final class TeslaConnectionServiceTest extends KernelTestCase
         $service = $this->service([]);
 
         try {
-            $service->completeFromCallback($app, new CallbackParameters(null, self::STATE, 'access_denied'), self::STATE);
+            $service->completeFromCallback(
+                $app,
+                new CallbackParameters(null, self::STATE, 'access_denied'),
+                self::STATE,
+            );
             self::fail('Denied.');
         } catch (ConnectionRejected $rejected) {
-            self::assertSame(ConnectionRejected::DENIED, $rejected->key);
+            self::assertSame(ConnectionRejection::Denied, $rejected->reason);
         }
 
         try {
             $service->completeFromCallback($app, new CallbackParameters(null, self::STATE), self::STATE);
             self::fail('No code.');
         } catch (ConnectionRejected $rejected) {
-            self::assertSame(ConnectionRejected::NO_CODE, $rejected->key);
+            self::assertSame(ConnectionRejection::NoCode, $rejected->reason);
         }
     }
 
@@ -189,7 +223,7 @@ final class TeslaConnectionServiceTest extends KernelTestCase
             $this->service([])->completeFromPastedUrl($app, str_replace(self::STATE, 'wrong', $url), self::STATE);
             self::fail('The state should be refused.');
         } catch (ConnectionRejected $rejected) {
-            self::assertSame(ConnectionRejected::BAD_STATE, $rejected->key);
+            self::assertSame(ConnectionRejection::BadState, $rejected->reason);
         }
 
         $result = $this->service([$this->tokens('pasted-access', 'pasted-refresh'), new MockResponse(self::EU_REGION)])
@@ -204,7 +238,7 @@ final class TeslaConnectionServiceTest extends KernelTestCase
     public function testAnInvalidPastedUrlIsRefused(): void
     {
         $this->expectException(ConnectionRejected::class);
-        $this->expectExceptionMessage(ConnectionRejected::BAD_URL);
+        $this->expectExceptionMessage('The connection to Tesla was refused: BadUrl.');
 
         $this->service([])->completeFromPastedUrl($this->app(), 'not a url', self::STATE);
     }
@@ -218,7 +252,7 @@ final class TeslaConnectionServiceTest extends KernelTestCase
                 ->completeFromCallback($app, new CallbackParameters('stale-code', self::STATE), self::STATE);
             self::fail('The exchange should be refused.');
         } catch (ConnectionRejected $rejected) {
-            self::assertSame(ConnectionRejected::TOKEN_REFUSED, $rejected->key);
+            self::assertSame(ConnectionRejection::TokenRefused, $rejected->reason);
             self::assertStringNotContainsString('stale-code', (string) $rejected->getPrevious()?->getMessage());
         }
 
@@ -232,7 +266,7 @@ final class TeslaConnectionServiceTest extends KernelTestCase
                 ->completeFromCallback($this->app(), new CallbackParameters('fake-code', self::STATE), self::STATE);
             self::fail('The exchange should fail.');
         } catch (ConnectionRejected $rejected) {
-            self::assertSame(ConnectionRejected::TESLA_FAILED, $rejected->key);
+            self::assertSame(ConnectionRejection::TeslaFailed, $rejected->reason);
         }
     }
 
@@ -243,7 +277,7 @@ final class TeslaConnectionServiceTest extends KernelTestCase
                 ->completeFromCallback($this->app(), new CallbackParameters('fake-code', self::STATE), self::STATE);
             self::fail('The lookup should fail.');
         } catch (ConnectionRejected $rejected) {
-            self::assertSame(ConnectionRejected::TESLA_FAILED, $rejected->key);
+            self::assertSame(ConnectionRejection::TeslaFailed, $rejected->reason);
         }
 
         self::assertSame([], $this->entityManager->getRepository(OAuthToken::class)->findAll());
@@ -262,12 +296,17 @@ final class TeslaConnectionServiceTest extends KernelTestCase
     {
         $app = $this->app();
 
-        $result = $this->service([$this->tokens('rotated-access', 'rotated-refresh'), new MockResponse(self::EU_REGION)])
+        $result = $this->service(
+            [$this->tokens('rotated-access', 'rotated-refresh'), new MockResponse(self::EU_REGION)]
+        )
             ->connectWithRefreshToken($app, '  pasted-refresh  ');
 
         self::assertSame(ConnectionMethod::PastedRefreshToken, $result->token->getMethod());
         parse_str($this->calls[0][2], $fields);
-        self::assertSame(['grant_type' => 'refresh_token', 'client_id' => 'fake-client-id', 'refresh_token' => 'pasted-refresh'], $fields);
+        self::assertSame(
+            ['grant_type' => 'refresh_token', 'client_id' => 'fake-client-id', 'refresh_token' => 'pasted-refresh'],
+            $fields,
+        );
         $this->entityManager->clear();
         $token = $this->storedToken();
         self::assertSame('rotated-refresh', $this->encrypter->decrypt($token->getEncryptedRefreshToken()));
@@ -283,7 +322,7 @@ final class TeslaConnectionServiceTest extends KernelTestCase
                 ->connectWithRefreshToken($app, 'pasted-refresh');
             self::fail('The token should be refused.');
         } catch (ConnectionRejected $rejected) {
-            self::assertSame(ConnectionRejected::TOKEN_REFUSED, $rejected->key);
+            self::assertSame(ConnectionRejection::TokenRefused, $rejected->reason);
         }
 
         self::assertCount(1, $this->calls, 'No retry.');
@@ -329,7 +368,7 @@ final class TeslaConnectionServiceTest extends KernelTestCase
         $this->entityManager->flush();
 
         $this->expectException(ConnectionRejected::class);
-        $this->expectExceptionMessage(ConnectionRejected::NOT_CONFIGURED);
+        $this->expectExceptionMessage('The connection to Tesla was refused: NotConfigured.');
 
         $this->service([])->startAuthorization($app);
     }
@@ -365,11 +404,16 @@ final class TeslaConnectionServiceTest extends KernelTestCase
     {
         $queue = $responses;
         $calls = &$this->calls;
-        $client = new MockHttpClient(static function (string $method, string $url, array $options) use (&$queue, &$calls): ResponseInterface {
+        $respond = static function (
+            string $method,
+            string $url,
+            array $options,
+        ) use (&$queue, &$calls): ResponseInterface {
             $calls[] = [$method, $url, \is_string($options['body'] ?? null) ? $options['body'] : ''];
 
             return array_shift($queue) ?? new MockResponse('unexpected call', ['http_code' => 500]);
-        });
+        };
+        $client = new MockHttpClient($respond);
 
         return new TeslaConnectionService(
             $this->entityManager,

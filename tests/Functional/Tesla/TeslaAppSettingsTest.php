@@ -98,7 +98,10 @@ final class TeslaAppSettingsTest extends KernelTestCase
         $this->createApp($owner);
 
         try {
-            $this->settings->save($owner, $this->data(regions: [FleetRegion::EuropeMiddleEastAfrica, FleetRegion::China]));
+            $this->settings->save(
+                $owner,
+                $this->data(regions: [FleetRegion::EuropeMiddleEastAfrica, FleetRegion::China]),
+            );
             self::fail('China must be refused.');
         } catch (TeslaSettingsRejected $rejected) {
             self::assertStringContainsString('China', $rejected->getMessage());
@@ -146,7 +149,9 @@ final class TeslaAppSettingsTest extends KernelTestCase
     private function createApp(User $owner): void
     {
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        $entityManager->persist(new TeslaApp($owner, 'public key', 'v1:private', CarbonImmutable::parse('2026-10-20 12:00:00 UTC')));
+        $entityManager->persist(
+            new TeslaApp($owner, 'public key', 'v1:private', CarbonImmutable::parse('2026-10-20 12:00:00 UTC'))
+        );
         $entityManager->flush();
     }
 }

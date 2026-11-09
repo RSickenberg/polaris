@@ -34,14 +34,18 @@ class PasswordResetRequestRepository extends ServiceEntityRepository
 
     public function removeFor(User $user): void
     {
-        $this->getEntityManager()->createQuery(\sprintf('DELETE %s r WHERE r.user = :user', PasswordResetRequest::class))
+        $this->getEntityManager()->createQuery(
+            \sprintf('DELETE %s r WHERE r.user = :user', PasswordResetRequest::class)
+        )
             ->setParameter('user', $user->getId(), UlidType::NAME)
             ->execute();
     }
 
     public function removeExpired(CarbonImmutable $now): void
     {
-        $this->getEntityManager()->createQuery(\sprintf('DELETE %s r WHERE r.expiresAt <= :now', PasswordResetRequest::class))
+        $this->getEntityManager()->createQuery(
+            \sprintf('DELETE %s r WHERE r.expiresAt <= :now', PasswordResetRequest::class)
+        )
             ->setParameter('now', $now->utc(), Types::DATETIME_IMMUTABLE)
             ->execute();
     }

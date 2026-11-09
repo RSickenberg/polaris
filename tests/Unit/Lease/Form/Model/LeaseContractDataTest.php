@@ -55,7 +55,9 @@ final class LeaseContractDataTest extends TestCase
 
     public function testSavingTheShownDataUnchangedKeepsTheStoredTerms(): void
     {
-        foreach ([Distance::fromKilometres(45_000), Distance::fromMetres(100_000_001), Distance::fromMiles(30_000)] as $total) {
+        foreach (
+            [Distance::fromKilometres(45_000), Distance::fromMetres(100_000_001), Distance::fromMiles(30_000)] as $total
+        ) {
             $contract = self::contract($total);
 
             $terms = new LeaseContractFactory()->terms(LeaseContractData::fromContract($contract));
@@ -70,7 +72,11 @@ final class LeaseContractDataTest extends TestCase
     {
         return new LeaseContract(
             new Vehicle(new Vin('5YJ3E7EB2NF000001'), 'Model 3', Owner::user()),
-            new LeaseTerm(CarbonImmutable::parse('2026-01-15', 'UTC'), CarbonImmutable::parse('2029-01-15', 'UTC'), EndDateConvention::Exclusive),
+            new LeaseTerm(
+                CarbonImmutable::parse('2026-01-15', 'UTC'),
+                CarbonImmutable::parse('2029-01-15', 'UTC'),
+                EndDateConvention::Exclusive,
+            ),
             Allowance::ofTotal($total),
             Distance::fromKilometres(12),
             Money::fromDecimal('0.12', Currency::CHF),

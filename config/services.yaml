@@ -79,17 +79,6 @@ when@test:
         # of a functional test would print an "[error]" line in the PHPUnit output.
         logger:
             class: Psr\Log\NullLogger
-        # Nothing injects these yet, so the compiler would remove them before the functional
-        # tests can fetch them. Drop the aliases once a controller or command depends on them.
-        test.polaris.lease.projection_calculator:
-            alias: Polaris\Lease\Domain\ProjectionCalculator
-            public: true
-        test.polaris.lease.assessment_service:
-            alias: Polaris\Lease\Service\LeaseAssessmentService
-            public: true
-        test.polaris.tesla.odometer_reader:
-            alias: Polaris\Tesla\Service\TeslaOdometerReader
-            public: true
         # Tesla tests replace the HTTP client with a MockHttpClient: no test reaches the network.
         test.polaris.http_client:
             alias: http_client

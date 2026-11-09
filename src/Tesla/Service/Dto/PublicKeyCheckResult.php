@@ -48,7 +48,11 @@ final readonly class PublicKeyCheckResult
     {
         return new self(
             PublicKeyCheckStatus::Redirected,
-            \sprintf('%s answered a redirect (HTTP %d). Serve the key directly on that URL; redirects are not followed.', $url, $httpStatus),
+            \sprintf(
+                '%s answered a redirect (HTTP %d). Serve the key directly on that URL; redirects are not followed.',
+                $url,
+                $httpStatus,
+            ),
         );
     }
 

@@ -21,6 +21,7 @@ use Polaris\Tesla\Entity\TeslaApp;
 use Polaris\Tesla\Service\Client\OAuthClient;
 use Polaris\Tesla\Service\Dto\AuthorizationRequest;
 use Polaris\Tesla\Service\Dto\ConnectionResult;
+use Polaris\Tesla\Service\Enum\ConnectionRejection;
 use Polaris\Tesla\Service\Exception\ConnectionRejected;
 use Polaris\Tesla\Service\Exception\FleetApiError;
 use Psr\Clock\ClockInterface;
@@ -102,7 +103,12 @@ final readonly class TeslaConnectionService
         $state = OAuthState::generate();
 
         return new AuthorizationRequest(
-            $this->client->authorizationUrl((string) $app->getClientId(), $this->redirectUri->get(), $state, $promptMissingScopes),
+            $this->client->authorizationUrl(
+                (string) $app->getClientId(),
+                $this->redirectUri->get(),
+                $state,
+                $promptMissingScopes,
+            ),
             $state,
         );
     }
@@ -113,8 +119,11 @@ final readonly class TeslaConnectionService
      * @throws ORMException
      * @throws RandomException
      */
-    public function completeFromCallback(TeslaApp $app, CallbackParameters $callback, ?string $expectedState): ConnectionResult
-    {
+    public function completeFromCallback(
+        TeslaApp $app,
+        CallbackParameters $callback,
+        ?string $expectedState,
+    ): ConnectionResult {
         return $this->complete($app, $callback, $expectedState, ConnectionMethod::OAuth);
     }
 
@@ -127,12 +136,16 @@ final readonly class TeslaConnectionService
      * @throws ORMException
      * @throws RandomException
      */
-    public function completeFromPastedUrl(TeslaApp $app, #[\SensitiveParameter] string $url, ?string $expectedState): ConnectionResult
-    {
+    public function completeFromPastedUrl(
+        TeslaApp $app,
+        #[\SensitiveParameter]
+        string $url,
+        ?string $expectedState,
+    ): ConnectionResult {
         try {
             $callback = CallbackUrlParser::parse($url);
         } catch (InvalidCallbackUrl $invalid) {
-            throw new ConnectionRejected(ConnectionRejected::BAD_URL, $invalid);
+            throw new ConnectionRejected(ConnectionRejection::BadUrl, $invalid);
         }
 
         return $this->complete($app, $callback, $expectedState, ConnectionMethod::PastedCallback);
@@ -147,13 +160,16 @@ final readonly class TeslaConnectionService
      * @throws RandomException
      * @throws \SodiumException
      */
-    public function connectWithRefreshToken(TeslaApp $app, #[\SensitiveParameter] string $refreshToken): ConnectionResult
-    {
+    public function connectWithRefreshToken(
+        TeslaApp $app,
+        #[\SensitiveParameter]
+        string $refreshToken,
+    ): ConnectionResult {
         $this->requireReady($app, false);
 
         $refreshToken = trim($refreshToken);
         if ('' === $refreshToken) {
-            throw new ConnectionRejected(ConnectionRejected::TOKEN_REFUSED);
+            throw new ConnectionRejected(ConnectionRejection::TokenRefused);
         }
 
         $audience = $this->audience($app);
@@ -173,20 +189,24 @@ final readonly class TeslaConnectionService
      * @throws ORMException
      * @throws RandomException
      */
-    private function complete(TeslaApp $app, CallbackParameters $callback, ?string $expectedState, ConnectionMethod $method): ConnectionResult
-    {
+    private function complete(
+        TeslaApp $app,
+        CallbackParameters $callback,
+        ?string $expectedState,
+        ConnectionMethod $method,
+    ): ConnectionResult {
         $this->requireReady($app);
 
         if (null !== $callback->error) {
-            throw new ConnectionRejected(ConnectionRejected::DENIED);
+            throw new ConnectionRejected(ConnectionRejection::Denied);
         }
 
         if (!OAuthState::matches($expectedState, $callback->state)) {
-            throw new ConnectionRejected(ConnectionRejected::BAD_STATE);
+            throw new ConnectionRejected(ConnectionRejection::BadState);
         }
 
         if (null === $callback->code) {
-            throw new ConnectionRejected(ConnectionRejected::NO_CODE);
+            throw new ConnectionRejected(ConnectionRejection::NoCode);
         }
 
         $audience = $this->audience($app);
@@ -211,8 +231,12 @@ final readonly class TeslaConnectionService
      * @throws RandomException
      * @throws \SodiumException
      */
-    private function store(TeslaApp $app, FleetRegion $audience, TokenSet $tokens, ConnectionMethod $method): ConnectionResult
-    {
+    private function store(
+        TeslaApp $app,
+        FleetRegion $audience,
+        TokenSet $tokens,
+        ConnectionMethod $method,
+    ): ConnectionResult {
         try {
             $userRegion = $this->client->userRegion($audience, $tokens->accessToken);
         } catch (FleetApiError $failure) {
@@ -249,12 +273,17 @@ final readonly class TeslaConnectionService
      */
     private function requireReady(TeslaApp $app, bool $needsSecret = true): void
     {
-        if (null === $app->getClientId() || ($needsSecret && null === $app->getEncryptedClientSecret()) || [] === $this->supportedRegions($app)) {
-            throw new ConnectionRejected(ConnectionRejected::NOT_CONFIGURED);
+        if (
+            null === $app->getClientId()
+            || ($needsSecret
+            && null === $app->getEncryptedClientSecret())
+            || [] === $this->supportedRegions($app)
+        ) {
+            throw new ConnectionRejected(ConnectionRejection::NotConfigured);
         }
 
         if (!$app->hasConsent()) {
-            throw new ConnectionRejected(ConnectionRejected::NO_CONSENT);
+            throw new ConnectionRejected(ConnectionRejection::NoConsent);
         }
     }
 
@@ -264,7 +293,7 @@ final readonly class TeslaConnectionService
      */
     private function audience(TeslaApp $app): FleetRegion
     {
-        return $this->supportedRegions($app)[0] ?? throw new ConnectionRejected(ConnectionRejected::NOT_CONFIGURED);
+        return $this->supportedRegions($app)[0] ?? throw new ConnectionRejected(ConnectionRejection::NotConfigured);
     }
 
     /**
@@ -281,7 +310,7 @@ final readonly class TeslaConnectionService
     private function rejection(FleetApiError $failure, bool $refusedByTesla): ConnectionRejected
     {
         return new ConnectionRejected(
-            $refusedByTesla ? ConnectionRejected::TOKEN_REFUSED : ConnectionRejected::TESLA_FAILED,
+            $refusedByTesla ? ConnectionRejection::TokenRefused : ConnectionRejection::TeslaFailed,
             $failure,
         );
     }

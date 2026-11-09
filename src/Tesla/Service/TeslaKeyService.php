@@ -68,7 +68,11 @@ final readonly class TeslaKeyService
 
     private function assertCanStore(User $owner, bool $force): void
     {
-        if (!$force && $this->entityManager->getRepository(TeslaApp::class)->findOneBy(['owner' => $owner]) instanceof TeslaApp) {
+        if ($force) {
+            return;
+        }
+
+        if ($this->appOf($owner) instanceof TeslaApp) {
             throw KeyAlreadyExists::forApp();
         }
     }
@@ -80,23 +84,31 @@ final readonly class TeslaKeyService
      */
     private function store(User $owner, KeyPair $keyPair): TeslaApp
     {
-        $app = $this->entityManager->getRepository(TeslaApp::class)->findOneBy(['owner' => $owner]);
+        $app = $this->appOf($owner);
         $encryptedPrivateKey = $this->encrypter->encrypt($keyPair->privateKeyPem());
         $now = CarbonImmutable::instance($this->clock->now());
 
         // The hosting runs inside the transaction: if the public key cannot be published, the new
         // key is not kept.
-        $this->entityManager->wrapInTransaction(function () use ($app, $owner, $keyPair, $encryptedPrivateKey, $now): void {
+        $publicKey = $keyPair->publicKeyPem;
+
+        $save = function () use ($app, $owner, $publicKey, $encryptedPrivateKey, $now): void {
             if ($app instanceof TeslaApp) {
-                $app->replaceKeyPair($keyPair->publicKeyPem, $encryptedPrivateKey, $now);
+                $app->replaceKeyPair($publicKey, $encryptedPrivateKey, $now);
             } else {
-                $this->entityManager->persist(new TeslaApp($owner, $keyPair->publicKeyPem, $encryptedPrivateKey, $now));
+                $this->entityManager->persist(new TeslaApp($owner, $publicKey, $encryptedPrivateKey, $now));
             }
 
             $this->entityManager->flush();
-            $this->hosting->publish($keyPair->publicKeyPem);
-        });
+            $this->hosting->publish($publicKey);
+        };
+        $this->entityManager->wrapInTransaction($save);
 
-        return $app ?? $this->entityManager->getRepository(TeslaApp::class)->findOneBy(['owner' => $owner]) ?? throw new \LogicException('The Tesla app was not saved.');
+        return $app ?? $this->appOf($owner) ?? throw new \LogicException('The Tesla app was not saved.');
+    }
+
+    private function appOf(User $owner): ?TeslaApp
+    {
+        return $this->entityManager->getRepository(TeslaApp::class)->findOneBy(['owner' => $owner]);
     }
 }

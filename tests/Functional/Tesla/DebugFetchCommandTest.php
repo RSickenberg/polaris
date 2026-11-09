@@ -36,7 +36,7 @@ final class DebugFetchCommandTest extends KernelTestCase
         self::assertStringContainsString(FleetApiResponses::VIN, $display);
         self::assertStringContainsString('Lucia', $display);
         self::assertStringContainsString('"id": 1', $display);
-        self::assertSame(['GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles'], $calls);
+        self::assertSame(['GET ' . FleetApiResponses::EU_VEHICLES], $calls);
     }
 
     public function testRedactRemovesTheVinTheIdsAndTheNames(): void
@@ -64,7 +64,12 @@ final class DebugFetchCommandTest extends KernelTestCase
 
         self::assertStringContainsString('HTTP 408', $tester->getDisplay());
         self::assertStringContainsString('vehicle is offline or asleep', $tester->getDisplay());
-        self::assertSame(['GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . FleetApiResponses::VIN . '/vehicle_data'], $calls);
+        self::assertSame(
+            [
+                'GET ' . FleetApiResponses::EU_VEHICLES . '/' . FleetApiResponses::VIN . '/vehicle_data',
+            ],
+            $calls,
+        );
     }
 
     public function testOnlyTheFourReadsExistAndNeverAWakeUp(): void
@@ -84,7 +89,12 @@ final class DebugFetchCommandTest extends KernelTestCase
 
         $tester->execute(['what' => 'cached', 'vin' => FleetApiResponses::VIN]);
 
-        self::assertSame(['GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . FleetApiResponses::VIN . '/vehicle_data_cached'], $calls);
+        self::assertSame(
+            [
+                'GET ' . FleetApiResponses::EU_VEHICLES . '/' . FleetApiResponses::VIN . '/vehicle_data_cached',
+            ],
+            $calls,
+        );
     }
 
     public function testFailsWithoutAConnection(): void
@@ -107,11 +117,12 @@ final class DebugFetchCommandTest extends KernelTestCase
     {
         $kernel = self::bootKernel();
         self::createToken(self::createConfiguredApp(self::createUser()), CarbonImmutable::now()->addHours(2));
-        self::getContainer()->set('http_client', new MockHttpClient(static function (string $method, string $url) use (&$calls, $body, $status): MockResponse {
+        $respond = static function (string $method, string $url) use (&$calls, $body, $status): MockResponse {
             $calls[] = $method . ' ' . $url;
 
             return new MockResponse($body, ['http_code' => $status]);
-        }));
+        };
+        self::getContainer()->set('http_client', new MockHttpClient($respond));
 
         return new CommandTester(new Application($kernel)->find('polaris:tesla:debug:fetch'));
     }

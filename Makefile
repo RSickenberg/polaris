@@ -14,11 +14,11 @@ SYMFONY  = $(PHP) bin/console
 ARGS          =
 .PHONY        : help build up start down logs sh install composer vendor sf cc tailwind migrate diff test-db seed test phpstan cs cs-fix deptrac translations ci release
 
-## —— 🧭 The Polaris Makefile 🧭 ——————————————————————————————————
+## == 🧭 The Polaris Makefile 🧭 ==================================
 help: ## Outputs this help screen
 	@grep -E '(^[a-zA-Z0-9\./_-]+:.*?##.*$$)|(^##)' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}{printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}' | sed -e 's/\[32m##/[33m/'
 
-## —— Docker 🐳 ————————————————————————————————————————————————
+## == Docker 🐳 ================================================
 build: ## Build the Docker images (pull base images, no cache)
 	@$(DOCKER_COMP) build --pull --no-cache
 
@@ -36,18 +36,18 @@ logs: ## Follow the container logs
 sh: ## Open a shell in the php container
 	@$(PHP_CONT) sh
 
-## —— Setup 🧙 ——————————————————————————————————————————————————
+## == Setup 🧙 ==================================================
 install: vendor ## Install Composer deps (in the container) and release tooling (npm)
 	@npm install
 
-## —— Composer 🧙 ——————————————————————————————————————————————
+## == Composer 🧙 ==============================================
 composer: ## Run Composer, pass the command with ARGS, e.g. make composer ARGS="outdated"
 	@$(COMPOSER) $(ARGS)
 
 vendor: ## Install the Composer dependencies from composer.lock
 	@$(COMPOSER) install --prefer-dist --no-progress --no-interaction
 
-## —— Symfony 🎵 ———————————————————————————————————————————————
+## == Symfony 🎵 ===============================================
 sf: ## Run bin/console, pass the command with ARGS, e.g. make sf ARGS="debug:router"
 	@$(SYMFONY) $(ARGS)
 
@@ -57,7 +57,7 @@ cc: ## Clear the Symfony cache
 tailwind: ## Build the Tailwind CSS once (the tailwind service keeps it up to date in dev, tests need it)
 	@$(SYMFONY) tailwind:build
 
-## —— Database 🐘 ——————————————————————————————————————————————
+## == Database 🐘 ==============================================
 migrate: ## Apply the pending Doctrine migrations
 	@$(SYMFONY) doctrine:migrations:migrate --no-interaction --all-or-nothing
 
@@ -73,7 +73,7 @@ seed: ## Reset the development database, load the sample data, create the dev us
 	@$(SYMFONY) polaris:dev:user
 	@$(SYMFONY) polaris:dev:urls
 
-## —— Quality ✅ ——————————————————————————————————————————————
+## == Quality ✅ ==============================================
 test: test-db tailwind ## Run the test suite, pass PHPUnit options with ARGS, e.g. make test ARGS="--filter=Kernel"
 	@$(PHP) bin/phpunit $(ARGS)
 
@@ -95,6 +95,6 @@ translations: ## Lint the XLIFF files and fail on a missing French key, as CI do
 ci: test-db tailwind ## Run every check CI runs: coding standard, PHPStan, Deptrac, translations, tests
 	@$(COMPOSER) ci
 
-## —— Release 📦 ——————————————————————————————————————————————
+## == Release 📦 ==============================================
 release: ## Cut a release with release-it (run locally: main is protected, the CI bot cannot push to it)
 	@npm run release

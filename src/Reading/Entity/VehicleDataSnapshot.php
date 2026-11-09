@@ -52,8 +52,12 @@ class VehicleDataSnapshot
     /**
      * @param array<array-key, mixed> $payload
      */
-    public function __construct(Vehicle $vehicle, CarbonImmutable $capturedAt, CarbonImmutable $receivedAt, array $payload)
-    {
+    public function __construct(
+        Vehicle $vehicle,
+        CarbonImmutable $capturedAt,
+        CarbonImmutable $receivedAt,
+        array $payload,
+    ) {
         $this->id = new Ulid();
         $this->vehicle = $vehicle;
         $this->capturedAt = $capturedAt->utc();

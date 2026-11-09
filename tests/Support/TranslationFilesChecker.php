@@ -51,13 +51,27 @@ final class TranslationFilesChecker
                 if ('' === trim($text)) {
                     $problems[] = \sprintf('%s: empty translation for "%s"', basename($file), $key);
                 } elseif (self::placeholders($text) !== self::placeholders($source[$key])) {
-                    $problems[] = \sprintf('%s: "%s" does not use the same placeholders as %s', basename($file), $key, $this->sourceLocale);
+                    $problems[] = \sprintf(
+                        '%s: "%s" does not use the same placeholders as %s',
+                        basename($file),
+                        $key,
+                        $this->sourceLocale,
+                    );
                 }
             }
         }
 
         foreach (glob(\sprintf('%s/*.%s.xlf', $this->directory, $locale)) ?: [] as $file) {
-            if (!is_file(\sprintf('%s/%s.%s.xlf', $this->directory, basename($file, \sprintf('.%s.xlf', $locale)), $this->sourceLocale))) {
+            if (
+                !is_file(
+                    \sprintf(
+                        '%s/%s.%s.xlf',
+                        $this->directory,
+                        basename($file, \sprintf('.%s.xlf', $locale)),
+                        $this->sourceLocale,
+                    )
+                )
+            ) {
                 $problems[] = \sprintf('%s: there is no %s counterpart', basename($file), $this->sourceLocale);
             }
         }

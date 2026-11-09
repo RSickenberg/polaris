@@ -69,7 +69,9 @@ class OdometerReading
         ReadingSource $source,
     ) {
         if (0 !== $readAt->getOffset()) {
-            throw new \InvalidArgumentException(\sprintf('An odometer reading must be read at a UTC instant, got %s.', $readAt->toIso8601String()));
+            throw new \InvalidArgumentException(
+                \sprintf('An odometer reading must be read at a UTC instant, got %s.', $readAt->toIso8601String())
+            );
         }
 
         $this->id = new Ulid();
@@ -93,14 +95,17 @@ class OdometerReading
     public static function fromTesla(Vehicle $vehicle, CarbonImmutable $readAt, string $raw, DistanceUnit $unit): self
     {
         if (1 !== preg_match('/^\d{1,9}(\.\d{1,3})?$/', $raw)) {
-            throw new \InvalidArgumentException(\sprintf('A Tesla odometer must be a non-negative number with at most 3 decimals, got "%s".', $raw));
+            throw new \InvalidArgumentException(
+                \sprintf('A Tesla odometer must be a non-negative number with at most 3 decimals, got "%s".', $raw)
+            );
         }
 
         return new self($vehicle, $readAt, Distance::from((float) $raw, $unit), $raw, $unit, ReadingSource::Api);
     }
 
     /**
-     * A reading brought back from an export, as it was: the Tesla raw value and unit go together, and only with the API.
+     * A reading brought back from an export, as it was: the Tesla raw value and unit go together, and only with the
+     * API.
      *
      * @throws \InvalidArgumentException when the raw value and its unit do not fit the source
      */
@@ -189,7 +194,9 @@ class OdometerReading
     public function verify(CarbonImmutable $at): void
     {
         if (0 !== $at->getOffset()) {
-            throw new \InvalidArgumentException(\sprintf('A verification must be a UTC instant, got %s.', $at->toIso8601String()));
+            throw new \InvalidArgumentException(
+                \sprintf('A verification must be a UTC instant, got %s.', $at->toIso8601String())
+            );
         }
 
         if ($at->greaterThan($this->lastVerifiedAt ?? $this->readAt)) {

@@ -147,7 +147,10 @@ final class ReportingGateTest extends KernelTestCase
         $this->context->enterUser($with->getId()->toRfc4122());
         $event = $this->event();
         $event->setExtra(['vehicle_data' => ['charge_state' => ['battery_level' => 80]]]);
-        self::assertSame(['vehicle_data' => ['charge_state' => ['battery_level' => 80]]], $this->events->__invoke($event)?->getExtra());
+        self::assertSame(
+            ['vehicle_data' => ['charge_state' => ['battery_level' => 80]]],
+            $this->events->__invoke($event)?->getExtra(),
+        );
     }
 
     public function testALogOfAnOptedInUserIsScrubbedAndCarriesTheUlid(): void
@@ -166,7 +169,13 @@ final class ReportingGateTest extends KernelTestCase
     {
         $user = $this->user('web@example.test', false, false);
         $tokens = self::getContainer()->get('security.token_storage');
-        $tokens->setToken(new \Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken($user, 'main', $user->getRoles()));
+        $tokens->setToken(
+            new \Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken(
+                $user,
+                'main',
+                $user->getRoles(),
+            )
+        );
 
         $this->controllerRuns();
 
@@ -184,7 +193,14 @@ final class ReportingGateTest extends KernelTestCase
         $request = new Request();
         $request->attributes->set('_stateless', true);
 
-        $this->bindRequestUser->onController(new ControllerEvent($this->appKernel, static fn (): null => null, $request, HttpKernelInterface::MAIN_REQUEST));
+        $this->bindRequestUser->onController(
+            new ControllerEvent(
+                $this->appKernel,
+                static fn (): null => null,
+                $request,
+                HttpKernelInterface::MAIN_REQUEST,
+            )
+        );
 
         self::assertNull($this->context->userId());
         self::assertFalse($this->context->isUnresolved());
@@ -229,7 +245,10 @@ final class ReportingGateTest extends KernelTestCase
         self::assertNull($this->events->__invoke($this->event()));
 
         $this->receive(new FetchOdometerMessage($in->getId()->toRfc4122()));
-        self::assertSame($in->getOwner()->getId()->toRfc4122(), $this->events->__invoke($this->event())?->getUser()?->getId());
+        self::assertSame(
+            $in->getOwner()->getId()->toRfc4122(),
+            $this->events->__invoke($this->event())?->getUser()?->getId(),
+        );
 
         // The scheduler tick belongs to no user: neither the previous nor a dropped one.
         $this->receive(new DispatchDueFetches());
@@ -242,7 +261,14 @@ final class ReportingGateTest extends KernelTestCase
 
     public function testABreadcrumbIsScrubbed(): void
     {
-        $crumb = $this->crumbs->__invoke(new \Sentry\Breadcrumb(\Sentry\Breadcrumb::LEVEL_INFO, \Sentry\Breadcrumb::TYPE_DEFAULT, 'app', 'GET /vehicles/' . self::VIN));
+        $crumb = $this->crumbs->__invoke(
+            new \Sentry\Breadcrumb(
+                \Sentry\Breadcrumb::LEVEL_INFO,
+                \Sentry\Breadcrumb::TYPE_DEFAULT,
+                'app',
+                'GET /vehicles/' . self::VIN,
+            )
+        );
 
         self::assertSame('GET /vehicles/[Filtered]', $crumb->getMessage());
     }
@@ -250,7 +276,12 @@ final class ReportingGateTest extends KernelTestCase
     private function controllerRuns(): void
     {
         $this->bindRequestUser->onController(
-            new ControllerEvent($this->appKernel, static fn (): null => null, new Request(), HttpKernelInterface::MAIN_REQUEST),
+            new ControllerEvent(
+                $this->appKernel,
+                static fn (): null => null,
+                new Request(),
+                HttpKernelInterface::MAIN_REQUEST,
+            ),
         );
     }
 

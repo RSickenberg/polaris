@@ -17,7 +17,10 @@ use Polaris\Shared\Domain\Distance;
 final readonly class ProjectionSnapshotPoint
 {
     public function __construct(
-        /** The calendar date the midnight opens (the row of 7 November is taken at the start of the 7th), as midnight UTC. A label, not an instant. */
+        /**
+         * The calendar date the midnight opens (the row of 7 November is taken at the start of the 7th), as midnight
+         * UTC. A label, not an instant.
+         */
         public CarbonImmutable $localDay,
         /** The owner's midnight the figures are taken at (only readings up to it count), UTC; null for an old row. */
         public ?CarbonImmutable $cutoffAt,

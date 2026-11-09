@@ -31,7 +31,14 @@ final readonly class LeaseTerm
         $months = ($exclusiveEnd->year - $start->year) * 12 + $exclusiveEnd->month - $start->month;
 
         if ($months < 1 || !$start->addMonthsNoOverflow($months)->equalTo($exclusiveEnd)) {
-            throw new \InvalidArgumentException(\sprintf('The lease term from %s to %s (%s) is not a whole number of months.', $start->toDateString(), $end->toDateString(), $endDateConvention->value));
+            throw new \InvalidArgumentException(
+                \sprintf(
+                    'The lease term from %s to %s (%s) is not a whole number of months.',
+                    $start->toDateString(),
+                    $end->toDateString(),
+                    $endDateConvention->value,
+                )
+            );
         }
 
         $this->months = $months;
@@ -41,8 +48,11 @@ final readonly class LeaseTerm
      * Builds a term from the calendar dates the user picked, whatever their time zone:
      * only the year, month and day are kept.
      */
-    public static function fromCalendarDates(\DateTimeInterface $start, \DateTimeInterface $end, EndDateConvention $endDateConvention): self
-    {
+    public static function fromCalendarDates(
+        \DateTimeInterface $start,
+        \DateTimeInterface $end,
+        EndDateConvention $endDateConvention,
+    ): self {
         return new self(self::toCalendarDate($start), self::toCalendarDate($end), $endDateConvention);
     }
 
@@ -91,7 +101,9 @@ final readonly class LeaseTerm
     private static function assertCalendarDate(CarbonImmutable $date, string $name): void
     {
         if (0 !== $date->getOffset() || !$date->equalTo($date->startOfDay())) {
-            throw new \InvalidArgumentException(\sprintf('The lease %s date must be at midnight UTC, got %s.', $name, $date->toIso8601String()));
+            throw new \InvalidArgumentException(
+                \sprintf('The lease %s date must be at midnight UTC, got %s.', $name, $date->toIso8601String())
+            );
         }
     }
 }

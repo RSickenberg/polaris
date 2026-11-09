@@ -47,7 +47,12 @@ final class PublicKeyFormatTest extends TestCase
         $other = new KeyPairGenerator()->generate();
 
         self::assertFalse($this->format()->sameKey($stored->publicKeyPem, $other->publicKeyPem));
-        self::assertFalse($this->format()->sameKey($stored->publicKeyPem, (string) $this->format()->uncompressedPointHex($other->publicKeyPem)));
+        self::assertFalse(
+            $this->format()->sameKey(
+                $stored->publicKeyPem,
+                (string) $this->format()->uncompressedPointHex($other->publicKeyPem),
+            )
+        );
         self::assertFalse($this->format()->sameKey($stored->publicKeyPem, 'not a key'));
         self::assertFalse($this->format()->sameKey($stored->publicKeyPem, ''));
     }

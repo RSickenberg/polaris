@@ -17,8 +17,8 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * Adds the data of an export file to a vehicle: the lease only when it has none, the readings and snapshots that are not
- * there yet. Nothing is replaced or deleted. See {@see VehicleDataImporter}.
+ * Adds the data of an export file to a vehicle: the lease only when it has none, the readings and snapshots that are
+ * not there yet. Nothing is replaced or deleted. See {@see VehicleDataImporter}.
  */
 #[AsCommand(
     name: 'polaris:vehicle:data:import',

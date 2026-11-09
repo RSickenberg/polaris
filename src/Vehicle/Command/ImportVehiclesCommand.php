@@ -57,7 +57,12 @@ final readonly class ImportVehiclesCommand
             if ($dryRun) {
                 $rows = [];
                 foreach ($this->importer->candidates($owner) as $candidate) {
-                    $rows[] = [$candidate->summary->vin->value(), $candidate->name(), $candidate->summary->state->value, $candidate->added ? 'already added' : 'would be added'];
+                    $rows[] = [
+                        $candidate->summary->vin->value(),
+                        $candidate->name(),
+                        $candidate->summary->state->value,
+                        $candidate->added ? 'already added' : 'would be added',
+                    ];
                 }
                 $io->table(['VIN', 'Name', 'State', 'Result'], $rows);
 

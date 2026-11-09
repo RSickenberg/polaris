@@ -127,7 +127,12 @@ final class RegisterCommandTest extends KernelTestCase
         self::bootKernel();
         $owner = self::createUser();
         $pair = new KeyPairGenerator()->generate();
-        $app = new TeslaApp($owner, $pair->publicKeyPem, 'v1:private', CarbonImmutable::parse('2026-10-20 12:00:00 UTC'));
+        $app = new TeslaApp(
+            $owner,
+            $pair->publicKeyPem,
+            'v1:private',
+            CarbonImmutable::parse('2026-10-20 12:00:00 UTC'),
+        );
         $app->configure(
             'client-id',
             self::getContainer()->get(SecretEncrypter::class)->encrypt(self::SECRET),

@@ -3,7 +3,7 @@
 {% block title %}{{ 'page.data.title'|trans(domain='vehicle') }} | {{ vehicle.name }}{% endblock %}
 
 {% block main %}
-    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.data.title'|trans(domain='vehicle') }} <span class="font-normal text-muted-foreground">| {{ vehicle.name }}</span></h1>
+    <twig:Shared:PageHeader title="{{ 'page.data.title'|trans(domain='vehicle') }}" subject="{{ vehicle.name }}" />
 
     <div class="mt-6 grid max-w-5xl gap-4 lg:grid-cols-2">
         <twig:Card data-data="export">

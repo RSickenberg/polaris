@@ -53,8 +53,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private CarbonImmutable $createdAt;
 
     /**
-     * Whether error reports about this user's activity may be sent to Sentry, when the owner of the instance turned error
-     * reporting on. Off until the user (or the sign-up policy of the instance) says otherwise.
+     * Whether error reports about this user's activity may be sent to Sentry, when the owner of the instance turned
+     * error reporting on. Off until the user (or the sign-up policy of the instance) says otherwise.
      */
     #[ORM\Column(options: ['default' => false])]
     private bool $errorReporting = false;
@@ -90,7 +90,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $email = mb_strtolower(trim($email));
 
         if ('' === $email || mb_strlen($email) > self::EMAIL_MAX_LENGTH) {
-            throw new \InvalidArgumentException(\sprintf('An email must have 1 to %d characters.', self::EMAIL_MAX_LENGTH));
+            throw new \InvalidArgumentException(
+                \sprintf('An email must have 1 to %d characters.', self::EMAIL_MAX_LENGTH)
+            );
         }
 
         return $email;

@@ -28,7 +28,14 @@ final class LeaseContractFactory
     {
         $terms = $this->terms($data);
 
-        return new LeaseContract($vehicle, $terms->term, $terms->allowance, $terms->startOdometer, $terms->excessCostPerKm, $terms->tolerance);
+        return new LeaseContract(
+            $vehicle,
+            $terms->term,
+            $terms->allowance,
+            $terms->startOdometer,
+            $terms->excessCostPerKm,
+            $terms->tolerance,
+        );
     }
 
     /**
@@ -37,15 +44,21 @@ final class LeaseContractFactory
     public function terms(LeaseContractData $data): LeaseTerms
     {
         if (!$data->isComplete()) {
-            throw new \InvalidArgumentException('The lease contract data is incomplete: validate it before creating the contract.');
+            throw new \InvalidArgumentException(
+                'The lease contract data is incomplete: validate it before creating the contract.'
+            );
         }
 
         $term = LeaseTerm::fromCalendarDates($data->startDate, $data->endDate, $data->endDateConvention);
         $entered = Distance::from($data->allowance, $data->distanceUnit);
 
+        $allowance = AllowanceBasis::PerYear === $data->allowanceBasis
+            ? Allowance::fromYearly($entered, $term)
+            : Allowance::ofTotal($entered);
+
         return new LeaseTerms(
             $term,
-            AllowanceBasis::PerYear === $data->allowanceBasis ? Allowance::fromYearly($entered, $term) : Allowance::ofTotal($entered),
+            $allowance,
             Distance::from($data->startOdometer, $data->distanceUnit),
             Money::fromDecimal($data->excessCostPerKm, $data->currency),
             Tolerance::fromPercent($data->tolerancePercent),

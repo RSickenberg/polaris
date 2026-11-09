@@ -7,7 +7,6 @@ namespace Polaris\Fetching\Service;
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
-use Polaris\Fetching\Domain\RefreshOutcome;
 use Polaris\Fetching\Domain\WakeWindow;
 use Polaris\Fetching\Entity\RefreshAttempt;
 use Polaris\Fetching\Message\FetchOdometerMessage;
@@ -15,7 +14,7 @@ use Polaris\Fetching\Repository\RefreshAttemptRepository;
 use Polaris\Fetching\Service\Dto\RefreshRequestResult;
 use Polaris\Fetching\Service\Dto\WakeRequestResult;
 use Polaris\Fetching\Service\Enum\WakeRequestStatus;
-use Polaris\Lease\Service\LeaseTermsService;
+use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Tesla\Service\Enum\WakeAccess;
 use Polaris\Tesla\Service\TeslaAppSettings;
 use Polaris\Tesla\Service\TeslaVehicleWaker;
@@ -46,7 +45,7 @@ final readonly class ManualRefreshService
         private TeslaAppSettings $teslaApps,
         private TeslaVehicleWaker $waker,
         private WakeCap $wakeCap,
-        private LeaseTermsService $leases,
+        private LeaseReturnService $leaseReturns,
     ) {
     }
 
@@ -58,7 +57,7 @@ final readonly class ManualRefreshService
     {
         $vehicleId = $vehicle->getId()->toRfc4122();
 
-        if ($this->leases->isReturned($vehicle)) {
+        if ($this->leaseReturns->isReturned($vehicle)) {
             return RefreshRequestResult::returned();
         }
 
@@ -78,12 +77,13 @@ final readonly class ManualRefreshService
     }
 
     /**
-     * Whether a wake could be confirmed now for this refresh, without sending anything: {@see WakeRequestStatus::Accepted}
-     * when it could, else the reason it cannot. The dashboard uses it to decide what to offer.
+     * Whether a wake could be confirmed now for this refresh, without sending anything:
+     * {@see WakeRequestStatus::Accepted} when it could, else the reason it cannot. The dashboard uses it to decide what
+     * to offer.
      */
     public function wakeOffer(Vehicle $vehicle, string $attemptId): WakeRequestResult
     {
-        if ($this->leases->isReturned($vehicle)) {
+        if ($this->leaseReturns->isReturned($vehicle)) {
             return WakeRequestResult::refused(WakeRequestStatus::Returned);
         }
 
@@ -101,15 +101,15 @@ final readonly class ManualRefreshService
     }
 
     /**
-     * The user confirmed waking the car a refresh found asleep or offline. The cap is checked here for a quick answer and again
-     * by the fetch, which counts a wake when wake_up is actually sent.
+     * The user confirmed waking the car a refresh found asleep or offline. The cap is checked here for a quick answer
+     * and again by the fetch, which counts a wake when wake_up is actually sent.
      *
      * @throws ORMException
      * @throws ExceptionInterface
      */
     public function requestWake(Vehicle $vehicle, string $attemptId): WakeRequestResult
     {
-        if ($this->leases->isReturned($vehicle)) {
+        if ($this->leaseReturns->isReturned($vehicle)) {
             return WakeRequestResult::refused(WakeRequestStatus::Returned);
         }
 
@@ -144,7 +144,7 @@ final readonly class ManualRefreshService
     {
         $expired = $attempt->getUpdatedAt()->addSeconds(WakeWindow::CONFIRM_SECONDS) < $now;
 
-        if ($expired || !\in_array($attempt->getOutcome(), [RefreshOutcome::Asleep, RefreshOutcome::Offline], true)) {
+        if ($expired || !$attempt->getOutcome()->isWakeable()) {
             return WakeRequestResult::refused(WakeRequestStatus::NothingToWake);
         }
 

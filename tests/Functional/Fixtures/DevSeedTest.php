@@ -84,8 +84,8 @@ final class DevSeedTest extends KernelTestCase
     }
 
     /**
-     * The running leases come with the daily snapshots of the last 30 days and today, so that the comparison panels have
-     * figures; the other vehicles have none.
+     * The running leases come with the daily snapshots of the last 30 days and today, so that the comparison panels
+     * have figures; the other vehicles have none.
      */
     public function testTheRunningLeasesGetTheDailySnapshotsOfTheLastMonth(): void
     {
@@ -156,7 +156,8 @@ final class DevSeedTest extends KernelTestCase
     private function odometers(EntityManagerInterface $entityManager): array
     {
         /** @var list<string> $rows */
-        $rows = $entityManager->getConnection()->fetchFirstColumn('SELECT read_at::text || odometer_m FROM odometer_reading ORDER BY read_at');
+        $rows = $entityManager->getConnection()->fetchFirstColumn('SELECT read_at::text || odometer_m FROM '
+            . 'odometer_reading ORDER BY read_at');
 
         return $rows;
     }

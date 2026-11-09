@@ -19,7 +19,12 @@ final readonly class Vin
         $normalized = strtoupper(trim($value));
 
         if (1 !== preg_match('/^[A-HJ-NPR-Z0-9]{17}$/', $normalized)) {
-            throw new \InvalidArgumentException(\sprintf('"%s" is not a valid VIN: expected 17 digits or capital letters other than I, O and Q.', $value));
+            throw new \InvalidArgumentException(
+                \sprintf(
+                    '"%s" is not a valid VIN: expected 17 digits or capital letters other than I, O and Q.',
+                    $value,
+                )
+            );
         }
 
         $this->value = $normalized;

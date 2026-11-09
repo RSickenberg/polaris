@@ -33,7 +33,13 @@ final class UserTimeZoneTest extends WebTestCase
         $vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000091'), 'Model 3', $user);
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->persist($vehicle);
-        $entityManager->persist(OdometerReading::manual($vehicle, CarbonImmutable::parse('2026-07-01 08:00:00', 'UTC'), Distance::fromKilometres(1_000)));
+        $entityManager->persist(
+            OdometerReading::manual(
+                $vehicle,
+                CarbonImmutable::parse('2026-07-01 08:00:00', 'UTC'),
+                Distance::fromKilometres(1_000),
+            )
+        );
         $entityManager->flush();
         self::signIn($client, $user);
         $path = \sprintf('/vehicles/%s/readings', $vehicle->getId()->toBase32());
@@ -47,7 +53,14 @@ final class UserTimeZoneTest extends WebTestCase
         self::assertSelectorTextContains('label[for=odometer_reading_readAt]', 'Read at (Europe/Zurich)');
         self::assertInputValueSame('odometer_reading[readAt]', '2026-07-01T14:00');
 
-        $client->submitForm('Add reading', ['odometer_reading[readAt]' => '2026-07-01T11:30', 'odometer_reading[odometer]' => '1100', 'odometer_reading[distanceUnit]' => 'km']);
+        $client->submitForm(
+            'Add reading',
+            [
+                'odometer_reading[readAt]' => '2026-07-01T11:30',
+                'odometer_reading[odometer]' => '1100',
+                'odometer_reading[distanceUnit]' => 'km',
+            ],
+        );
 
         self::assertResponseRedirects($path);
         $stored = $entityManager->getRepository(OdometerReading::class)->findBy([], ['odometerM' => 'DESC'])[0];

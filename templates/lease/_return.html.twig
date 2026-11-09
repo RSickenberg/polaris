@@ -1,10 +1,11 @@
-{# The car went back to the bank. Two dialogs confirm: the first takes the day, the second undoes the return. #}
+{# The car went back to the lessor. Two dialogs confirm: the first takes the day, the second undoes the return. #}
 {% set returnFailed = returnForm.vars.submitted and not returnForm.vars.valid %}
 
-{# Like the projection above it: the title sits outside the card. #}
-<section id="lease-return" class="mt-8">
-<h2 class="mb-3 text-lg font-semibold">{{ 'return.title'|trans(domain='lease') }}</h2>
-<twig:Card>
+{# A card like the projection above it, its title in the card header. #}
+<twig:Card id="lease-return">
+    <twig:Card:Header>
+        <twig:Card:Title><h2>{{ 'return.title'|trans(domain='lease') }}</h2></twig:Card:Title>
+    </twig:Card:Header>
     <twig:Card:Content class="flex flex-col gap-4">
         {% if returnedOn is null %}
             <p class="text-sm text-muted-foreground text-pretty">{{ 'return.help'|trans(domain='lease') }}</p>
@@ -64,5 +65,3 @@
         </div>
     </twig:Card:Content>
 </twig:Card>
-</section>
-</section>

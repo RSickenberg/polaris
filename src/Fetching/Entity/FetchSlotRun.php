@@ -48,7 +48,9 @@ class FetchSlotRun
     public function __construct(Vehicle $vehicle, CarbonImmutable $slotAt, CarbonImmutable $now)
     {
         if (0 !== $slotAt->getOffset()) {
-            throw new \InvalidArgumentException(\sprintf('A fetch slot must be a UTC instant, got %s.', $slotAt->toIso8601String()));
+            throw new \InvalidArgumentException(
+                \sprintf('A fetch slot must be a UTC instant, got %s.', $slotAt->toIso8601String())
+            );
         }
 
         $this->id = new Ulid();

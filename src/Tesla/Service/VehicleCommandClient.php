@@ -19,7 +19,8 @@ interface VehicleCommandClient
      * POST /api/1/vehicles/{vin}/wake_up. A billed call that is never retried.
      *
      * @throws TeslaNotConnected
-     * @throws FleetApiError     HTTP 401 and 403 mean the scope is missing (see {@see FleetApiError::isAccessRefused()}), 408 that the car did not answer
+     * @throws FleetApiError     HTTP 401 and 403 mean the scope is missing (see
+     *                           {@see FleetApiError::isAccessRefused()}), 408 that the car did not answer
      */
     public function wakeUp(TeslaApp $app, Vin $vin): void;
 }

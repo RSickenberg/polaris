@@ -19,7 +19,14 @@ final class AccessControlTest extends WebTestCase
      * The routes that are public on purpose: the login page, and the language switcher, which the
      * login page uses.
      */
-    private const array PUBLIC_ROUTES = ['account_login', 'shared_locale', 'account_forgot_password', 'account_forgot_password_sent', 'account_reset_password', 'tesla_public_key'];
+    private const array PUBLIC_ROUTES = [
+        'account_login',
+        'shared_locale',
+        'account_forgot_password',
+        'account_forgot_password_sent',
+        'account_reset_password',
+        'tesla_public_key',
+    ];
 
     /**
      * Development tooling: open in the dev and test environments only (parameter
@@ -43,7 +50,11 @@ final class AccessControlTest extends WebTestCase
             $method = $route->getMethods()[0] ?? 'GET';
             $client->request($method, $url);
 
-            self::assertResponseRedirects('http://localhost/login', null, \sprintf('Route "%s" (%s %s) is reachable without signing in.', $name, $method, $path));
+            self::assertResponseRedirects(
+                'http://localhost/login',
+                null,
+                \sprintf('Route "%s" (%s %s) is reachable without signing in.', $name, $method, $path),
+            );
             $checked[] = $name;
         }
 

@@ -69,7 +69,12 @@ final class FleetApiError extends \RuntimeException
         ?\Throwable $previous = null,
     ): self {
         return new self(
-            \sprintf('%s in region %s failed: Tesla could not be reached (%s).', $operation->describe(), $region->value, $reason),
+            \sprintf(
+                '%s in region %s failed: Tesla could not be reached (%s).',
+                $operation->describe(),
+                $region->value,
+                $reason,
+            ),
             $operation,
             $region,
             null,
@@ -94,8 +99,13 @@ final class FleetApiError extends \RuntimeException
      */
     public function refreshTokenRejected(): bool
     {
-        return FleetApiOperation::Refresh === $this->operation
-            && (\in_array($this->oauthError, ['invalid_grant', 'login_required'], true) || Response::HTTP_UNAUTHORIZED === $this->httpStatus);
+        if (FleetApiOperation::Refresh !== $this->operation) {
+            return false;
+        }
+
+        $refusedByOAuth = \in_array($this->oauthError, ['invalid_grant', 'login_required'], true);
+
+        return $refusedByOAuth || Response::HTTP_UNAUTHORIZED === $this->httpStatus;
     }
 
     /**
@@ -127,15 +137,20 @@ final class FleetApiError extends \RuntimeException
     {
         return match (true) {
             Response::HTTP_BAD_REQUEST === $status => 'Tesla rejected the request',
-            Response::HTTP_UNAUTHORIZED === $status => 'Tesla did not accept the credentials, check the client ID and the client secret',
-            Response::HTTP_FORBIDDEN === $status => 'Tesla refused access, check that the app is approved and that the domain matches an allowed origin',
+            Response::HTTP_UNAUTHORIZED === $status => 'Tesla did not accept the credentials, check the client ID and '
+                . 'the client secret',
+            Response::HTTP_FORBIDDEN === $status => 'Tesla refused access, check that the app is approved and that the '
+                . 'domain matches an allowed origin',
             Response::HTTP_NOT_FOUND === $status => 'Tesla does not know this endpoint or domain',
             Response::HTTP_REQUEST_TIMEOUT === $status => 'the vehicle is not online',
-            Response::HTTP_PRECONDITION_FAILED === $status => 'a Tesla precondition is not met, check that the app is registered and that the vehicle supports the call',
-            Response::HTTP_MISDIRECTED_REQUEST === $status => 'the Tesla account is in another region, check the enabled regions of the app',
+            Response::HTTP_PRECONDITION_FAILED === $status => 'a Tesla precondition is not met, check that the app is '
+                . 'registered and that the vehicle supports the call',
+            Response::HTTP_MISDIRECTED_REQUEST === $status => 'the Tesla account is in another region, check the '
+                . 'enabled regions of the app',
             Response::HTTP_UNPROCESSABLE_ENTITY === $status => 'Tesla could not validate the request or the public key',
             Response::HTTP_TOO_MANY_REQUESTS === $status => 'Tesla is rate-limiting the requests, try again later',
-            self::HTTP_DEVICE_UNEXPECTED_RESPONSE === $status => 'the vehicle returned an error, it may need a reboot or service',
+            self::HTTP_DEVICE_UNEXPECTED_RESPONSE === $status => 'the vehicle returned an error, it may need a reboot '
+                . 'or service',
             $status >= Response::HTTP_INTERNAL_SERVER_ERROR => 'Tesla failed to answer, try again later',
             default => 'Tesla answered an unexpected status',
         };

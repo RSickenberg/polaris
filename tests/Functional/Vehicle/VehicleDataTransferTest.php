@@ -24,6 +24,7 @@ use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Polaris\Vehicle\Service\Dto\VehicleDataImportResult;
 use Polaris\Vehicle\Service\Enum\LeaseImportOutcome;
+use Polaris\Vehicle\Service\Enum\VehicleDataRejection;
 use Polaris\Vehicle\Service\Exception\VehicleDataRejected;
 use Polaris\Vehicle\Service\VehicleDataExporter;
 use Polaris\Vehicle\Service\VehicleDataImporter;
@@ -195,27 +196,27 @@ final class VehicleDataTransferTest extends KernelTestCase
     }
 
     /**
-     * @return iterable<string, array{string, string}>
+     * @return iterable<string, array{string, VehicleDataRejection}>
      */
     public static function badFiles(): iterable
     {
         $export = '{"format": "polaris.vehicle-data", "version": %d, "lease": null, %s"snapshots": []}';
 
-        yield 'not JSON' => ['{"format": ', VehicleDataRejected::NOT_JSON];
-        yield 'a list' => ['[1, 2]', VehicleDataRejected::NOT_JSON];
-        yield 'an empty object' => ['{}', VehicleDataRejected::NOT_AN_EXPORT];
-        yield 'another format' => ['{"format": "something.else", "version": 1}', VehicleDataRejected::NOT_AN_EXPORT];
+        yield 'not JSON' => ['{"format": ', VehicleDataRejection::NotJson];
+        yield 'a list' => ['[1, 2]', VehicleDataRejection::NotJson];
+        yield 'an empty object' => ['{}', VehicleDataRejection::NotAnExport];
+        yield 'another format' => ['{"format": "something.else", "version": 1}', VehicleDataRejection::NotAnExport];
         yield 'a version from the future' => [
             \sprintf($export, 2, '"readings": [], '),
-            VehicleDataRejected::UNKNOWN_VERSION,
+            VehicleDataRejection::UnknownVersion,
         ];
-        yield 'readings missing' => [\sprintf($export, 1, ''), VehicleDataRejected::INVALID];
+        yield 'readings missing' => [\sprintf($export, 1, ''), VehicleDataRejection::Invalid];
     }
 
     #[DataProvider('badFiles')]
     public function testAFileThatIsNotAnExportOfThisVersionIsRefusedWholeAndNothingIsWritten(
         string $json,
-        string $reason,
+        VehicleDataRejection $reason,
     ): void {
         try {
             $this->importer->import($this->target, $json);

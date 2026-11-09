@@ -22,7 +22,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * daily schedule does for that midnight. Running it again replaces the figures of that midnight, so it never adds a
  * second row.
  */
-#[AsCommand(name: 'polaris:lease:snapshot', description: 'Save the projection snapshot at the owner\'s latest midnight of one lease (--vin) or of all leases')]
+#[AsCommand(
+    name: 'polaris:lease:snapshot',
+    description: 'Save the projection snapshot at the owner\'s latest midnight of one lease (--vin) or of all leases',
+)]
 final readonly class SnapshotCommand
 {
     public function __construct(
@@ -39,7 +42,9 @@ final readonly class SnapshotCommand
         ?string $vin = null,
     ): int {
         if (null !== $vin) {
-            $vehicle = $this->entityManager->getRepository(Vehicle::class)->findOneBy(['vin' => strtoupper(trim($vin))]);
+            $vehicle = $this->entityManager->getRepository(Vehicle::class)->findOneBy(
+                ['vin' => strtoupper(trim($vin))]
+            );
 
             if (!$vehicle instanceof Vehicle) {
                 $io->error(\sprintf('No vehicle with VIN %s.', strtoupper(trim($vin))));
@@ -49,7 +54,10 @@ final readonly class SnapshotCommand
 
             $vehicles = [$vehicle];
         } else {
-            $vehicles = array_map(static fn ($contract): Vehicle => $contract->getVehicle(), $this->contracts->findAll());
+            $vehicles = array_map(
+                static fn ($contract): Vehicle => $contract->getVehicle(),
+                $this->contracts->findAll(),
+            );
         }
 
         /** @var array<string, int> $counts */
@@ -58,7 +66,10 @@ final readonly class SnapshotCommand
         $now = CarbonImmutable::instance($this->clock->now());
 
         foreach ($vehicles as $vehicle) {
-            $outcome = $this->snapshots->save($vehicle, OwnerMidnight::latestAt($now, $vehicle->getOwner()->getTimeZone()));
+            $outcome = $this->snapshots->save(
+                $vehicle,
+                OwnerMidnight::latestAt($now, $vehicle->getOwner()->getTimeZone()),
+            );
             $counts[$outcome->value] = ($counts[$outcome->value] ?? 0) + 1;
         }
 

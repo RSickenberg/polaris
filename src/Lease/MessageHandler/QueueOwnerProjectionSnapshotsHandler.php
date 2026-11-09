@@ -31,7 +31,13 @@ final readonly class QueueOwnerProjectionSnapshotsHandler
     public function __invoke(OwnerMidnightPassed $message): void
     {
         foreach ($this->contracts->findOfOwner(Ulid::fromString($message->userId)) as $contract) {
-            $this->bus->dispatch(new SaveProjectionSnapshot($contract->getVehicle()->getId()->toRfc4122(), $message->localDay, $message->midnightTimestamp));
+            $this->bus->dispatch(
+                new SaveProjectionSnapshot(
+                    $contract->getVehicle()->getId()->toRfc4122(),
+                    $message->localDay,
+                    $message->midnightTimestamp,
+                )
+            );
         }
     }
 }

@@ -24,6 +24,17 @@ use Symfony\Component\Clock\MockClock;
  * a start odometer of 10,000 km; a recent pace weight of 0.6.
  *
  * Day n is 2026-01-01 plus n days. Distances are in metres, paces in metres per day.
+ *
+ * @phpstan-type Expected array{
+ *     asOf: string,
+ *     driven: int,
+ *     allowedToDate: int,
+ *     margin: int,
+ *     overallPace: float,
+ *     recentPace: float|null,
+ *     blendedPace: float,
+ *     projectedAtEnd: int,
+ * }
  */
 #[CoversClass(ProjectionCalculator::class)]
 #[CoversClass(Projection::class)]
@@ -32,7 +43,7 @@ final class ProjectionCalculatorTest extends TestCase
     private const int START_ODOMETER = 10_000_000;
 
     /**
-     * @return iterable<string, array{LeaseTerm, int, string, list<array{string, int}>, array{string, int, int, int, float, float|null, float, int}}>
+     * @return iterable<string, array{LeaseTerm, int, string, list<array{string, int}>, Expected}>
      */
     public static function projections(): iterable
     {
@@ -43,7 +54,16 @@ final class ProjectionCalculatorTest extends TestCase
         yield 'younger than 30 days: overall pace only' => [
             self::term('2026-01-01', '2027-01-01'), 36_500, '2026-01-21 12:00',
             [['2026-01-21 00:00', 12_000_000]],
-            ['2026-01-21 00:00', 2_000_000, 2_000_000, 0, 100_000.0, null, 100_000.0, 36_500_000],
+            self::expected(
+                asOf: '2026-01-21 00:00',
+                driven: 2_000_000,
+                allowedToDate: 2_000_000,
+                margin: 0,
+                overallPace: 100_000.0,
+                recentPace: null,
+                blendedPace: 100_000.0,
+                projectedAtEnd: 36_500_000,
+            ),
         ];
 
         // Day 30: driven 3,600,000. Allowed 36,500,000 x 30 / 365 = 3,000,000, margin -600,000.
@@ -53,7 +73,16 @@ final class ProjectionCalculatorTest extends TestCase
         yield 'exactly 30 days: the window starts at the lease start' => [
             self::term('2026-01-01', '2027-01-01'), 36_500, '2026-01-31 12:00',
             [['2026-01-31 00:00', 13_600_000]],
-            ['2026-01-31 00:00', 3_600_000, 3_000_000, -600_000, 120_000.0, 120_000.0, 120_000.0, 43_800_000],
+            self::expected(
+                asOf: '2026-01-31 00:00',
+                driven: 3_600_000,
+                allowedToDate: 3_000_000,
+                margin: -600_000,
+                overallPace: 120_000.0,
+                recentPace: 120_000.0,
+                blendedPace: 120_000.0,
+                projectedAtEnd: 43_800_000,
+            ),
         ];
 
         // Day 100: driven 9,000,000. Allowed 36,500,000 x 100 / 365 = 10,000,000, margin 1,000,000.
@@ -63,7 +92,16 @@ final class ProjectionCalculatorTest extends TestCase
         yield 'under the allowance, speeding up' => [
             self::term('2026-01-01', '2027-01-01'), 36_500, '2026-04-11 12:00',
             [['2026-03-12 00:00', 15_400_000], ['2026-04-11 00:00', 19_000_000]],
-            ['2026-04-11 00:00', 9_000_000, 10_000_000, 1_000_000, 90_000.0, 120_000.0, 108_000.0, 37_620_000],
+            self::expected(
+                asOf: '2026-04-11 00:00',
+                driven: 9_000_000,
+                allowedToDate: 10_000_000,
+                margin: 1_000_000,
+                overallPace: 90_000.0,
+                recentPace: 120_000.0,
+                blendedPace: 108_000.0,
+                projectedAtEnd: 37_620_000,
+            ),
         ];
 
         // Same as above, but no sample on day 70: the window start is interpolated between
@@ -71,7 +109,16 @@ final class ProjectionCalculatorTest extends TestCase
         yield 'window start interpolated between two samples' => [
             self::term('2026-01-01', '2027-01-01'), 36_500, '2026-04-11 12:00',
             [['2026-03-07 00:00', 14_700_000], ['2026-03-17 00:00', 16_100_000], ['2026-04-11 00:00', 19_000_000]],
-            ['2026-04-11 00:00', 9_000_000, 10_000_000, 1_000_000, 90_000.0, 120_000.0, 108_000.0, 37_620_000],
+            self::expected(
+                asOf: '2026-04-11 00:00',
+                driven: 9_000_000,
+                allowedToDate: 10_000_000,
+                margin: 1_000_000,
+                overallPace: 90_000.0,
+                recentPace: 120_000.0,
+                blendedPace: 108_000.0,
+                projectedAtEnd: 37_620_000,
+            ),
         ];
 
         // Day 100: driven 11,000,000. Allowed 10,000,000, margin -1,000,000.
@@ -81,7 +128,16 @@ final class ProjectionCalculatorTest extends TestCase
         yield 'over the allowance, slowing down' => [
             self::term('2026-01-01', '2027-01-01'), 36_500, '2026-04-11 12:00',
             [['2026-03-12 00:00', 18_000_000], ['2026-04-11 00:00', 21_000_000]],
-            ['2026-04-11 00:00', 11_000_000, 10_000_000, -1_000_000, 110_000.0, 100_000.0, 104_000.0, 38_560_000],
+            self::expected(
+                asOf: '2026-04-11 00:00',
+                driven: 11_000_000,
+                allowedToDate: 10_000_000,
+                margin: -1_000_000,
+                overallPace: 110_000.0,
+                recentPace: 100_000.0,
+                blendedPace: 104_000.0,
+                projectedAtEnd: 38_560_000,
+            ),
         ];
 
         // The case above with the day-100 sample, but the lease is written with its last
@@ -89,7 +145,16 @@ final class ProjectionCalculatorTest extends TestCase
         yield 'inclusive end date' => [
             self::term('2026-01-01', '2026-12-31', EndDateConvention::Inclusive), 36_500, '2026-04-11 12:00',
             [['2026-03-12 00:00', 15_400_000], ['2026-04-11 00:00', 19_000_000]],
-            ['2026-04-11 00:00', 9_000_000, 10_000_000, 1_000_000, 90_000.0, 120_000.0, 108_000.0, 37_620_000],
+            self::expected(
+                asOf: '2026-04-11 00:00',
+                driven: 9_000_000,
+                allowedToDate: 10_000_000,
+                margin: 1_000_000,
+                overallPace: 90_000.0,
+                recentPace: 120_000.0,
+                blendedPace: 108_000.0,
+                projectedAtEnd: 37_620_000,
+            ),
         ];
 
         // Leap year: 2028-01-01 to 2029-01-01 is 366 days; 36,600 km is 100 km a day.
@@ -100,7 +165,16 @@ final class ProjectionCalculatorTest extends TestCase
         yield 'leap year' => [
             self::term('2028-01-01', '2029-01-01'), 36_600, '2028-02-29 12:00',
             [['2028-02-29 00:00', 15_900_000]],
-            ['2028-02-29 00:00', 5_900_000, 5_900_000, 0, 100_000.0, 100_000.0, 100_000.0, 36_600_000],
+            self::expected(
+                asOf: '2028-02-29 00:00',
+                driven: 5_900_000,
+                allowedToDate: 5_900_000,
+                margin: 0,
+                overallPace: 100_000.0,
+                recentPace: 100_000.0,
+                blendedPace: 100_000.0,
+                projectedAtEnd: 36_600_000,
+            ),
         ];
 
         // The lease is over (day 365) and the car kept driving: the latest sample is day 375.
@@ -111,7 +185,16 @@ final class ProjectionCalculatorTest extends TestCase
         yield 'lease over, sample after the end' => [
             self::term('2026-01-01', '2027-01-01'), 36_500, '2027-03-01 00:00',
             [['2026-12-12 00:00', 44_500_000], ['2027-01-11 00:00', 47_500_000]],
-            ['2027-01-11 00:00', 37_500_000, 36_500_000, -1_000_000, 100_000.0, 100_000.0, 100_000.0, 37_500_000],
+            self::expected(
+                asOf: '2027-01-11 00:00',
+                driven: 37_500_000,
+                allowedToDate: 36_500_000,
+                margin: -1_000_000,
+                overallPace: 100_000.0,
+                recentPace: 100_000.0,
+                blendedPace: 100_000.0,
+                projectedAtEnd: 37_500_000,
+            ),
         ];
 
         // The lease is over, but the latest sample is day 300: figures stay at day 300.
@@ -122,7 +205,16 @@ final class ProjectionCalculatorTest extends TestCase
         yield 'lease over, no sample after the end' => [
             self::term('2026-01-01', '2027-01-01'), 36_500, '2027-02-01 00:00',
             [['2026-09-28 00:00', 38_000_000], ['2026-10-28 00:00', 40_000_000]],
-            ['2026-10-28 00:00', 30_000_000, 30_000_000, 0, 100_000.0, 2_000_000 / 30, 80_000.0, 35_200_000],
+            self::expected(
+                asOf: '2026-10-28 00:00',
+                driven: 30_000_000,
+                allowedToDate: 30_000_000,
+                margin: 0,
+                overallPace: 100_000.0,
+                recentPace: 2_000_000 / 30,
+                blendedPace: 80_000.0,
+                projectedAtEnd: 35_200_000,
+            ),
         ];
 
         // 54 s after the start: allowed 36,500,000 x 54 / 31,536,000 = 62.5, rounded half up to 63.
@@ -131,7 +223,16 @@ final class ProjectionCalculatorTest extends TestCase
         yield 'allowed to date rounded half up' => [
             self::term('2026-01-01', '2027-01-01'), 36_500, '2026-01-01 00:01:00',
             [['2026-01-01 00:00:54', 10_000_001]],
-            ['2026-01-01 00:00:54', 1, 63, 62, 1_600.0, null, 1_600.0, 584_000],
+            self::expected(
+                asOf: '2026-01-01 00:00:54',
+                driven: 1,
+                allowedToDate: 63,
+                margin: 62,
+                overallPace: 1_600.0,
+                recentPace: null,
+                blendedPace: 1_600.0,
+                projectedAtEnd: 584_000,
+            ),
         ];
 
         // Day 2: driven 1, allowed 36,500,000 x 2 / 365 = 200,000, margin 199,999. Overall 0.5.
@@ -139,7 +240,16 @@ final class ProjectionCalculatorTest extends TestCase
         yield 'projection rounded half up' => [
             self::term('2026-01-01', '2027-01-01'), 36_500, '2026-01-03 12:00',
             [['2026-01-03 00:00', 10_000_001]],
-            ['2026-01-03 00:00', 1, 200_000, 199_999, 0.5, null, 0.5, 183],
+            self::expected(
+                asOf: '2026-01-03 00:00',
+                driven: 1,
+                allowedToDate: 200_000,
+                margin: 199_999,
+                overallPace: 0.5,
+                recentPace: null,
+                blendedPace: 0.5,
+                projectedAtEnd: 183,
+            ),
         ];
 
         // Samples out of order, a duplicate, and samples at or before the lease start (even
@@ -153,18 +263,41 @@ final class ProjectionCalculatorTest extends TestCase
                 ['2026-01-01 00:00', 10_000_500],
                 ['2026-04-11 00:00', 19_000_000],
             ],
-            ['2026-04-11 00:00', 9_000_000, 10_000_000, 1_000_000, 90_000.0, 120_000.0, 108_000.0, 37_620_000],
+            self::expected(
+                asOf: '2026-04-11 00:00',
+                driven: 9_000_000,
+                allowedToDate: 10_000_000,
+                margin: 1_000_000,
+                overallPace: 90_000.0,
+                recentPace: 120_000.0,
+                blendedPace: 108_000.0,
+                projectedAtEnd: 37_620_000,
+            ),
         ];
     }
 
     /**
-     * @param list<array{string, int}>                                    $samples
-     * @param array{string, int, int, int, float, float|null, float, int} $expected
+     * @param list<array{string, int}> $samples
+     * @param Expected                 $expected
      */
     #[DataProvider('projections')]
-    public function testProjection(LeaseTerm $term, int $allowanceKm, string $now, array $samples, array $expected): void
-    {
-        [$asOf, $driven, $allowedToDate, $margin, $overallPace, $recentPace, $blendedPace, $projectedAtEnd] = $expected;
+    public function testProjection(
+        LeaseTerm $term,
+        int $allowanceKm,
+        string $now,
+        array $samples,
+        array $expected,
+    ): void {
+        [
+            'asOf' => $asOf,
+            'driven' => $driven,
+            'allowedToDate' => $allowedToDate,
+            'margin' => $margin,
+            'overallPace' => $overallPace,
+            'recentPace' => $recentPace,
+            'blendedPace' => $blendedPace,
+            'projectedAtEnd' => $projectedAtEnd,
+        ] = $expected;
 
         $projection = self::calculator($now)->calculate(
             $term,
@@ -174,7 +307,10 @@ final class ProjectionCalculatorTest extends TestCase
         );
 
         self::assertNotNull($projection);
-        self::assertSame(new CarbonImmutable($asOf, 'UTC')->toIso8601ZuluString(), $projection->asOf->toIso8601ZuluString());
+        self::assertSame(
+            new CarbonImmutable($asOf, 'UTC')->toIso8601ZuluString(),
+            $projection->asOf->toIso8601ZuluString(),
+        );
         self::assertSame(0, $projection->asOf->getOffset());
         self::assertSame($driven, $projection->driven->metres());
         self::assertSame($allowedToDate, $projection->allowedToDate->metres());
@@ -226,7 +362,10 @@ final class ProjectionCalculatorTest extends TestCase
     {
         yield 'no sample' => ['2026-04-11 12:00', []];
         yield 'clock before the lease start' => ['2025-12-31 12:00', [['2025-12-30 00:00', 9_990_000]]];
-        yield 'samples at or before the start only' => ['2026-04-11 12:00', [['2025-12-30 00:00', 9_990_000], ['2026-01-01 00:00', 10_000_000]]];
+        yield 'samples at or before the start only' => [
+            '2026-04-11 12:00',
+            [['2025-12-30 00:00', 9_990_000], ['2026-01-01 00:00', 10_000_000]],
+        ];
     }
 
     /**
@@ -250,8 +389,14 @@ final class ProjectionCalculatorTest extends TestCase
     {
         yield 'sample in the future' => [[['2026-04-11 12:00:01', 19_000_000]], 'in the future'];
         yield 'lower than the start odometer' => [[['2026-01-21 00:00', 9_999_999]], 'lower than an earlier one'];
-        yield 'lower than an earlier sample' => [[['2026-03-12 00:00', 15_400_000], ['2026-04-11 00:00', 15_399_999]], 'lower than an earlier one'];
-        yield 'two odometers at the same second' => [[['2026-04-11 00:00', 19_000_000], ['2026-04-11 00:00', 19_000_001]], 'disagree'];
+        yield 'lower than an earlier sample' => [
+            [['2026-03-12 00:00', 15_400_000], ['2026-04-11 00:00', 15_399_999]],
+            'lower than an earlier one',
+        ];
+        yield 'two odometers at the same second' => [
+            [['2026-04-11 00:00', 19_000_000], ['2026-04-11 00:00', 19_000_001]],
+            'disagree',
+        ];
     }
 
     /**
@@ -292,8 +437,11 @@ final class ProjectionCalculatorTest extends TestCase
         );
     }
 
-    private static function term(string $start, string $end, EndDateConvention $convention = EndDateConvention::Exclusive): LeaseTerm
-    {
+    private static function term(
+        string $start,
+        string $end,
+        EndDateConvention $convention = EndDateConvention::Exclusive,
+    ): LeaseTerm {
         return new LeaseTerm(new CarbonImmutable($start, 'UTC'), new CarbonImmutable($end, 'UTC'), $convention);
     }
 
@@ -305,8 +453,38 @@ final class ProjectionCalculatorTest extends TestCase
     private static function samples(array $samples): array
     {
         return array_map(
-            static fn (array $sample): OdometerSample => new OdometerSample(new CarbonImmutable($sample[0], 'UTC'), Distance::fromMetres($sample[1])),
+            static fn (array $sample): OdometerSample => new OdometerSample(
+                new CarbonImmutable($sample[0], 'UTC'),
+                Distance::fromMetres($sample[1]),
+            ),
             $samples,
         );
+    }
+
+    /**
+     * The figures a projection is expected to give, in metres and metres per day.
+     *
+     * @return Expected
+     */
+    private static function expected(
+        string $asOf,
+        int $driven,
+        int $allowedToDate,
+        int $margin,
+        float $overallPace,
+        ?float $recentPace,
+        float $blendedPace,
+        int $projectedAtEnd,
+    ): array {
+        return [
+            'asOf' => $asOf,
+            'driven' => $driven,
+            'allowedToDate' => $allowedToDate,
+            'margin' => $margin,
+            'overallPace' => $overallPace,
+            'recentPace' => $recentPace,
+            'blendedPace' => $blendedPace,
+            'projectedAtEnd' => $projectedAtEnd,
+        ];
     }
 }

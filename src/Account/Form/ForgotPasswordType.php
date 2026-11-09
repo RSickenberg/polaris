@@ -19,7 +19,11 @@ final class ForgotPasswordType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('email', EmailType::class, ['label' => 'form.email.label', 'attr' => ['autocomplete' => 'username', 'autofocus' => true]])
+            ->add(
+                'email',
+                EmailType::class,
+                ['label' => 'form.email.label', 'attr' => ['autocomplete' => 'username', 'autofocus' => true]],
+            )
             ->add('send', SubmitType::class, ['label' => 'form.send_link']);
     }
 

@@ -57,14 +57,14 @@ final class ComparisonPanelTest extends KernelTestCase
         self::assertCount(0, $row->filter('[data-figure]'));
     }
 
-    public function testTheFrenchPanelUsesFrenchWordsAndAFrenchPercentage(): void
+    public function testTheFrenchPanelUsesFrenchWordsAndASwissPercentage(): void
     {
         $panel = $this->panel('fr');
 
         $period = $panel->filter('[data-period=today] td')->first()->filter('span')->first();
 
         self::assertSame('Aujourd’hui', $this->text($period));
-        self::assertSame('+11 %', $this->text($panel->filter('[data-period=today] [data-figure=ratio]')));
+        self::assertSame('+11%', $this->text($panel->filter('[data-period=today] [data-figure=ratio]')));
     }
 
     protected function tearDown(): void
@@ -86,6 +86,17 @@ final class ComparisonPanelTest extends KernelTestCase
         self::assertCount(1, $panel->filter('dialog br'));
     }
 
+    public function testTheFirstParagraphOfTheExplanationIsItsLeadAndTheOthersFollow(): void
+    {
+        $panel = $this->panel('en', help: 'The answer.\\n\\nHow it works.\\n\\nHow to read it.');
+
+        self::assertSame('The answer.', $panel->filter('dialog [data-slot=dialog-description]')->text());
+        self::assertSame(
+            ['How it works.', 'How to read it.'],
+            $panel->filter('dialog [data-help-details] p')->each(static fn ($p): string => $p->text()),
+        );
+    }
+
     public function testWithoutAnExplanationThereIsNoInfoButton(): void
     {
         self::assertCount(0, $this->panel('en')->filter('[data-help]'));
@@ -105,7 +116,9 @@ final class ComparisonPanelTest extends KernelTestCase
             new ComparisonRow(ComparisonPeriod::LastMonth, $withHistory ? $this->figures(9_000, 9_000) : null),
         ];
 
-        $template = "{{ component('Dashboard:ComparisonPanel', {key: 'budget', title: 'Title', basis: 'Basis', rows: rows, help: help}) }}";
+        $template = "{{ component('Dashboard:ComparisonPanel', {"
+            . "key: 'budget', title: 'Title', basis: 'Basis', rows: rows, help: help"
+            . '}) }}';
         $html = self::getContainer()->get(Environment::class)
             ->createTemplate($template)
             ->render(['rows' => $rows, 'help' => $help]);

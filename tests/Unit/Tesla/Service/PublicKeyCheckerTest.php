@@ -26,17 +26,20 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 #[CoversClass(PublicKeyCheckResult::class)]
 final class PublicKeyCheckerTest extends TestCase
 {
-    private const string KEY = "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE\n-----END PUBLIC KEY-----\n";
+    private const string KEY = "-----BEGIN PUBLIC KEY-----\n"
+        . "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE\n"
+        . "-----END PUBLIC KEY-----\n";
     private const string URL = 'https://polaris.example.com/.well-known/appspecific/com.tesla.3p.public-key.pem';
 
     public function testItFetchesTheWellKnownUrlWithoutFollowingRedirects(): void
     {
         $requests = [];
-        $client = new MockHttpClient(static function (string $method, string $url, array $options) use (&$requests): MockResponse {
+        $respond = static function (string $method, string $url, array $options) use (&$requests): MockResponse {
             $requests[] = [$method, $url, $options['max_redirects']];
 
             return new MockResponse(self::KEY);
-        });
+        };
+        $client = new MockHttpClient($respond);
 
         $result = $this->checker($client)->check($this->app());
 
@@ -137,7 +140,10 @@ final class PublicKeyCheckerTest extends TestCase
 
         self::assertTrue($result->isMatch());
         self::assertSame(['https://keys.example.org/pem/key.pem'], $requests);
-        self::assertStringContainsString('https://keys.example.org/pem/key.pem serves the public key', $result->message);
+        self::assertStringContainsString(
+            'https://keys.example.org/pem/key.pem serves the public key',
+            $result->message,
+        );
         self::assertStringContainsString('Tesla itself reads ' . self::URL, $result->message);
     }
 
@@ -171,7 +177,12 @@ final class PublicKeyCheckerTest extends TestCase
     private function app(): TeslaApp
     {
         $app = new TeslaApp(Owner::user(), self::KEY, 'v1:private', CarbonImmutable::parse('2026-10-20 12:00:00 UTC'));
-        $app->configure('client-id', 'v1:secret', AppDomain::fromString('polaris.example.com'), [FleetRegion::EuropeMiddleEastAfrica]);
+        $app->configure(
+            'client-id',
+            'v1:secret',
+            AppDomain::fromString('polaris.example.com'),
+            [FleetRegion::EuropeMiddleEastAfrica],
+        );
 
         return $app;
     }

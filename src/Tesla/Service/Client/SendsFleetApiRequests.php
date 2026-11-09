@@ -43,7 +43,12 @@ trait SendsFleetApiRequests
 
             return $this->decode($operation, $region, $response, $secrets);
         } catch (ExceptionInterface $failure) {
-            throw FleetApiError::unreachable($operation, $region, $this->redact($failure->getMessage(), $secrets), $failure);
+            throw FleetApiError::unreachable(
+                $operation,
+                $region,
+                $this->redact($failure->getMessage(), $secrets),
+                $failure,
+            );
         }
     }
 
@@ -57,8 +62,12 @@ trait SendsFleetApiRequests
      * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
-    private function decode(FleetApiOperation $operation, FleetRegion $region, ResponseInterface $response, array $secrets): array
-    {
+    private function decode(
+        FleetApiOperation $operation,
+        FleetRegion $region,
+        ResponseInterface $response,
+        array $secrets,
+    ): array {
         $status = $response->getStatusCode();
         $body = $response->getContent(false);
 

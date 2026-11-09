@@ -20,7 +20,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * Generates the Tesla key pair. It prints the public key only; the private key is stored encrypted
  * and never shown.
  */
-#[AsCommand(name: 'polaris:tesla:keygen', description: 'Generate the Tesla key pair (secp256r1) and publish the public key')]
+#[AsCommand(
+    name: 'polaris:tesla:keygen',
+    description: 'Generate the Tesla key pair (secp256r1) and publish the public key',
+)]
 final readonly class KeygenCommand
 {
     public function __construct(
@@ -66,10 +69,13 @@ final readonly class KeygenCommand
         $io->writeln($app->getPublicKey());
         $io->note(
             $this->hosting->servesPublicKey()
-                ? 'Polaris serves the public key at /.well-known/appspecific/com.tesla.3p.public-key.pem on your domain.'
+                ? 'Polaris serves the public key at /.well-known/appspecific/com.tesla.3p.public-key.pem on your '
+                    . 'domain.'
                 : \sprintf(
-                    'The public key is written to POLARIS_KEY_HOSTING_DIR when it is set. Publish it yourself (commit and push) so that it is served at %s.',
-                    $this->hosting->publicKeyUrl() ?? '/.well-known/appspecific/com.tesla.3p.public-key.pem on your domain',
+                    'The public key is written to POLARIS_KEY_HOSTING_DIR when it is set. Publish it yourself (commit '
+                        . 'and push) so that it is served at %s.',
+                    $this->hosting->publicKeyUrl() ?? '/.well-known/appspecific/com.tesla.3p.public-key.pem on your '
+                        . 'domain',
                 ),
         );
 

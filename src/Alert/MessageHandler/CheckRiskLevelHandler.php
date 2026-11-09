@@ -52,7 +52,10 @@ final readonly class CheckRiskLevelHandler
 
         $outcome = $this->watcher->check($vehicle);
         if (RiskCheckOutcome::Busy === $outcome && $message->attempt < self::MAX_RETRIES) {
-            $this->bus->dispatch(new CheckRiskLevel($message->vehicleId, $message->attempt + 1), [new DelayStamp(self::RETRY_DELAY_MS)]);
+            $this->bus->dispatch(
+                new CheckRiskLevel($message->vehicleId, $message->attempt + 1),
+                [new DelayStamp(self::RETRY_DELAY_MS)],
+            );
         }
     }
 }

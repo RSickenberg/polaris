@@ -12,9 +12,10 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Messenger\Event\WorkerMessageReceivedEvent;
 
 /**
- * The worker tells the error reporting whose vehicle the message is about, before the handler runs. A message about a user
- * (an owner's midnight) sets that user directly. A message about neither (the scheduler tick) clears it, so one message never inherits the user of the previous one. A
- * vehicle that cannot be found leaves the context unresolved: nothing is sent (fail closed).
+ * The worker tells the error reporting whose vehicle the message is about, before the handler runs. A message about a
+ * user (an owner's midnight) sets that user directly. A message about neither (the scheduler tick) clears it, so one
+ * message never inherits the user of the previous one. A vehicle that cannot be found leaves the context unresolved:
+ * nothing is sent (fail closed).
  *
  * The context is not cleared when the handler ends: the SDK finishes the transaction of the message after that, and
  * it must still know the user. The next message sets it again.

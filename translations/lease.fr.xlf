@@ -28,7 +28,7 @@
       </trans-unit>
       <trans-unit id="end_date_convention.exclusive">
         <source>end_date_convention.exclusive</source>
-        <target>La date de restitution (-1 jour)</target>
+        <target>Le lendemain du dernier jour</target>
       </trans-unit>
       <trans-unit id="end_date_convention.inclusive">
         <source>end_date_convention.inclusive</source>
@@ -56,7 +56,7 @@
       </trans-unit>
       <trans-unit id="form.allowance.help">
         <source>form.allowance.help</source>
-        <target>Comptée par an ou sur toute la durée, selon le choix ci-dessus.</target>
+        <target>Compté par an ou sur toute la durée, selon le choix ci-dessus.</target>
       </trans-unit>
       <trans-unit id="form.start_odometer.label">
         <source>form.start_odometer.label</source>
@@ -72,7 +72,7 @@
       </trans-unit>
       <trans-unit id="form.excess_cost.help">
         <source>form.excess_cost.help</source>
-        <target>Prix facturé pour chaque kilomètre au-delà du forfait.</target>
+        <target>Prix facturé pour chaque kilomètre au-delà du kilométrage autorisé.</target>
       </trans-unit>
       <trans-unit id="form.currency.label">
         <source>form.currency.label</source>
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="form.tolerance.help">
         <source>form.tolerance.help</source>
-        <target>Marge de sécurité sous le forfait, de 0 à 50. Dans cette marge, le niveau de risque est « À surveiller ». 0 : aucune marge.</target>
+        <target>Marge de sécurité sous le kilométrage autorisé, de 0 à 50. Dans cette marge, le niveau de risque est « À surveiller ». 0 : aucune marge.</target>
       </trans-unit>
       <trans-unit id="form.submit">
         <source>form.submit</source>
@@ -96,7 +96,7 @@
       </trans-unit>
       <trans-unit id="rejected.inconsistent_readings">
         <source>rejected.inconsistent_readings</source>
-        <target>Ces conditions contredisent les relevés enregistrés, par exemple un compteur de départ supérieur à un relevé.</target>
+        <target>Ces conditions contredisent les relevés enregistrés, par exemple un compteur de départ supérieur à un relevé. Vérifiez le compteur de départ et les dates.</target>
       </trans-unit>
       <trans-unit id="assessment.no_contract">
         <source>assessment.no_contract</source>
@@ -120,7 +120,7 @@
       </trans-unit>
       <trans-unit id="risk.over">
         <source>risk.over</source>
-        <target>Au-dessus du kilométrage</target>
+        <target>Au-delà du kilométrage autorisé</target>
       </trans-unit>
       <trans-unit id="assessment.allowed_to_date">
         <source>assessment.allowed_to_date</source>
@@ -136,19 +136,19 @@
       </trans-unit>
       <trans-unit id="return.title">
         <source>return.title</source>
-        <target>Restitution du véhicule</target>
+        <target>Restitution de la voiture</target>
       </trans-unit>
       <trans-unit id="return.help">
         <source>return.help</source>
-        <target>Voiture rendue ? Marquez-la comme restituée pour figer les chiffres et arrêter les relevés.</target>
+        <target>Voiture rendue? Marquez-la comme rendue pour figer les chiffres et arrêter les lectures du compteur.</target>
       </trans-unit>
       <trans-unit id="return.status_help">
         <source>return.status_help</source>
-        <target>Les chiffres sont définitifs. Plus de relevés pour ce véhicule.</target>
+        <target>Les chiffres sont définitifs. Le compteur de cette voiture n’est plus relevé.</target>
       </trans-unit>
       <trans-unit id="return.open">
         <source>return.open</source>
-        <target>Marquer comme restitué</target>
+        <target>Marquer comme rendue</target>
       </trans-unit>
       <trans-unit id="return.change">
         <source>return.change</source>
@@ -164,15 +164,15 @@
       </trans-unit>
       <trans-unit id="return.dialog.title">
         <source>return.dialog.title</source>
-        <target>Marquer le véhicule comme restitué ?</target>
+        <target>Marquer la voiture comme rendue?</target>
       </trans-unit>
       <trans-unit id="return.dialog.description">
         <source>return.dialog.description</source>
-        <target>Les chiffres sont figés au dernier relevé jusqu’à la fin de ce jour. Plus de relevés pour ce véhicule. Vous pouvez annuler.</target>
+        <target>Les chiffres sont figés au dernier relevé jusqu’à la fin de ce jour, et le compteur n’est plus relevé. Vous pouvez annuler.</target>
       </trans-unit>
       <trans-unit id="return.undo_dialog.title">
         <source>return.undo_dialog.title</source>
-        <target>Annuler la restitution ?</target>
+        <target>Annuler la restitution?</target>
       </trans-unit>
       <trans-unit id="return.undo_dialog.description">
         <source>return.undo_dialog.description</source>
@@ -184,7 +184,7 @@
       </trans-unit>
       <trans-unit id="form.returned_on.label">
         <source>form.returned_on.label</source>
-        <target>Jour où le véhicule a été rendu</target>
+        <target>Jour où la voiture a été rendue</target>
       </trans-unit>
       <trans-unit id="form.returned_on.help">
         <source>form.returned_on.help</source>
@@ -196,7 +196,7 @@
       </trans-unit>
       <trans-unit id="flash.lease_returned">
         <source>flash.lease_returned</source>
-        <target>Véhicule marqué comme restitué.
+        <target>Voiture marquée comme rendue.
 Les chiffres sont définitifs.</target>
       </trans-unit>
       <trans-unit id="flash.lease_return_undone">
@@ -210,15 +210,15 @@ Le leasing est de nouveau suivi.</target>
       </trans-unit>
       <trans-unit id="rejected.return_before_start">
         <source>rejected.return_before_start</source>
-        <target>Le véhicule ne peut pas être rendu avant le début du leasing.</target>
+        <target>La voiture ne peut pas être rendue avant le début du leasing. Choisissez un jour plus tard.</target>
       </trans-unit>
       <trans-unit id="rejected.return_in_future">
         <source>rejected.return_in_future</source>
-        <target>Ce jour n’est pas encore arrivé.</target>
+        <target>Ce jour n’est pas encore arrivé. Choisissez aujourd’hui ou un jour plus tôt.</target>
       </trans-unit>
       <trans-unit id="rejected.start_after_return">
         <source>rejected.start_after_return</source>
-        <target>Le début doit précéder le jour où le véhicule a été rendu. Annulez la restitution ou choisissez un début plus tôt.</target>
+        <target>Le début doit précéder le jour où la voiture a été rendue. Annulez la restitution ou choisissez un début plus tôt.</target>
       </trans-unit>
     </body>
   </file>

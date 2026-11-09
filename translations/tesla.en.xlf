@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="page.title">
         <source>page.title</source>
-        <target>Tesla app</target>
+        <target>Tesla settings</target>
       </trans-unit>
       <trans-unit id="page.no_key.title">
         <source>page.no_key.title</source>
@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="page.no_key.description">
         <source>page.no_key.description</source>
-        <target>Run polaris:tesla:keygen first, then come back to enter your Tesla app credentials.</target>
+        <target>Run polaris:tesla:keygen first, then come back to enter the credentials of your Tesla developer app.</target>
       </trans-unit>
       <trans-unit id="page.credentials.title">
         <source>page.credentials.title</source>
@@ -72,7 +72,7 @@
       </trans-unit>
       <trans-unit id="form.domain.help">
         <source>form.domain.help</source>
-        <target>Domain serving your public key, e.g. polaris.example.com, without https://.</target>
+        <target>Domain serving your public key, for example polaris.example.com, without https://.</target>
       </trans-unit>
       <trans-unit id="form.regions.label">
         <source>form.regions.label</source>
@@ -80,7 +80,7 @@
       </trans-unit>
       <trans-unit id="form.regions.help">
         <source>form.regions.help</source>
-        <target>The app is registered in each enabled region. China needs a separate Tesla app and is not available yet.</target>
+        <target>Polaris registers your app in each enabled region. China needs a separate Tesla developer app and is not supported.</target>
       </trans-unit>
       <trans-unit id="region.na">
         <source>region.na</source>
@@ -96,11 +96,11 @@
       </trans-unit>
       <trans-unit id="form.submit">
         <source>form.submit</source>
-        <target>Save the Tesla app</target>
+        <target>Save the credentials</target>
       </trans-unit>
       <trans-unit id="flash.saved">
         <source>flash.saved</source>
-        <target>Tesla app settings saved.</target>
+        <target>Tesla settings saved.</target>
       </trans-unit>
       <trans-unit id="error.rejected">
         <source>error.rejected</source>
@@ -128,7 +128,7 @@
       </trans-unit>
       <trans-unit id="page.consent.disconnect">
         <source>page.consent.disconnect</source>
-        <target>To disconnect: use the Disconnect button on the Tesla app page (it deletes the tokens), then revoke the access in your Tesla account.</target>
+        <target>To disconnect: use Disconnect in the Tesla settings (it deletes the tokens), then revoke the access in your Tesla account.</target>
       </trans-unit>
       <trans-unit id="form.consent.label">
         <source>form.consent.label</source>
@@ -152,7 +152,7 @@
       </trans-unit>
       <trans-unit id="page.connect.redirect_uri">
         <source>page.connect.redirect_uri</source>
-        <target>Redirect URI to allow in your Tesla app:</target>
+        <target>Redirect URI to allow in your Tesla developer app:</target>
       </trans-unit>
       <trans-unit id="form.authorize.submit">
         <source>form.authorize.submit</source>
@@ -265,7 +265,7 @@
       <trans-unit id="flash.region_differs">
         <source>flash.region_differs</source>
         <target>Your Tesla account is in another region than the one enabled.
-Enable that region in the Tesla app settings.</target>
+Enable that region in the Tesla settings.</target>
       </trans-unit>
       <trans-unit id="flash.disconnected">
         <source>flash.disconnected</source>
@@ -274,11 +274,11 @@ Also revoke the access in your Tesla account.</target>
       </trans-unit>
       <trans-unit id="error.connect.no_app">
         <source>error.connect.no_app</source>
-        <target>Generate the key pair and enter the Tesla app credentials first.</target>
+        <target>Generate the key pair and enter the credentials of your Tesla developer app first.</target>
       </trans-unit>
       <trans-unit id="error.connect.not_configured">
         <source>error.connect.not_configured</source>
-        <target>First enter the client ID, client secret and at least one region in the Tesla app settings.</target>
+        <target>First enter the client ID, the client secret and at least one region in the Tesla settings.</target>
       </trans-unit>
       <trans-unit id="error.connect.no_consent">
         <source>error.connect.no_consent</source>
@@ -294,15 +294,15 @@ Also revoke the access in your Tesla account.</target>
       </trans-unit>
       <trans-unit id="error.connect.no_code">
         <source>error.connect.no_code</source>
-        <target>The address has no authorization code.</target>
+        <target>The address has no authorization code. Paste the full address from the browser bar.</target>
       </trans-unit>
       <trans-unit id="error.connect.denied">
         <source>error.connect.denied</source>
-        <target>Tesla did not grant the access.</target>
+        <target>Tesla did not grant the access. Start again from Connect Tesla and approve it.</target>
       </trans-unit>
       <trans-unit id="error.connect.token_refused">
         <source>error.connect.token_refused</source>
-        <target>Tesla refused it: the code or token is expired, already used, or from another Tesla app. Start again.</target>
+        <target>Tesla refused it: the code or token is expired, already used, or from another developer app. Start again from Connect Tesla.</target>
       </trans-unit>
       <trans-unit id="error.connect.tesla_failed">
         <source>error.connect.tesla_failed</source>
@@ -310,7 +310,7 @@ Also revoke the access in your Tesla account.</target>
       </trans-unit>
       <trans-unit id="form.wake_cap.label">
         <source>form.wake_cap.label</source>
-        <target>Wakes allowed per vehicle and 24 hours</target>
+        <target>Wakes allowed per car and 24 hours</target>
       </trans-unit>
       <trans-unit id="form.wake_cap.help">
         <source>form.wake_cap.help</source>
@@ -362,7 +362,7 @@ Also revoke the access in your Tesla account.</target>
       </trans-unit>
       <trans-unit id="storage.scopes.text">
         <source>storage.scopes.text</source>
-        <target>Vehicle data, plus commands only to wake your car when you confirm. Never your location.</target>
+        <target>Vehicle data, plus commands only to wake your car when you confirm it. Never your location.</target>
       </trans-unit>
       <trans-unit id="storage.disconnect.title">
         <source>storage.disconnect.title</source>
@@ -378,7 +378,7 @@ Also revoke the access in your Tesla account.</target>
       </trans-unit>
       <trans-unit id="storage.audit.text">
         <source>storage.audit.text</source>
-        <target>Polaris is open source. Read the code that handles your tokens:</target>
+        <target>The source of Polaris is public. Read the code that handles your tokens:</target>
       </trans-unit>
       <trans-unit id="storage.source.encryption">
         <source>storage.source.encryption</source>
@@ -402,7 +402,7 @@ Also revoke the access in your Tesla account.</target>
       </trans-unit>
       <trans-unit id="form.keep_vehicle_data.label">
         <source>form.keep_vehicle_data.label</source>
-        <target>Keep what the car reports</target>
+        <target>Keep everything the car reports</target>
       </trans-unit>
       <trans-unit id="form.keep_vehicle_data.help">
         <source>form.keep_vehicle_data.help</source>

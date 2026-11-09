@@ -60,7 +60,13 @@ readonly class UserCreator
         }
 
         if (null !== $newUser->locale && !\in_array($newUser->locale, $this->enabledLocales, true)) {
-            throw new \InvalidArgumentException(\sprintf('locale: "%s" is not an enabled locale (%s).', $newUser->locale, implode(', ', $this->enabledLocales)));
+            throw new \InvalidArgumentException(
+                \sprintf(
+                    'locale: "%s" is not an enabled locale (%s).',
+                    $newUser->locale,
+                    implode(', ', $this->enabledLocales),
+                )
+            );
         }
 
         $this->signUpPolicy->assertCanSignUp($newUser);

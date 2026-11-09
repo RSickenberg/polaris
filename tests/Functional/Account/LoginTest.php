@@ -116,7 +116,11 @@ final class LoginTest extends WebTestCase
         $this->createAccount('csrf@example.test');
 
         $this->client->request('GET', '/login');
-        $this->client->submitForm('Sign in', ['_username' => 'csrf@example.test', '_password' => self::PASSWORD], serverParameters: ['HTTP_ORIGIN' => 'https://evil.example', 'HTTP_REFERER' => 'https://evil.example/']);
+        $this->client->submitForm(
+            'Sign in',
+            ['_username' => 'csrf@example.test', '_password' => self::PASSWORD],
+            serverParameters: ['HTTP_ORIGIN' => 'https://evil.example', 'HTTP_REFERER' => 'https://evil.example/'],
+        );
 
         self::assertResponseRedirects('/login');
         $this->client->followRedirect();
@@ -138,7 +142,10 @@ final class LoginTest extends WebTestCase
         self::assertResponseRedirects('/login');
         $this->client->followRedirect();
         // The limiter rounds the wait up, so a test straddling a second boundary reads 16.
-        self::assertMatchesRegularExpression('/Too many failed login attempts, please try again in 1[56] minutes\./', $this->client->getCrawler()->filter('[role=alert]')->text());
+        self::assertMatchesRegularExpression(
+            '/Too many failed login attempts, please try again in 1[56] minutes\./',
+            $this->client->getCrawler()->filter('[role=alert]')->text(),
+        );
     }
 
     public function testThrottlingIsPerEmail(): void
@@ -165,7 +172,11 @@ final class LoginTest extends WebTestCase
         self::assertResponseRedirects('http://localhost/login');
 
         $this->client->followRedirect();
-        $this->client->submitForm('Sign in', ['_username' => 'target@example.test', '_password' => self::PASSWORD], serverParameters: ['HTTP_ORIGIN' => 'http://localhost']);
+        $this->client->submitForm(
+            'Sign in',
+            ['_username' => 'target@example.test', '_password' => self::PASSWORD],
+            serverParameters: ['HTTP_ORIGIN' => 'http://localhost'],
+        );
 
         self::assertResponseRedirects('http://localhost' . $path);
     }
@@ -201,7 +212,11 @@ final class LoginTest extends WebTestCase
         $this->createAccount('keep@example.test');
         $this->login('keep@example.test', self::PASSWORD);
 
-        $this->client->request('GET', '/logout', server: ['HTTP_ORIGIN' => 'https://evil.example', 'HTTP_REFERER' => 'https://evil.example/']);
+        $this->client->request(
+            'GET',
+            '/logout',
+            server: ['HTTP_ORIGIN' => 'https://evil.example', 'HTTP_REFERER' => 'https://evil.example/'],
+        );
 
         self::assertResponseStatusCodeSame(403);
         $this->client->request('GET', '/');
@@ -222,7 +237,10 @@ final class LoginTest extends WebTestCase
         $this->client->request('GET', '/locale/en', ['redirect' => '/']);
         $this->client->followRedirect();
         self::assertSelectorExists('html[lang=en]');
-        $stored = self::getContainer()->get(EntityManagerInterface::class)->getRepository(User::class)->findOneBy(['email' => 'locale@example.test']);
+        $stored = self::getContainer()
+            ->get(EntityManagerInterface::class)
+            ->getRepository(User::class)
+            ->findOneBy(['email' => 'locale@example.test']);
         self::assertSame('en', $stored?->getLocale());
     }
 
@@ -232,7 +250,11 @@ final class LoginTest extends WebTestCase
     private function login(string $email, string $password, array $server = []): void
     {
         $this->client->request('GET', '/login', server: $server);
-        $this->client->submitForm($this->submitLabel($server), ['_username' => $email, '_password' => $password], serverParameters: $server + ['HTTP_ORIGIN' => 'http://localhost']);
+        $this->client->submitForm(
+            $this->submitLabel($server),
+            ['_username' => $email, '_password' => $password],
+            serverParameters: $server + ['HTTP_ORIGIN' => 'http://localhost'],
+        );
     }
 
     /**

@@ -69,7 +69,11 @@ final class OdometerRefreshButtonTest extends WebTestCase
         $html = (string) $component->render();
         self::assertStringContainsString('data-poll="delay(2000)|$render"', $html);
         self::assertStringContainsString('Reading the odometer', $html);
-        self::assertMatchesRegularExpression('/<button[^>]*\sdisabled(?=[\s=>])/', $html, 'The button stays disabled while the fetch is queued.');
+        self::assertMatchesRegularExpression(
+            '/<button[^>]*\sdisabled(?=[\s=>])/',
+            $html,
+            'The button stays disabled while the fetch is queued.',
+        );
         self::assertStringContainsString('animate-spin', $html);
 
         $attempt = $this->entityManager()->find(RefreshAttempt::class, $message->refreshId);
@@ -79,10 +83,18 @@ final class OdometerRefreshButtonTest extends WebTestCase
 
         $html = (string) $component->refresh()->render();
         self::assertStringNotContainsString('data-poll', $html);
-        self::assertStringContainsString('data-toast-announce-variant-value="warning"', $html, 'A car that is asleep is a warning, not an error.');
+        self::assertStringContainsString(
+            'data-toast-announce-variant-value="warning"',
+            $html,
+            'A car that is asleep is a warning, not an error.',
+        );
         self::assertDoesNotMatchRegularExpression('/<button[^>]*\sdisabled(?=[\s=>])/', $html);
         self::assertStringContainsString('The car is asleep, last reading kept', $html);
-        self::assertCount(1, $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(), 'Rendering never starts another refresh.');
+        self::assertCount(
+            1,
+            $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(),
+            'Rendering never starts another refresh.',
+        );
     }
 
     public function testANewReadingAsksTheDashboardToRefreshItselfOnce(): void
@@ -92,7 +104,11 @@ final class OdometerRefreshButtonTest extends WebTestCase
         $queued = $this->queued();
         $message = $queued[0]->getMessage();
         self::assertInstanceOf(FetchOdometerMessage::class, $message);
-        self::assertStringNotContainsString('data-controller="dashboard-refresh"', (string) $component->render(), 'Nothing while the fetch is queued.');
+        self::assertStringNotContainsString(
+            'data-controller="dashboard-refresh"',
+            (string) $component->render(),
+            'Nothing while the fetch is queued.',
+        );
 
         $attempt = $this->entityManager()->find(RefreshAttempt::class, $message->refreshId);
         self::assertInstanceOf(RefreshAttempt::class, $attempt);
@@ -101,7 +117,11 @@ final class OdometerRefreshButtonTest extends WebTestCase
 
         $html = (string) $component->refresh()->render();
         self::assertStringContainsString('id="figures-1" data-controller="dashboard-refresh"', $html);
-        self::assertSame($html, (string) $component->refresh()->render(), 'A poll shows the same element, so it is not connected again.');
+        self::assertSame(
+            $html,
+            (string) $component->refresh()->render(),
+            'A poll shows the same element, so it is not connected again.',
+        );
     }
 
     public function testACarThatDidNotAnswerLeavesTheDashboardAlone(): void
@@ -123,10 +143,18 @@ final class OdometerRefreshButtonTest extends WebTestCase
 
         self::assertStringContainsString('You can refresh again at', $html);
         self::assertStringContainsString('data-toast-announce-variant-value="warning"', $html);
-        self::assertMatchesRegularExpression('/You can refresh again at [^(]+\(UTC\)\./', $html, 'The time says its zone.');
+        self::assertMatchesRegularExpression(
+            '/You can refresh again at [^(]+\(UTC\)\./',
+            $html,
+            'The time says its zone.',
+        );
         self::assertStringContainsString('id="limited-1"', $html);
         self::assertStringNotContainsString('data-poll', $html);
-        self::assertSame([], $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(), 'The limited click starts nothing.');
+        self::assertSame(
+            [],
+            $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(),
+            'The limited click starts nothing.',
+        );
     }
 
     public function testAnotherUsersVehicleIsRefusedOnEveryRequest(): void
@@ -150,7 +178,11 @@ final class OdometerRefreshButtonTest extends WebTestCase
         $this->entityManager()->flush();
         $this->client->loginUser($this->me);
 
-        $html = (string) $this->createLiveComponent(self::NAME, ['vehicleId' => $this->mine->getId()->toRfc4122(), 'attemptId' => $attempt->getId()->toRfc4122()], $this->client)->render();
+        $html = (string) $this->createLiveComponent(
+            self::NAME,
+            ['vehicleId' => $this->mine->getId()->toRfc4122(), 'attemptId' => $attempt->getId()->toRfc4122()],
+            $this->client,
+        )->render();
 
         self::assertStringNotContainsString('New reading stored.', $html);
     }
@@ -166,7 +198,11 @@ final class OdometerRefreshButtonTest extends WebTestCase
 
         self::assertStringContainsString('data-wake-dialog', $html);
         self::assertStringContainsString('Wake it to get the current mileage?', $html);
-        self::assertStringContainsString('$0.02', $html, 'The cost per wake comes from the configuration, formatted for the locale.');
+        self::assertStringContainsString(
+            '$0.02',
+            $html,
+            'The cost per wake comes from the configuration, formatted for the locale.',
+        );
         self::assertStringContainsString('Use last reading', $html);
         self::assertStringContainsString('Wake and refresh', $html);
         self::assertStringContainsString('data-dialog-open-value="true"', $html);
@@ -185,7 +221,11 @@ final class OdometerRefreshButtonTest extends WebTestCase
         self::assertSame($this->attemptId(), $message->refreshId);
         self::assertStringNotContainsString('data-wake-dialog', $html);
         self::assertStringContainsString('data-poll', $html, 'The component polls while the wake runs.');
-        self::assertCount(1, $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(), 'A wake is not a new refresh.');
+        self::assertCount(
+            1,
+            $this->entityManager()->getRepository(RefreshAttempt::class)->findAll(),
+            'A wake is not a new refresh.',
+        );
     }
 
     public function testAnOfflineCarIsOfferedTheWakeWithoutAPromise(): void
@@ -200,7 +240,11 @@ final class OdometerRefreshButtonTest extends WebTestCase
         self::assertStringContainsString('data-wake-dialog', $html);
         self::assertStringContainsString('Your car is offline', $html);
         self::assertStringContainsString('may not be able to wake it', $html);
-        self::assertMatchesRegularExpression('/Try anyway\?<br \/>\s*Tesla bills about/', $html, 'The price is on its own line.');
+        self::assertMatchesRegularExpression(
+            '/Try anyway\?<br \/>\s*Tesla bills about/',
+            $html,
+            'The price is on its own line.',
+        );
         self::assertStringContainsString('$0.02', $html);
         self::assertStringContainsString('Wake and refresh', $html);
         self::assertStringNotContainsString('Your car is asleep', $html);
@@ -312,7 +356,10 @@ final class OdometerRefreshButtonTest extends WebTestCase
 
     private function settle(RefreshOutcome $outcome): void
     {
-        $attempt = $this->entityManager()->getRepository(RefreshAttempt::class)->findOneBy([], ['requestedAt' => 'DESC']);
+        $attempt = $this->entityManager()->getRepository(RefreshAttempt::class)->findOneBy(
+            [],
+            ['requestedAt' => 'DESC'],
+        );
         self::assertInstanceOf(RefreshAttempt::class, $attempt);
         $attempt->settle($outcome, CarbonImmutable::now('UTC'));
         $this->entityManager()->flush();

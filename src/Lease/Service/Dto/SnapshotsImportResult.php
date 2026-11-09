@@ -13,7 +13,10 @@ final readonly class SnapshotsImportResult
         public int $added,
         /** Snapshots of a local day that already has one. */
         public int $alreadyThere,
-        /** Snapshots that cannot be kept: without a cutoff or a pace (saved before they were stored), or without a lease. */
+        /**
+         * Snapshots that cannot be kept: without a cutoff or a pace (saved before they were stored), or without a
+         * lease.
+         */
         public int $skipped,
     ) {
     }
