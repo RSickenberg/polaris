@@ -38,7 +38,7 @@ final class WorkerHeartbeatTest extends TestCase
                 self::isFloat(),
                 self::isInstanceOf(MonitorConfig::class),
             );
-        $heartbeat = new WorkerHeartbeat($hub, 'secret');
+        $heartbeat = new WorkerHeartbeat($hub, 'secret', 'custom');
         $envelope = $this->scheduled(new DispatchDueFetches());
 
         $heartbeat->onReceived(new WorkerMessageReceivedEvent($envelope, 'scheduler_default'));
@@ -51,11 +51,11 @@ final class WorkerHeartbeatTest extends TestCase
         $hub->expects(self::once())
             ->method('captureCheckIn')
             ->with(
-                self::matchesRegularExpression('/-dispatch-owner-midnights$/'),
+                self::matchesRegularExpression('/-dispatch-due-fetches$/'),
                 self::equalTo(CheckInStatus::error()),
             );
-        $heartbeat = new WorkerHeartbeat($hub, 'secret');
-        $envelope = $this->scheduled(new DispatchOwnerMidnights());
+        $heartbeat = new WorkerHeartbeat($hub, 'secret', 'custom');
+        $envelope = $this->scheduled(new DispatchDueFetches());
 
         $heartbeat->onReceived(new WorkerMessageReceivedEvent($envelope, 'scheduler_default'));
         $heartbeat->onFailed(new WorkerMessageFailedEvent($envelope, 'scheduler_default', new \RuntimeException('x')));
@@ -73,7 +73,7 @@ final class WorkerHeartbeatTest extends TestCase
                     return null;
                 },
             );
-            $heartbeat = new WorkerHeartbeat($hub, $secret);
+            $heartbeat = new WorkerHeartbeat($hub, $secret, 'custom');
             $envelope = $this->scheduled(new DispatchDueFetches());
             $heartbeat->onReceived(new WorkerMessageReceivedEvent($envelope, 'scheduler_default'));
             $heartbeat->onHandled(new WorkerMessageHandledEvent($envelope, 'scheduler_default'));
@@ -88,8 +88,30 @@ final class WorkerHeartbeatTest extends TestCase
     {
         $hub = $this->hub(null);
         $hub->expects(self::never())->method('captureCheckIn');
-        $heartbeat = new WorkerHeartbeat($hub, 'secret');
+        $heartbeat = new WorkerHeartbeat($hub, 'secret', 'custom');
         $envelope = $this->scheduled(new DispatchDueFetches());
+
+        $heartbeat->onReceived(new WorkerMessageReceivedEvent($envelope, 'scheduler_default'));
+        $heartbeat->onHandled(new WorkerMessageHandledEvent($envelope, 'scheduler_default'));
+    }
+
+    public function testTheMaintainerProjectGetsNoHeartbeat(): void
+    {
+        $hub = $this->hub(self::DSN);
+        $hub->expects(self::never())->method('captureCheckIn');
+        $heartbeat = new WorkerHeartbeat($hub, 'secret', 'maintainer');
+        $envelope = $this->scheduled(new DispatchDueFetches());
+
+        $heartbeat->onReceived(new WorkerMessageReceivedEvent($envelope, 'scheduler_default'));
+        $heartbeat->onHandled(new WorkerMessageHandledEvent($envelope, 'scheduler_default'));
+    }
+
+    public function testTheOwnerMidnightTickGetsNoMonitorOfItsOwn(): void
+    {
+        $hub = $this->hub(self::DSN);
+        $hub->expects(self::never())->method('captureCheckIn');
+        $heartbeat = new WorkerHeartbeat($hub, 'secret', 'custom');
+        $envelope = $this->scheduled(new DispatchOwnerMidnights());
 
         $heartbeat->onReceived(new WorkerMessageReceivedEvent($envelope, 'scheduler_default'));
         $heartbeat->onHandled(new WorkerMessageHandledEvent($envelope, 'scheduler_default'));
@@ -99,7 +121,7 @@ final class WorkerHeartbeatTest extends TestCase
     {
         $hub = $this->hub(self::DSN);
         $hub->expects(self::never())->method('captureCheckIn');
-        $heartbeat = new WorkerHeartbeat($hub, 'secret');
+        $heartbeat = new WorkerHeartbeat($hub, 'secret', 'custom');
         $envelope = new Envelope(new DispatchDueFetches());
 
         $heartbeat->onReceived(new WorkerMessageReceivedEvent($envelope, 'async'));
