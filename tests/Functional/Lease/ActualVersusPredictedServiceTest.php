@@ -67,6 +67,7 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
         self::assertNotNull($result);
         $today = $result->budget[0]->comparison;
         self::assertSame([50_000, 45_000, 5_000], $this->figures($today));
+        self::assertFalse($result->budget[0]->live, 'A stored snapshot is not live.');
         $pace = $result->pace[0]->comparison;
         self::assertSame([50_000, 40_000, 10_000], $this->figures($pace));
         $week = $result->budget[1]->comparison;
@@ -88,6 +89,38 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
         $result = $this->comparison->compare($this->vehicle);
 
         self::assertSame(45_000, $result?->budget[0]->comparison?->expected->metres());
+    }
+
+    public function testTodayIsRebuiltWhenTheMidnightJobSavedNothingForIt(): void
+    {
+        $this->lease();
+        $this->reading('2026-07-09 12:00:00', 19_000);
+        $this->reading('2026-07-10 12:00:00', 19_050);
+        // An older snapshot exists, but today must not fall back on it: the job's own figures are rebuilt.
+        $this->snapshot('2026-07-08', projectedAtEndKm: 30_000, dailyBudgetKm: 10, paceMetresPerDay: 10_000.0);
+
+        $result = $this->comparison->compare($this->vehicle);
+
+        self::assertNotNull($result);
+        self::assertSame(0, $result->budget[0]->fallbackDays);
+        self::assertTrue($result->budget[0]->live, 'Rebuilt on the fly, so shown as live.');
+        // The odometer is linear between the readings: 19,025 km at midnight, so 25 km driven today.
+        self::assertSame(25_000, $result->budget[0]->comparison?->actual->metres());
+        self::assertNotNull($result->pace[0]->comparison);
+        self::assertNotNull($result->projectedEnd[0]->comparison);
+        self::assertNull($result->budget[1]->comparison, 'The other windows still need a stored snapshot.');
+        $this->assertNoSnapshotStoredFor('2026-07-10');
+    }
+
+    private function assertNoSnapshotStoredFor(string $localDay): void
+    {
+        $contract = $this->leases->find($this->vehicle);
+        self::assertInstanceOf(LeaseContract::class, $contract);
+        $days = array_map(
+            static fn (ProjectionSnapshot $snapshot): string => $snapshot->getLocalDay()->format('Y-m-d'),
+            $this->entityManager->getRepository(ProjectionSnapshot::class)->findBy(['leaseContract' => $contract]),
+        );
+        self::assertNotContains($localDay, $days);
     }
 
     public function testASnapshotSavedBeforeThePaceWasStoredHasNoPaceRow(): void

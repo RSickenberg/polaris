@@ -18,6 +18,8 @@ final readonly class SnapshotFigures
         public Distance $dailyBudget,
         /** The pace the snapshot projected with; null for a snapshot saved before the pace was stored. */
         public ?Pace $blendedPace,
+        /** True for figures rebuilt on the fly because the midnight job has not saved them (yet). */
+        public bool $live = false,
     ) {
     }
 }

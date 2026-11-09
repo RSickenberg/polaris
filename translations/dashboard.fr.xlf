@@ -238,6 +238,14 @@
         <source>compare.no_history_yet</source>
         <target>Pas encore assez d’historique. Les lignes se remplissent au fil des 30 prochains jours.</target>
       </trans-unit>
+      <trans-unit id="compare.live">
+        <source>compare.live</source>
+        <target>En direct</target>
+      </trans-unit>
+      <trans-unit id="compare.live_hint">
+        <source>compare.live_hint</source>
+        <target>Comparé à une projection recalculée à l’instant : l’instantané du jour est enregistré à minuit.</target>
+      </trans-unit>
       <trans-unit id="compare.no_history">
         <source>compare.no_history</source>
         <target>Historique insuffisant</target>

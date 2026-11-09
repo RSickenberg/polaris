@@ -61,16 +61,19 @@ final readonly class PredictionComparer
                 $window,
                 $this->againstBudget($figures, $driven, $seconds),
                 $fallbackDays,
+                $figures->live ?? false,
             );
             $pace[] = new WindowComparison(
                 $window,
                 $this->againstPace($figures, $driven, $seconds),
                 $fallbackDays,
+                $figures->live ?? false,
             );
             $projectedEnd[] = new WindowComparison(
                 $window,
                 $this->againstProjectedEnd($figures, $latest),
                 $fallbackDays,
+                $figures->live ?? false,
             );
         }
 

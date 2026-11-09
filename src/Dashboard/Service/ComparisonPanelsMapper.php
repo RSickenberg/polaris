@@ -42,6 +42,7 @@ final readonly class ComparisonPanelsMapper
                 self::period($window->window),
                 null === $result ? null : $this->figures($result),
                 $window->fallbackDays,
+                $window->live,
             );
         }
 
