@@ -38,7 +38,12 @@
                         {% set figures = row.figures %}
                         <twig:Table:Row data-period="{{ row.period.value }}">
                             <twig:Table:Cell class="ps-0 py-3 px-1 whitespace-normal">
-                                <span class="block">{{ ('compare.period.' ~ row.period.value)|trans(domain='dashboard') }}</span>
+                                {# "Today" without a snapshot of its own day starts at the midnight of the latest earlier one. #}
+                                {% if row.fallbackDays > 0 %}
+                                    <span class="block" data-fallback-days="{{ row.fallbackDays }}">{{ 'compare.period.since_days'|trans({count: row.fallbackDays}, domain='dashboard') }}</span>
+                                {% else %}
+                                    <span class="block">{{ ('compare.period.' ~ row.period.value)|trans(domain='dashboard') }}</span>
+                                {% endif %}
                                 {% if figures is not null %}
                                     <span class="mt-1 block text-xs text-muted-foreground" data-figure="figures">
                                         {%- set actual = figures.actual|km -%}

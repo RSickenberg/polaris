@@ -57,6 +57,18 @@ final class ComparisonPanelTest extends KernelTestCase
         self::assertCount(0, $row->filter('[data-figure]'));
     }
 
+    public function testTodayThatFellBackSaysSinceWhenItStarted(): void
+    {
+        $yesterday = $this->panel('en', todayFallbackDays: 1)->filter('[data-period=today] [data-fallback-days]');
+        $earlier = $this->panel('en', todayFallbackDays: 3)->filter('[data-period=today] [data-fallback-days]');
+        $french = $this->panel('fr', todayFallbackDays: 1)->filter('[data-period=today] [data-fallback-days]');
+
+        self::assertSame('Since yesterday', $this->text($yesterday));
+        self::assertSame('Since 3 days ago', $this->text($earlier));
+        self::assertSame('Depuis hier', $this->text($french));
+        self::assertCount(0, $this->panel('en')->filter('[data-fallback-days]'));
+    }
+
     public function testTheFrenchPanelUsesFrenchWordsAndASwissPercentage(): void
     {
         $panel = $this->panel('fr');
@@ -102,15 +114,19 @@ final class ComparisonPanelTest extends KernelTestCase
         self::assertCount(0, $this->panel('en')->filter('[data-help]'));
     }
 
-    private function panel(string $locale, bool $withHistory = true, ?string $help = null): Crawler
-    {
+    private function panel(
+        string $locale,
+        bool $withHistory = true,
+        ?string $help = null,
+        int $todayFallbackDays = 0,
+    ): Crawler {
         self::bootKernel();
         $translator = self::getContainer()->get('translator');
         $translator->setLocale($locale);
         // The number formats of Twig follow the default locale of PHP, which a request sets in the application.
         \Locale::setDefault($locale);
         $rows = [
-            new ComparisonRow(ComparisonPeriod::Today, $this->figures(50_000, 45_000)),
+            new ComparisonRow(ComparisonPeriod::Today, $this->figures(50_000, 45_000), $todayFallbackDays),
             new ComparisonRow(ComparisonPeriod::LastWeek, $withHistory ? $this->figures(38_000, 40_000) : null),
             new ComparisonRow(ComparisonPeriod::LastTwoWeeks, $withHistory ? $this->figures(3_000, 0) : null),
             new ComparisonRow(ComparisonPeriod::LastMonth, $withHistory ? $this->figures(9_000, 9_000) : null),
