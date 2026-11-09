@@ -287,4 +287,4 @@ No space before `;`, `!`, `?`; a no-break space (U+00A0) before `:` and inside `
 
 ### Definition of done
 
-- Tests pass (unit for `Domain/`, functional for controllers and commands), PHPStan, php-cs-fixer and Deptrac pass (`make ci` runs all four), docs updated, story acceptance criteria met.
+- Tests pass (unit for `Domain/`, functional for controllers and commands), PHPStan, php-cs-fixer and Deptrac pass (`make ci` runs all four), docs updated (`docs/self-hosting.md` with any change to the compose files, the environment variables or the Tesla setup), story acceptance criteria met.
