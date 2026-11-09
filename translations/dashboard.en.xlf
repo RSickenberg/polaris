@@ -208,7 +208,7 @@
       </trans-unit>
       <trans-unit id="compare.projected_end.basis">
         <source>compare.projected_end.basis</source>
-        <target>Projected now / projected then, at lease end</target>
+        <target>Today / at the start of the period</target>
       </trans-unit>
       <trans-unit id="compare.period.today">
         <source>compare.period.today</source>
@@ -268,15 +268,15 @@
       </trans-unit>
       <trans-unit id="help.compare_budget">
         <source>help.compare_budget</source>
-        <target>Did you stay within your budget?\n\nFor each period, Polaris compares what you drove with what your daily budget allowed. It uses the budget as it was when the period started, not today’s.\n\nHow to read a row: driven / allowed, and the difference on the right. A plus means you drove more than allowed, a minus that you drove less.\n\n“Today” runs from midnight to your latest reading, so it only counts the part of the day that has passed.</target>
+        <target>Did you stay within your budget?\n\nYour budget is the distance per day that brings you exactly to your allowance at the end of the lease.\n\nEach row is a period: today (since midnight), then the last 7, 14 and 30 days.\nThey all end at your latest reading.\n\nUnder each period, two figures:\n• what you drove\n• what the budget allowed\nFor example “320 / 280 km”: you drove 320 km where the budget allowed 280.\n\nThe gap on the right says by how much:\n• red with a +, you drove more than allowed\n• green with a −, less\nThe percentage gives this gap against the second figure.\n\nPolaris uses the budget as it was at the start of the period, recorded every day at midnight.</target>
       </trans-unit>
       <trans-unit id="help.compare_pace">
         <source>help.compare_pace</source>
-        <target>Are you driving more or less than usual?\n\nFor each period, Polaris compares what you drove with what your usual pace predicted when the period started.\n\nHow to read a row: driven / expected, and the difference on the right. A plus means you drove more than usual, a minus that you drove less.\n\nPolaris records its prediction once a day, at midnight. A row says “Not enough history” until the day it starts has one.</target>
+        <target>Are you driving more or less than usual?\n\nYour usual pace is your average distance per day since the start of the lease, with more weight on the last 30 days.\n\nEach row is a period: today (since midnight), then the last 7, 14 and 30 days.\nThey all end at your latest reading.\n\nUnder each period, two figures:\n• what you drove\n• what your pace predicted\nFor example “320 / 280 km”: you drove 40 km more than usual.\n\nThe gap on the right says by how much:\n• red with a +, you drove more than usual\n• green with a −, less\nThe percentage gives this gap against the second figure.\n\nPolaris records your pace every day at midnight.\nUntil it has a record for the first day of a period, the row says “Not enough history”.</target>
       </trans-unit>
       <trans-unit id="help.compare_projected_end">
         <source>help.compare_projected_end</source>
-        <target>Is your end-of-lease projection getting better or worse?\n\nFor each period, Polaris compares the total it projects today for the end of the lease with the total it projected when the period started.\n\nHow to read a row: projected now / projected then, and the difference on the right. A plus means you are now heading for more kilometres than before, a minus for fewer.\n\nPolaris records its projection once a day, at midnight. A row says “Not enough history” until the day it starts has one.</target>
+        <target>Is your end of lease looking better or worse?\n\nEvery day, Polaris estimates how far you will have driven by the end of the lease. This panel compares today’s estimate with the one from the start of each period.\n\nEach row is a period: today (since midnight), then the last 7, 14 and 30 days.\nThey all end at your latest reading.\n\nUnder each period, two figures:\n• today’s estimate\n• the estimate Polaris made at the start of the period\nFor example “61,200 / 60,500 km”: your estimate went up by 700 km since the start of the period.\n\nThe gap on the right says by how much:\n• red with a +, the estimate went up\n• green with a −, it went down: you are driving less than before\nThe percentage gives this gap against the second figure.\n\nPolaris records its estimate every day at midnight.\nUntil it has a record for the first day of a period, the row says “Not enough history”.</target>
       </trans-unit>
       <trans-unit id="page.debug.title">
         <source>page.debug.title</source>
