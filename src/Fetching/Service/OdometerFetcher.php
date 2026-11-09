@@ -61,7 +61,8 @@ use Symfony\Component\Uid\Ulid;
  * One fetch runs per vehicle at a time, scheduled or manual, under a lock. A refresh that finds it held ends as
  * {@see RefreshOutcome::Busy}; a scheduled check is queued again shortly, without using up a check.
  *
- * A scheduled fetch never wakes the car. A refresh the user confirmed ({@see FetchOdometerMessage::$allowWake})
+ * A scheduled fetch wakes the car only at the last check of its window, if the owner allowed it
+ * ({@see TeslaApp::wakesOnLastCheck()}), on the same rules as below. A refresh the user confirmed ({@see FetchOdometerMessage::$allowWake})
  * wakes a car found asleep, once and within the daily cap: wake_up is sent, then the same message is queued again
  * every 10 seconds, with the deadline in it, to look at the list of vehicles until the car is online (and then
  * read it as usual) or 90 seconds have passed. No worker waits: the lock is held for one step at a time, and a
@@ -185,7 +186,7 @@ final readonly class OdometerFetcher
         }
 
         if ($message->isPollingWake()) {
-            $polled = $this->pollWake($message, $vehicle, $app, $refresh, $now);
+            $polled = $this->pollWake($message, $vehicle, $app, $run, $refresh, $now);
 
             if (null !== $polled) {
                 return $polled;
@@ -271,10 +272,28 @@ final readonly class OdometerFetcher
         // An offline car is offered the wake too: whether Tesla can wake it is not documented, so what happens is
         // recorded on the refresh (see RefreshAttempt::$wokeFrom).
         if (null !== $refresh && $message->asksForWake() && $reason->isWakeable()) {
-            return $this->wake($message, $vehicle, $app, $refresh, $now, $reason);
+            return $this->wake($message, $vehicle, $app, $run, $refresh, $now, $reason);
+        }
+
+        // The last check of a scheduled slot may wake the car if the owner allowed it. The wake is recorded on a
+        // refresh of its own, which is what the daily cap counts and the poll settles.
+        if ($this->wakesAtLastCheck($message, $app, $reason)) {
+            $scheduledWake = new RefreshAttempt($vehicle, $now);
+            $this->entityManager->persist($scheduledWake);
+
+            return $this->wake($message, $vehicle, $app, $run, $scheduledWake, $now, $reason);
         }
 
         return $this->notOnline($message, $run, $refresh, $reason, $checksMade, $now);
+    }
+
+    private function wakesAtLastCheck(FetchOdometerMessage $message, TeslaApp $app, NoReadingReason $reason): bool
+    {
+        return null !== $message->slotTimestamp
+            && !$message->isPollingWake()
+            && $app->wakesOnLastCheck()
+            && $reason->isWakeable()
+            && FetchWindow::isLastAttempt($message->attempt);
     }
 
     /**
@@ -331,26 +350,31 @@ final readonly class OdometerFetcher
         FetchOdometerMessage $message,
         Vehicle $vehicle,
         TeslaApp $app,
+        ?FetchSlotRun $run,
         RefreshAttempt $refresh,
         CarbonImmutable $now,
         NoReadingReason $from,
     ): SlotRunStatus {
+        $checksMade = $message->attempt + 1;
+        // A scheduled check is not held by the hourly limit of the manual refresh.
+        $limited = null === $message->slotTimestamp && null !== $this->limit->retryAfter($vehicle);
+
         if (WakeAccess::ScopeMissing === $this->waker->access($app)) {
             $this->logger->info(
                 'Wake not sent: the connection lacks the vehicle_cmds scope.',
                 ['vehicle' => $message->vehicleId],
             );
 
-            return $this->stop($refresh, RefreshOutcome::WakeScopeMissing, $now);
+            return $this->stop($refresh, RefreshOutcome::WakeScopeMissing, $now, $run, $checksMade);
         }
 
-        if (null !== $this->limit->retryAfter($vehicle)) {
+        if ($limited) {
             $this->logger->info(
                 'Wake not sent: the hourly limit of the refresh is spent.',
                 ['vehicle' => $message->vehicleId],
             );
 
-            return $this->stop($refresh, RefreshOutcome::Limited, $now);
+            return $this->stop($refresh, RefreshOutcome::Limited, $now, $run, $checksMade);
         }
 
         $cap = $this->wakeCap->status($vehicle, $app, $now);
@@ -361,27 +385,20 @@ final readonly class OdometerFetcher
                 ['vehicle' => $message->vehicleId, 'cap' => $cap->cap],
             );
 
-            return $this->stop($refresh, RefreshOutcome::WakeCapReached, $now);
+            return $this->stop($refresh, RefreshOutcome::WakeCapReached, $now, $run, $checksMade);
         }
 
         try {
             $this->waker->wake($app, $vehicle->getVin());
         } catch (TeslaNotConnected $notConnected) {
-            return $this->notConnected(
-                null,
-                $refresh,
-                $message->attempt + 1,
-                $now,
-                $vehicle,
-                $notConnected->getMessage(),
-            );
+            return $this->notConnected($run, $refresh, $checksMade, $now, $vehicle, $notConnected->getMessage());
         } catch (WakeScopeMissing) {
             $this->logger->warning(
                 'Wake refused by Tesla: the vehicle_cmds scope is missing or was revoked.',
                 ['vehicle' => $message->vehicleId],
             );
 
-            return $this->stop($refresh, RefreshOutcome::WakeScopeMissing, $now);
+            return $this->stop($refresh, RefreshOutcome::WakeScopeMissing, $now, $run, $checksMade);
         } catch (FleetApiError $failure) {
             if ($failure->isVehicleNotOnline()) {
                 $this->logger->info('Wake not delivered: Tesla could not reach the car.', [
@@ -389,7 +406,7 @@ final readonly class OdometerFetcher
                     'state_before' => $from->value,
                 ]);
 
-                return $this->stop($refresh, RefreshOutcome::WakeFailed, $now);
+                return $this->stop($refresh, RefreshOutcome::WakeFailed, $now, $run, $checksMade);
             }
 
             $refresh->settle(RefreshOutcome::Failed, $now);
@@ -407,8 +424,11 @@ final readonly class OdometerFetcher
             'woken_today' => $cap->used + 1,
         ]);
 
+        // The slot stays open while the poll runs, so the dispatcher does not queue it again.
+        $this->finish($run, SlotRunStatus::Retrying, $checksMade, $now);
+
         $this->bus->dispatch(
-            $message->wokenUntil(WakeWindow::deadline($now)->getTimestamp()),
+            $message->wokenUntil(WakeWindow::deadline($now)->getTimestamp(), $refresh->getId()->toRfc4122()),
             [new DelayStamp(WakeWindow::POLL_INTERVAL_SECONDS * 1000)],
         );
 
@@ -428,12 +448,15 @@ final readonly class OdometerFetcher
         FetchOdometerMessage $message,
         Vehicle $vehicle,
         TeslaApp $app,
+        ?FetchSlotRun $run,
         ?RefreshAttempt $refresh,
         CarbonImmutable $now,
     ): ?SlotRunStatus {
+        $checksMade = $message->attempt + 1;
+
         if (null === $refresh || RefreshOutcome::Waking !== $refresh->getOutcome()) {
             // The refresh was purged or settled by someone else: nothing to wait for.
-            return SlotRunStatus::Skipped;
+            return $this->finish($run, SlotRunStatus::Skipped, $checksMade, $now);
         }
 
         try {
@@ -447,14 +470,7 @@ final readonly class OdometerFetcher
                 return null;
             }
         } catch (TeslaNotConnected $notConnected) {
-            return $this->notConnected(
-                null,
-                $refresh,
-                $message->attempt + 1,
-                $now,
-                $vehicle,
-                $notConnected->getMessage(),
-            );
+            return $this->notConnected($run, $refresh, $checksMade, $now, $vehicle, $notConnected->getMessage());
         } catch (FleetApiError $failure) {
             $refresh->settle(RefreshOutcome::Failed, $now);
             $this->entityManager->flush();
@@ -469,7 +485,7 @@ final readonly class OdometerFetcher
                 'seconds_after_wake' => $this->secondsSinceWake($refresh, $now),
             ]);
 
-            return $this->stop($refresh, RefreshOutcome::WakeTimeout, $now);
+            return $this->stop($refresh, RefreshOutcome::WakeTimeout, $now, $run, $checksMade);
         }
 
         $this->bus->dispatch($message, [new DelayStamp(WakeWindow::POLL_INTERVAL_SECONDS * 1000)]);
@@ -487,12 +503,16 @@ final readonly class OdometerFetcher
     /**
      * @throws ORMException
      */
-    private function stop(?RefreshAttempt $refresh, RefreshOutcome $outcome, CarbonImmutable $now): SlotRunStatus
-    {
+    private function stop(
+        ?RefreshAttempt $refresh,
+        RefreshOutcome $outcome,
+        CarbonImmutable $now,
+        ?FetchSlotRun $run = null,
+        int $checksMade = 0,
+    ): SlotRunStatus {
         $refresh?->settle($outcome, $now);
-        $this->entityManager->flush();
 
-        return SlotRunStatus::Skipped;
+        return $this->finish($run, SlotRunStatus::Skipped, $checksMade, $now);
     }
 
     /**

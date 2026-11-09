@@ -80,6 +80,13 @@ class TeslaApp
     #[ORM\Column(options: ['default' => true])]
     private bool $keepVehicleData = true;
 
+    /**
+     * Whether a scheduled fetch whose last check of the window still finds the car asleep or offline may wake it,
+     * within the daily wake cap. Off by default: waking is billed.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $wakeOnLastCheck = false;
+
     public function __construct(
         User $owner,
         string $publicKey,
@@ -149,6 +156,16 @@ class TeslaApp
     public function changeKeepVehicleData(bool $keep): void
     {
         $this->keepVehicleData = $keep;
+    }
+
+    public function wakesOnLastCheck(): bool
+    {
+        return $this->wakeOnLastCheck;
+    }
+
+    public function changeWakeOnLastCheck(bool $wake): void
+    {
+        $this->wakeOnLastCheck = $wake;
     }
 
     public function getClientId(): ?string

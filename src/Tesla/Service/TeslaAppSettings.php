@@ -88,6 +88,11 @@ final readonly class TeslaAppSettings
         if (null !== $data->keepVehicleData) {
             $app->changeKeepVehicleData($data->keepVehicleData);
         }
+
+        if (null !== $data->wakeOnLastCheck) {
+            $app->changeWakeOnLastCheck($data->wakeOnLastCheck);
+        }
+
         $this->entityManager->flush();
 
         return $app;

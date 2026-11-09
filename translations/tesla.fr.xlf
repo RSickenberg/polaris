@@ -413,6 +413,14 @@ Révoquez aussi l’accès dans votre compte Tesla.</target>
         <target>Enregistre la réponse complète de chaque lecture (batterie, charge, climat, portes, jamais la position) pour de futures fonctions.
 Le désactiver arrête les nouvelles copies, rien n’est supprimé.</target>
       </trans-unit>
+      <trans-unit id="form.wake_on_last_check.label">
+        <source>form.wake_on_last_check.label</source>
+        <target>Réveiller la voiture à la dernière vérification planifiée</target>
+      </trans-unit>
+      <trans-unit id="form.wake_on_last_check.help">
+        <source>form.wake_on_last_check.help</source>
+        <target>Si la dernière vérification d’une lecture planifiée (environ 3 heures après l’heure prévue) trouve encore la voiture endormie ou hors ligne, Polaris la réveille une fois puis la lit. Cela compte dans la limite quotidienne de réveils ci-dessus, et Tesla facture chaque réveil.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

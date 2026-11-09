@@ -40,6 +40,8 @@ final class TeslaAppSettingsFormData
 
     public bool $keepVehicleData = true;
 
+    public bool $wakeOnLastCheck = false;
+
     private bool $secretStored = false;
 
     public static function fromApp(TeslaApp $app): self
@@ -50,6 +52,7 @@ final class TeslaAppSettingsFormData
         $data->regions = $app->getEnabledRegions();
         $data->dailyWakeCap = $app->getDailyWakeCap();
         $data->keepVehicleData = $app->keepsVehicleData();
+        $data->wakeOnLastCheck = $app->wakesOnLastCheck();
         $data->secretStored = null !== $app->getEncryptedClientSecret();
 
         return $data;
@@ -68,7 +71,8 @@ final class TeslaAppSettingsFormData
             (string) $this->domain,
             $this->regions,
             $this->dailyWakeCap ?? TeslaApp::DEFAULT_DAILY_WAKE_CAP,
-            $this->keepVehicleData
+            $this->keepVehicleData,
+            $this->wakeOnLastCheck
         );
     }
 
