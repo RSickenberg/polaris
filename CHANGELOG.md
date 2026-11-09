@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.3.0](https://github.com/RSickenberg/polaris/compare/v0.2.0...v0.3.0) (2026-11-09)
+
+### Features
+
+* **ui:** bold the figures of the KPI cards ([42ba3b3](https://github.com/RSickenberg/polaris/commit/42ba3b325c78c8bb4d948013db9164106ce09705))
+* **ui:** bold the figures of the risk message ([3fa83be](https://github.com/RSickenberg/polaris/commit/3fa83be4517bf1dc21dc36f0b17d38f228cd8e4f))
+* **ui:** help of the dashboard cards written for a reader, not a spec ([3a9fcd4](https://github.com/RSickenberg/polaris/commit/3a9fcd47b78e240fd74d71771cd22d9b85fdf548))
+* **ui:** main figures first, one look for headers and tones, Swiss figures ([9b0f09d](https://github.com/RSickenberg/polaris/commit/9b0f09d79cedbd5d33e441503be447d1ff369920))
+* **ui:** the risk message in the colour of its title, the tick in the risk colour again ([19349f1](https://github.com/RSickenberg/polaris/commit/19349f1e7a5404c7e2b226c5a5aac13c8516a041))
+
+### Bug Fixes
+
+* **i18n:** French pace units with spaces around the slash (km / jour) ([2dfe718](https://github.com/RSickenberg/polaris/commit/2dfe7182ab926bb82ce1261b02af7708403ab6b6))
+* **i18n:** one word per thing, next steps in errors, Swiss French typography ([ad1c184](https://github.com/RSickenberg/polaris/commit/ad1c18490ed542b5a1182ef22e988dc4094e07f3))
+
+### Reverts
+
+* Revert "feat(ui): bold the figures of the KPI cards" ([2724e8d](https://github.com/RSickenberg/polaris/commit/2724e8d944e8c92e9b1c7d69c0bc3ae2594595f8))
+
 ## [0.2.0](https://github.com/RSickenberg/polaris/compare/v0.1.0...v0.2.0) (2026-11-08)
 
 ### Features
