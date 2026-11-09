@@ -7,7 +7,18 @@
         <div class="flex h-8 items-center gap-2 px-2 font-semibold">
             <span class="flex size-6 items-center justify-center rounded-md bg-sidebar-primary text-xs text-sidebar-primary-foreground" aria-hidden="true">P</span>
             <span>Polaris</span>
-            <span class="ms-auto rounded-md bg-sidebar-accent px-1.5 py-0.5 font-mono text-xs font-normal text-sidebar-accent-foreground" title="{{ 'nav.version'|trans(domain='shared') }}" data-version>{{ polaris_version }}</span>
+            {# The build tells itself apart: a local build is red, a nightly image orange, a release the blue of the logo. #}
+            {% if polaris_version == 'dev' %}
+                {% set versionKind = 'dev' %}
+                {% set versionTone = 'bg-danger-surface text-danger-foreground' %}
+            {% elseif polaris_version starts with 'nightly-' %}
+                {% set versionKind = 'nightly' %}
+                {% set versionTone = 'bg-warning-surface text-warning-foreground' %}
+            {% else %}
+                {% set versionKind = 'release' %}
+                {% set versionTone = 'bg-sidebar-primary text-sidebar-primary-foreground' %}
+            {% endif %}
+            <span class="ms-auto rounded-md px-1.5 py-0.5 font-mono text-xs font-normal {{ versionTone }}" title="{{ 'nav.version'|trans(domain='shared') }}" data-version="{{ versionKind }}">{{ polaris_version }}</span>
         </div>
     </twig:Sidebar:Header>
     <twig:Sidebar:Content>
