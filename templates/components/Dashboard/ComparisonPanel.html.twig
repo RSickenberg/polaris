@@ -41,17 +41,23 @@
                             <twig:Table:Row data-period="{{ row.period.value }}">
                                 <twig:Table:Cell class="py-3 ps-4 pe-2 whitespace-normal">
                                     {# "Today" without a snapshot of its own day starts at the midnight of the latest earlier one. #}
-                                    {% if row.fallbackDays > 0 %}
-                                        <span class="block" data-fallback-days="{{ row.fallbackDays }}">{{ 'compare.period.since_days'|trans({count: row.fallbackDays}, domain='dashboard') }}</span>
-                                    {% else %}
-                                        <span class="block{{ figures is null ? ' text-muted-foreground' : '' }}">{{ ('compare.period.' ~ row.period.value)|trans(domain='dashboard') }}</span>
-                                    {% endif %}
-                                    {# Rebuilt on the fly: the midnight snapshot of the day is not saved yet. #}
-                                    {% if row.live and figures is not null %}
-                                        <twig:Badge variant="outline" class="mt-1 gap-1 px-1.5 py-0 text-[10px] uppercase" data-live title="{{ 'compare.live_hint'|trans(domain='dashboard') }}">
-                                            <span class="size-1.5 rounded-full bg-info" aria-hidden="true"></span>{{ 'compare.live'|trans(domain='dashboard') }}
-                                        </twig:Badge>
-                                    {% endif %}
+                                    <div class="flex flex-wrap items-center gap-x-2">
+                                        {% if row.fallbackDays > 0 %}
+                                            <span data-fallback-days="{{ row.fallbackDays }}">{{ 'compare.period.since_days'|trans({count: row.fallbackDays}, domain='dashboard') }}</span>
+                                        {% else %}
+                                            <span{{ figures is null ? ' class="text-muted-foreground"' : '' }}>{{ ('compare.period.' ~ row.period.value)|trans(domain='dashboard') }}</span>
+                                        {% endif %}
+                                        {# Rebuilt on the fly: the midnight snapshot of the day is not saved yet. A pulsing dot and the words, never colour alone. #}
+                                        {% if row.live and figures is not null %}
+                                            <span class="inline-flex items-center gap-1.5 text-xs text-muted-foreground" data-live title="{{ 'compare.live_hint'|trans(domain='dashboard') }}">
+                                                <span class="relative flex size-2" aria-hidden="true">
+                                                    <span class="absolute inline-flex size-full rounded-full bg-info opacity-75 motion-safe:animate-ping"></span>
+                                                    <span class="relative inline-flex size-2 rounded-full bg-info"></span>
+                                                </span>
+                                                {{ 'compare.live'|trans(domain='dashboard') }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
                                     {% if figures is not null %}
                                         <span class="mt-1 block text-xs text-muted-foreground" data-figure="figures">
                                             {%- set actual = figures.actual|km -%}
