@@ -28,4 +28,9 @@ enum SnapshotOutcome: string
 
     /** Another writer stored the day's row between the lookup and the insert; nothing was changed here. */
     case Concurrent = 'concurrent';
+
+    public function isStored(): bool
+    {
+        return self::Saved === $this || self::Updated === $this;
+    }
 }

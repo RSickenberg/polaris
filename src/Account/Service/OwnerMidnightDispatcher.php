@@ -90,6 +90,11 @@ final readonly class OwnerMidnightDispatcher
             throw $e;
         }
 
+        $this->logger->info(
+            'Owner midnight queued.',
+            ['user' => $user->getId()->toRfc4122(), 'local_day' => $midnight->localDay->format('Y-m-d')],
+        );
+
         return true;
     }
 }
