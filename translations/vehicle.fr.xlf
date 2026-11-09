@@ -98,6 +98,14 @@
         <source>data.rejected.invalid</source>
         <target>Le fichier contient une valeur invalide : %detail%</target>
       </trans-unit>
+      <trans-unit id="import.limit.title">
+        <source>import.limit.title</source>
+        <target>Limite de véhicules atteinte</target>
+      </trans-unit>
+      <trans-unit id="import.limit.description">
+        <source>import.limit.description</source>
+        <target>Ce Polaris suit déjà le véhicule qu’il autorise  : aucun autre ne peut être ajouté.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

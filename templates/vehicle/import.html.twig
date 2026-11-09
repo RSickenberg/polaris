@@ -23,6 +23,12 @@
                 cta: 'import.back'|trans(domain='vehicle'),
                 href: path('dashboard_home'),
             }) }}
+        {% elseif status == 'limit_reached' %}
+            <twig:Alert data-import-status="limit_reached">
+                <twig:Alert:Title>{{ 'import.limit.title'|trans(domain='vehicle') }}</twig:Alert:Title>
+                <twig:Alert:Description>{{ 'import.limit.description'|trans(domain='vehicle') }}</twig:Alert:Description>
+            </twig:Alert>
+            <div><twig:Button as="a" href="{{ path('dashboard_home') }}" class="w-full sm:w-auto">{{ 'import.back'|trans(domain='vehicle') }}</twig:Button></div>
         {% elseif status == 'not_connected' %}
             <twig:Alert variant="destructive" data-import-status="not_connected">
                 <twig:Alert:Title>{{ 'import.not_connected.title'|trans(domain='vehicle') }}</twig:Alert:Title>

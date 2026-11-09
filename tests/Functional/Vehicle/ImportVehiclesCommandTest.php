@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Polaris\Tests\Support\FleetApiResponses;
+use Polaris\Tests\Support\LiftsVehicleLimit;
 use Polaris\Tests\Support\SignsIn;
 use Polaris\Tests\Support\TeslaFixtures;
 use Polaris\Vehicle\Command\ImportVehiclesCommand;
@@ -22,6 +23,7 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 #[CoversClass(ImportVehiclesCommand::class)]
 final class ImportVehiclesCommandTest extends KernelTestCase
 {
+    use LiftsVehicleLimit;
     use SignsIn;
     use TeslaFixtures;
 
@@ -57,8 +59,24 @@ final class ImportVehiclesCommandTest extends KernelTestCase
         );
     }
 
+    public function testRefusesToImportMoreVehiclesThanTheLimitAndAddsNothing(): void
+    {
+        $tester = $this->tester();
+        $this->connect();
+
+        self::assertSame(Command::FAILURE, $tester->execute([]));
+
+        self::assertStringContainsString('--vin', $tester->getDisplay());
+        self::assertSame(
+            [],
+            self::getContainer()->get(EntityManagerInterface::class)->getRepository(Vehicle::class)->findAll(),
+        );
+    }
+
     public function testImportsAndThenFindsNothingNew(): void
     {
+        self::bootKernel();
+        $this->liftVehicleLimit();
         $tester = $this->tester();
         $this->connect(2);
 
@@ -101,7 +119,8 @@ final class ImportVehiclesCommandTest extends KernelTestCase
 
     private function tester(): CommandTester
     {
-        $kernel = self::bootKernel();
+        // A test that replaced a service has booted the kernel already: keep that container.
+        $kernel = self::$booted ? self::getContainer()->get('kernel') : self::bootKernel();
 
         return new CommandTester(new Application($kernel)->find('polaris:vehicle:import'));
     }

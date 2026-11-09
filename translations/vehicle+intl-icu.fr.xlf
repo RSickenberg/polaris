@@ -10,6 +10,10 @@
         <source>flash.data_imported</source>
         <target>Import terminé. Leasing : {lease, select, created {créé à partir du fichier} kept {le véhicule en a déjà un, conservé} other {aucun dans le fichier}}. Relevés : {readingsAdded, number} ajoutés, {readingsAlreadyThere, number} déjà présents, {readingsRejected, number} refusés. Relevés de projection : {snapshotsAdded, number} ajoutés, {snapshotsAlreadyThere, number} déjà présents, {snapshotsSkipped, number} écartés.</target>
       </trans-unit>
+      <trans-unit id="flash.limit_reached">
+        <source>flash.limit_reached</source>
+        <target>Rien n’a été importé  : vous pouvez avoir {limit, plural, one {# véhicule} other {# véhicules}} ici. Cochez moins de véhicules.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

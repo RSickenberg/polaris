@@ -13,7 +13,9 @@ use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Form\Model\VehicleImportFormData;
 use Polaris\Vehicle\Form\VehicleImportType;
 use Polaris\Vehicle\Service\Dto\ImportCandidate;
+use Polaris\Vehicle\Service\Exception\VehicleLimitReached;
 use Polaris\Vehicle\Service\TeslaVehicleImporter;
+use Polaris\Vehicle\Service\VehicleQuota;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,9 +34,11 @@ final class VehicleImportController extends AbstractController
     public const string STATUS_NOTHING_NEW = 'nothing_new';
     public const string STATUS_NOT_CONNECTED = 'not_connected';
     public const string STATUS_ERROR = 'error';
+    public const string STATUS_LIMIT_REACHED = 'limit_reached';
 
     public function __construct(
         private readonly TeslaVehicleImporter $importer,
+        private readonly VehicleQuota $quota,
         private readonly TranslatorInterface $translator,
         private readonly LoggerInterface $logger,
     ) {
@@ -47,6 +51,11 @@ final class VehicleImportController extends AbstractController
     #[Route('/vehicles/import', name: 'vehicle_import', methods: ['GET', 'POST'], priority: 10)]
     public function __invoke(Request $request, #[CurrentUser] User $user): Response
     {
+        // Before asking Tesla anything: an owner at the limit has nothing to pick.
+        if (0 === $this->quota->remaining($user)) {
+            return $this->page(self::STATUS_LIMIT_REACHED);
+        }
+
         try {
             $candidates = $this->importer->candidates($user);
         } catch (TeslaNotConnected) {
@@ -76,6 +85,17 @@ final class VehicleImportController extends AbstractController
                 $result = $this->importer->import(
                     $user,
                     array_map(static fn (string $vin): Vin => new Vin($vin), $data->vins),
+                );
+            } catch (VehicleLimitReached $limit) {
+                $this->addFlash(
+                    ToastVariant::Danger->value,
+                    $this->translator->trans('flash.limit_reached', ['limit' => $limit->limit], 'vehicle'),
+                );
+
+                return $this->page(
+                    self::STATUS_READY,
+                    ['form' => $form, 'candidates' => $new],
+                    Response::HTTP_UNPROCESSABLE_ENTITY,
                 );
             } catch (TeslaNotConnected) {
                 return $this->page(self::STATUS_NOT_CONNECTED);

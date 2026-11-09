@@ -98,6 +98,14 @@
         <source>data.rejected.invalid</source>
         <target>The file has an invalid value: %detail%</target>
       </trans-unit>
+      <trans-unit id="import.limit.title">
+        <source>import.limit.title</source>
+        <target>Vehicle limit reached</target>
+      </trans-unit>
+      <trans-unit id="import.limit.description">
+        <source>import.limit.description</source>
+        <target>This Polaris already tracks the vehicle it allows, so no other can be added.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
