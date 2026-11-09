@@ -24,174 +24,41 @@ This is the self-hostable edition: one user and one vehicle, personal and noncom
 
 ## Install
 
-Requirements: Docker with Compose v2.24 or later.
-
-### 1. Get the files
-
-Pick the latest version on the [releases page](https://github.com/RSickenberg/polaris/releases):
+Requirements: Docker with Compose v2.24 or later. The full guide, with the environment variables, HTTPS, backups, restore and upgrades, is [docs/self-hosting.md](docs/self-hosting.md). In short:
 
 ```bash
-git clone --branch v<version> --depth 1 https://github.com/RSickenberg/polaris.git
-cd polaris
-cp .env.example .env.local
+mkdir polaris && cd polaris
+for f in compose.yaml compose.image.yaml; do
+  curl -fsSLO "https://raw.githubusercontent.com/RSickenberg/polaris/v<version>/$f"
+done
+printf 'COMPOSE_FILE=compose.yaml:compose.image.yaml\nPOLARIS_VERSION=<version>\nSERVER_NAME=polaris.example.com\n' > .env
+cat > .env.local <<EOF
+APP_SECRET=$(openssl rand -hex 16)
+POSTGRES_PASSWORD=$(openssl rand -hex 16)
+POLARIS_ENCRYPTION_KEY=$(openssl rand -base64 32)
+DEFAULT_URI=https://polaris.example.com
+MAILER_DSN=smtp://<user>:<password>@smtp.example.com:587
+MAILER_FROM=polaris@example.com
+EOF
+docker compose up -d --wait
+docker compose exec php bin/console polaris:user:create you@example.com
 ```
 
-The image carries the application, not the Compose setup, so take the files of the release you run.
-
-**Nightly (beta).** `ghcr.io/rsickenberg/polaris:nightly` is built every night from the `dev` branch, when it got a new commit, and each build replaces the previous one. It can break and its database migrations are not guaranteed to be upgradable to the next release: use it to try what is coming, not for the data you care about. Stable installs use a version tag or `latest`, which come from `main`.
-
-### 2. Fill `.env.local`
-
-| Variable | Value |
-| --- | --- |
-| `APP_SECRET`, `POSTGRES_PASSWORD` | `openssl rand -hex 16` |
-| `POLARIS_ENCRYPTION_KEY` | `openssl rand -base64 32` (read the warning below) |
-| `MAILER_DSN`, `MAILER_FROM`, `DEFAULT_URI` | Your SMTP server, the sender address and the public address of the app. Needed for password reset. |
+Pick `<version>` (without the `v`) on the [releases page](https://github.com/RSickenberg/polaris/releases), and fill in your domain and mail settings. Then open `https://<your domain>` and sign in.
 
 > [!IMPORTANT]
-> `POLARIS_ENCRYPTION_KEY` encrypts the Tesla tokens, client secret and private key.
-> - Back it up, apart from your database dumps.
-> - Never change it once Tesla is connected: the stored values become unreadable and you must connect and register again.
-> - Keep it in `.env.local` (never committed) or the Symfony vault (`make sf ARGS="secrets:set POLARIS_ENCRYPTION_KEY"`), never in the database or the logs.
+> Back up `POLARIS_ENCRYPTION_KEY` apart from your database dumps and never change it once Tesla is connected: it encrypts the Tesla tokens, client secret and private key. See [Backups](docs/self-hosting.md#backups).
 
-### 3. Start
+**Nightly (beta).** `ghcr.io/rsickenberg/polaris:nightly` is built every night from the `dev` branch, when it got a new commit, and each build replaces the previous one. It can break and its database migrations are not guaranteed to be upgradable to the next release: use it to try what is coming, not for the data you care about. Stable installs pin a version tag.
 
-**Published image** (`linux/amd64` and `linux/arm64`, tag = version without the `v`). Pin a version rather than `latest`:
-
-```bash
-export POLARIS_VERSION=<version>   # the same version, without the v; Compose reads it from the shell or .env, not .env.local
-docker compose -f compose.yaml -f compose.image.yaml pull
-docker compose -f compose.yaml -f compose.image.yaml up -d --wait
-```
-
-**Or build from source:** `make start`.
-
-Migrations run when the container starts.
-
-### 4. Create your user and sign in
-
-```bash
-make sf ARGS="polaris:user:create you@example.com"
-```
-
-The password is asked twice, hidden, 12 characters minimum (or piped on stdin without a terminal). Options: `--locale=fr`, `--time-zone=Europe/Zurich`. There is one user and no sign-up page.
-
-Open https://localhost, accept the self-signed certificate and sign in.
+**Build from source:** `make start` (development, with the `Makefile`; see [Development](#development)).
 
 > [!NOTE]
-> This README writes console commands as `make sf ARGS="<command>"`, which runs the development image. With the published image, run `docker compose -f compose.yaml -f compose.image.yaml exec php bin/console <command>` instead.
+> The commands in the rest of this README are written `make sf ARGS="<command>"`, which runs the development image. With the published image, run `docker compose exec php bin/console <command>` instead (add `-T` when you pipe a file or a secret on standard input).
 
 ## Connect your Tesla
 
-Run the steps in order.
-
-### 1. Create a Tesla app
-
-On developer.tesla.com, create a Fleet API app. Note its **client ID** and **client secret** (keep the secret private). Set its allowed origin to the domain that will serve your public key, for example `polaris.example.com`.
-
-### 2. Generate the key pair
-
-```bash
-make sf ARGS="polaris:tesla:keygen"
-```
-
-It prints the public key and stores the private key encrypted (never shown). It refuses to replace an existing key unless you pass `--force`; you would then register again.
-
-<details>
-<summary>Already have a key pair? Import it instead</summary>
-
-The key must be prime256v1, PKCS8 or SEC1 PEM, without a passphrase. Pipe it on stdin so it never appears in a command argument:
-
-```bash
-docker compose exec -T php bin/console polaris:tesla:key:import < private-key.pem
-```
-
-Use `docker compose exec -T`, not `make sf`: `make sf` has no `-T`, so a piped file fails with "cannot attach stdin to a TTY-enabled container". Without piping, copy the file in, import it, then delete it (outside the repository folder, where it could be committed):
-
-```bash
-docker compose cp private-key.pem php:/tmp/private-key.pem
-make sf ARGS="polaris:tesla:key:import --file=/tmp/private-key.pem"
-docker compose exec php rm /tmp/private-key.pem
-```
-
-Add `--force` to replace a stored key. Step 5 confirms it matches the key served on your domain.
-</details>
-
-### 3. Serve the public key
-
-Tesla reads it at `https://<your domain>/.well-known/appspecific/com.tesla.3p.public-key.pem`. Set `POLARIS_KEY_HOSTING` in `.env.local`:
-
-- `polaris` (default): Polaris answers that URL, without a login. Nothing else to do.
-- `external`: the key lives on a static site (for example GitHub Pages). Set one or both:
-  - `POLARIS_KEY_HOSTING_DIR`: a local clone of the site. `keygen` writes the key into it; you commit and push.
-  - `POLARIS_KEY_HOSTING_URL`: the https URL of the PEM file. You publish the key yourself and `key:check` reads that URL. Use the URL Tesla reads (or one serving the same key); the check warns when it differs.
-
-### 4. Store the credentials
-
-```bash
-make sf ARGS="polaris:tesla:configure --client-id=<client ID> --domain=polaris.example.com --region=eu"
-```
-
-You are then asked for the client secret (hidden, or from stdin, never an argument). Options you leave out keep their stored value.
-
-- `--region`: `na` (North America and Asia-Pacific) or `eu` (Europe, Middle East and Africa). Repeat it for both. China is not supported.
-- `--email=you@example.com`: the owner of the app.
-
-The same settings are on the web, under **Tesla settings** in the account menu (`/settings/tesla`). The client secret is write-only there; leave it empty to keep the stored one.
-
-### 5. Check, then register
-
-```bash
-make sf ARGS="polaris:tesla:key:check"   # Tesla must be able to read your public key
-make sf ARGS="polaris:tesla:register"    # runs the check first, then registers each enabled region
-```
-
-`register` sends nothing to Tesla if the check fails, and shows Tesla's errors with a hint.
-
-### 6. Connect your Tesla account
-
-Go to `/settings/tesla` > **Connect Tesla**, give your consent, then choose one way:
-
-- **Sign in with Tesla.** Add the redirect URI shown on the connect page to the allowed redirect URIs of your Tesla app (by default `DEFAULT_URI` + `/tesla/callback`, or `POLARIS_TESLA_REDIRECT_URI` when set).
-- **Paste the callback URL**, when your browser cannot open the Polaris address (LAN or `.local` host): start with the button above, approve, then paste the full address from the browser bar.
-- **Paste a refresh token** obtained elsewhere. Polaris uses it once right away (Tesla refresh tokens are single use) and keeps only the new tokens.
-
-Requested scopes: `openid offline_access vehicle_device_data vehicle_cmds` (`vehicle_cmds` only to wake the car from a refresh you confirm).
-
-<details>
-<summary>Local install on localhost</summary>
-
-The Tesla portal refuses `https://localhost` and any `http` address on port 80. Instead:
-
-1. Register `http://localhost:8000/tesla/callback` in your Tesla app.
-2. Set `POLARIS_TESLA_REDIRECT_URI=http://localhost:8000/tesla/callback` in `.env.local`.
-3. Start with `HTTP_PORT=8000 make up` (Compose reads `.env`, not `.env.local`). Caddy redirects that port to `https://localhost`, keeping the code and state.
-
-A real domain with `https` needs none of this.
-</details>
-
-### 7. Import your vehicles
-
-Open **Import from Tesla** on the home page (`/vehicles/import`), or:
-
-```bash
-make sf ARGS="polaris:vehicle:import"            # --dry-run lists first, --vin= picks some
-make sf ARGS="polaris:vehicle:add <VIN> 'Model 3'"   # add one by hand
-```
-
-Only your account's vehicle list is read; no car is contacted.
-
-A self-hosted Polaris tracks **one vehicle**. If your Tesla account lists several, pick one (`--vin=` on the command, one box on the page); a second one is refused. Vehicles you already added are kept.
-
-### 8. Choose when the odometer is read (optional)
-
-By default once a day at 21:00 in your time zone. Set one or two times (`HH:MM`, 24 h); without arguments the command shows the current ones:
-
-```bash
-make sf ARGS="polaris:fetch:schedule 07:30 18:00"
-```
-
-The `worker` service does the reading and must be running. A scheduled read never wakes the car: if it is asleep or offline, Polaris checks again every hour for 3 hours, then skips that day. A value is stored only when it changed.
+Register your own Tesla developer app, generate and serve the key pair, store the credentials, register, connect and import your vehicle, then choose when the odometer is read. The steps, with the commands, the sources and what is not verified, are in [Tesla app registration](docs/self-hosting.md#tesla-app-registration) of the self-hosting guide. Polaris requests the scopes `openid offline_access vehicle_device_data vehicle_cmds` (`vehicle_cmds` only to wake the car from a refresh you confirm), and a scheduled read never wakes the car.
 
 ## Use it
 
