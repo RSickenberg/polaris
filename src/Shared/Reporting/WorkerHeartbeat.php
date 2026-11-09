@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Polaris\Shared\Reporting;
 
-use Polaris\Fetching\Message\DispatchDueFetches;
 use Sentry\CheckInStatus;
 use Sentry\MonitorConfig;
 use Sentry\MonitorSchedule;
@@ -103,7 +102,7 @@ final class WorkerHeartbeat
     private function isScheduled(Envelope $envelope): bool
     {
         return null !== $envelope->last(ScheduledStamp::class)
-            && $envelope->getMessage() instanceof DispatchDueFetches;
+            && $envelope->getMessage() instanceof ReportsHeartbeat;
     }
 
     private function isReporting(): bool
