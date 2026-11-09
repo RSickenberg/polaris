@@ -38,6 +38,8 @@ cp .env.example .env.local
 
 The image carries the application, not the Compose setup, so take the files of the release you run.
 
+**Nightly (beta).** `ghcr.io/rsickenberg/polaris:nightly` is built every night from the `dev` branch, when it got a new commit, and each build replaces the previous one. It can break and its database migrations are not guaranteed to be upgradable to the next release: use it to try what is coming, not for the data you care about. Stable installs use a version tag or `latest`, which come from `main`.
+
 ### 2. Fill `.env.local`
 
 | Variable | Value |

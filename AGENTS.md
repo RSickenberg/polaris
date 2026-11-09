@@ -279,7 +279,8 @@ No space before `;`, `!`, `?`; a no-break space (U+00A0) before `:` and inside `
 
 - Conventional Commits (`feat`, `fix`, `docs`, `refactor`, `test`, `build`, `ci`, `chore`); PR titles are checked in CI.
 - Versions and `CHANGELOG.md` come from release-it: don't edit by hand.
-- One issue per small PR, with "Closes #N"; squash-merged.
+- `main` is the released code (tags, image `latest`); `dev` is the next release and its tip is built every night into the image `nightly` (`nightly.yml`, overwritten each time). Branch from `dev` and open PRs against it, except a fix that cannot wait, which goes to `main` and is merged back into `dev`.
+- One issue per small PR, with "Closes #N"; squash-merged into `dev`. A release is a PR `dev` to `main` merged with a merge commit (never squashed), then the Release workflow.
 - No `.bak` or backup copies: git is the history.
 
 ### Definition of done
