@@ -34,7 +34,7 @@ final readonly class LeaseReturnService
     }
 
     /**
-     * Whether the user gave the car back. Cheap: no assessment is made.
+     * Whether the user gave the car back.
      */
     public function isReturned(Vehicle $vehicle): bool
     {
