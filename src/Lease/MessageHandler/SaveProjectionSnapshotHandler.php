@@ -12,6 +12,8 @@ use Polaris\Lease\Service\Enum\SnapshotOutcome;
 use Polaris\Lease\Service\ProjectionSnapshotService;
 use Polaris\Shared\Domain\OwnerMidnight;
 use Polaris\Vehicle\Entity\Vehicle;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 use Symfony\Component\Lock\Exception\LockAcquiringException;
 use Symfony\Component\Lock\Exception\LockConflictedException;
 use Symfony\Component\Lock\Exception\LockReleasingException;
@@ -32,6 +34,7 @@ final readonly class SaveProjectionSnapshotHandler
         private ProjectionSnapshotService $snapshots,
         private EntityManagerInterface $entityManager,
         private MessageBusInterface $bus,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -47,6 +50,11 @@ final readonly class SaveProjectionSnapshotHandler
         $vehicle = $this->entityManager->find(Vehicle::class, Ulid::fromString($message->vehicleId));
 
         if (!$vehicle instanceof Vehicle) {
+            $this->logger->warning(
+                'Projection snapshot dropped: the vehicle does not exist any more.',
+                ['vehicle' => $message->vehicleId, 'local_day' => $message->localDay],
+            );
+
             return;
         }
 
@@ -61,10 +69,18 @@ final readonly class SaveProjectionSnapshotHandler
             $localDay,
         );
 
-        if (
-            SnapshotOutcome::Busy === $this->snapshots->save($vehicle, $midnight)
-            && $message->attempt < self::MAX_RETRIES
-        ) {
+        $outcome = $this->snapshots->save($vehicle, $midnight);
+        $this->logger->log(
+            $outcome->isStored() ? LogLevel::INFO : LogLevel::WARNING,
+            'Projection snapshot: ' . $outcome->value . '.',
+            [
+                'vehicle' => $message->vehicleId,
+                'local_day' => $message->localDay,
+                'attempt' => $message->attempt,
+            ],
+        );
+
+        if (SnapshotOutcome::Busy === $outcome && $message->attempt < self::MAX_RETRIES) {
             $this->bus->dispatch(
                 new SaveProjectionSnapshot(
                     $message->vehicleId,
