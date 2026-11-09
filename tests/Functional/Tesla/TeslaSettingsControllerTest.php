@@ -72,6 +72,17 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertSelectorNotExists('[class*="max-w-3xl"]');
     }
 
+    public function testTheCredentialsCardLinksToTheTeslaDeveloperDashboard(): void
+    {
+        $this->createApp(self::signIn($this->client));
+
+        $this->client->request('GET', '/settings/tesla');
+
+        self::assertSelectorExists(
+            'a[data-developer-link][href="https://developer.tesla.com/dashboard"][rel~=noopener]',
+        );
+    }
+
     public function testThePageShowsTheFormAndNeverTheSecret(): void
     {
         $user = self::signIn($this->client);

@@ -10,6 +10,18 @@ Polaris tracks your Tesla's odometer against your lease allowance, projects the 
 
 This is the self-hostable edition: one user, personal and noncommercial use. You connect your own Tesla developer app, so Tesla bills API usage to your own developer account.
 
+## Screenshots
+
+![The dashboard of a lease on track: projected mileage at lease end, driven distance, allowance to date and the mileage chart](docs/screenshots/hero-ok-light.png)
+
+| Close to the limit | Over the allowance (dark) |
+| --- | --- |
+| ![A lease close to the limit](docs/screenshots/hero-watch-light.png) | ![A lease over the allowance, in dark mode](docs/screenshots/hero-over-dark.png) |
+
+| On your phone | On your phone (dark) |
+| --- | --- |
+| <img src="docs/screenshots/hero-mobile-ok-light.png" alt="The dashboard on a phone" width="300"> | <img src="docs/screenshots/hero-mobile-over-dark.png" alt="The dashboard on a phone, in dark mode" width="300"> |
+
 ## Install
 
 Requirements: Docker with Compose v2.24 or later.

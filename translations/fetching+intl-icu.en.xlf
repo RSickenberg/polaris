@@ -35,7 +35,7 @@ Wake it from the Tesla mobile app, then refresh.</target>
       <trans-unit id="outcome.offline">
         <source>outcome.offline</source>
         <target>The car is offline, last reading kept.
-Try again once it has a connection.</target>
+Try again once it is online.</target>
       </trans-unit>
       <trans-unit id="outcome.unavailable">
         <source>outcome.unavailable</source>

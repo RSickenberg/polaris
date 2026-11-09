@@ -22,6 +22,10 @@
         <source>page.credentials.description</source>
         <target>Identifiant client et secret de votre application développeur Tesla, domaine qui sert votre clé publique, et régions.</target>
       </trans-unit>
+      <trans-unit id="page.credentials.developer_link">
+        <source>page.credentials.developer_link</source>
+        <target>Ouvrir votre application développeur Tesla</target>
+      </trans-unit>
       <trans-unit id="page.status.title">
         <source>page.status.title</source>
         <target>Enregistrement</target>

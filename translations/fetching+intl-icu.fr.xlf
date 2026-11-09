@@ -35,7 +35,7 @@ Réveillez-la depuis l’application mobile Tesla, puis actualisez.</target>
       <trans-unit id="outcome.offline">
         <source>outcome.offline</source>
         <target>La voiture est hors ligne, dernier relevé conservé.
-Réessayez quand elle a du réseau.</target>
+Réessayez quand elle sera en ligne.</target>
       </trans-unit>
       <trans-unit id="outcome.unavailable">
         <source>outcome.unavailable</source>

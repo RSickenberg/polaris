@@ -19,6 +19,15 @@
                     <twig:Card:Description>{{ 'page.credentials.description'|trans(domain='tesla') }}</twig:Card:Description>
                 </twig:Card:Header>
                 <twig:Card:Content>
+                    <p class="mb-4 text-sm">
+                        <a
+                            href="https://developer.tesla.com/dashboard"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            data-developer-link
+                            class="font-medium underline underline-offset-4 hover:text-foreground"
+                        >{{ 'page.credentials.developer_link'|trans(domain='tesla') }}</a>
+                    </p>
                     {{ form(form) }}
                 </twig:Card:Content>
             </twig:Card>

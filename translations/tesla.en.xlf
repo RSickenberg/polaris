@@ -22,6 +22,10 @@
         <source>page.credentials.description</source>
         <target>Client ID and secret of your Tesla developer app, the domain serving your public key, and the regions.</target>
       </trans-unit>
+      <trans-unit id="page.credentials.developer_link">
+        <source>page.credentials.developer_link</source>
+        <target>Open your Tesla developer app</target>
+      </trans-unit>
       <trans-unit id="page.status.title">
         <source>page.status.title</source>
         <target>Registration</target>

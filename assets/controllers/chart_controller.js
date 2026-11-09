@@ -15,7 +15,7 @@ const TOKEN = /^var\((--[\w-]+)\)$/;
  * and `timeZone`; series times are Unix milliseconds (UTC instants).
  *
  * When the `series` or `options` values change (a morphed page), the chart is updated in place, keeping the
- * zoom of the last range button.
+ * zoom of the last range button. Turbo's morph skips the chart container itself (its markup is the chart's).
  *
  * The chart is destroyed when the element disconnects and before Turbo caches the page, so
  * a snapshot never holds chart markup and a restored page never shows two charts.
@@ -57,8 +57,16 @@ export default class extends Controller {
     connect() {
         this._dark = this._isDark();
         this._range = null;
-        this._chart = new ApexCharts(this.hasCanvasTarget ? this.canvasTarget : this.element, this._config());
+        this._chart = new ApexCharts(this._container(), this._config());
         this._rendered = this._chart.render();
+
+        // The server sends the canvas empty: a morph would strip the markup ApexCharts injected and leave no chart.
+        this._onBeforeMorph = (event) => {
+            if (this.hasCanvasTarget && event.target === this.canvasTarget) {
+                event.preventDefault();
+            }
+        };
+        document.addEventListener('turbo:before-morph-element', this._onBeforeMorph);
 
         this._observer = new MutationObserver(() => this._onThemeChange());
         this._observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
@@ -78,6 +86,7 @@ export default class extends Controller {
 
     disconnect() {
         document.removeEventListener('turbo:before-cache', this._onBeforeCache);
+        document.removeEventListener('turbo:before-morph-element', this._onBeforeMorph);
         this._observer?.disconnect();
         this._observer = null;
         this._destroy();
@@ -95,6 +104,10 @@ export default class extends Controller {
         }
 
         this._chart.updateOptions({ xaxis: { min, max } }, false, false);
+    }
+
+    _container() {
+        return this.hasCanvasTarget ? this.canvasTarget : this.element;
     }
 
     _refresh() {
