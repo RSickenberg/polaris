@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.0](https://github.com/RSickenberg/polaris/compare/v0.3.1...v0.4.0) (2026-11-09)
+
+### Features
+
+* **shared:** report the worker scheduler ticks to Sentry Crons ([94d3ade](https://github.com/RSickenberg/polaris/commit/94d3ade917be91b575ab3665b61292ae401339b5))
+
 ## [0.3.1](https://github.com/RSickenberg/polaris/compare/v0.3.0...v0.3.1) (2026-11-09)
 
 ## [0.3.0](https://github.com/RSickenberg/polaris/compare/v0.2.0...v0.3.0) (2026-11-09)
