@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.5.0](https://github.com/RSickenberg/polaris/compare/v0.4.0...v0.5.0) (2026-11-09)
+
+### Features
+
+* add a debug page for dev and nightly builds ([b99403f](https://github.com/RSickenberg/polaris/commit/b99403fbbd965b6359f763e5e40d9bcbd8b8bbba))
+* **dashboard:** rebuild today's comparison live when the midnight snapshot is missing ([e00106a](https://github.com/RSickenberg/polaris/commit/e00106af240f287b8885c562c831207ef6be40c4))
+* **dashboard:** show the comparison gap as a coloured pill ([473b37b](https://github.com/RSickenberg/polaris/commit/473b37bca1c82abfa6e99efb86c020fb4f8354a6))
+* **fetching:** optionally wake the car at the last scheduled check ([4519a0d](https://github.com/RSickenberg/polaris/commit/4519a0d1d6e86093fd6569c427854918a6d9b8e8))
+* filter the tables of the debug page ([b0d5b8b](https://github.com/RSickenberg/polaris/commit/b0d5b8b26acc8e7807a7c62ccbf1e0be060fc8a4))
+* round the comparison tables and tint the version badge by build ([075710b](https://github.com/RSickenberg/polaris/commit/075710b94e96112c111ee89c38a91ceb5c24cf5e))
+* show the running version in the sidebar ([db38da4](https://github.com/RSickenberg/polaris/commit/db38da4b84ed151c8ad205dc983698127fd985dc))
+* **vehicle:** allow a single vehicle on a self-hosted Polaris ([ffbddd8](https://github.com/RSickenberg/polaris/commit/ffbddd8675bbfe8dec293a64488de075a5f6a4e8))
+
+### Bug Fixes
+
+* let today's comparison fall back on the latest earlier snapshot ([d3abc5f](https://github.com/RSickenberg/polaris/commit/d3abc5f019566901ed9452907674e8730bf115c7))
+* make the published image start with the documented setup ([c943417](https://github.com/RSickenberg/polaris/commit/c94341718a15a5fef24daa624175d8e2648c083c))
+* **shared:** mark the heartbeat tick with an interface, not a Fetching import ([4d9bc6a](https://github.com/RSickenberg/polaris/commit/4d9bc6aad6d2981799468a891c2cbc94714df8ac))
+* **shared:** send the worker heartbeat for custom DSNs only, one monitor per instance ([a4f0042](https://github.com/RSickenberg/polaris/commit/a4f0042549f7538c66c3773552775fc7c22788b4))
+
 ## [0.4.0](https://github.com/RSickenberg/polaris/compare/v0.3.1...v0.4.0) (2026-11-09)
 
 ### Features
