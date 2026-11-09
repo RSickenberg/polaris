@@ -20,6 +20,7 @@ services:
       XDEBUG_MODE: "${XDEBUG_MODE:-develop}"
       APP_ENV: "${APP_ENV:-dev}"
       MAILER_DSN: smtp://mailer:1025
+      DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}
     extra_hosts:
       # Ensure that host.docker.internal is correctly defined on Linux
       - host.docker.internal:host-gateway
@@ -41,6 +42,7 @@ services:
       XDEBUG_MODE: "${XDEBUG_MODE:-develop}"
       APP_ENV: "${APP_ENV:-dev}"
       MAILER_DSN: smtp://mailer:1025
+      DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}
     extra_hosts:
       - host.docker.internal:host-gateway
 
