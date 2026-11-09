@@ -310,6 +310,26 @@
         <source>debug.show</source>
         <target>Show</target>
       </trans-unit>
+      <trans-unit id="debug.filter.placeholder">
+        <source>debug.filter.placeholder</source>
+        <target>Filter rows</target>
+      </trans-unit>
+      <trans-unit id="debug.filter.label">
+        <source>debug.filter.label</source>
+        <target>Filter the rows of the tables</target>
+      </trans-unit>
+      <trans-unit id="debug.filter.table">
+        <source>debug.filter.table</source>
+        <target>Table</target>
+      </trans-unit>
+      <trans-unit id="debug.filter.all">
+        <source>debug.filter.all</source>
+        <target>All tables</target>
+      </trans-unit>
+      <trans-unit id="debug.filter.none">
+        <source>debug.filter.none</source>
+        <target>No row matches.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

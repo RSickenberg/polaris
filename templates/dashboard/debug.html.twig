@@ -5,7 +5,7 @@
 {% block main %}
     <twig:Shared:PageHeader title="{{ 'page.debug.title'|trans(domain='dashboard') }}" />
 
-    <div class="mt-6 flex flex-col gap-6">
+    <div class="mt-6 flex flex-col gap-6" data-controller="table-filter">
         <twig:Alert>
             <twig:ux:icon name="lucide:info" aria-hidden="true" />
             <twig:Alert:Description>{{ 'debug.intro'|trans(domain='dashboard') }}</twig:Alert:Description>
@@ -25,8 +25,30 @@
             </twig:Card:Content>
         </twig:Card>
 
+        <div class="flex flex-col gap-2 sm:flex-row">
+            <twig:Input
+                type="search"
+                class="sm:max-w-sm"
+                placeholder="{{ 'debug.filter.placeholder'|trans(domain='dashboard') }}"
+                aria-label="{{ 'debug.filter.label'|trans(domain='dashboard') }}"
+                data-table-filter-target="query"
+                data-action="input->table-filter#apply"
+            />
+            <twig:NativeSelect
+                size="sm"
+                aria-label="{{ 'debug.filter.table'|trans(domain='dashboard') }}"
+                data-table-filter-select
+                data-action="change->table-filter#apply"
+            >
+                <twig:NativeSelect:Option value="">{{ 'debug.filter.all'|trans(domain='dashboard') }}</twig:NativeSelect:Option>
+                {% for table in tables %}
+                    <twig:NativeSelect:Option value="{{ table.name }}">{{ table.name }}</twig:NativeSelect:Option>
+                {% endfor %}
+            </twig:NativeSelect>
+        </div>
+
         {% for table in tables %}
-            <twig:Card data-debug-table="{{ table.name }}">
+            <twig:Card data-debug-table="{{ table.name }}" data-table-filter-target="table">
                 <twig:Card:Header>
                     <twig:Card:Title>
                         <h2 class="flex flex-wrap items-baseline gap-x-3">
@@ -49,7 +71,7 @@
                             </twig:Table:Header>
                             <twig:Table:Body>
                                 {% for row in table.rows %}
-                                    <twig:Table:Row>
+                                    <twig:Table:Row data-filter-row>
                                         {% for column in table.columns %}
                                             {% set cell = row[column] %}
                                             <twig:Table:Cell class="align-top font-mono text-xs">
@@ -73,5 +95,7 @@
                 </twig:Card:Content>
             </twig:Card>
         {% endfor %}
+
+        <p class="text-sm text-muted-foreground" data-table-filter-target="empty" hidden>{{ 'debug.filter.none'|trans(domain='dashboard') }}</p>
     </div>
 {% endblock %}

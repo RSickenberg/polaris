@@ -59,6 +59,18 @@ final class DebugControllerTest extends WebTestCase
         self::assertSelectorTextContains('[data-debug-table=odometer_reading]', '1 of 1 rows');
     }
 
+    public function testTheTablesCanBeFilteredByTextAndByTable(): void
+    {
+        self::signIn($this->client);
+
+        $this->client->request('GET', '/debug');
+
+        self::assertSelectorExists('[data-controller=table-filter] input[type=search][data-table-filter-target=query]');
+        self::assertSelectorExists('select[data-table-filter-select] option[value=app_user]');
+        self::assertSelectorExists('[data-debug-table=app_user][data-table-filter-target=table] [data-filter-row]');
+        self::assertSelectorExists('[data-table-filter-target=empty][hidden]');
+    }
+
     public function testItNeverShowsThePasswordHash(): void
     {
         self::signIn($this->client);

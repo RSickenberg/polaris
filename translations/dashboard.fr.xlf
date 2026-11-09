@@ -310,6 +310,26 @@
         <source>debug.show</source>
         <target>Afficher</target>
       </trans-unit>
+      <trans-unit id="debug.filter.placeholder">
+        <source>debug.filter.placeholder</source>
+        <target>Filtrer les lignes</target>
+      </trans-unit>
+      <trans-unit id="debug.filter.label">
+        <source>debug.filter.label</source>
+        <target>Filtrer les lignes des tables</target>
+      </trans-unit>
+      <trans-unit id="debug.filter.table">
+        <source>debug.filter.table</source>
+        <target>Table</target>
+      </trans-unit>
+      <trans-unit id="debug.filter.all">
+        <source>debug.filter.all</source>
+        <target>Toutes les tables</target>
+      </trans-unit>
+      <trans-unit id="debug.filter.none">
+        <source>debug.filter.none</source>
+        <target>Aucune ligne ne correspond.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
