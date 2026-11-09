@@ -46,6 +46,12 @@
                                     {% else %}
                                         <span class="block{{ figures is null ? ' text-muted-foreground' : '' }}">{{ ('compare.period.' ~ row.period.value)|trans(domain='dashboard') }}</span>
                                     {% endif %}
+                                    {# Rebuilt on the fly: the midnight snapshot of the day is not saved yet. #}
+                                    {% if row.live and figures is not null %}
+                                        <twig:Badge variant="outline" class="mt-1 gap-1 px-1.5 py-0 text-[10px] uppercase" data-live title="{{ 'compare.live_hint'|trans(domain='dashboard') }}">
+                                            <span class="size-1.5 rounded-full bg-info" aria-hidden="true"></span>{{ 'compare.live'|trans(domain='dashboard') }}
+                                        </twig:Badge>
+                                    {% endif %}
                                     {% if figures is not null %}
                                         <span class="mt-1 block text-xs text-muted-foreground" data-figure="figures">
                                             {%- set actual = figures.actual|km -%}

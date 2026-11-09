@@ -238,6 +238,14 @@
         <source>compare.no_history_yet</source>
         <target>Not enough history yet. The rows fill in over the next 30 days.</target>
       </trans-unit>
+      <trans-unit id="compare.live">
+        <source>compare.live</source>
+        <target>Live</target>
+      </trans-unit>
+      <trans-unit id="compare.live_hint">
+        <source>compare.live_hint</source>
+        <target>Compared with a projection rebuilt just now: the snapshot of the day is saved at midnight.</target>
+      </trans-unit>
       <trans-unit id="compare.no_history">
         <source>compare.no_history</source>
         <target>Not enough history</target>

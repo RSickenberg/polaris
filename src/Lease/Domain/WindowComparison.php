@@ -15,6 +15,8 @@ final readonly class WindowComparison
         public ?Comparison $comparison,
         /** How many days before its usual start the window really starts: 0 unless "today" fell back (see the comparer). */
         public int $fallbackDays = 0,
+        /** True when the figures of the window's start were rebuilt on the fly, not read from a stored snapshot. */
+        public bool $live = false,
     ) {
     }
 }
