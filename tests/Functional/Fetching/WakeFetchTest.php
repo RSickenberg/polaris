@@ -373,6 +373,79 @@ final class WakeFetchTest extends KernelTestCase
         self::assertSame(SlotRunStatus::Stored, $fetcher->fetch($message));
     }
 
+    public function testTheLastCheckOfASlotWakesTheCarWhenTheOwnerAllowedItThenReadsIt(): void
+    {
+        $this->app->changeWakeOnLastCheck(true);
+        $slot = CarbonImmutable::parse(self::NOW, 'UTC')->subHours(3);
+        $run = new FetchSlotRun($this->vehicle, $slot, $slot);
+        $this->entityManager()->persist($run);
+        $this->entityManager()->flush();
+
+        $status = $this->process($this->slotMessage($slot, 3));
+
+        self::assertSame(SlotRunStatus::Retrying, $status);
+        self::assertContains('POST ' . self::VEHICLES . '/' . FleetApiResponses::VIN . '/wake_up', $this->requests);
+        $poll = $this->lastQueued();
+        self::assertSame($slot->getTimestamp(), $poll->slotTimestamp);
+        self::assertNotNull($poll->refreshId, 'The wake is recorded on a refresh, which the cap counts.');
+        self::assertSame(SlotRunStatus::Retrying, $this->statusOf($run));
+
+        // The car comes online: it is read, and the slot is settled.
+        $this->state = 'online';
+        self::mockTime('2026-10-27 20:00:10 UTC');
+
+        self::assertSame(SlotRunStatus::Stored, $this->process($poll));
+        self::assertSame(SlotRunStatus::Stored, $this->statusOf($run));
+        self::assertCount(1, $this->entityManager()->getRepository(OdometerReading::class)->findAll());
+    }
+
+    public function testASlotWhoseWakeTimesOutIsSkipped(): void
+    {
+        $this->app->changeWakeOnLastCheck(true);
+        $slot = CarbonImmutable::parse(self::NOW, 'UTC')->subHours(3);
+        $run = new FetchSlotRun($this->vehicle, $slot, $slot);
+        $this->entityManager()->persist($run);
+        $this->entityManager()->flush();
+        $this->process($this->slotMessage($slot, 3));
+        self::mockTime('2026-10-27 20:01:30 UTC');
+
+        self::assertSame(SlotRunStatus::Skipped, $this->process($this->lastQueued()));
+        self::assertSame(SlotRunStatus::Skipped, $this->statusOf($run));
+    }
+
+    public function testAnEarlierCheckOrAnOwnerWhoDidNotAllowItNeverWakes(): void
+    {
+        $slot = CarbonImmutable::parse(self::NOW, 'UTC')->subHours(3);
+        $this->entityManager()->persist(new FetchSlotRun($this->vehicle, $slot, $slot));
+        $this->entityManager()->flush();
+
+        // Allowed, but this is the third check of four.
+        $this->app->changeWakeOnLastCheck(true);
+        $this->process($this->slotMessage($slot, 2));
+        // The last check, but not allowed.
+        $this->app->changeWakeOnLastCheck(false);
+        $this->process($this->slotMessage($slot, 3));
+
+        foreach ($this->requests as $request) {
+            self::assertStringStartsWith('GET ', $request);
+        }
+    }
+
+    public function testTheDailyCapAlsoHoldsTheWakeOfTheLastCheck(): void
+    {
+        $this->app->changeWakeOnLastCheck(true);
+        $this->app->changeDailyWakeCap(1);
+        $this->wokeAgo(3600);
+        $slot = CarbonImmutable::parse(self::NOW, 'UTC')->subHours(3);
+        $run = new FetchSlotRun($this->vehicle, $slot, $slot);
+        $this->entityManager()->persist($run);
+        $this->entityManager()->flush();
+
+        self::assertSame(SlotRunStatus::Skipped, $this->process($this->slotMessage($slot, 3)));
+        self::assertSame(SlotRunStatus::Skipped, $this->statusOf($run));
+        self::assertSame([], $this->queued());
+    }
+
     public function testAManualRefreshWhileAWakeIsPendingIsBusy(): void
     {
         $waking = $this->newAttempt();
@@ -397,6 +470,18 @@ final class WakeFetchTest extends KernelTestCase
                 $allowWake,
             )
         );
+    }
+
+    private function slotMessage(CarbonImmutable $slot, int $attempt): FetchOdometerMessage
+    {
+        return new FetchOdometerMessage($this->vehicle->getId()->toRfc4122(), $slot->getTimestamp(), $attempt);
+    }
+
+    private function statusOf(FetchSlotRun $run): SlotRunStatus
+    {
+        $this->entityManager()->refresh($run);
+
+        return $run->getStatus();
     }
 
     private function process(FetchOdometerMessage $message): SlotRunStatus

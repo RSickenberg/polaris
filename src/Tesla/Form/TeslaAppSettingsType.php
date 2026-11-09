@@ -64,6 +64,11 @@ final class TeslaAppSettingsType extends AbstractType
                 'help' => 'form.wake_cap.help',
                 'attr' => ['min' => 0, 'max' => TeslaApp::MAX_DAILY_WAKE_CAP, 'inputmode' => 'numeric'],
             ])
+            ->add('wakeOnLastCheck', CheckboxType::class, [
+                'label' => 'form.wake_on_last_check.label',
+                'help' => 'form.wake_on_last_check.help',
+                'required' => false,
+            ])
             ->add('keepVehicleData', CheckboxType::class, [
                 'label' => 'form.keep_vehicle_data.label',
                 'help' => 'form.keep_vehicle_data.help',

@@ -258,6 +258,18 @@ final class TeslaSettingsControllerTest extends WebTestCase
         self::assertTrue($this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->keepsVehicleData());
     }
 
+    public function testWakingAtTheLastScheduledCheckIsOffByDefaultAndTheUserSwitchesItOn(): void
+    {
+        $this->createApp(self::signIn($this->client));
+        $this->client->request('GET', '/settings/tesla');
+        self::assertSelectorExists('input[type=checkbox][name="' . self::FORM . '[wakeOnLastCheck]"]:not([checked])');
+
+        $this->submit(['clientSecret' => self::SECRET, 'wakeOnLastCheck' => '1']);
+        self::assertResponseRedirects('/settings/tesla');
+        $this->entityManager->clear();
+        self::assertTrue($this->entityManager->getRepository(TeslaApp::class)->findOneBy([])?->wakesOnLastCheck());
+    }
+
     public function testAnEmptySecretKeepsTheStoredOne(): void
     {
         $user = self::signIn($this->client);

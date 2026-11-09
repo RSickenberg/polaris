@@ -53,15 +53,16 @@ final readonly class FetchOdometerMessage implements ReportsForVehicle
     }
 
     /**
-     * The same fetch once wake_up was sent: it now polls the state until the deadline.
+     * The same fetch once wake_up was sent: it now polls the state until the deadline. A scheduled fetch has no
+     * refresh yet: the one created for its wake is passed as $refreshId.
      */
-    public function wokenUntil(int $deadline): self
+    public function wokenUntil(int $deadline, ?string $refreshId = null): self
     {
         return new self(
             $this->vehicleId,
             $this->slotTimestamp,
             $this->attempt,
-            $this->refreshId,
+            $refreshId ?? $this->refreshId,
             $this->allowWake,
             $deadline
         );

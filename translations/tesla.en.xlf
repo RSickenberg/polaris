@@ -413,6 +413,14 @@ Also revoke the access in your Tesla account.</target>
         <target>Saves the full answer of each live read (battery, charge, climate, doors, never the location) for later features.
 Turning it off stops new copies, it deletes nothing.</target>
       </trans-unit>
+      <trans-unit id="form.wake_on_last_check.label">
+        <source>form.wake_on_last_check.label</source>
+        <target>Wake the car at the last scheduled check</target>
+      </trans-unit>
+      <trans-unit id="form.wake_on_last_check.help">
+        <source>form.wake_on_last_check.help</source>
+        <target>When the last check of a scheduled read (about 3 hours after the slot) still finds the car asleep or offline, Polaris wakes it once and reads it. It counts against the daily wake cap above, and Tesla bills each wake.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
