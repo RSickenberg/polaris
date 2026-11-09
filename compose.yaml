@@ -5,6 +5,8 @@
 #
 # Secrets (APP_SECRET, POSTGRES_PASSWORD) are never committed: put them in .env.local,
 # which every service reads when it exists, or set them in your own compose override.
+# DEFAULT_URI (the public address of the app) is set in .env.local too: Compose must not set it, since a value in
+# "environment" wins over env_file. Development sets it in compose.override.yaml.
 services:
   php:
     restart: unless-stopped
@@ -13,7 +15,6 @@ services:
         required: false
     environment:
       SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
-      DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}
       REDIS_URL: redis://redis:6379
       LOCK_DSN: redis://redis:6379
       MESSENGER_TRANSPORT_DSN: redis://redis:6379
@@ -48,7 +49,6 @@ services:
       - path: .env.local
         required: false
     environment:
-      DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}
       REDIS_URL: redis://redis:6379
       LOCK_DSN: redis://redis:6379
       MESSENGER_TRANSPORT_DSN: redis://redis:6379
