@@ -24,6 +24,7 @@ final class ComparisonPanelsMapperTest extends TestCase
             static fn (ComparisonWindow $window): WindowComparison => new WindowComparison(
                 $window,
                 ComparisonWindow::LastTwoWeeks === $window ? null : $comparison,
+                ComparisonWindow::Today === $window ? 2 : 0,
             ),
             ComparisonWindow::cases(),
         );
@@ -49,5 +50,7 @@ final class ComparisonPanelsMapperTest extends TestCase
         self::assertSame(5_000, $figures->delta->metres());
         self::assertSame(0.1, $figures->ratio);
         self::assertNull($panels->budget[2]->figures, 'No result stays no figures.');
+        self::assertSame(2, $panels->budget[0]->fallbackDays);
+        self::assertSame(0, $panels->budget[1]->fallbackDays);
     }
 }

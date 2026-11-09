@@ -2,6 +2,10 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
   <file source-language="en" target-language="en" datatype="plaintext" original="file.ext">
     <body>
+      <trans-unit id="compare.period.since_days">
+        <source>compare.period.since_days</source>
+        <target>{count, plural, one {Since yesterday} other {Since # days ago}}</target>
+      </trans-unit>
       <trans-unit id="progress.value_text">
         <source>progress.value_text</source>
         <target>{share, number, percent} of the allowance driven</target>
@@ -53,6 +57,10 @@
       <trans-unit id="risk.message.returned_over">
         <source>risk.message.returned_over</source>
         <target>Returned {excess} over: {cost} final cost.</target>
+      </trans-unit>
+      <trans-unit id="debug.rows">
+        <source>debug.rows</source>
+        <target>{shown, number} of {total, number} rows</target>
       </trans-unit>
     </body>
   </file>

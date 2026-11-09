@@ -13,6 +13,8 @@ final readonly class WindowComparison
         public ComparisonWindow $window,
         /** Null when there is no usable snapshot for the start of the window ("not enough history"). */
         public ?Comparison $comparison,
+        /** How many days before its usual start the window really starts: 0 unless "today" fell back (see the comparer). */
+        public int $fallbackDays = 0,
     ) {
     }
 }

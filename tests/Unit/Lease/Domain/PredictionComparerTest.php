@@ -120,6 +120,52 @@ final class PredictionComparerTest extends TestCase
         self::assertSame([25_000, 25_000, 0], $this->figures($comparison->budget[0]));
     }
 
+    public function testTodayWithoutASnapshotOfItsOwnDayFallsBackOnTheLatestEarlierOneAndSaysByHowManyDays(): void
+    {
+        // 2026-07-10 12:00 UTC: today has no snapshot, nor has the 9th; the 8th does, and so does an older one.
+        $latest = '2026-07-10 12:00:00';
+
+        $comparison = $this->compare($latest, 36_000_000, [
+            '2026-07-08' => self::snapshot(36_500_000, 90_000, 80_000.0),
+            '2026-07-01' => self::snapshot(1, 1, 1.0),
+        ]);
+
+        // Measured from the midnight of the 8th: 2.5 days, 250,000 m driven; 90,000 m a day expects 225,000 m.
+        self::assertSame([250_000, 225_000, 25_000], $this->figures($comparison->budget[0]));
+        self::assertSame(2, $comparison->budget[0]->fallbackDays);
+        // 80,000 m a day over 2.5 days expects 200,000 m.
+        self::assertSame([250_000, 200_000, 50_000], $this->figures($comparison->pace[0]));
+        self::assertSame(2, $comparison->pace[0]->fallbackDays);
+        // The projection of the 8th, not of the 1st.
+        self::assertSame([36_000_000, 36_500_000, -500_000], $this->figures($comparison->projectedEnd[0]));
+        self::assertSame(2, $comparison->projectedEnd[0]->fallbackDays);
+    }
+
+    public function testTodayKeepsItsOwnSnapshotWhenThereIsOneAndTheOtherWindowsNeverFallBack(): void
+    {
+        $latest = '2026-07-10 12:00:00';
+
+        $comparison = $this->compare($latest, 36_000_000, [
+            '2026-07-10' => self::snapshot(36_000_000, 100_000, null),
+            // 8 days before: not the 7 day window's day (the 3rd), so it must not stand in for it.
+            '2026-07-02' => self::snapshot(36_000_000, 100_000, null),
+        ]);
+
+        self::assertSame(0, $comparison->budget[0]->fallbackDays);
+        self::assertNotNull($comparison->budget[0]->comparison);
+        self::assertNull($comparison->budget[1]->comparison);
+        self::assertSame(0, $comparison->budget[1]->fallbackDays);
+    }
+
+    public function testTodayHasNoResultWhenNoSnapshotIsOlderThanIt(): void
+    {
+        // Only a later snapshot exists: nothing to fall back on.
+        $comparison = $this->compare('2026-07-10 12:00:00', 1, ['2026-07-12' => self::snapshot(1, 1, null)]);
+
+        self::assertNull($comparison->budget[0]->comparison);
+        self::assertSame(0, $comparison->budget[0]->fallbackDays);
+    }
+
     /**
      * A snapshot that expects exactly what the car drives gives a delta of zero in every window only if the windows
      * start at the owner's real midnights, whatever the zone or daylight saving.
