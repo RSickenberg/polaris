@@ -9,6 +9,8 @@ use Doctrine\ORM\Exception\ORMException;
 use Polaris\Account\Entity\User;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
+use Polaris\Vehicle\Service\Exception\VehicleLimitReached;
+use Polaris\Vehicle\Service\VehicleQuota;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
@@ -22,8 +24,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'polaris:vehicle:add', description: 'Add a vehicle by its VIN')]
 final readonly class AddVehicleCommand
 {
-    public function __construct(private EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        private VehicleQuota $quota,
+    ) {
     }
 
     /**
@@ -64,6 +68,14 @@ final readonly class AddVehicleCommand
 
         if (null !== $vehicles->findOneBy(['vin' => $vehicle->getVin()->value()])) {
             $io->error('A vehicle with this VIN already exists.');
+
+            return Command::FAILURE;
+        }
+
+        try {
+            $this->quota->assertCanAdd($owner);
+        } catch (VehicleLimitReached $limit) {
+            $io->error($limit->getMessage());
 
             return Command::FAILURE;
         }

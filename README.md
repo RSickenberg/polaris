@@ -179,6 +179,8 @@ make sf ARGS="polaris:vehicle:add <VIN> 'Model 3'"   # add one by hand
 
 Only your account's vehicle list is read; no car is contacted.
 
+A self-hosted Polaris tracks **one vehicle**. If your Tesla account lists several, pick one (`--vin=` on the command, one box on the page); a second one is refused. Vehicles you already added are kept.
+
 ### 8. Choose when the odometer is read (optional)
 
 By default once a day at 21:00 in your time zone. Set one or two times (`HH:MM`, 24 h); without arguments the command shows the current ones:

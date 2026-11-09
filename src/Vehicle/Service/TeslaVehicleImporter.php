@@ -15,12 +15,13 @@ use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Polaris\Vehicle\Service\Dto\ImportCandidate;
 use Polaris\Vehicle\Service\Dto\ImportResult;
+use Polaris\Vehicle\Service\Exception\VehicleLimitReached;
 
 /**
  * Lists the vehicles of the Tesla account of a user and creates the ones Polaris does not have yet. The
  * listing is read from Tesla every time, also when importing: what the caller asks for is only a choice
  * among the vehicles Tesla returned, never data to trust. It reads the list (first page) and nothing else:
- * it does not touch the cars.
+ * it does not touch the cars. The vehicle limit of the owner ({@see VehicleQuota}) applies to what is added.
  */
 final readonly class TeslaVehicleImporter
 {
@@ -28,6 +29,7 @@ final readonly class TeslaVehicleImporter
         private EntityManagerInterface $entityManager,
         private TeslaAppSettings $teslaApps,
         private VehicleClient $tesla,
+        private VehicleQuota $quota,
     ) {
     }
 
@@ -56,12 +58,13 @@ final readonly class TeslaVehicleImporter
      *
      * @throws TeslaNotConnected
      * @throws FleetApiError
+     * @throws VehicleLimitReached when the vehicles to add are more than the owner may still have: nothing is added
      * @throws ORMException
      */
     public function import(User $owner, ?array $only = null): ImportResult
     {
         $wanted = null === $only ? null : array_map(static fn (Vin $vin): string => $vin->value(), $only);
-        $added = [];
+        $toAdd = [];
         $alreadyAdded = 0;
 
         foreach ($this->candidates($owner) as $candidate) {
@@ -75,6 +78,13 @@ final readonly class TeslaVehicleImporter
                 continue;
             }
 
+            $toAdd[] = $candidate;
+        }
+
+        $this->quota->assertCanAdd($owner, \count($toAdd));
+        $added = [];
+
+        foreach ($toAdd as $candidate) {
             $vehicle = new Vehicle($candidate->summary->vin, $candidate->name(), $owner);
             $this->entityManager->persist($vehicle);
             $added[] = $vehicle;

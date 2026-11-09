@@ -7,6 +7,7 @@ namespace Polaris\Tests\Functional\Vehicle;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Polaris\Tests\Support\FleetApiResponses;
+use Polaris\Tests\Support\LiftsVehicleLimit;
 use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Command\AddVehicleCommand;
 use Polaris\Vehicle\Entity\Vehicle;
@@ -18,6 +19,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 #[CoversClass(AddVehicleCommand::class)]
 final class AddVehicleCommandTest extends KernelTestCase
 {
+    use LiftsVehicleLimit;
     use SignsIn;
 
     public function testFailsWithoutAUser(): void
@@ -90,9 +92,42 @@ final class AddVehicleCommandTest extends KernelTestCase
         self::assertStringContainsString('already exists', $tester->getDisplay());
     }
 
+    public function testRefusesASecondVehicleOnASelfHostedInstance(): void
+    {
+        $tester = $this->tester();
+        self::createUser();
+        self::assertSame(Command::SUCCESS, $tester->execute(['vin' => FleetApiResponses::VIN, 'name' => 'Model 3']));
+
+        self::assertSame(
+            Command::FAILURE,
+            $tester->execute(['vin' => FleetApiResponses::OTHER_VIN, 'name' => 'Model Y']),
+        );
+
+        self::assertStringContainsString('single vehicle', $tester->getDisplay());
+        self::assertCount(
+            1,
+            self::getContainer()->get(EntityManagerInterface::class)->getRepository(Vehicle::class)->findAll(),
+        );
+    }
+
+    public function testAReplacedPolicyLetsTheOwnerAddMore(): void
+    {
+        self::bootKernel();
+        $this->liftVehicleLimit();
+        $tester = $this->tester();
+        self::createUser();
+
+        self::assertSame(Command::SUCCESS, $tester->execute(['vin' => FleetApiResponses::VIN, 'name' => 'Model 3']));
+        self::assertSame(
+            Command::SUCCESS,
+            $tester->execute(['vin' => FleetApiResponses::OTHER_VIN, 'name' => 'Model Y']),
+        );
+    }
+
     private function tester(): CommandTester
     {
-        $kernel = self::bootKernel();
+        // A test that replaced a service has booted the kernel already: keep that container.
+        $kernel = self::$booted ? self::getContainer()->get('kernel') : self::bootKernel();
 
         return new CommandTester(new Application($kernel)->find('polaris:vehicle:add'));
     }

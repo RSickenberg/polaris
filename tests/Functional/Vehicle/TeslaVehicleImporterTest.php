@@ -11,11 +11,13 @@ use Polaris\Account\Entity\User;
 use Polaris\Tesla\Service\Exception\FleetApiError;
 use Polaris\Tesla\Service\Exception\TeslaNotConnected;
 use Polaris\Tests\Support\FleetApiResponses;
+use Polaris\Tests\Support\LiftsVehicleLimit;
 use Polaris\Tests\Support\SignsIn;
 use Polaris\Tests\Support\TeslaFixtures;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
 use Polaris\Vehicle\Service\Dto\ImportCandidate;
+use Polaris\Vehicle\Service\Exception\VehicleLimitReached;
 use Polaris\Vehicle\Service\TeslaVehicleImporter;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
@@ -25,6 +27,7 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 #[CoversClass(ImportCandidate::class)]
 final class TeslaVehicleImporterTest extends KernelTestCase
 {
+    use LiftsVehicleLimit;
     use SignsIn;
     use TeslaFixtures;
 
@@ -53,6 +56,7 @@ final class TeslaVehicleImporterTest extends KernelTestCase
 
     public function testImportsEveryNewVehicleForTheUser(): void
     {
+        $this->liftVehicleLimit();
         $this->connect();
 
         $result = self::importer()->import($this->owner);
@@ -64,6 +68,38 @@ final class TeslaVehicleImporterTest extends KernelTestCase
             ['name' => 'ASC'],
         );
         self::assertSame(['Lucia', 'Raven'], array_map(static fn (Vehicle $v): string => $v->getName(), $vehicles));
+    }
+
+    public function testSelfHostedImportsNothingWhenTheListIsLongerThanTheLimit(): void
+    {
+        $this->connect();
+
+        try {
+            self::importer()->import($this->owner);
+            self::fail('Expected VehicleLimitReached.');
+        } catch (VehicleLimitReached $limit) {
+            self::assertSame(1, $limit->limit);
+            self::assertSame([], self::entityManager()->getRepository(Vehicle::class)->findAll());
+        }
+    }
+
+    public function testSelfHostedImportsTheOneVehicleThatWasPicked(): void
+    {
+        $this->connect();
+
+        $result = self::importer()->import($this->owner, [new Vin(FleetApiResponses::OTHER_VIN)]);
+
+        self::assertCount(1, $result->added);
+    }
+
+    public function testNothingIsImportedOnceTheOwnerIsAtTheLimit(): void
+    {
+        $this->connect();
+        $this->add(FleetApiResponses::VIN, 'Mine');
+
+        $this->expectException(VehicleLimitReached::class);
+
+        self::importer()->import($this->owner, [new Vin(FleetApiResponses::OTHER_VIN)]);
     }
 
     public function testImportsOnlyTheAskedVinsAndNeverTwiceTheSameOne(): void

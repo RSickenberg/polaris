@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Polaris\Account\Entity\User;
 use Polaris\Tests\Support\FleetApiResponses;
+use Polaris\Tests\Support\LiftsVehicleLimit;
 use Polaris\Tests\Support\SignsIn;
 use Polaris\Tests\Support\TeslaFixtures;
 use Polaris\Vehicle\Controller\VehicleImportController;
@@ -23,11 +24,13 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 #[CoversClass(VehicleImportController::class)]
 final class VehicleImportControllerTest extends WebTestCase
 {
+    use LiftsVehicleLimit;
     use SignsIn;
     use TeslaFixtures;
 
     private KernelBrowser $client;
     private User $user;
+    private MockHttpClient $tesla;
 
     protected function setUp(): void
     {
@@ -58,6 +61,7 @@ final class VehicleImportControllerTest extends WebTestCase
 
     public function testTheNewVehiclesOfTheAccountAreListedAndTheOnesAlreadyAddedAreNot(): void
     {
+        $this->liftVehicleLimit();
         $this->connect();
         $this->add(FleetApiResponses::VIN, 'Mine');
 
@@ -89,6 +93,40 @@ final class VehicleImportControllerTest extends WebTestCase
         self::assertSelectorExists('[data-flash="success"]');
         self::assertSelectorTextContains('[data-flash="success"]', '1 vehicle imported');
         self::assertSelectorTextContains('main', 'Raven');
+    }
+
+    public function testAnOwnerAtTheLimitIsToldSoWithoutAskingTesla(): void
+    {
+        $this->connect();
+        $this->add(FleetApiResponses::VIN, 'Mine');
+
+        $this->client->request('GET', '/vehicles/import');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('[data-import-status="limit_reached"]');
+        self::assertSame(0, $this->tesla->getRequestsCount());
+    }
+
+    public function testMoreVehiclesThanTheLimitAreRefusedAndNothingIsImported(): void
+    {
+        $this->connect(2);
+        $crawler = $this->client->request('GET', '/vehicles/import');
+
+        $form = $crawler->selectButton('Import selected vehicles')->form();
+        foreach (['vehicle_import[vins][0]', 'vehicle_import[vins][1]'] as $name) {
+            $box = $form->get($name);
+            self::assertInstanceOf(ChoiceFormField::class, $box);
+            $box->tick();
+        }
+        $this->client->submit($form);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorExists('[data-flash="danger"]');
+        self::assertSelectorTextContains('[data-flash="danger"]', 'you can have 1 vehicle here');
+        self::assertSame(
+            [],
+            self::getContainer()->get(EntityManagerInterface::class)->getRepository(Vehicle::class)->findAll(),
+        );
     }
 
     public function testNothingTickedIsRefused(): void
@@ -123,6 +161,7 @@ final class VehicleImportControllerTest extends WebTestCase
 
     public function testWhenEverythingIsAlreadyThereItSaysSo(): void
     {
+        $this->liftVehicleLimit();
         $this->connect();
         $this->add(FleetApiResponses::VIN, 'A');
         $this->add(FleetApiResponses::OTHER_VIN, 'B');
@@ -155,16 +194,14 @@ final class VehicleImportControllerTest extends WebTestCase
     {
         $app = self::createConfiguredApp($this->user);
         self::createToken($app, CarbonImmutable::now()->addHours(2));
-        self::getContainer()->set(
-            'http_client',
-            new MockHttpClient(
-                array_fill(
-                    0,
-                    $responses * 2,
-                    new MockResponse(FleetApiResponses::vehicleList(), ['http_code' => $status]),
-                )
-            ),
+        $this->tesla = new MockHttpClient(
+            array_fill(
+                0,
+                $responses * 2,
+                new MockResponse(FleetApiResponses::vehicleList(), ['http_code' => $status]),
+            )
         );
+        self::getContainer()->set('http_client', $this->tesla);
     }
 
     private function add(string $vin, string $name): void
