@@ -68,7 +68,7 @@
       </trans-unit>
       <trans-unit id="ended.text">
         <source>ended.text</source>
-        <target>Le leasing est terminé. Chiffres définitifs.</target>
+        <target>Le leasing est terminé. Les chiffres sont définitifs.</target>
       </trans-unit>
       <trans-unit id="ended.cta">
         <source>ended.cta</source>
