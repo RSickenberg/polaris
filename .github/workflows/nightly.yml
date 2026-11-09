@@ -1,0 +1,52 @@
+name: Nightly
+
+# Builds the tip of the dev branch every night and pushes it to GHCR as
+# ghcr.io/rsickenberg/polaris:nightly. Each build overwrites the tag of the one before,
+# so nightly always is the latest dev. It is a beta: the stable image is <version> / latest,
+# built from main when a release is cut (release.yml).
+#
+# A scheduled workflow runs from the default branch, so this file must be on main; it
+# checks out dev itself.
+on:
+  schedule:
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+jobs:
+  # A night without a new commit on dev builds nothing. A manual run always builds.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: dev
+          persist-credentials: false
+
+      - name: Look for a commit of the last 25 hours
+        id: check
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] || [ -n "$(git log -1 --since='25 hours ago' --format=%H)" ]; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=false" >> "$GITHUB_OUTPUT"
+            echo "No commit on dev in the last 25 hours: nothing to build."
+          fi
+
+  image:
+    needs: changes
+    if: needs.changes.outputs.build == 'true'
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/docker.yml
+    with:
+      nightly: true
