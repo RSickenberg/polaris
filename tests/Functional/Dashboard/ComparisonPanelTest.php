@@ -31,6 +31,17 @@ final class ComparisonPanelTest extends KernelTestCase
         self::assertSame('+11%', $this->text($today->filter('[data-figure=ratio]')));
     }
 
+    public function testTheGapIsAGreenPillWhenItIsNotMoreThanExpectedAndARedOneWhenItIs(): void
+    {
+        $panel = $this->panel('en');
+
+        // Today +5 km and two weeks +3 km are more than expected; week -2 km and month 0 km are not.
+        self::assertSame('bad', $panel->filter('[data-period=today] [data-figure=delta]')->attr('data-tone'));
+        self::assertSame('bad', $panel->filter('[data-period=two_weeks] [data-figure=delta]')->attr('data-tone'));
+        self::assertSame('good', $panel->filter('[data-period=week] [data-figure=delta]')->attr('data-tone'));
+        self::assertSame('good', $panel->filter('[data-period=month] [data-figure=delta]')->attr('data-tone'));
+    }
+
     public function testALessThanExpectedRowHasAMinusAndAZeroRowNoSign(): void
     {
         $panel = $this->panel('en');

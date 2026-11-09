@@ -10,7 +10,7 @@
     ## string|null The translated explanation of the panel, shown in a dialog behind an info button.
     help = null
 -%}
-{# A card with one row per period: the period with the two figures under it (what happened, what was expected), and the gap on the right, as large as the period. A positive gap is more than expected. Only the digits are monospaced. Before any period has history (the first days after deploy), one line says so instead of four empty rows. #}
+{# A card with one row per period: the period with the two figures under it (what happened, what was expected), and the gap on the right, as large as the period. A positive gap is more than expected: the gap is a red pill, and a gap of zero or less a green one. Only the digits are monospaced. Before any period has history (the first days after deploy), one line says so instead of four empty rows. #}
 {% set withHistory = rows|filter(row => row.figures is not null)|length > 0 %}
 {% set unit = 'unit.km'|trans(domain='shared') %}
 <twig:Card data-comparison="{{ key }}" {{ ...attributes }}>
@@ -44,7 +44,7 @@
                                     {% if row.fallbackDays > 0 %}
                                         <span class="block" data-fallback-days="{{ row.fallbackDays }}">{{ 'compare.period.since_days'|trans({count: row.fallbackDays}, domain='dashboard') }}</span>
                                     {% else %}
-                                        <span class="block">{{ ('compare.period.' ~ row.period.value)|trans(domain='dashboard') }}</span>
+                                        <span class="block{{ figures is null ? ' text-muted-foreground' : '' }}">{{ ('compare.period.' ~ row.period.value)|trans(domain='dashboard') }}</span>
                                     {% endif %}
                                     {% if figures is not null %}
                                         <span class="mt-1 block text-xs text-muted-foreground" data-figure="figures">
@@ -55,7 +55,7 @@
                                     {% endif %}
                                 </twig:Table:Cell>
                                 {% if figures is null %}
-                                    <twig:Table:Cell class="py-3 ps-2 pe-4 whitespace-normal text-end text-muted-foreground" data-no-history>{{ 'compare.no_history'|trans(domain='dashboard') }}</twig:Table:Cell>
+                                    <twig:Table:Cell class="py-3 ps-2 pe-4 whitespace-normal text-end text-sm text-muted-foreground/70" data-no-history>{{ 'compare.no_history'|trans(domain='dashboard') }}</twig:Table:Cell>
                                 {% else %}
                                     {% set sign = '' %}
                                     {% if figures.delta.isNegative %}
@@ -63,13 +63,29 @@
                                     {% elseif figures.delta.metres > 0 %}
                                         {% set sign = '+' %}
                                     {% endif %}
+                                    {# Every panel compares a distance driven or projected: more than expected is bad news (red), the same or less is good news (green). #}
+                                    {% set good = figures.delta.metres <= 0 %}
+                                    {% set tone = good ? 'border-success/30 bg-success-surface text-success-foreground' : 'border-danger/30 bg-danger-surface text-danger-foreground' %}
+                                    {# The arrow says it too, so the colour is never alone: down is under the expectation, up is over it, a dash is on it. #}
+                                    {% set trend = 'lucide:minus' %}
+                                    {% if figures.delta.isNegative %}
+                                        {% set trend = 'lucide:trending-down' %}
+                                    {% elseif figures.delta.metres > 0 %}
+                                        {% set trend = 'lucide:trending-up' %}
+                                    {% endif %}
                                     <twig:Table:Cell class="py-3 ps-2 pe-4 whitespace-normal text-end">
-                                        <span class="block text-base font-medium" data-figure="delta">
-                                            <span class="font-mono">{{ sign }}{{ figures.delta.absolute|km }}</span> {{ unit }}
-                                        </span>
-                                        {% if figures.ratio is not null %}
-                                            <span class="mt-1 block text-xs text-muted-foreground" data-figure="ratio">{{ sign }}{{ figures.ratio|abs|percent }}</span>
-                                        {% endif %}
+                                        <twig:Badge
+                                            variant="outline"
+                                            class="h-7 gap-1.5 px-3 text-sm font-semibold {{ tone }}"
+                                        >
+                                            <twig:ux:icon :name="trend" aria-hidden="true" />
+                                            <span data-figure="delta" data-tone="{{ good ? 'good' : 'bad' }}"><span class="font-mono">{{ sign }}{{ figures.delta.absolute|km }}</span> {{ unit }}</span>
+                                            {# The gap as a share of what was expected, after a thin vertical rule. #}
+                                            {% if figures.ratio is not null %}
+                                                <span class="h-3.5 w-px bg-current opacity-30" aria-hidden="true"></span>
+                                                <span class="font-mono font-medium opacity-80" data-figure="ratio">{{ sign }}{{ figures.ratio|abs|percent }}</span>
+                                            {% endif %}
+                                        </twig:Badge>
                                     </twig:Table:Cell>
                                 {% endif %}
                             </twig:Table:Row>
