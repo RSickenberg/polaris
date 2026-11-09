@@ -98,6 +98,10 @@
         <source>nav.vehicles</source>
         <target>Mes véhicules</target>
       </trans-unit>
+      <trans-unit id="nav.version">
+        <source>nav.version</source>
+        <target>Version</target>
+      </trans-unit>
       <trans-unit id="nav.home_label">
         <source>nav.home_label</source>
         <target>Navigation de l’accueil</target>
