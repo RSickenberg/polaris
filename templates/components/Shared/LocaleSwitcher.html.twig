@@ -5,12 +5,12 @@
             <twig:ux:icon name="lucide:languages" class="size-4" aria-hidden="true" />
         </twig:Button>
     </twig:DropdownMenu:Trigger>
-    <twig:DropdownMenu:Content class="w-40">
+    <twig:DropdownMenu:Content class="flex w-40 flex-col gap-1 p-1.5">
         <twig:DropdownMenu:Label>{{ 'locale.label'|trans(domain='shared') }}</twig:DropdownMenu:Label>
         <twig:DropdownMenu:Separator />
         {% for locale in enabled_locales %}
             {# A full page load, so that <html lang> and every translation follow the new locale. #}
-            <twig:DropdownMenu:Item as="a" href="{{ path('shared_locale', {locale: locale, redirect: app.request.requestUri}) }}" lang="{{ locale }}" data-turbo="false" aria-current="{{ app.locale == locale ? 'true' : 'false' }}">
+            <twig:DropdownMenu:Item as="a" class="py-2" href="{{ path('shared_locale', {locale: locale, redirect: app.request.requestUri}) }}" lang="{{ locale }}" data-turbo="false" aria-current="{{ app.locale == locale ? 'true' : 'false' }}">
                 {{ ('locale.' ~ locale)|trans(domain='shared') }}
                 {% if app.locale == locale %}
                     <twig:ux:icon name="lucide:check" class="ms-auto size-4" aria-hidden="true" />
