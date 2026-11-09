@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Polaris\Fetching\Message;
 
+use Polaris\Shared\Reporting\ReportsHeartbeat;
+
 /**
  * The tick of the scheduler: queues a {@see FetchOdometerMessage} for every slot that is due.
  */
-final readonly class DispatchDueFetches
+final readonly class DispatchDueFetches implements ReportsHeartbeat
 {
 }

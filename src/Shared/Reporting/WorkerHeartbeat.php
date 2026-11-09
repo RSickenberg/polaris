@@ -20,11 +20,13 @@ use Symfony\Component\Scheduler\Messenger\ScheduledStamp;
 /**
  * Tells Sentry Crons that the scheduler tick of this instance ran, so that a worker that died, hung or cannot reach its
  * database raises a "missed" or "failed" alert instead of staying silent. Only messages that come out of the scheduler
- * count (they carry a {@see ScheduledStamp}), one monitor per message class.
+ * count (they carry a {@see ScheduledStamp}), and only the fetch tick: both ticks run in the same worker, so one
+ * monitor is enough to see it die, and Sentry bills every monitor (the free plan includes one).
  *
- * It follows the instance switch like the scheduler errors do: without a DSN (`POLARIS_ERROR_REPORTING` off, or a
- * `maintainer` image built without a DSN) nothing is sent. A tick belongs to no user, so there is no user choice to
- * apply, and a check-in carries only a monitor slug, a status and a duration.
+ * It is sent only to the owner's own Sentry project (`POLARIS_ERROR_REPORTING=custom`): every instance gets its own
+ * monitor, and Sentry bills each one, so the maintainer's project would pay for every install. With `maintainer`, `off`
+ * or without a DSN nothing is sent. A tick belongs to no user, so there is no user choice to apply, and a check-in
+ * carries only a monitor slug, a status and a duration.
  *
  * The slug holds an instance id, `hash_hmac` of the app secret: stable, the same for every tick of an instance, and it
  * names neither the host nor the secret. Several instances reporting to one Sentry project each get their own monitors.
@@ -44,6 +46,8 @@ final class WorkerHeartbeat
         private readonly HubInterface $hub,
         #[Autowire('%kernel.secret%')]
         private readonly string $secret,
+        #[Autowire('%env(POLARIS_ERROR_REPORTING)%')]
+        private readonly string $reportingSwitch,
     ) {
     }
 
@@ -97,12 +101,14 @@ final class WorkerHeartbeat
 
     private function isScheduled(Envelope $envelope): bool
     {
-        return null !== $envelope->last(ScheduledStamp::class);
+        return null !== $envelope->last(ScheduledStamp::class)
+            && $envelope->getMessage() instanceof ReportsHeartbeat;
     }
 
     private function isReporting(): bool
     {
-        return null !== $this->hub->getClient()?->getOptions()->getDsn();
+        return ErrorReportingMode::Custom === ErrorReportingMode::fromSwitch($this->reportingSwitch)
+            && null !== $this->hub->getClient()?->getOptions()->getDsn();
     }
 
     private function slug(object $message): string
