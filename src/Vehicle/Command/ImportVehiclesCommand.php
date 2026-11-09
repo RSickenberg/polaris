@@ -10,6 +10,7 @@ use Polaris\Tesla\Service\Exception\FleetApiError;
 use Polaris\Tesla\Service\Exception\TeslaNotConnected;
 use Polaris\Tesla\Service\TeslaOwnerFinder;
 use Polaris\Vehicle\Domain\Vin;
+use Polaris\Vehicle\Service\Exception\VehicleLimitReached;
 use Polaris\Vehicle\Service\TeslaVehicleImporter;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
@@ -74,6 +75,10 @@ final readonly class ImportVehiclesCommand
             $io->error($invalid->getMessage());
 
             return Command::INVALID;
+        } catch (VehicleLimitReached $limit) {
+            $io->error($limit->getMessage() . ' Nothing was added. Pick the vehicle with --vin.');
+
+            return Command::FAILURE;
         } catch (TeslaNotConnected $notConnected) {
             $io->error($notConnected->getMessage() . ' Connect Tesla first (see the README).');
 

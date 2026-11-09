@@ -10,6 +10,10 @@
         <source>flash.data_imported</source>
         <target>Import done. Lease: {lease, select, created {created from the file} kept {the vehicle already has one, kept} other {none in the file}}. Readings: {readingsAdded, number} added, {readingsAlreadyThere, number} already there, {readingsRejected, number} refused. Snapshots: {snapshotsAdded, number} added, {snapshotsAlreadyThere, number} already there, {snapshotsSkipped, number} left out.</target>
       </trans-unit>
+      <trans-unit id="flash.limit_reached">
+        <source>flash.limit_reached</source>
+        <target>Nothing imported: you can have {limit, plural, one {# vehicle} other {# vehicles}} here. Tick fewer vehicles.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
