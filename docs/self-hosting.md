@@ -102,7 +102,7 @@ done
 Replace `<version>` in the URL too. The commands in this guide run from this folder.
 
 > [!IMPORTANT]
-> Pin a version and keep it in `.env` (next step). There is no `latest` tag until the first stable release. The `nightly` image is built every night from the `dev` branch and replaces itself: it can break, and its database migrations are not guaranteed to upgrade to the next release. Do not use it for data you care about.
+> Pin a version and keep it in `.env` (next step). There is no `latest` tag until the first stable release. The `latest-nightly` image is built every night from the `dev` branch and moves to each new build: it can break, and its database migrations are not guaranteed to upgrade to the next release. Do not use it for data you care about.
 
 ## 2. Configure
 
@@ -411,7 +411,7 @@ The `php` container applies the pending database migrations at start, all or non
 
 **Going back.** The migrations are not written to be undone, and the guide promises no downgrade. To return to an older version, restore the backup you took before the upgrade (see [Restore](#restore)) with the older `POLARIS_VERSION`.
 
-**Nightly.** The `nightly` image is a beta; its migrations may not upgrade to the next release. Use it with a database you can lose.
+**Nightly.** The `latest-nightly` image is a beta; its migrations may not upgrade to the next release. Use it with a database you can lose.
 
 ## Troubleshooting
 

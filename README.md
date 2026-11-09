@@ -49,7 +49,7 @@ Pick `<version>` (without the `v`) on the [releases page](https://github.com/RSi
 > [!IMPORTANT]
 > Back up `POLARIS_ENCRYPTION_KEY` apart from your database dumps and never change it once Tesla is connected: it encrypts the Tesla tokens, client secret and private key. See [Backups](docs/self-hosting.md#backups).
 
-**Nightly (beta).** `ghcr.io/rsickenberg/polaris:nightly` is built every night from the `dev` branch, when it got a new commit, and each build replaces the previous one. It can break and its database migrations are not guaranteed to be upgradable to the next release: use it to try what is coming, not for the data you care about. Stable installs pin a version tag.
+**Nightly (beta).** `ghcr.io/rsickenberg/polaris:latest-nightly` is built every night from the `dev` branch, when it got a new commit, and each build moves that tag to itself (`nightly-<commit>` tags stay). It can break and its database migrations are not guaranteed to be upgradable to the next release: use it to try what is coming, not for the data you care about. Stable installs pin a version tag.
 
 **Build from source:** `make start` (development, with the `Makefile`; see [Development](#development)).
 

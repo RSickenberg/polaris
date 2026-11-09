@@ -3,8 +3,8 @@ name: Docker
 # Builds the production image and pushes it to GHCR:
 # - from the commit a release tag points at, as <version> (no "v") and, for a stable
 #   release, latest;
-# - with "nightly", from the tip of the dev branch, as nightly only. Each nightly build
-#   overwrites the tag of the one before.
+# - with "nightly", from the tip of the dev branch, as nightly-<commit> (kept) and
+#   latest-nightly, which each nightly build moves to itself.
 #
 # Ways in, never both for one release:
 # - "release: published" covers a release published by hand in the GitHub UI.
@@ -98,9 +98,9 @@ jobs:
           images: ${{ env.IMAGE }}
           flavor: latest=false
           tags: |
-            type=raw,value=${{ steps.ref.outputs.version }},enable=${{ env.NIGHTLY != 'true' }}
+            type=raw,value=${{ steps.ref.outputs.version }}
             type=raw,value=latest,enable=${{ env.NIGHTLY != 'true' && env.PRERELEASE != 'true' }}
-            type=raw,value=nightly,enable=${{ env.NIGHTLY == 'true' }}
+            type=raw,value=latest-nightly,enable=${{ env.NIGHTLY == 'true' }}
           labels: |
             org.opencontainers.image.title=Polaris
             org.opencontainers.image.description=Tracks a Tesla's odometer against the lease allowance and warns before the limit.
