@@ -15,8 +15,17 @@
         <ini name="memory_limit" value="512M"/>
         <server name="APP_ENV" value="test" force="true"/>
         <server name="KERNEL_CLASS" value="Polaris\Kernel"/>
-        <!-- The tests are about the shipped default, whatever the install of the developer lifted in .env.local. -->
+        <!--
+            The tests are about the shipped defaults of .env. Compose loads .env.local into the php container as real
+            environment variables, which win over .env and .env.test: force the values the tests rely on, whatever the
+            install of the developer set there.
+        -->
         <env name="POLARIS_MANUAL_REFRESH_LIMIT" value="1" force="true"/>
+        <env name="POLARIS_KEY_HOSTING" value="polaris" force="true"/>
+        <env name="POLARIS_KEY_HOSTING_DIR" value="" force="true"/>
+        <env name="POLARIS_KEY_HOSTING_URL" value="" force="true"/>
+        <env name="POLARIS_TESLA_REDIRECT_URI" value="" force="true"/>
+        <env name="POLARIS_TESLA_REFRESH_MARGIN" value="600" force="true"/>
         <server name="SHELL_VERBOSITY" value="-1"/>
     </php>
 
