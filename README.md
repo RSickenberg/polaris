@@ -28,7 +28,7 @@ Requirements: Docker with Compose v2.24 or later.
 
 ### 1. Get the files
 
-Pick the latest version on the [releases page](https://github.com/RSickenberg/polaris/releases), for example `0.2.0`:
+Pick the latest version on the [releases page](https://github.com/RSickenberg/polaris/releases):
 
 ```bash
 git clone --branch v<version> --depth 1 https://github.com/RSickenberg/polaris.git
