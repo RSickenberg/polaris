@@ -270,6 +270,46 @@
         <source>help.compare_projected_end</source>
         <target>Votre projection de fin de leasing s’améliore-t-elle?\n\nPour chaque période, Polaris compare le total qu’il projette aujourd’hui pour la fin du leasing avec celui qu’il projetait au début de la période.\n\nComment lire une ligne : projeté maintenant / projeté alors, et l’écart à droite. Un plus veut dire que vous allez maintenant vers plus de kilomètres qu’avant; un moins, vers moins.\n\nPolaris enregistre sa projection une fois par jour, à minuit. Une ligne affiche « Historique insuffisant » tant que le jour où elle commence n’en a pas.</target>
       </trans-unit>
+      <trans-unit id="page.debug.title">
+        <source>page.debug.title</source>
+        <target>Données de débogage</target>
+      </trans-unit>
+      <trans-unit id="debug.intro">
+        <source>debug.intro</source>
+        <target>Les lignes brutes telles que stockées, les plus récentes d’abord, pour les versions de développement et nocturnes. Cette page n’existe pas dans une version publiée. Les mots de passe, clés et jetons Tesla ne sont jamais affichés.</target>
+      </trans-unit>
+      <trans-unit id="debug.runtime_title">
+        <source>debug.runtime_title</source>
+        <target>Version installée</target>
+      </trans-unit>
+      <trans-unit id="debug.runtime.version">
+        <source>debug.runtime.version</source>
+        <target>Version</target>
+      </trans-unit>
+      <trans-unit id="debug.runtime.environment">
+        <source>debug.runtime.environment</source>
+        <target>Environnement</target>
+      </trans-unit>
+      <trans-unit id="debug.runtime.symfony">
+        <source>debug.runtime.symfony</source>
+        <target>Symfony</target>
+      </trans-unit>
+      <trans-unit id="debug.runtime.php">
+        <source>debug.runtime.php</source>
+        <target>PHP</target>
+      </trans-unit>
+      <trans-unit id="debug.runtime.now">
+        <source>debug.runtime.now</source>
+        <target>Maintenant (UTC)</target>
+      </trans-unit>
+      <trans-unit id="debug.empty">
+        <source>debug.empty</source>
+        <target>Aucune ligne.</target>
+      </trans-unit>
+      <trans-unit id="debug.show">
+        <source>debug.show</source>
+        <target>Afficher</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

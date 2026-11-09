@@ -92,6 +92,12 @@
                         <twig:ux:icon name="lucide:key-round" aria-hidden="true" />
                         {{ 'account.tesla'|trans(domain='shared') }}
                     </twig:DropdownMenu:Item>
+                    {% if polaris_build.isPreview %}
+                        <twig:DropdownMenu:Item as="a" class="py-2" href="{{ path('dashboard_debug') }}" {{ ...('dashboard_debug' == route ? {'aria-current': 'page'} : {}) }}>
+                            <twig:ux:icon name="lucide:bug" aria-hidden="true" />
+                            {{ 'account.debug'|trans(domain='shared') }}
+                        </twig:DropdownMenu:Item>
+                    {% endif %}
                     <twig:DropdownMenu:Separator />
                     {# A full page load, so that the session ends and the next page is the login. #}
                     <twig:DropdownMenu:Item as="a" class="py-2" href="{{ logout_path() }}" data-turbo="false">

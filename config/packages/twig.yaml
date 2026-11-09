@@ -8,6 +8,8 @@ twig:
         # The pages that explain how secrets are handled link to the code.
         polaris_source_url: '%polaris.source_url%'
         # The version the image was built from (SENTRY_RELEASE), "dev" for a local build.
+        # Dev and nightly builds show the debug page.
+        polaris_build: '@Polaris\Dashboard\Service\PreviewBuild'
         polaris_version: '%env(default:polaris.version_fallback:SENTRY_RELEASE)%'
 
 when@test:

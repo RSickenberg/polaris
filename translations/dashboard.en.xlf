@@ -270,6 +270,46 @@
         <source>help.compare_projected_end</source>
         <target>Is your end-of-lease projection getting better or worse?\n\nFor each period, Polaris compares the total it projects today for the end of the lease with the total it projected when the period started.\n\nHow to read a row: projected now / projected then, and the difference on the right. A plus means you are now heading for more kilometres than before, a minus for fewer.\n\nPolaris records its projection once a day, at midnight. A row says “Not enough history” until the day it starts has one.</target>
       </trans-unit>
+      <trans-unit id="page.debug.title">
+        <source>page.debug.title</source>
+        <target>Debug data</target>
+      </trans-unit>
+      <trans-unit id="debug.intro">
+        <source>debug.intro</source>
+        <target>Raw rows as stored, newest first, for development and nightly builds. This page does not exist in a release. Passwords, Tesla keys and tokens are never shown.</target>
+      </trans-unit>
+      <trans-unit id="debug.runtime_title">
+        <source>debug.runtime_title</source>
+        <target>Build</target>
+      </trans-unit>
+      <trans-unit id="debug.runtime.version">
+        <source>debug.runtime.version</source>
+        <target>Version</target>
+      </trans-unit>
+      <trans-unit id="debug.runtime.environment">
+        <source>debug.runtime.environment</source>
+        <target>Environment</target>
+      </trans-unit>
+      <trans-unit id="debug.runtime.symfony">
+        <source>debug.runtime.symfony</source>
+        <target>Symfony</target>
+      </trans-unit>
+      <trans-unit id="debug.runtime.php">
+        <source>debug.runtime.php</source>
+        <target>PHP</target>
+      </trans-unit>
+      <trans-unit id="debug.runtime.now">
+        <source>debug.runtime.now</source>
+        <target>Now (UTC)</target>
+      </trans-unit>
+      <trans-unit id="debug.empty">
+        <source>debug.empty</source>
+        <target>No rows.</target>
+      </trans-unit>
+      <trans-unit id="debug.show">
+        <source>debug.show</source>
+        <target>Show</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

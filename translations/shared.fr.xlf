@@ -110,6 +110,10 @@
         <source>nav.data</source>
         <target>Données</target>
       </trans-unit>
+      <trans-unit id="account.debug">
+        <source>account.debug</source>
+        <target>Données de débogage</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
