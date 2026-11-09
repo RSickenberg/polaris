@@ -80,8 +80,12 @@ class TeslaApp
     #[ORM\Column(options: ['default' => true])]
     private bool $keepVehicleData = true;
 
-    public function __construct(User $owner, string $publicKey, string $encryptedPrivateKey, CarbonImmutable $generatedAt)
-    {
+    public function __construct(
+        User $owner,
+        string $publicKey,
+        string $encryptedPrivateKey,
+        CarbonImmutable $generatedAt,
+    ) {
         $this->id = new Ulid();
         $this->owner = $owner;
         $this->publicKey = $publicKey;
@@ -129,7 +133,9 @@ class TeslaApp
     public function changeDailyWakeCap(int $cap): void
     {
         if ($cap < 0 || $cap > self::MAX_DAILY_WAKE_CAP) {
-            throw new \InvalidArgumentException(\sprintf('The wake cap must be between 0 and %d.', self::MAX_DAILY_WAKE_CAP));
+            throw new \InvalidArgumentException(
+                \sprintf('The wake cap must be between 0 and %d.', self::MAX_DAILY_WAKE_CAP)
+            );
         }
 
         $this->dailyWakeCap = $cap;

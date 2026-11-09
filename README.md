@@ -16,8 +16,10 @@ Requirements: Docker with Compose v2.24 or later.
 
 ### 1. Get the files
 
+Pick the latest version on the [releases page](https://github.com/RSickenberg/polaris/releases), for example `0.2.0`:
+
 ```bash
-git clone --branch v0.1.0 --depth 1 https://github.com/RSickenberg/polaris.git
+git clone --branch v<version> --depth 1 https://github.com/RSickenberg/polaris.git
 cd polaris
 cp .env.example .env.local
 ```
@@ -43,7 +45,7 @@ The image carries the application, not the Compose setup, so take the files of t
 **Published image** (`linux/amd64` and `linux/arm64`, tag = version without the `v`). Pin a version rather than `latest`:
 
 ```bash
-export POLARIS_VERSION=0.1.0   # Compose reads it from the shell or .env, not .env.local
+export POLARIS_VERSION=<version>   # the same version, without the v; Compose reads it from the shell or .env, not .env.local
 docker compose -f compose.yaml -f compose.image.yaml pull
 docker compose -f compose.yaml -f compose.image.yaml up -d --wait
 ```
@@ -121,7 +123,7 @@ You are then asked for the client secret (hidden, or from stdin, never an argume
 - `--region`: `na` (North America and Asia-Pacific) or `eu` (Europe, Middle East and Africa). Repeat it for both. China is not supported.
 - `--email=you@example.com`: the owner of the app.
 
-The same settings are on the web, under **Tesla app** in the account menu (`/settings/tesla`). The client secret is write-only there; leave it empty to keep the stored one.
+The same settings are on the web, under **Tesla settings** in the account menu (`/settings/tesla`). The client secret is write-only there; leave it empty to keep the stored one.
 
 ### 5. Check, then register
 
@@ -178,7 +180,8 @@ The `worker` service does the reading and must be running. A scheduled read neve
 ## Use it
 
 1. **Enter the lease terms** on `/vehicles/{id}/lease`: start and end dates (whole months), allowance (per year or whole term, km or miles), odometer at start, excess cost per km (CHF, EUR, GBP, USD) and a tolerance (0 to 50 %). One contract per vehicle; saving overwrites it.
-2. **Read the dashboard** on `/vehicles/{id}`: risk level, share of the allowance driven, allowance to date, projection at lease end and budget per day, week and month. If a contract or reading is missing, it links to the page that fixes it.
+2. **Read the dashboard** on `/vehicles/{id}`: risk level, projection at lease end, distance driven, allowance to date, share of the allowance driven, the mileage chart and the budget per day, week and month. If a contract or reading is missing, it links to the page that fixes it.
+   - **Actual versus predicted**: while the lease runs, three panels compare today and the last 7, 14 and 30 days with what Polaris predicted at the start of each period (daily budget, pace, projected end). Polaris keeps one projection snapshot per day, taken at your midnight, so the rows fill in over the first month.
 3. **Add readings by hand** when needed, on `/vehicles/{id}/readings` (with the history) or:
 
    ```bash
@@ -187,6 +190,15 @@ The `worker` service does the reading and must be running. A scheduled read neve
    ```
 
    A value lower than the previous reading is rejected; a backfilled one must fit between its neighbours.
+4. **Give the car back** at the end: **Mark as returned** on the lease page (`/vehicles/{id}/lease`) freezes the figures at the last reading of that day and stops the odometer reads. You can undo it.
+5. **Save or move the data** of a vehicle on `/vehicles/{id}/data`: download one JSON file (lease, readings, daily snapshots; no VIN, no Tesla token) or import one into a vehicle (it only adds, never replaces). Or from the console:
+
+   ```bash
+   make sf ARGS="polaris:vehicle:data:export <VIN> --file=/tmp/model-3.json"
+   make sf ARGS="polaris:vehicle:data:import <VIN> /tmp/model-3.json"
+   ```
+
+   The daily snapshot runs by itself; `make sf ARGS="polaris:lease:snapshot"` takes it by hand for your latest midnight.
 
 **Settings** (`/settings`): email, language (follows your browser, English or French, until you pick one), time zone (dates are shown in it, stored in UTC) and password. Forgot your password? Use the link on the login page (needs the mailer settings).
 
@@ -293,11 +305,9 @@ Each CI check also runs alone: `make phpstan` (level max), `make cs` (dry run), 
 - **Schema:** only through Doctrine migrations in `migrations/`; the `php` container applies pending ones at start.
 - **Without Docker:** PHP 8.5 and Composer run the console and unit tests (`composer install`, `vendor/bin/phpunit tests/Unit`). Functional tests need PostgreSQL via `DATABASE_URL` in `.env.local`.
 
-### Repository layout and stack
+### Repository layout
 
-A standard Symfony application at the root (namespace `Polaris\`). `src/` is organized by feature module. The private hosted platform builds on this application's Docker image; nothing hosted-only lives here.
-
-Stack: Symfony 8.1, PHP 8.5, PostgreSQL 18 with Doctrine, Messenger and Lock on Redis, Twig, Carbon, Tailwind CSS 4 on AssetMapper with the Symfony UX Toolkit Shadcn kit (Stimulus, Turbo, Lucide icons), ApexCharts, Symfony Security, English and French, ULID identifiers. Planned: Redis as the cache.
+A standard Symfony application at the root (namespace `Polaris\`), with `src/` organized by feature module ([ADR 0001](docs/adr/0001-feature-modules.md)). The private hosted platform builds on this application's Docker image and plugs in through `src/Extension/`; nothing hosted-only lives here. The rules for contributors and coding agents are in [AGENTS.md](AGENTS.md), the decisions in [docs/adr](docs/adr).
 
 ## Related repositories
 

@@ -24,14 +24,19 @@ final readonly class VehicleDataRecorder
     }
 
     /**
-     * @param array<array-key, mixed> $payload the answer without its location, see {@see \Polaris\Tesla\Domain\VehicleDataRedactor}
+     * @param array<array-key, mixed> $payload the answer without its location, see
+     *                                         {@see \Polaris\Tesla\Domain\VehicleDataRedactor}
      *
      * @return bool whether a row was added
      *
      * @throws ORMException
      */
-    public function record(Vehicle $vehicle, CarbonImmutable $capturedAt, CarbonImmutable $receivedAt, array $payload): bool
-    {
+    public function record(
+        Vehicle $vehicle,
+        CarbonImmutable $capturedAt,
+        CarbonImmutable $receivedAt,
+        array $payload,
+    ): bool {
         if ([] === $payload || null !== $this->snapshots->findAt($vehicle, $capturedAt)) {
             return false;
         }

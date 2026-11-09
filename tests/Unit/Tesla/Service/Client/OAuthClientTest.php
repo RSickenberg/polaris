@@ -21,7 +21,8 @@ final class OAuthClientTest extends TestCase
     private const string CODE = 'fake-authorization-code';
     private const string REFRESH = 'fake-refresh-token';
     private const string REDIRECT = 'https://polaris.example.com/tesla/callback';
-    private const string TOKENS = '{"access_token":"fake-access","refresh_token":"fake-new-refresh","expires_in":28800,"token_type":"Bearer","scope":"openid offline_access vehicle_device_data"}';
+    private const string TOKENS = '{"access_token":"fake-access","refresh_token":"fake-new-refresh",'
+        . '"expires_in":28800,"token_type":"Bearer","scope":"openid offline_access vehicle_device_data"}';
 
     public function testTheAuthorizationUrlCarriesTheDocumentedParameters(): void
     {
@@ -44,13 +45,20 @@ final class OAuthClientTest extends TestCase
     public function testTheCodeExchangeSendsTheAudienceTheRedirectUriAndTheSecret(): void
     {
         $seen = null;
-        $client = new MockHttpClient(static function (string $method, string $url, array $options) use (&$seen): MockResponse {
+        $respond = static function (string $method, string $url, array $options) use (&$seen): MockResponse {
             $seen = [$method, $url, $options['body']];
 
             return new MockResponse(self::TOKENS);
-        });
+        };
+        $client = new MockHttpClient($respond);
 
-        $tokens = new OAuthClient($client)->exchangeCode(FleetRegion::EuropeMiddleEastAfrica, 'client-id', self::SECRET, self::CODE, self::REDIRECT);
+        $tokens = new OAuthClient($client)->exchangeCode(
+            FleetRegion::EuropeMiddleEastAfrica,
+            'client-id',
+            self::SECRET,
+            self::CODE,
+            self::REDIRECT,
+        );
 
         self::assertSame('fake-access', $tokens->accessToken);
         self::assertSame('fake-new-refresh', $tokens->refreshToken);
@@ -78,11 +86,12 @@ final class OAuthClientTest extends TestCase
     public function testTheRefreshSendsNoClientSecret(): void
     {
         $seen = null;
-        $client = new MockHttpClient(static function (string $method, string $url, array $options) use (&$seen): MockResponse {
+        $respond = static function (string $method, string $url, array $options) use (&$seen): MockResponse {
             $seen = [$url, $options['body']];
 
             return new MockResponse(self::TOKENS);
-        });
+        };
+        $client = new MockHttpClient($respond);
 
         new OAuthClient($client)->refresh(FleetRegion::NorthAmericaAsiaPacific, 'client-id', self::REFRESH);
 
@@ -91,7 +100,10 @@ final class OAuthClientTest extends TestCase
         self::assertIsString($body);
         self::assertSame('https://fleet-auth.prd.vn.cloud.tesla.com/oauth2/v3/token', $url);
         parse_str($body, $fields);
-        self::assertSame(['grant_type' => 'refresh_token', 'client_id' => 'client-id', 'refresh_token' => self::REFRESH], $fields);
+        self::assertSame(
+            ['grant_type' => 'refresh_token', 'client_id' => 'client-id', 'refresh_token' => self::REFRESH],
+            $fields,
+        );
     }
 
     public function testTheScopesDefaultToTheRequestedOnesWhenTeslaOmitsThem(): void
@@ -129,7 +141,11 @@ final class OAuthClientTest extends TestCase
             new MockResponse('', ['http_code' => 429]),
         ] as $response) {
             try {
-                new OAuthClient(new MockHttpClient($response))->refresh(FleetRegion::EuropeMiddleEastAfrica, 'client-id', self::REFRESH);
+                new OAuthClient(new MockHttpClient($response))->refresh(
+                    FleetRegion::EuropeMiddleEastAfrica,
+                    'client-id',
+                    self::REFRESH,
+                );
                 self::fail('The refresh should have failed.');
             } catch (FleetApiError $error) {
                 self::assertFalse($error->refreshTokenRejected());
@@ -139,7 +155,9 @@ final class OAuthClientTest extends TestCase
 
     public function testATransportFailureIsNotARefusedToken(): void
     {
-        $client = new MockHttpClient(static fn (): MockResponse => new MockResponse(info: ['error' => 'connection refused ' . self::REFRESH]));
+        $client = new MockHttpClient(
+            static fn (): MockResponse => new MockResponse(info: ['error' => 'connection refused ' . self::REFRESH])
+        );
 
         try {
             new OAuthClient($client)->refresh(FleetRegion::EuropeMiddleEastAfrica, 'client-id', self::REFRESH);
@@ -153,11 +171,19 @@ final class OAuthClientTest extends TestCase
 
     public function testNoSecretReachesAnErrorMessage(): void
     {
-        $body = (string) json_encode(['error' => 'invalid_request', 'error_description' => 'bad ' . self::CODE . ' ' . self::SECRET]);
+        $body = (string) json_encode(
+            ['error' => 'invalid_request', 'error_description' => 'bad ' . self::CODE . ' ' . self::SECRET]
+        );
         $client = new MockHttpClient(new MockResponse($body, ['http_code' => 400]));
 
         try {
-            new OAuthClient($client)->exchangeCode(FleetRegion::EuropeMiddleEastAfrica, 'client-id', self::SECRET, self::CODE, self::REDIRECT);
+            new OAuthClient($client)->exchangeCode(
+                FleetRegion::EuropeMiddleEastAfrica,
+                'client-id',
+                self::SECRET,
+                self::CODE,
+                self::REDIRECT,
+            );
             self::fail('The exchange should have failed.');
         } catch (FleetApiError $error) {
             self::assertStringNotContainsString(self::CODE, $error->getMessage());
@@ -168,9 +194,18 @@ final class OAuthClientTest extends TestCase
 
     public function testAnIncompleteTokenAnswerIsRefused(): void
     {
-        foreach (['{}', '{"access_token":"a"}', '{"access_token":"a","refresh_token":"r"}', '{"access_token":"a","refresh_token":"r","expires_in":"soon"}'] as $body) {
+        foreach (
+            [
+                '{}',
+                '{"access_token":"a"}',
+                '{"access_token":"a","refresh_token":"r"}',
+                '{"access_token":"a","refresh_token":"r","expires_in":"soon"}',
+            ] as $body
+        ) {
             try {
-                new OAuthClient(new MockHttpClient(new MockResponse($body)))->refresh(FleetRegion::EuropeMiddleEastAfrica, 'client-id', self::REFRESH);
+                new OAuthClient(
+                    new MockHttpClient(new MockResponse($body))
+                )->refresh(FleetRegion::EuropeMiddleEastAfrica, 'client-id', self::REFRESH);
                 self::fail('The answer should have been refused: ' . $body);
             } catch (FleetApiError $error) {
                 self::assertFalse($error->refreshTokenRejected());
@@ -181,11 +216,14 @@ final class OAuthClientTest extends TestCase
     public function testTheUserRegionIsReadWithTheBearerToken(): void
     {
         $seen = null;
-        $client = new MockHttpClient(static function (string $method, string $url, array $options) use (&$seen): MockResponse {
+        $respond = static function (string $method, string $url, array $options) use (&$seen): MockResponse {
             $seen = [$method, $url, $options['headers']];
 
-            return new MockResponse('{"response":{"region":"eu","fleet_api_base_url":"https://fleet-api.prd.eu.vn.cloud.tesla.com"}}');
-        });
+            return new MockResponse(
+                '{"response":{"region":"eu","fleet_api_base_url":"https://fleet-api.prd.eu.vn.cloud.tesla.com"}}'
+            );
+        };
+        $client = new MockHttpClient($respond);
 
         $region = new OAuthClient($client)->userRegion(FleetRegion::NorthAmericaAsiaPacific, 'fake-access');
 

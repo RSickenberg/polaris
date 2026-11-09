@@ -27,7 +27,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * prompt, or read from the standard input when the command is not interactive. Options left out keep
  * the stored value. The client ID, domain and regions are asked on a terminal when their option is missing.
  */
-#[AsCommand(name: 'polaris:tesla:configure', description: 'Store the client ID, client secret, domain and regions of the Tesla app')]
+#[AsCommand(
+    name: 'polaris:tesla:configure',
+    description: 'Store the client ID, client secret, domain and regions of the Tesla app',
+)]
 final readonly class ConfigureCommand
 {
     public function __construct(
@@ -48,7 +51,10 @@ final readonly class ConfigureCommand
         ?string $clientId = null,
         #[Option(description: 'The domain that hosts the public key, for example polaris.example.com')]
         ?string $domain = null,
-        #[Option(description: 'A Fleet API region to enable: na (North America and Asia-Pacific) or eu (Europe, Middle East, Africa). Repeat for several')]
+        #[Option(
+            description: 'A Fleet API region to enable: na (North America and Asia-Pacific) or eu (Europe, Middle '
+                . 'East, Africa). Repeat for several'
+        )]
         array $region = [],
         #[Option(description: 'The email of the owner. Optional when there is a single user')]
         ?string $email = null,
@@ -126,7 +132,12 @@ final readonly class ConfigureCommand
         $io->definitionList(
             ['Client ID' => $app->getClientId()],
             ['Domain' => $app->getDomain()?->toString()],
-            ['Regions' => implode(', ', array_map(static fn (FleetRegion $enabled): string => $enabled->value, $app->getEnabledRegions()))],
+            [
+                'Regions' => implode(
+                    ', ',
+                    array_map(static fn (FleetRegion $enabled): string => $enabled->value, $app->getEnabledRegions()),
+                ),
+            ],
         );
 
         return Command::SUCCESS;
@@ -145,7 +156,8 @@ final readonly class ConfigureCommand
     private function askDomain(SymfonyStyle $io, ?string $stored): ?string
     {
         $answer = $io->ask(
-            null === $stored ? 'Domain that hosts the public key' : 'Domain that hosts the public key (empty keeps the stored one)',
+            null === $stored ? 'Domain that hosts the public key' : 'Domain that hosts the public key (empty keeps the '
+                . 'stored one)',
             $stored,
         );
 
@@ -169,7 +181,10 @@ final readonly class ConfigureCommand
         $question = new ChoiceQuestion(
             'Regions to enable (comma separated, empty keeps the stored ones)',
             $choices,
-            [] === $stored ? null : implode(',', array_map(static fn (FleetRegion $region): string => $region->value, $stored)),
+            [] === $stored ? null : implode(
+                ',',
+                array_map(static fn (FleetRegion $region): string => $region->value, $stored),
+            ),
         );
         $question->setMultiselect(true);
 

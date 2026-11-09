@@ -31,7 +31,8 @@ final class TeslaConnectionControllerTest extends WebTestCase
     use SignsIn;
     use TeslaFixtures;
 
-    private const string EU_REGION = '{"response":{"region":"eu","fleet_api_base_url":"https://fleet-api.prd.eu.vn.cloud.tesla.com"}}';
+    private const string EU_REGION = '{"response":{"region":"eu",'
+        . '"fleet_api_base_url":"https://fleet-api.prd.eu.vn.cloud.tesla.com"}}';
 
     private KernelBrowser $client;
     private EntityManagerInterface $entityManager;
@@ -47,11 +48,12 @@ final class TeslaConnectionControllerTest extends WebTestCase
         $this->client = self::createClient();
         $this->client->disableReboot();
         $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        self::getContainer()->set('http_client', new MockHttpClient(function (string $method, string $url): ResponseInterface {
+        $respond = function (string $method, string $url): ResponseInterface {
             $this->calls[] = $url;
 
             return array_shift($this->responses) ?? new MockResponse('unexpected call', ['http_code' => 500]);
-        }));
+        };
+        self::getContainer()->set('http_client', new MockHttpClient($respond));
     }
 
     public function testTheConsentComesBeforeAnyConnection(): void
@@ -76,7 +78,10 @@ final class TeslaConnectionControllerTest extends WebTestCase
         self::assertSelectorTextContains('#consent', 'odometer');
         self::assertSelectorTextContains('#consent', 'encrypted');
         self::assertSelectorTextContains('#consent', 'Disconnect');
-        self::assertSelectorExists('#consent ~ #token-storage', 'How the tokens are stored comes with the consent that stores them.');
+        self::assertSelectorExists(
+            '#consent ~ #token-storage',
+            'How the tokens are stored comes with the consent that stores them.',
+        );
         self::assertSelectorExists('#token-storage a[href="https://github.com/RSickenberg/polaris"]');
     }
 
@@ -115,7 +120,7 @@ final class TeslaConnectionControllerTest extends WebTestCase
         $this->client->request('GET', '/settings/tesla/consent');
 
         self::assertSelectorTextContains('h1', 'Connecter Tesla');
-        self::assertSelectorTextContains('#consent', 'compteur kilométrique');
+        self::assertSelectorTextContains('#consent', 'les données de ma voiture');
     }
 
     public function testTheConnectPageOffersTheThreeWaysAndShowsTheRedirectUri(): void
@@ -201,10 +206,16 @@ final class TeslaConnectionControllerTest extends WebTestCase
         $this->client->followRedirect();
         self::assertSelectorTextContains('[data-slot=alert]', 'Tesla connected.');
         self::assertSelectorExists('[data-connection-status=connected]');
-        self::assertSelectorExists('form[name=disconnect].w-full.sm\\:w-auto button.w-full', 'The disconnect button is a block on a phone.');
+        self::assertSelectorExists(
+            'form[name=disconnect].w-full.sm\\:w-auto button.w-full',
+            'The disconnect button is a block on a phone.',
+        );
         $this->entityManager->clear();
         $token = $this->storedToken();
-        self::assertSame('cb-access', self::getContainer()->get(SecretEncrypter::class)->decrypt($token->getEncryptedAccessToken()));
+        self::assertSame(
+            'cb-access',
+            self::getContainer()->get(SecretEncrypter::class)->decrypt($token->getEncryptedAccessToken()),
+        );
         self::assertSame('https://fleet-api.prd.eu.vn.cloud.tesla.com', $token->getFleetApiBaseUrl());
     }
 
@@ -276,7 +287,10 @@ final class TeslaConnectionControllerTest extends WebTestCase
         $state = $this->authorize();
         $this->responses = [$this->tokens('paste-access', 'paste-refresh'), new MockResponse(self::EU_REGION)];
 
-        $this->submitPaste('paste_callback', ['url' => 'https://polaris.local/tesla/callback?code=fake-code&state=' . $state]);
+        $this->submitPaste(
+            'paste_callback',
+            ['url' => 'https://polaris.local/tesla/callback?code=fake-code&state=' . $state],
+        );
 
         self::assertResponseRedirects('/settings/tesla');
         $this->entityManager->clear();
@@ -288,7 +302,10 @@ final class TeslaConnectionControllerTest extends WebTestCase
         self::createConfiguredApp(self::signIn($this->client));
         $this->authorize();
 
-        $this->submitPaste('paste_callback', ['url' => 'https://polaris.local/tesla/callback?code=fake-code&state=wrong']);
+        $this->submitPaste(
+            'paste_callback',
+            ['url' => 'https://polaris.local/tesla/callback?code=fake-code&state=wrong'],
+        );
 
         self::assertResponseStatusCodeSame(422);
         self::assertSelectorTextContains('#paste-callback [data-slot=field-error]', 'Start again');
@@ -300,7 +317,10 @@ final class TeslaConnectionControllerTest extends WebTestCase
     {
         self::createConfiguredApp(self::signIn($this->client));
 
-        $this->submitPaste('paste_callback', ['url' => 'https://polaris.local/tesla/callback?code=fake-code&state=anything']);
+        $this->submitPaste(
+            'paste_callback',
+            ['url' => 'https://polaris.local/tesla/callback?code=fake-code&state=anything'],
+        );
 
         self::assertResponseStatusCodeSame(422);
         self::assertSame([], $this->calls);
@@ -486,6 +506,9 @@ final class TeslaConnectionControllerTest extends WebTestCase
         $button = 'paste_callback' === $formName ? 'Connect with this URL' : 'Connect with this token';
         $posted = $crawler->selectButton($button)->form()->getPhpValues();
         $posted[$formName] = array_merge((array) $posted[$formName], $values);
-        $this->client->request('POST', 'paste_callback' === $formName ? '/settings/tesla/connect/callback-url' : '/settings/tesla/connect/refresh-token', $posted);
+        $path = 'paste_callback' === $formName
+            ? '/settings/tesla/connect/callback-url'
+            : '/settings/tesla/connect/refresh-token';
+        $this->client->request('POST', $path, $posted);
     }
 }

@@ -17,7 +17,7 @@ use Polaris\Lease\Domain\EndDateConvention;
 use Polaris\Lease\Domain\LeaseTerm;
 use Polaris\Lease\Domain\Tolerance;
 use Polaris\Lease\Entity\LeaseContract;
-use Polaris\Lease\Service\LeaseTermsService;
+use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Currency;
 use Polaris\Shared\Domain\Distance;
@@ -51,13 +51,23 @@ final class ReturnedLeaseAlertTest extends KernelTestCase
         $entityManager->persist($this->vehicle);
         $entityManager->persist(new LeaseContract(
             $this->vehicle,
-            LeaseTerm::fromCalendarDates(CarbonImmutable::parse('2026-01-01', 'UTC'), CarbonImmutable::parse('2027-01-01', 'UTC'), EndDateConvention::Exclusive),
+            LeaseTerm::fromCalendarDates(
+                CarbonImmutable::parse('2026-01-01', 'UTC'),
+                CarbonImmutable::parse('2027-01-01', 'UTC'),
+                EndDateConvention::Exclusive,
+            ),
             Allowance::ofTotal(Distance::fromKilometres(15_000)),
             Distance::fromKilometres(0),
             Money::fromDecimal('0.12', Currency::CHF),
             Tolerance::fromPercent(0),
         ));
-        $entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-01 10:00:00', 'UTC'), Distance::fromKilometres(9_000)));
+        $entityManager->persist(
+            OdometerReading::manual(
+                $this->vehicle,
+                CarbonImmutable::parse('2026-07-01 10:00:00', 'UTC'),
+                Distance::fromKilometres(9_000),
+            )
+        );
         $entityManager->flush();
 
         $transport = self::getContainer()->get('messenger.transport.async');
@@ -68,28 +78,34 @@ final class ReturnedLeaseAlertTest extends KernelTestCase
 
     public function testAReturnedLeaseIsNotAssessedAndNothingIsLogged(): void
     {
-        $this->leases()->markReturned($this->vehicle, new \DateTimeImmutable('2026-07-01'));
+        $this->leaseReturns()->markReturned($this->vehicle, new \DateTimeImmutable('2026-07-01'));
 
-        self::assertSame(RiskCheckOutcome::NotAssessable, self::getContainer()->get(RiskLevelWatcher::class)->check($this->vehicle));
+        self::assertSame(
+            RiskCheckOutcome::NotAssessable,
+            self::getContainer()->get(RiskLevelWatcher::class)->check($this->vehicle),
+        );
         self::assertSame([], $this->entityManager()->getRepository(AlertLog::class)->findAll());
     }
 
     public function testMarkingTheReturnQueuesNoCheck(): void
     {
-        $this->leases()->markReturned($this->vehicle, new \DateTimeImmutable('2026-07-01'));
+        $this->leaseReturns()->markReturned($this->vehicle, new \DateTimeImmutable('2026-07-01'));
 
         self::assertCount(0, $this->sent());
     }
 
     public function testUndoingTheReturnQueuesACheckAndTheLeaseIsAssessedAgain(): void
     {
-        $this->leases()->markReturned($this->vehicle, new \DateTimeImmutable('2026-07-01'));
-        $this->leases()->undoReturn($this->vehicle);
+        $this->leaseReturns()->markReturned($this->vehicle, new \DateTimeImmutable('2026-07-01'));
+        $this->leaseReturns()->undoReturn($this->vehicle);
 
         $sent = $this->sent();
         self::assertCount(1, $sent);
         self::assertInstanceOf(CheckRiskLevel::class, $sent[0]->getMessage());
-        self::assertSame(RiskCheckOutcome::Recorded, self::getContainer()->get(RiskLevelWatcher::class)->check($this->vehicle));
+        self::assertSame(
+            RiskCheckOutcome::Recorded,
+            self::getContainer()->get(RiskLevelWatcher::class)->check($this->vehicle),
+        );
     }
 
     /**
@@ -100,9 +116,9 @@ final class ReturnedLeaseAlertTest extends KernelTestCase
         return array_values($this->transport->getSent());
     }
 
-    private function leases(): LeaseTermsService
+    private function leaseReturns(): LeaseReturnService
     {
-        return self::getContainer()->get(LeaseTermsService::class);
+        return self::getContainer()->get(LeaseReturnService::class);
     }
 
     private function entityManager(): EntityManagerInterface

@@ -32,8 +32,11 @@ final readonly class ExternalPublicKeyHosting implements PublicKeyHosting
         if ('' !== $url) {
             $parts = parse_url($url);
 
-            if (false === $parts || 'https' !== ($parts['scheme'] ?? null) || '' === ($parts['host'] ?? '') || '' === ($parts['path'] ?? '') || isset($parts['query']) || isset($parts['fragment'])) {
-                throw new \InvalidArgumentException('POLARIS_KEY_HOSTING_URL must be the https URL of the PEM file, without query or fragment, for example https://polaris.example.com/.well-known/appspecific/com.tesla.3p.public-key.pem.');
+            if (!self::isPlainHttpsUrl($parts)) {
+                throw new \InvalidArgumentException(
+                    'POLARIS_KEY_HOSTING_URL must be the https URL of the PEM file, without query or fragment, for '
+                        . 'example https://polaris.example.com/.well-known/appspecific/com.tesla.3p.public-key.pem.'
+                );
             }
         }
     }
@@ -41,7 +44,10 @@ final readonly class ExternalPublicKeyHosting implements PublicKeyHosting
     public function publish(string $publicKeyPem): void
     {
         if ('' === $this->directory && '' === $this->url) {
-            throw new \RuntimeException('Set POLARIS_KEY_HOSTING_DIR to the directory of the static site, or POLARIS_KEY_HOSTING_URL to the URL of the PEM file, when POLARIS_KEY_HOSTING is "external".');
+            throw new \RuntimeException(
+                'Set POLARIS_KEY_HOSTING_DIR to the directory of the static site, or POLARIS_KEY_HOSTING_URL to the '
+                    . 'URL of the PEM file, when POLARIS_KEY_HOSTING is "external".'
+            );
         }
 
         // Only a URL: the key is published by hand, there is nothing to write.
@@ -52,7 +58,11 @@ final readonly class ExternalPublicKeyHosting implements PublicKeyHosting
         try {
             $this->filesystem->dumpFile(rtrim($this->directory, '/') . '/' . self::RELATIVE_PATH, $publicKeyPem);
         } catch (IOExceptionInterface $exception) {
-            throw new \RuntimeException('The public key could not be written to the static site directory: ' . $exception->getMessage(), 0, $exception);
+            throw new \RuntimeException(
+                'The public key could not be written to the static site directory: ' . $exception->getMessage(),
+                0,
+                $exception,
+            );
         }
     }
 
@@ -64,5 +74,22 @@ final readonly class ExternalPublicKeyHosting implements PublicKeyHosting
     public function publicKeyUrl(): ?string
     {
         return '' === $this->url ? null : $this->url;
+    }
+
+    /**
+     * Whether parse_url() found an https URL with a host and a path, and no query or fragment.
+     *
+     * @param array<string, int|string>|false $parts
+     */
+    private static function isPlainHttpsUrl(array|false $parts): bool
+    {
+        if (false === $parts) {
+            return false;
+        }
+
+        $hasHostAndPath = '' !== ($parts['host'] ?? '') && '' !== ($parts['path'] ?? '');
+        $hasNoExtras = !isset($parts['query']) && !isset($parts['fragment']);
+
+        return 'https' === ($parts['scheme'] ?? null) && $hasHostAndPath && $hasNoExtras;
     }
 }

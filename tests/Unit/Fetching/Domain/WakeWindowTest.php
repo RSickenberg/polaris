@@ -33,7 +33,9 @@ final class WakeWindowTest extends TestCase
         $deadline = WakeWindow::deadline($wokeAt)->getTimestamp();
         $checks = 0;
 
-        for ($at = $wokeAt->addSeconds(WakeWindow::POLL_INTERVAL_SECONDS); !WakeWindow::isOver($deadline, $at); $at = $at->addSeconds(WakeWindow::POLL_INTERVAL_SECONDS)) {
+        $step = WakeWindow::POLL_INTERVAL_SECONDS;
+
+        for ($at = $wokeAt->addSeconds($step); !WakeWindow::isOver($deadline, $at); $at = $at->addSeconds($step)) {
             ++$checks;
         }
 

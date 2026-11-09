@@ -29,8 +29,15 @@ final class AllowanceProgressTest extends TestCase
     }
 
     #[DataProvider('shares')]
-    public function testSharesOfTheAllowance(int $driven, int $allowed, int $total, int $used, int $earned, int $bar, bool $over): void
-    {
+    public function testSharesOfTheAllowance(
+        int $driven,
+        int $allowed,
+        int $total,
+        int $used,
+        int $earned,
+        int $bar,
+        bool $over,
+    ): void {
         $progress = AllowanceProgress::of(
             Distance::fromKilometres($driven),
             Distance::fromKilometres($allowed),
@@ -45,7 +52,11 @@ final class AllowanceProgressTest extends TestCase
 
     public function testTheTickNeverGoesBeyondTheEndOfTheBar(): void
     {
-        $progress = AllowanceProgress::of(Distance::fromKilometres(10), Distance::fromKilometres(200), Distance::fromKilometres(100));
+        $progress = AllowanceProgress::of(
+            Distance::fromKilometres(10),
+            Distance::fromKilometres(200),
+            Distance::fromKilometres(100),
+        );
 
         self::assertSame(100, $progress->earnedPercent);
     }

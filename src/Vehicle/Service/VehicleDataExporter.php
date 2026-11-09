@@ -15,10 +15,10 @@ use Psr\Clock\ClockInterface;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
 /**
- * Writes what Polaris keeps about a vehicle into one JSON file, to keep it or to bring it to another install: the lease,
- * the odometer readings and the daily projection snapshots. It leaves out what identifies the car or the account (the VIN,
- * the Tesla tokens) and the raw answers of the car (`vehicle_data`), which can carry a location. The file has a format name
- * and a version, so that a later Polaris can still read it; {@see VehicleDataImporter} reads it back.
+ * Writes what Polaris keeps about a vehicle into one JSON file, to keep it or to bring it to another install: the
+ * lease, the odometer readings and the daily projection snapshots. It leaves out what identifies the car or the account
+ * (the VIN, the Tesla tokens) and the raw answers of the car (`vehicle_data`), which can carry a location. The file has
+ * a format name and a version, so that a later Polaris can still read it; {@see VehicleDataImporter} reads it back.
  *
  * Distances are integer metres, instants are ISO 8601 in UTC, local days are `Y-m-d`, enums are their values.
  */

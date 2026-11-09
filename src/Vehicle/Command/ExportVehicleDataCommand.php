@@ -18,8 +18,8 @@ use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
- * Writes the lease, the odometer readings and the daily snapshots of a vehicle as JSON, to a file or to the output (so it
- * can be piped). The file holds no VIN and no Tesla token. See {@see VehicleDataExporter}.
+ * Writes the lease, the odometer readings and the daily snapshots of a vehicle as JSON, to a file or to the output (so
+ * it can be piped). The file holds no VIN and no Tesla token. See {@see VehicleDataExporter}.
  */
 #[AsCommand(
     name: 'polaris:vehicle:data:export',

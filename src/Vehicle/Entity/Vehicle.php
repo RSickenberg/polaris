@@ -62,7 +62,9 @@ class Vehicle
         $name = trim($name);
 
         if ('' === $name || mb_strlen($name) > self::NAME_MAX_LENGTH) {
-            throw new \InvalidArgumentException(\sprintf('A vehicle name must have 1 to %d characters.', self::NAME_MAX_LENGTH));
+            throw new \InvalidArgumentException(
+                \sprintf('A vehicle name must have 1 to %d characters.', self::NAME_MAX_LENGTH)
+            );
         }
 
         $this->name = $name;

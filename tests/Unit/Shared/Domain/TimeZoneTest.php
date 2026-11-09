@@ -15,6 +15,9 @@ final class TimeZoneTest extends TestCase
     public function testUtcIsTheZoneTheKernelForces(): void
     {
         // Read through reflection: both are compile-time constants, which PHPStan folds into a tautology.
-        self::assertSame(new \ReflectionClassConstant(Kernel::class, 'TIMEZONE')->getValue(), new \ReflectionClassConstant(TimeZone::class, 'UTC')->getValue());
+        self::assertSame(
+            new \ReflectionClassConstant(Kernel::class, 'TIMEZONE')->getValue(),
+            new \ReflectionClassConstant(TimeZone::class, 'UTC')->getValue(),
+        );
     }
 }

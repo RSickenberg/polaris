@@ -41,7 +41,8 @@ final class ProdKernel extends Kernel
                 $container->getDefinition(HubInterface::class)->setPublic(true);
 
                 if ($container->hasDefinition(MessengerListener::class)) {
-                    ProdKernel::$messengerListenerArguments = $container->getDefinition(MessengerListener::class)->getArguments();
+                    $listener = $container->getDefinition(MessengerListener::class);
+                    ProdKernel::$messengerListenerArguments = $listener->getArguments();
                 }
             }
         }, PassConfig::TYPE_BEFORE_REMOVING);

@@ -10,6 +10,7 @@ use Polaris\Account\Entity\User;
 use Polaris\Account\Repository\PasswordResetRequestRepository;
 use Polaris\Account\Repository\UserRepository;
 use Polaris\Account\Service\Dto\NewUser;
+use Polaris\Account\Service\Enum\UserSettingsRejection;
 use Polaris\Account\Service\Exception\UserSettingsRejected;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -43,7 +44,7 @@ final readonly class UserSettings
         $normalized = User::normalizeEmail($email);
         $owner = $this->users->loadUserByIdentifier($normalized);
         if (null !== $owner && !$owner->getId()->equals($user->getId())) {
-            throw UserSettingsRejected::emailTaken();
+            throw new UserSettingsRejected(UserSettingsRejection::EmailTaken);
         }
 
         $this->assertEnabled($locale);
@@ -86,7 +87,13 @@ final readonly class UserSettings
     {
         $length = mb_strlen($plainPassword);
         if ($length < NewUser::PASSWORD_MIN_LENGTH || $length > NewUser::PASSWORD_MAX_LENGTH) {
-            throw new \InvalidArgumentException(\sprintf('A password must have %d to %d characters.', NewUser::PASSWORD_MIN_LENGTH, NewUser::PASSWORD_MAX_LENGTH));
+            throw new \InvalidArgumentException(
+                \sprintf(
+                    'A password must have %d to %d characters.',
+                    NewUser::PASSWORD_MIN_LENGTH,
+                    NewUser::PASSWORD_MAX_LENGTH,
+                )
+            );
         }
 
         $user->changePassword($this->hasher->hashPassword($user, $plainPassword));

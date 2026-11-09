@@ -12,7 +12,7 @@ use Polaris\Lease\Domain\EndDateConvention;
 use Polaris\Lease\Domain\LeaseTerm;
 use Polaris\Lease\Domain\Tolerance;
 use Polaris\Lease\Entity\LeaseContract;
-use Polaris\Lease\Service\LeaseTermsService;
+use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Reading\Controller\OdometerReadingController;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Currency;
@@ -47,15 +47,28 @@ final class ReadingAfterReturnTest extends WebTestCase
         $entityManager->persist($this->vehicle);
         $entityManager->persist(new LeaseContract(
             $this->vehicle,
-            LeaseTerm::fromCalendarDates(CarbonImmutable::parse('2026-01-01', 'UTC'), CarbonImmutable::parse('2027-01-01', 'UTC'), EndDateConvention::Exclusive),
+            LeaseTerm::fromCalendarDates(
+                CarbonImmutable::parse('2026-01-01', 'UTC'),
+                CarbonImmutable::parse('2027-01-01', 'UTC'),
+                EndDateConvention::Exclusive,
+            ),
             Allowance::ofTotal(Distance::fromKilometres(15_000)),
             Distance::fromKilometres(0),
             Money::fromDecimal('0.12', Currency::CHF),
             Tolerance::fromPercent(0),
         ));
-        $entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-06-30 10:00:00', 'UTC'), Distance::fromKilometres(9_000)));
+        $entityManager->persist(
+            OdometerReading::manual(
+                $this->vehicle,
+                CarbonImmutable::parse('2026-06-30 10:00:00', 'UTC'),
+                Distance::fromKilometres(9_000),
+            )
+        );
         $entityManager->flush();
-        self::getContainer()->get(LeaseTermsService::class)->markReturned($this->vehicle, new \DateTimeImmutable('2026-06-30'));
+        self::getContainer()->get(LeaseReturnService::class)->markReturned(
+            $this->vehicle,
+            new \DateTimeImmutable('2026-06-30'),
+        );
     }
 
     public function testAReadingAfterTheReturnIsKeptWithAWarning(): void
@@ -66,7 +79,10 @@ final class ReadingAfterReturnTest extends WebTestCase
         $this->client->followRedirect();
         self::assertSelectorTextContains('[data-flash=warning]', 'the car was returned on June 30, 2026');
         self::assertSelectorTextContains('[data-flash=warning]', 'not counted');
-        self::assertCount(2, self::getContainer()->get(EntityManagerInterface::class)->getRepository(OdometerReading::class)->findAll());
+        self::assertCount(
+            2,
+            self::getContainer()->get(EntityManagerInterface::class)->getRepository(OdometerReading::class)->findAll(),
+        );
     }
 
     public function testAReadingBeforeTheReturnIsAnOrdinaryOne(): void

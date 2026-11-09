@@ -81,12 +81,18 @@ final class RefreshAttemptPurgerTest extends KernelTestCase
     public function testTheHandlerRunsThePurgeAndTheScheduleHasNoDailyEntry(): void
     {
         self::bootKernel();
-        self::getContainer()->get(PurgeOwnerRefreshAttemptsHandler::class)(new OwnerMidnightPassed(self::createUser()->getId()->toRfc4122(), '2026-10-26', 0));
+        self::getContainer()->get(PurgeOwnerRefreshAttemptsHandler::class)(
+            new OwnerMidnightPassed(self::createUser()->getId()->toRfc4122(), '2026-10-26', 0)
+        );
 
         $triggers = array_map(
             static fn (RecurringMessage $recurring): string => (string) $recurring->getTrigger(),
             self::getContainer()->get(FetchScheduleProvider::class)->getSchedule()->getRecurringMessages(),
         );
-        self::assertSame(['* * * * *', '* * * * *'], $triggers, 'The fetch tick and the owners\' midnight tick: no daily entry at a UTC time.');
+        self::assertSame(
+            ['* * * * *', '* * * * *'],
+            $triggers,
+            'The fetch tick and the owners\' midnight tick: no daily entry at a UTC time.',
+        );
     }
 }

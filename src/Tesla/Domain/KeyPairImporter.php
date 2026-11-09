@@ -22,7 +22,9 @@ final class KeyPairImporter
         }
 
         if (str_contains($privatePem, 'ENCRYPTED')) {
-            throw new InvalidKeyPair('The private key is protected by a passphrase, which is not supported. Remove the passphrase first.');
+            throw new InvalidKeyPair(
+                'The private key is protected by a passphrase, which is not supported. Remove the passphrase first.'
+            );
         }
 
         // Without a passphrase argument OpenSSL may try to prompt: an empty one makes it fail instead.
@@ -41,7 +43,9 @@ final class KeyPairImporter
         $curve = \is_array($details['ec'] ?? null) ? ($details['ec']['curve_name'] ?? null) : null;
 
         if ('prime256v1' !== $curve) {
-            throw new InvalidKeyPair('The private key must use the prime256v1 curve (also called secp256r1), the only one Tesla supports.');
+            throw new InvalidKeyPair(
+                'The private key must use the prime256v1 curve (also called secp256r1), the only one Tesla supports.'
+            );
         }
 
         if (!openssl_pkey_export($key, $pkcs8) || !\is_string($pkcs8) || !\is_string($details['key'] ?? null)) {

@@ -24,7 +24,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * a file or from the standard input (never an argument), the public key is derived from it, and the
  * private key is stored encrypted and never shown.
  */
-#[AsCommand(name: 'polaris:tesla:key:import', description: 'Use an existing prime256v1 private key instead of generating a key pair')]
+#[AsCommand(
+    name: 'polaris:tesla:key:import',
+    description: 'Use an existing prime256v1 private key instead of generating a key pair',
+)]
 final readonly class KeyImportCommand
 {
     public function __construct(
@@ -42,7 +45,10 @@ final readonly class KeyImportCommand
     public function __invoke(
         SymfonyStyle $io,
         InputInterface $input,
-        #[Option(description: 'Path of the private key PEM file, as seen by the process. Without it the key is read from the standard input')]
+        #[Option(
+            description: 'Path of the private key PEM file, as seen by the process. Without it the key is read from '
+                . 'the standard input'
+        )]
         ?string $file = null,
         #[Option(description: 'Replace an existing key pair. The app must then be registered with Tesla again')]
         bool $force = false,

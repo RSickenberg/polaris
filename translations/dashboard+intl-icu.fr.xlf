@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="progress.value_text">
         <source>progress.value_text</source>
-        <target>{share, number, percent} du kilométrage parcouru</target>
+        <target>{share, number, percent} du kilométrage autorisé parcouru</target>
       </trans-unit>
       <trans-unit id="kpi.allowed.hint">
         <source>kpi.allowed.hint</source>
@@ -12,31 +12,31 @@
       </trans-unit>
       <trans-unit id="kpi.projected.hint">
         <source>kpi.projected.hint</source>
-        <target>Limite : {allowance, number, ::precision-integer} {unit}</target>
+        <target>Limite : {allowance, number, ::precision-integer} {unit}</target>
       </trans-unit>
       <trans-unit id="risk.message.ok">
         <source>risk.message.ok</source>
-        <target>{projected, number, ::precision-integer} {unit} projetés en fin de leasing, sous la limite de {allowance, number, ::precision-integer} {unit}.</target>
+        <target>{projected} projetés en fin de leasing, sous la limite de {allowance}.</target>
       </trans-unit>
       <trans-unit id="risk.message.watch">
         <source>risk.message.watch</source>
-        <target>{projected, number, ::precision-integer} {unit} projetés en fin de leasing, proche de la limite de {allowance, number, ::precision-integer} {unit}.</target>
+        <target>{projected} projetés en fin de leasing, proche de la limite de {allowance}.</target>
       </trans-unit>
       <trans-unit id="risk.message.over">
         <source>risk.message.over</source>
-        <target>{excess, number, ::precision-integer} {unit} de dépassement en fin de leasing, environ {cost}. Roulez {cut, number, ::precision-integer} {unit} de moins par semaine pour rester dans la limite.</target>
+        <target>{excess} de dépassement en fin de leasing, environ {cost}. Roulez {cut} de moins par semaine pour rester dans la limite.</target>
       </trans-unit>
       <trans-unit id="risk.message.over_no_cut">
         <source>risk.message.over_no_cut</source>
-        <target>{excess, number, ::precision-integer} {unit} de dépassement en fin de leasing, environ {cost}.</target>
+        <target>{excess} de dépassement en fin de leasing, environ {cost}.</target>
       </trans-unit>
       <trans-unit id="risk.message.ended_ok">
         <source>risk.message.ended_ok</source>
-        <target>Terminé dans la limite de {allowance, number, ::precision-integer} {unit}.</target>
+        <target>Terminé dans la limite de {allowance}.</target>
       </trans-unit>
       <trans-unit id="risk.message.ended_over">
         <source>risk.message.ended_over</source>
-        <target>Terminé avec {excess, number, ::precision-integer} {unit} de dépassement, {cost} à ce jour.</target>
+        <target>Terminé avec {excess} de dépassement, {cost} à ce jour.</target>
       </trans-unit>
       <trans-unit id="kpi.driven.hint">
         <source>kpi.driven.hint</source>
@@ -44,15 +44,15 @@
       </trans-unit>
       <trans-unit id="returned.text">
         <source>returned.text</source>
-        <target>Rendu le {on, date, long}. Chiffres définitifs.</target>
+        <target>Rendue le {on, date, long}. Chiffres définitifs.</target>
       </trans-unit>
       <trans-unit id="risk.message.returned_ok">
         <source>risk.message.returned_ok</source>
-        <target>Rendu dans la limite de {allowance, number, ::precision-integer} {unit}.</target>
+        <target>Rendue dans la limite de {allowance}.</target>
       </trans-unit>
       <trans-unit id="risk.message.returned_over">
         <source>risk.message.returned_over</source>
-        <target>Rendu avec {excess, number, ::precision-integer} {unit} de dépassement : {cost} de coût définitif.</target>
+        <target>Rendue avec {excess} de dépassement : {cost} de coût définitif.</target>
       </trans-unit>
     </body>
   </file>

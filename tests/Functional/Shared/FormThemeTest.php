@@ -40,7 +40,13 @@ final class FormThemeTest extends WebTestCase
         $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000060'), 'Model 3', self::createUser());
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->persist($this->vehicle);
-        $entityManager->persist(OdometerReading::manual($this->vehicle, new \Carbon\CarbonImmutable('2026-10-01 08:00', 'UTC'), Distance::fromKilometres(10_000)));
+        $entityManager->persist(
+            OdometerReading::manual(
+                $this->vehicle,
+                new \Carbon\CarbonImmutable('2026-10-01 08:00', 'UTC'),
+                Distance::fromKilometres(10_000),
+            )
+        );
         $entityManager->flush();
     }
 
@@ -75,7 +81,8 @@ final class FormThemeTest extends WebTestCase
     {
         $crawler = $this->get($page, $locale);
 
-        // A select without placeholder is never marked required: Symfony's default theme drops it too, as an option is always chosen.
+        // A select without placeholder is never marked required: Symfony's default theme drops it too, as an option is
+        // always chosen.
         $controls = $crawler->filter('form input:not([type=hidden])');
         self::assertGreaterThan(1, $controls->count());
         self::assertCount($controls->count(), $crawler->filter('form input[required]:not([type=hidden])'));
@@ -87,7 +94,10 @@ final class FormThemeTest extends WebTestCase
         $crawler = $this->get($page, $locale);
 
         $labels = $crawler->filter('form label[for]');
-        self::assertCount($labels->count(), $crawler->filter('form label[for] span.text-destructive[aria-hidden=true]'));
+        self::assertCount(
+            $labels->count(),
+            $crawler->filter('form label[for] span.text-destructive[aria-hidden=true]'),
+        );
         self::assertSame('*', $crawler->filter('form label[for] span.text-destructive')->first()->text());
     }
 
@@ -108,8 +118,10 @@ final class FormThemeTest extends WebTestCase
     }
 
     #[DataProvider('locales')]
-    public function testInvalidSubmitShowsTheErrorInsideTheFieldAndWiresTheControl(string $locale, string $message): void
-    {
+    public function testInvalidSubmitShowsTheErrorInsideTheFieldAndWiresTheControl(
+        string $locale,
+        string $message,
+    ): void {
         $this->get('readings', $locale);
         $this->client->submitForm('fr' === $locale ? 'Ajouter le relevé' : 'Add reading', [
             'odometer_reading[readAt]' => '2026-10-02T08:00',
@@ -130,7 +142,10 @@ final class FormThemeTest extends WebTestCase
         foreach ($describedBy as $id) {
             self::assertCount(1, $crawler->filter(\sprintf('[id="%s"]', $id)), $id);
         }
-        self::assertSame($field->filter('[data-slot=field-error]')->attr('id'), $describedBy[array_key_last($describedBy)]);
+        self::assertSame(
+            $field->filter('[data-slot=field-error]')->attr('id'),
+            $describedBy[array_key_last($describedBy)],
+        );
         self::assertCount(0, $crawler->filter('form [data-slot=field]:not([data-invalid]) [aria-invalid=true]'));
     }
 
@@ -146,13 +161,28 @@ final class FormThemeTest extends WebTestCase
     public function testHelpTextsAreTranslatedAndDescribeTheirControl(): void
     {
         $english = $this->get('lease', 'en');
-        self::assertSame('Counted per year or for the whole term, as chosen above.', trim($english->filter('#lease_contract_allowance_help')->text()));
-        self::assertStringContainsString('lease_contract_allowance_help', (string) $english->filter('#lease_contract_allowance')->attr('aria-describedby'));
-        self::assertSame('Price charged for each kilometre over the allowance.', trim($english->filter('#lease_contract_excessCostPerKm_help')->text()));
+        self::assertSame(
+            'Counted per year or for the whole term, as chosen above.',
+            trim($english->filter('#lease_contract_allowance_help')->text()),
+        );
+        self::assertStringContainsString(
+            'lease_contract_allowance_help',
+            (string) $english->filter('#lease_contract_allowance')->attr('aria-describedby'),
+        );
+        self::assertSame(
+            'Price charged for each kilometre over the allowance.',
+            trim($english->filter('#lease_contract_excessCostPerKm_help')->text()),
+        );
 
         $french = $this->get('lease', 'fr');
-        self::assertSame('Comptée par an ou sur toute la durée, selon le choix ci-dessus.', trim($french->filter('#lease_contract_allowance_help')->text()));
-        self::assertSame('Prix facturé pour chaque kilomètre au-delà du forfait.', trim($french->filter('#lease_contract_excessCostPerKm_help')->text()));
+        self::assertSame(
+            'Compté par an ou sur toute la durée, selon le choix ci-dessus.',
+            trim($french->filter('#lease_contract_allowance_help')->text()),
+        );
+        self::assertSame(
+            'Prix facturé pour chaque kilomètre au-delà du kilométrage autorisé.',
+            trim($french->filter('#lease_contract_excessCostPerKm_help')->text()),
+        );
         self::assertCount(5, $french->filter('form [data-slot=field-description]'));
     }
 
@@ -162,9 +192,17 @@ final class FormThemeTest extends WebTestCase
 
         $select = $crawler->filter('select[name="lease_contract[allowanceBasis]"]');
         self::assertCount(1, $select);
-        self::assertSame(['per_year', 'total'], $select->filter('option')->each(static fn (Crawler $option): string => $option->attr('value') ?? ''));
+        self::assertSame(
+            ['per_year', 'total'],
+            $select->filter('option')->each(static fn (Crawler $option): string => $option->attr('value') ?? ''),
+        );
         self::assertCount(1, $select->filter('option[selected]'));
-        self::assertCount(1, $crawler->filter('[data-slot=native-select-wrapper] [data-slot=native-select-icon]')->reduce(static fn (Crawler $icon, int $i): bool => 0 === $i));
+        self::assertCount(
+            1,
+            $crawler->filter('[data-slot=native-select-wrapper] [data-slot=native-select-icon]')->reduce(
+                static fn (Crawler $icon, int $i): bool => 0 === $i
+            ),
+        );
         self::assertGreaterThan(0, $crawler->filter('[data-slot=native-select-wrapper] svg')->count());
     }
 

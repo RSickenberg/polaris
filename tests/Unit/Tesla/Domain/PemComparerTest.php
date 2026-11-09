@@ -11,7 +11,9 @@ use Polaris\Tesla\Domain\PemComparer;
 #[CoversClass(PemComparer::class)]
 final class PemComparerTest extends TestCase
 {
-    private const string KEY = "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE\n-----END PUBLIC KEY-----\n";
+    private const string KEY = "-----BEGIN PUBLIC KEY-----\n"
+        . "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE\n"
+        . "-----END PUBLIC KEY-----\n";
 
     public function testTheSameKeyMatches(): void
     {

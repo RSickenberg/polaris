@@ -22,7 +22,9 @@ final readonly class LocalTime implements \Stringable
     public static function fromString(string $time): self
     {
         if (1 !== preg_match('/^([01]\d|2[0-3]):([0-5]\d)$/', $time, $matches)) {
-            throw new \InvalidArgumentException(\sprintf('A fetch slot must be a 24-hour time written HH:MM, got "%s".', $time));
+            throw new \InvalidArgumentException(
+                \sprintf('A fetch slot must be a 24-hour time written HH:MM, got "%s".', $time)
+            );
         }
 
         return new self((int) $matches[1], (int) $matches[2]);

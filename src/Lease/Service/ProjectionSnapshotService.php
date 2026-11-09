@@ -28,10 +28,10 @@ use Symfony\Component\Lock\LockFactory;
 
 /**
  * Keeps what Polaris projected for a vehicle's lease at the owner's midnight ({@see OwnerMidnight}): one snapshot per
- * lease and local day, the last run for the same midnight winning. Only the readings and verifications up to that midnight count
- * ({@see LeaseTermsService::assessAt()}), so the figures are the same whenever the job runs; `computedAt` is the clock
- * of the run. Nothing is saved without a contract, without data, or for a car returned at or before that midnight. The scheduler,
- * the console command and any listener only call this class.
+ * lease and local day, the last run for the same midnight winning. Only the readings and verifications up to that
+ * midnight count ({@see LeaseTermsService::assessAt()}), so the figures are the same whenever the job runs;
+ * `computedAt` is the clock of the run. Nothing is saved without a contract, without data, or for a car returned at or
+ * before that midnight. The scheduler, the console command and any listener only call this class.
  *
  * One save per lease runs at a time (a lock); the unique (lease, day) constraint backs it up.
  */
@@ -63,7 +63,10 @@ final readonly class ProjectionSnapshotService
             return SnapshotOutcome::SkippedNoContract;
         }
 
-        $lock = $this->lockFactory->createLock('lease_snapshot_' . $contract->getId()->toBase32(), self::LOCK_TTL_SECONDS);
+        $lock = $this->lockFactory->createLock(
+            'lease_snapshot_' . $contract->getId()->toBase32(),
+            self::LOCK_TTL_SECONDS,
+        );
 
         if (!$lock->acquire()) {
             return SnapshotOutcome::Busy;
@@ -77,9 +80,9 @@ final readonly class ProjectionSnapshotService
     }
 
     /**
-     * Brings back snapshots exported earlier, as they were. A local day that already has a snapshot keeps it, a snapshot
-     * saved before the cutoff and the pace were stored cannot be kept (the entity needs them), and without a lease there
-     * is nothing to attach them to.
+     * Brings back snapshots exported earlier, as they were. A local day that already has a snapshot keeps it, a
+     * snapshot saved before the cutoff and the pace were stored cannot be kept (the entity needs them), and without a
+     * lease there is nothing to attach them to.
      *
      * @param list<ProjectionSnapshotPoint> $points
      *
@@ -155,7 +158,9 @@ final readonly class ProjectionSnapshotService
         }
 
         if (!SnapshotPolicy::covers($assessment->status)) {
-            return LeaseStatus::Returned === $assessment->status ? SnapshotOutcome::SkippedReturned : SnapshotOutcome::SkippedNotAssessable;
+            return LeaseStatus::Returned === $assessment->status
+                ? SnapshotOutcome::SkippedReturned
+                : SnapshotOutcome::SkippedNotAssessable;
         }
 
         return $this->store($vehicle, $midnight, $assessment);

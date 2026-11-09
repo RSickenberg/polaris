@@ -60,7 +60,9 @@ final readonly class AddVehicleCommand
             return Command::INVALID;
         }
 
-        if (null !== $this->entityManager->getRepository(Vehicle::class)->findOneBy(['vin' => $vehicle->getVin()->value()])) {
+        $vehicles = $this->entityManager->getRepository(Vehicle::class);
+
+        if (null !== $vehicles->findOneBy(['vin' => $vehicle->getVin()->value()])) {
             $io->error('A vehicle with this VIN already exists.');
 
             return Command::FAILURE;
@@ -69,7 +71,13 @@ final readonly class AddVehicleCommand
         $this->entityManager->persist($vehicle);
         $this->entityManager->flush();
 
-        $io->success(\sprintf('Added %s (%s). It reads once a day at 21:00 by default: see polaris:fetch:schedule.', $vehicle->getName(), $vehicle->getVin()->value()));
+        $io->success(
+            \sprintf(
+                'Added %s (%s). It reads once a day at 21:00 by default: see polaris:fetch:schedule.',
+                $vehicle->getName(),
+                $vehicle->getVin()->value(),
+            )
+        );
 
         return Command::SUCCESS;
     }

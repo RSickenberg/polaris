@@ -27,7 +27,10 @@ final class ErrorReportingDsnProcessorTest extends TestCase
         yield 'empty' => [['POLARIS_ERROR_REPORTING' => ''], ''];
         yield 'off' => [['POLARIS_ERROR_REPORTING' => 'off', 'SENTRY_DSN' => self::CUSTOM], ''];
         yield 'unknown word' => [['POLARIS_ERROR_REPORTING' => 'yes', 'SENTRY_DSN' => self::CUSTOM], ''];
-        yield 'maintainer' => [['POLARIS_ERROR_REPORTING' => 'maintainer', 'SENTRY_DSN' => self::CUSTOM], self::MAINTAINER];
+        yield 'maintainer' => [
+            ['POLARIS_ERROR_REPORTING' => 'maintainer', 'SENTRY_DSN' => self::CUSTOM],
+            self::MAINTAINER,
+        ];
         yield 'maintainer, any case' => [['POLARIS_ERROR_REPORTING' => ' Maintainer '], self::MAINTAINER];
         yield 'custom' => [['POLARIS_ERROR_REPORTING' => 'custom', 'SENTRY_DSN' => self::CUSTOM], self::CUSTOM];
         yield 'custom without a DSN' => [['POLARIS_ERROR_REPORTING' => 'custom'], ''];
@@ -41,7 +44,11 @@ final class ErrorReportingDsnProcessorTest extends TestCase
     {
         $processor = new ErrorReportingDsnProcessor(self::MAINTAINER);
 
-        $actual = $processor->getEnv('polaris_dsn', 'POLARIS_ERROR_REPORTING', static fn (string $name): string => $env[$name] ?? throw new EnvNotFoundException($name));
+        $actual = $processor->getEnv(
+            'polaris_dsn',
+            'POLARIS_ERROR_REPORTING',
+            static fn (string $name): string => $env[$name] ?? throw new EnvNotFoundException($name),
+        );
 
         self::assertSame($expected, $actual);
     }
@@ -50,6 +57,9 @@ final class ErrorReportingDsnProcessorTest extends TestCase
     {
         $processor = new ErrorReportingDsnProcessor('');
 
-        self::assertSame('', $processor->getEnv('polaris_dsn', 'POLARIS_ERROR_REPORTING', static fn (): string => 'maintainer'));
+        self::assertSame(
+            '',
+            $processor->getEnv('polaris_dsn', 'POLARIS_ERROR_REPORTING', static fn (): string => 'maintainer'),
+        );
     }
 }

@@ -37,14 +37,18 @@ final readonly class Scrubber
         '/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/',
     ];
 
-    private const string SENSITIVE_KEY = '/secret|token|password|passwd|authorization|cookie|private|api[_-]?key|credential|csrf|encryption|session|email|e-mail/i';
+    private const string SENSITIVE_KEY = '/secret|token|password|passwd|authorization|cookie|private|api[_-]?key'
+        . '|credential|csrf|encryption|session|email|e-mail/i';
 
     private const array LOCATION_KEYS = [
         'latitude', 'longitude', 'heading', 'native_latitude', 'native_longitude', 'native_location_supported',
         'native_type', 'gps_as_of', 'location_data', 'location',
     ];
 
-    /** Keys that hold the answer of the car (see Tesla\Domain\VehicleDataRedactor for what is stripped before it is stored). */
+    /**
+     * Keys that hold the answer of the car (see Tesla\Domain\VehicleDataRedactor for what is stripped before it is
+     * stored).
+     */
     private const array VEHICLE_DATA_KEYS = [
         'vehicle_data', 'vehicle_state', 'drive_state', 'charge_state', 'climate_state', 'gui_settings',
         'vehicle_config', 'payload',
@@ -103,7 +107,9 @@ final readonly class Scrubber
         }
 
         if (\is_object($value)) {
-            return $value instanceof \JsonSerializable ? $this->scrub($value->jsonSerialize(), $details) : $this->scrubString($value::class);
+            return $value instanceof \JsonSerializable
+                ? $this->scrub($value->jsonSerialize(), $details)
+                : $this->scrubString($value::class);
         }
 
         if (\is_array($value)) {
@@ -151,7 +157,12 @@ final readonly class Scrubber
             $event->setTransaction($this->scrubString($event->getTransaction()));
         }
 
-        $event->setBreadcrumb(array_map(fn (Breadcrumb $breadcrumb): Breadcrumb => $this->scrubBreadcrumb($breadcrumb), $event->getBreadcrumbs()));
+        $event->setBreadcrumb(
+            array_map(
+                fn (Breadcrumb $breadcrumb): Breadcrumb => $this->scrubBreadcrumb($breadcrumb),
+                $event->getBreadcrumbs(),
+            )
+        );
 
         foreach ($event->getSpans() as $span) {
             if (null !== $span->getDescription()) {

@@ -72,20 +72,31 @@ final class TokenRefreshCommandTest extends KernelTestCase
         self::assertStringContainsString('Refreshed', $tester->getDisplay());
         self::assertStringNotContainsString('new-access-value', $tester->getDisplay());
         self::assertStringNotContainsString('new-refresh-value', $tester->getDisplay());
-        $token = self::getContainer()->get('doctrine.orm.entity_manager')->getRepository(OAuthToken::class)->findOneBy([]);
+        $token = self::getContainer()
+            ->get('doctrine.orm.entity_manager')
+            ->getRepository(OAuthToken::class)
+            ->findOneBy([]);
         self::assertInstanceOf(OAuthToken::class, $token);
-        self::assertSame('new-refresh-value', self::getContainer()->get(SecretEncrypter::class)->decrypt($token->getEncryptedRefreshToken()));
+        self::assertSame(
+            'new-refresh-value',
+            self::getContainer()->get(SecretEncrypter::class)->decrypt($token->getEncryptedRefreshToken()),
+        );
     }
 
     public function testARefusedRefreshTokenMarksTheConnectionExpired(): void
     {
         self::bootKernel();
         self::createToken(self::createConfiguredApp(self::createUser()), CarbonImmutable::now()->addHours(2));
-        $tester = $this->tester(new MockHttpClient(new MockResponse('{"error":"login_required"}', ['http_code' => 401])));
+        $tester = $this->tester(
+            new MockHttpClient(new MockResponse('{"error":"login_required"}', ['http_code' => 401]))
+        );
 
         self::assertSame(Command::FAILURE, $tester->execute(['--force' => true]));
 
-        $token = self::getContainer()->get('doctrine.orm.entity_manager')->getRepository(OAuthToken::class)->findOneBy([]);
+        $token = self::getContainer()
+            ->get('doctrine.orm.entity_manager')
+            ->getRepository(OAuthToken::class)
+            ->findOneBy([]);
         self::assertInstanceOf(OAuthToken::class, $token);
         self::assertSame(ConnectionStatus::Expired, $token->getStatus());
     }
@@ -99,7 +110,10 @@ final class TokenRefreshCommandTest extends KernelTestCase
         self::assertSame(Command::FAILURE, $tester->execute(['--force' => true]));
 
         self::assertStringContainsString('unchanged', $tester->getDisplay());
-        $token = self::getContainer()->get('doctrine.orm.entity_manager')->getRepository(OAuthToken::class)->findOneBy([]);
+        $token = self::getContainer()
+            ->get('doctrine.orm.entity_manager')
+            ->getRepository(OAuthToken::class)
+            ->findOneBy([]);
         self::assertInstanceOf(OAuthToken::class, $token);
         self::assertSame(ConnectionStatus::Connected, $token->getStatus());
     }

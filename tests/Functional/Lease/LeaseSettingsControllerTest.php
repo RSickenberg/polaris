@@ -94,7 +94,14 @@ final class LeaseSettingsControllerTest extends WebTestCase
 
     public function testMilesAndATotalAllowanceAreConverted(): void
     {
-        $this->submit(['lease_contract[distanceUnit]' => 'mi', 'lease_contract[allowanceBasis]' => 'total', 'lease_contract[allowance]' => '10000', 'lease_contract[startOdometer]' => '7']);
+        $this->submit(
+            [
+                'lease_contract[distanceUnit]' => 'mi',
+                'lease_contract[allowanceBasis]' => 'total',
+                'lease_contract[allowance]' => '10000',
+                'lease_contract[startOdometer]' => '7',
+            ]
+        );
 
         self::assertResponseRedirects($this->url());
         $contract = $this->contract();
@@ -125,17 +132,33 @@ final class LeaseSettingsControllerTest extends WebTestCase
     public function testSavingRecomputesTheProjectionWithTheNewTerms(): void
     {
         // 10,000 km after 182 days of a one-year lease: about 20,000 km projected at the end.
-        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'), Distance::fromKilometres(10_000)));
+        $this->entityManager->persist(
+            OdometerReading::manual(
+                $this->vehicle,
+                CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'),
+                Distance::fromKilometres(10_000),
+            )
+        );
         $this->entityManager->flush();
         $this->submit(['lease_contract[startOdometer]' => '0', 'lease_contract[tolerancePercent]' => '0']);
         $this->client->followRedirect();
 
         self::assertSelectorTextContains('#assessment dd[data-risk]', 'Over the allowance');
-        self::assertMatchesRegularExpression('/^[\\d,.]+\x{00A0}km$/u', trim($this->client->getCrawler()->filter('#assessment dd')->eq(1)->text()), 'The unit follows the value.');
+        self::assertMatchesRegularExpression(
+            '/^[\\d,.]+\x{00A0}km$/u',
+            trim($this->client->getCrawler()->filter('#assessment dd')->eq(1)->text()),
+            'The unit follows the value.',
+        );
         self::assertStringNotContainsString('(km)', $this->client->getCrawler()->filter('#assessment')->text());
         $excessBefore = $this->client->getCrawler()->filter('#assessment dd')->eq(3)->text();
 
-        $this->submit(['lease_contract[allowance]' => '30000', 'lease_contract[startOdometer]' => '0', 'lease_contract[tolerancePercent]' => '0']);
+        $this->submit(
+            [
+                'lease_contract[allowance]' => '30000',
+                'lease_contract[startOdometer]' => '0',
+                'lease_contract[tolerancePercent]' => '0',
+            ]
+        );
         $this->client->followRedirect();
 
         self::assertSelectorTextContains('#assessment dd[data-risk]', 'OK');
@@ -144,7 +167,13 @@ final class LeaseSettingsControllerTest extends WebTestCase
 
     public function testTermsThatContradictTheReadingsShowAnErrorAndSaveNothing(): void
     {
-        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'), Distance::fromKilometres(10_000)));
+        $this->entityManager->persist(
+            OdometerReading::manual(
+                $this->vehicle,
+                CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'),
+                Distance::fromKilometres(10_000),
+            )
+        );
         $this->entityManager->flush();
 
         $this->submit(['lease_contract[startOdometer]' => '20000']);
@@ -159,14 +188,32 @@ final class LeaseSettingsControllerTest extends WebTestCase
      */
     public static function invalidSubmissions(): iterable
     {
-        yield 'end before start' => [['lease_contract[endDate]' => '2025-01-01'], 'The lease must last a whole number of months'];
-        yield 'partial month' => [['lease_contract[endDate]' => '2027-01-20'], 'The lease must last a whole number of months'];
+        yield 'end before start' => [
+            ['lease_contract[endDate]' => '2025-01-01'],
+            'The lease must last a whole number of months',
+        ];
+        yield 'partial month' => [
+            ['lease_contract[endDate]' => '2027-01-20'],
+            'The lease must last a whole number of months',
+        ];
         yield 'zero allowance' => [['lease_contract[allowance]' => '0'], 'This value should be positive.'];
-        yield 'negative start odometer' => [['lease_contract[startOdometer]' => '-1'], 'This value should be either positive or zero.'];
+        yield 'negative start odometer' => [
+            ['lease_contract[startOdometer]' => '-1'],
+            'This value should be either positive or zero.',
+        ];
         yield 'negative cost' => [['lease_contract[excessCostPerKm]' => '-0.12'], 'Enter an amount like 0.12'];
-        yield 'tolerance above 50%' => [['lease_contract[tolerancePercent]' => '60'], 'This value should be between 0 and 50.'];
-        yield 'negative tolerance' => [['lease_contract[tolerancePercent]' => '-1'], 'This value should be between 0 and 50.'];
-        yield 'currency outside the supported list' => [['lease_contract[currency]' => 'XXX'], 'The selected choice is invalid.'];
+        yield 'tolerance above 50%' => [
+            ['lease_contract[tolerancePercent]' => '60'],
+            'This value should be between 0 and 50.',
+        ];
+        yield 'negative tolerance' => [
+            ['lease_contract[tolerancePercent]' => '-1'],
+            'This value should be between 0 and 50.',
+        ];
+        yield 'currency outside the supported list' => [
+            ['lease_contract[currency]' => 'XXX'],
+            'The selected choice is invalid.',
+        ];
     }
 
     /**
@@ -177,7 +224,8 @@ final class LeaseSettingsControllerTest extends WebTestCase
     {
         // Posted as a browser could, so that values outside the form's choices reach the validation too.
         $this->client->request('GET', $this->url());
-        $token = $this->client->getCrawler()->selectButton('Save lease terms')->form()->getValues()['lease_contract[_token]'];
+        $form = $this->client->getCrawler()->selectButton('Save lease terms')->form();
+        $token = $form->getValues()['lease_contract[_token]'];
         $payload = ['_token' => $token];
         foreach ($change + self::VALID as $name => $value) {
             $payload[substr($name, \strlen('lease_contract['), -1)] = $value;
@@ -185,7 +233,10 @@ final class LeaseSettingsControllerTest extends WebTestCase
         $this->client->request('POST', $this->url(), ['lease_contract' => $payload]);
 
         self::assertResponseStatusCodeSame(422);
-        self::assertStringContainsString($message, preg_replace('/\s+/u', ' ', $this->client->getCrawler()->filter('body')->text()) ?? '');
+        self::assertStringContainsString(
+            $message,
+            preg_replace('/\s+/u', ' ', $this->client->getCrawler()->filter('body')->text()) ?? '',
+        );
         self::assertCount(0, $this->entityManager->getRepository(LeaseContract::class)->findAll());
     }
 

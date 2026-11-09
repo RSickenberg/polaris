@@ -9,16 +9,16 @@
     valueText,
     ## string The legend of the tick, already translated.
     tickLabel,
-    ## 'ok'|'watch'|'over' The risk level of the lease: it colors the tick.
+    ## 'ok'|'watch'|'over' The risk level of the lease: it colors the bar and the tick.
     level
 -%}
-{# The kit Progress paints its fill bg-primary; a child selector on the bar recolors it without editing the kit. #}
-{% set barColor = {ok: '[&>[data-slot=progress-indicator]]:bg-green-600/50 dark:[&>[data-slot=progress-indicator]]:bg-green-400/50', watch: '[&>[data-slot=progress-indicator]]:bg-amber-500/50 dark:[&>[data-slot=progress-indicator]]:bg-amber-400/50', over: '[&>[data-slot=progress-indicator]]:bg-red-600/50 dark:[&>[data-slot=progress-indicator]]:bg-red-400/50'}[level] %}
-{% set tickColor = {ok: 'bg-green-600 dark:bg-green-400', watch: 'bg-amber-500 dark:bg-amber-400', over: 'bg-red-600 dark:bg-red-400'}[level] %}
+{# The kit Progress paints its fill bg-primary; a child selector on the bar recolors it with the risk color at half strength, so the tick, in the full risk color, stands out over the fill. #}
+{% set barColor = {ok: '[&>[data-slot=progress-indicator]]:bg-risk-ok/50', watch: '[&>[data-slot=progress-indicator]]:bg-risk-watch/50', over: '[&>[data-slot=progress-indicator]]:bg-risk-over/50'}[level] %}
+{% set tickColor = {ok: 'bg-risk-ok', watch: 'bg-risk-watch', over: 'bg-risk-over'}[level] %}
 <div {{ attributes.defaults({class: 'flex flex-col gap-2'}) }}>
     <div class="flex items-baseline justify-between gap-2 text-sm">
         <span class="text-muted-foreground">{{ label }}</span>
-        <span class="font-normal">{{ (used / 100)|format_number(style: 'percent') }}</span>
+        <span class="font-normal">{{ (used / 100)|percent }}</span>
     </div>
     <div class="relative flex items-center">
         <twig:Progress :value="min(used, 100)" class="h-2 {{ barColor }}" aria-label="{{ label }}" aria-valuetext="{{ valueText }}" />

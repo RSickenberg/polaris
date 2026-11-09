@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="page.import.description">
         <source>page.import.description</source>
-        <target>Cochez les véhicules à ajouter. Seule la liste de votre compte est lue : aucune voiture n’est contactée ni réveillée.</target>
+        <target>Cochez les véhicules à ajouter. Seule la liste de votre compte est lue : aucune voiture n’est contactée ni réveillée.</target>
       </trans-unit>
       <trans-unit id="form.vehicles.label">
         <source>form.vehicles.label</source>
@@ -60,7 +60,7 @@
       </trans-unit>
       <trans-unit id="data.export.description">
         <source>data.export.description</source>
-        <target>Téléchargez le leasing, les relevés de compteur et les relevés quotidiens de projection de ce véhicule dans un seul fichier JSON. Il ne contient ni VIN ni jeton Tesla.</target>
+        <target>Téléchargez le leasing, les relevés du compteur et les instantanés quotidiens de la projection de ce véhicule dans un seul fichier JSON. Il ne contient ni VIN ni jeton Tesla.</target>
       </trans-unit>
       <trans-unit id="data.export.button">
         <source>data.export.button</source>
@@ -72,7 +72,7 @@
       </trans-unit>
       <trans-unit id="data.import.description">
         <source>data.import.description</source>
-        <target>Ajoutez à ce véhicule les données d’un export. Rien n’est remplacé ni supprimé : les relevés et les relevés de projection déjà présents sont conservés, ainsi que le leasing existant.</target>
+        <target>Ajoutez à ce véhicule les données d’un export. Rien n’est remplacé ni supprimé : les relevés et les instantanés déjà présents sont conservés, ainsi que le leasing existant.</target>
       </trans-unit>
       <trans-unit id="form.data.file.label">
         <source>form.data.file.label</source>
@@ -92,11 +92,11 @@
       </trans-unit>
       <trans-unit id="data.rejected.unknown_version">
         <source>data.rejected.unknown_version</source>
-        <target>Cet export a une version de format que ce Polaris ne connaît pas.</target>
+        <target>Cet export a une version de format que ce Polaris ne connaît pas. Mettez Polaris à jour, puis importez-le à nouveau.</target>
       </trans-unit>
       <trans-unit id="data.rejected.invalid">
         <source>data.rejected.invalid</source>
-        <target>Le fichier contient une valeur invalide : %detail%</target>
+        <target>Le fichier contient une valeur invalide : %detail%</target>
       </trans-unit>
     </body>
   </file>

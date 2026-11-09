@@ -10,6 +10,7 @@ use Doctrine\ORM\Exception\ORMException;
 use Polaris\Reading\Form\Model\OdometerReadingData;
 use Polaris\Reading\Service\Exception\ReadingRejected;
 use Polaris\Reading\Service\OdometerReadingService;
+use Polaris\Reading\Service\ReadingRejectionMessage;
 use Polaris\Shared\Domain\DistanceUnit;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
@@ -20,7 +21,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsCommand(name: 'polaris:odometer:add', description: 'Record a manual odometer reading')]
 final readonly class AddOdometerReadingCommand
@@ -29,7 +29,7 @@ final readonly class AddOdometerReadingCommand
         private EntityManagerInterface $entityManager,
         private OdometerReadingService $service,
         private ValidatorInterface $validator,
-        private TranslatorInterface $translator,
+        private ReadingRejectionMessage $rejectionMessage,
         private ClockInterface $clock,
     ) {
     }
@@ -43,7 +43,9 @@ final readonly class AddOdometerReadingCommand
         int $odometer,
         #[Option(description: 'Unit of the value: km or mi')]
         string $unit = 'km',
-        #[Option(description: 'When it was read, as an ISO 8601 date and time; UTC when it has no offset. Defaults to now')]
+        #[Option(
+            description: 'When it was read, as an ISO 8601 date and time; UTC when it has no offset. Defaults to now'
+        )]
         ?string $at = null,
         #[Option(description: 'The vehicle, by VIN or id. Optional when only one vehicle exists')]
         ?string $vehicle = null,
@@ -56,7 +58,8 @@ final readonly class AddOdometerReadingCommand
         }
 
         try {
-            $readAt = null === $at ? CarbonImmutable::instance($this->clock->now()) : CarbonImmutable::parse($at, 'UTC');
+            $now = CarbonImmutable::instance($this->clock->now());
+            $readAt = null === $at ? $now : CarbonImmutable::parse($at, 'UTC');
         } catch (\Exception) {
             $io->error(\sprintf('"%s" is not a valid date and time.', $at));
 
@@ -85,7 +88,7 @@ final readonly class AddOdometerReadingCommand
         try {
             $reading = $this->service->recordManual($vehicleEntity, $data);
         } catch (ReadingRejected $rejected) {
-            $io->error($this->translator->trans($rejected->reason->value, $rejected->parameters, 'reading'));
+            $io->error($this->rejectionMessage->of($rejected, $vehicleEntity->getOwner()->getTimeZone()));
 
             return Command::FAILURE;
         }
@@ -108,7 +111,11 @@ final readonly class AddOdometerReadingCommand
         if (null === $identifier) {
             $vehicles = $repository->findAll();
             if (1 !== \count($vehicles)) {
-                $io->error(0 === \count($vehicles) ? 'There is no vehicle yet.' : 'There are several vehicles: choose one with --vehicle (VIN or id).');
+                $io->error(
+                    [] === $vehicles
+                        ? 'There is no vehicle yet.'
+                        : 'There are several vehicles: choose one with --vehicle (VIN or id).',
+                );
 
                 return null;
             }

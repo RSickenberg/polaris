@@ -4,20 +4,18 @@ declare(strict_types=1);
 
 namespace Polaris\Lease\Service\Exception;
 
+use Polaris\Lease\Service\Enum\LeaseTermsRejection;
+
 /**
- * The new lease terms cannot be projected over the readings already recorded, for example a
- * start odometer above a recorded reading. Nothing was saved. The message is the translation
- * key (domain "lease") the caller shows.
+ * The new lease terms cannot be projected over the readings already recorded. Nothing was saved. The message is
+ * an English fallback; callers translate {@see $reason}.
  */
 final class LeaseTermsRejected extends \RuntimeException
 {
-    public const string INCONSISTENT_READINGS = 'rejected.inconsistent_readings';
-
-    /** The car was marked as returned, and the new start is on or after that instant. */
-    public const string START_AFTER_RETURN = 'rejected.start_after_return';
-
-    public function __construct(string $key = self::INCONSISTENT_READINGS, ?\Throwable $previous = null)
-    {
-        parent::__construct($key, 0, $previous);
+    public function __construct(
+        public readonly LeaseTermsRejection $reason = LeaseTermsRejection::InconsistentReadings,
+        ?\Throwable $previous = null,
+    ) {
+        parent::__construct(\sprintf('The lease terms were rejected: %s.', $reason->name), 0, $previous);
     }
 }

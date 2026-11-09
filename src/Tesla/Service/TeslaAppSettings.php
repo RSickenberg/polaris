@@ -63,7 +63,11 @@ final readonly class TeslaAppSettings
             }
         }
 
-        if (null !== $data->dailyWakeCap && ($data->dailyWakeCap < 0 || $data->dailyWakeCap > TeslaApp::MAX_DAILY_WAKE_CAP)) {
+        if (
+            null !== $data->dailyWakeCap
+            && ($data->dailyWakeCap < 0
+            || $data->dailyWakeCap > TeslaApp::MAX_DAILY_WAKE_CAP)
+        ) {
             throw TeslaSettingsRejected::wakeCapOutOfRange(TeslaApp::MAX_DAILY_WAKE_CAP);
         }
 

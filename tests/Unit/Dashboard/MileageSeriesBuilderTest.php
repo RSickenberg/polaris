@@ -98,7 +98,10 @@ final class MileageSeriesBuilderTest extends TestCase
         );
 
         self::assertTrue($series->hasProjection());
-        self::assertSame([['2026-07-02 11:00:00', 10_000_000], [self::END, 19_900_000]], self::points($series->projection));
+        self::assertSame(
+            [['2026-07-02 11:00:00', 10_000_000], [self::END, 19_900_000]],
+            self::points($series->projection),
+        );
     }
 
     public function testWithoutAForecastThereIsNoProjection(): void

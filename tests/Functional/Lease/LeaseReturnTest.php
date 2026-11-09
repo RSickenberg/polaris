@@ -17,6 +17,7 @@ use Polaris\Lease\Domain\LeaseTerm;
 use Polaris\Lease\Domain\Tolerance;
 use Polaris\Lease\Entity\LeaseContract;
 use Polaris\Lease\Service\Exception\LeaseReturnRejected;
+use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Currency;
@@ -34,6 +35,7 @@ use Symfony\Component\Clock\Test\ClockSensitiveTrait;
  */
 #[CoversClass(LeaseSettingsController::class)]
 #[CoversClass(LeaseTermsService::class)]
+#[CoversClass(LeaseReturnService::class)]
 final class LeaseReturnTest extends WebTestCase
 {
     use ClockSensitiveTrait;
@@ -55,7 +57,11 @@ final class LeaseReturnTest extends WebTestCase
         // A one-year lease of 15,000 km from 2026-01-01.
         $this->entityManager->persist(new LeaseContract(
             $this->vehicle,
-            LeaseTerm::fromCalendarDates(CarbonImmutable::parse('2026-01-01', 'UTC'), CarbonImmutable::parse('2027-01-01', 'UTC'), EndDateConvention::Exclusive),
+            LeaseTerm::fromCalendarDates(
+                CarbonImmutable::parse('2026-01-01', 'UTC'),
+                CarbonImmutable::parse('2027-01-01', 'UTC'),
+                EndDateConvention::Exclusive,
+            ),
             Allowance::ofTotal(Distance::fromKilometres(15_000)),
             Distance::fromKilometres(0),
             Money::fromDecimal('0.12', Currency::CHF),
@@ -94,7 +100,7 @@ final class LeaseReturnTest extends WebTestCase
         self::assertResponseRedirects($this->url());
         $this->client->followRedirect();
         self::assertSelectorTextContains('[data-slot=alert]', 'Car marked as returned.');
-        self::assertSelectorTextContains('#lease-return [data-returned]', 'Returned to the bank on June 30, 2026');
+        self::assertSelectorTextContains('#lease-return [data-returned]', 'Returned on June 30, 2026');
 
         // Zurich is UTC+2 on 2026-06-30: the end of that day is 22:00 UTC.
         self::assertSame('2026-06-30T22:00:00+00:00', $this->contract()->getReturnedAt()?->toIso8601String());
@@ -143,7 +149,10 @@ final class LeaseReturnTest extends WebTestCase
         $this->markReturned('2025-12-31', 'fr');
 
         self::assertResponseStatusCodeSame(422);
-        self::assertSelectorTextContains('#lease-return', 'Le véhicule ne peut pas être rendu avant le début du leasing.');
+        self::assertSelectorTextContains(
+            '#lease-return',
+            'La voiture ne peut pas être rendue avant le début du leasing.',
+        );
     }
 
     public function testTodayIsAllowed(): void
@@ -211,7 +220,10 @@ final class LeaseReturnTest extends WebTestCase
         $this->markReturned('2026-06-30');
 
         $this->client->request('GET', $this->url());
-        $this->client->submitForm('Save lease terms', ['lease_contract[startDate]' => '2026-07-01', 'lease_contract[endDate]' => '2027-07-01']);
+        $this->client->submitForm(
+            'Save lease terms',
+            ['lease_contract[startDate]' => '2026-07-01', 'lease_contract[endDate]' => '2027-07-01'],
+        );
 
         self::assertResponseStatusCodeSame(422);
         self::assertSelectorTextContains('body', 'The start must be before the day the car went back.');
@@ -228,9 +240,12 @@ final class LeaseReturnTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('main', 'Returned on June 30, 2026. Final figures.');
         // 9,000 km driven of 15,000: the later 20,000 km reading is not counted.
-        self::assertSelectorTextContains('[data-slot=alert]', 'Returned within the 15,000 km allowance.');
+        self::assertSelectorTextContains('[data-slot=alert]', "Returned within the 15,000\u{00A0}km allowance.");
         self::assertSelectorNotExists('[data-live-name-value="Fetching:OdometerRefreshButton"]');
-        self::assertStringNotContainsString('Projected at lease end', $this->client->getCrawler()->filter('main')->text());
+        self::assertStringNotContainsString(
+            'Projected at lease end',
+            $this->client->getCrawler()->filter('main')->text(),
+        );
     }
 
     public function testTheDashboardShowsTheFinalCostOfAnExcess(): void
@@ -238,22 +253,27 @@ final class LeaseReturnTest extends WebTestCase
         $this->reading('2026-07-01 10:00:00', 17_000);
         $this->markReturned('2026-07-01');
 
-        $this->client->request('GET', \sprintf('/vehicles/%s', $this->vehicle->getId()->toBase32()), server: ['HTTP_ACCEPT_LANGUAGE' => 'fr']);
+        $this->client->request(
+            'GET',
+            \sprintf('/vehicles/%s', $this->vehicle->getId()->toBase32()),
+            server: ['HTTP_ACCEPT_LANGUAGE' => 'fr'],
+        );
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('[data-slot=alert]', 'Rendu avec');
+        self::assertSelectorTextContains('[data-slot=alert]', 'Rendue avec');
         self::assertSelectorTextContains('[data-slot=alert]', 'de coût définitif');
     }
 
     public function testTheCutoffDropsReadingsAndVerificationsAfterTheReturn(): void
     {
         $service = $this->service();
+        $returns = $this->returns();
         $last = $this->reading('2026-06-30 10:00:00', 9_000, flush: false, existing: true);
         $last->verify(CarbonImmutable::parse('2026-07-01 07:00:00', 'UTC'));
         $this->reading('2026-07-01 08:00:00', 9_500);
         $this->entityManager->flush();
 
-        $service->markReturned($this->vehicle, new \DateTimeImmutable('2026-06-30'));
+        $returns->markReturned($this->vehicle, new \DateTimeImmutable('2026-06-30'));
         $returned = $service->assess($this->vehicle);
 
         self::assertInstanceOf(LeaseAssessment::class, $returned);
@@ -263,7 +283,7 @@ final class LeaseReturnTest extends WebTestCase
         self::assertSame('2026-06-30T22:00:00+00:00', $returned->projection->asOf->toIso8601String());
 
         // Undoing brings the readings back: the car had 9,500 km on 2026-07-01.
-        $service->undoReturn($this->vehicle);
+        $returns->undoReturn($this->vehicle);
         $active = $service->assess($this->vehicle);
         self::assertInstanceOf(LeaseAssessment::class, $active);
         self::assertSame(LeaseStatus::Active, $active->status);
@@ -276,12 +296,12 @@ final class LeaseReturnTest extends WebTestCase
         $this->entityManager->flush();
 
         $this->expectException(LeaseReturnRejected::class);
-        $this->service()->markReturned($this->vehicle, new \DateTimeImmutable('2026-06-30'));
+        $this->returns()->markReturned($this->vehicle, new \DateTimeImmutable('2026-06-30'));
     }
 
     public function testASecondUndoDoesNothing(): void
     {
-        $service = $this->service();
+        $service = $this->returns();
         $service->undoReturn($this->vehicle);
 
         self::assertFalse($service->isReturned($this->vehicle));
@@ -291,7 +311,7 @@ final class LeaseReturnTest extends WebTestCase
 
     public function testTheReturnedStateIsReadBack(): void
     {
-        $service = $this->service();
+        $service = $this->returns();
         $service->markReturned($this->vehicle, new \DateTimeImmutable('2026-06-30'));
 
         self::assertTrue($service->isReturned($this->vehicle));
@@ -303,19 +323,27 @@ final class LeaseReturnTest extends WebTestCase
     {
         $this->client->setServerParameter('HTTP_ACCEPT_LANGUAGE', $locale);
         $this->client->request('GET', $this->url());
-        $this->client->submitForm('en' === $locale ? 'Confirm the return' : 'Confirmer la restitution', ['lease_return[returnedOn]' => $date]);
+        $this->client->submitForm(
+            'en' === $locale ? 'Confirm the return' : 'Confirmer la restitution',
+            ['lease_return[returnedOn]' => $date],
+        );
     }
 
     private function reading(string $at, int $km, bool $flush = true, bool $existing = false): OdometerReading
     {
         if ($existing) {
-            $found = $this->entityManager->getRepository(OdometerReading::class)->findOneBy(['readAt' => CarbonImmutable::parse($at, 'UTC')]);
+            $readings = $this->entityManager->getRepository(OdometerReading::class);
+            $found = $readings->findOneBy(['readAt' => CarbonImmutable::parse($at, 'UTC')]);
             \assert($found instanceof OdometerReading);
 
             return $found;
         }
 
-        $reading = OdometerReading::manual($this->vehicle, CarbonImmutable::parse($at, 'UTC'), Distance::fromKilometres($km));
+        $reading = OdometerReading::manual(
+            $this->vehicle,
+            CarbonImmutable::parse($at, 'UTC'),
+            Distance::fromKilometres($km),
+        );
         $this->entityManager->persist($reading);
 
         if ($flush) {
@@ -337,6 +365,11 @@ final class LeaseReturnTest extends WebTestCase
     private function service(): LeaseTermsService
     {
         return self::getContainer()->get(LeaseTermsService::class);
+    }
+
+    private function returns(): LeaseReturnService
+    {
+        return self::getContainer()->get(LeaseReturnService::class);
     }
 
     private function url(): string

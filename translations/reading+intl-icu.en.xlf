@@ -4,11 +4,11 @@
     <body>
       <trans-unit id="rejected.lower_than_previous">
         <source>rejected.lower_than_previous</source>
-        <target>Lower than the previous reading ({limit, number, ::.#} {unit} on {at, date, medium} at {at, time, short} UTC).</target>
+        <target>Lower than the previous reading ({limit, number, ::.#} {unit} on {at}).</target>
       </trans-unit>
       <trans-unit id="rejected.higher_than_next">
         <source>rejected.higher_than_next</source>
-        <target>Higher than the next reading ({limit, number, ::.#} {unit} on {at, date, medium} at {at, time, short} UTC).</target>
+        <target>Higher than the next reading ({limit, number, ::.#} {unit} on {at}).</target>
       </trans-unit>
       <trans-unit id="rejected.duplicate_instant">
         <source>rejected.duplicate_instant</source>

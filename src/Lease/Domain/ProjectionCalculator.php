@@ -93,7 +93,8 @@ final readonly class ProjectionCalculator
         }
 
         $driven = Distance::fromMetres((int) round($drivenMetres));
-        // round(allowance x elapsed / term), half up, in integers: floor((2 x allowance x elapsed + term) / (2 x term)).
+        // round(allowance x elapsed / term), half up, in integers:
+        // floor((2 x allowance x elapsed + term) / (2 x term)).
         $allowedToDate = Distance::fromMetres(
             intdiv(2 * $allowanceMetres * min($elapsed, $termSeconds) + $termSeconds, 2 * $termSeconds)
         );

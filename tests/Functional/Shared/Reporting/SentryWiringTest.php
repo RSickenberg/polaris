@@ -71,15 +71,20 @@ final class SentryWiringTest extends KernelTestCase
 
     protected function tearDown(): void
     {
-        // The Sentry bundle installs its own error and exception handlers when it boots: give back the ones PHPUnit had.
-        for ($i = 0; $i < 10 && $this->errorHandler !== ($current = set_error_handler(static fn (): bool => false)); ++$i) {
+        // The Sentry bundle installs its own error and exception handlers when it boots: give back the ones PHPUnit
+        // had.
+        for ($i = 0; $i < 10 && $this->errorHandler !== (
+            $current = set_error_handler(static fn (): bool => false)
+        ); ++$i) {
             restore_error_handler();
             restore_error_handler();
         }
         if ($i < 10) {
             restore_error_handler();
         }
-        for ($i = 0; $i < 10 && $this->exceptionHandler !== ($current = set_exception_handler(static fn (): null => null)); ++$i) {
+        for ($i = 0; $i < 10 && $this->exceptionHandler !== (
+            $current = set_exception_handler(static fn (): null => null)
+        ); ++$i) {
             restore_exception_handler();
             restore_exception_handler();
         }
@@ -105,7 +110,10 @@ final class SentryWiringTest extends KernelTestCase
         self::assertFalse($client->getOptions()->isSpotlightEnabled());
         // Without a DSN the transport answers "skipped" before it builds a request: no connection is opened.
         self::assertEquals(ResultStatus::skipped(), $client->getTransport()->send(Event::createEvent())->getStatus());
-        self::assertEquals(ResultStatus::skipped(), $client->getTransport()->send(Event::createTransaction())->getStatus());
+        self::assertEquals(
+            ResultStatus::skipped(),
+            $client->getTransport()->send(Event::createTransaction())->getStatus(),
+        );
     }
 
     public function testAnEmptySwitchBehavesAsOff(): void
@@ -124,14 +132,25 @@ final class SentryWiringTest extends KernelTestCase
 
     public function testTheMaintainerOptionUsesTheDsnTheImageWasBuiltWith(): void
     {
-        $this->bootWith(['POLARIS_ERROR_REPORTING' => 'maintainer', 'POLARIS_MAINTAINER_DSN' => 'https://maintainer@o1.ingest.sentry.io/1', 'SENTRY_DSN' => self::DSN]);
+        $this->bootWith(
+            [
+                'POLARIS_ERROR_REPORTING' => 'maintainer',
+                'POLARIS_MAINTAINER_DSN' => 'https://maintainer@o1.ingest.sentry.io/1',
+                'SENTRY_DSN' => self::DSN,
+            ]
+        );
 
-        self::assertSame('https://maintainer@o1.ingest.sentry.io/1', (string) $this->hub()->getClient()?->getOptions()->getDsn());
+        self::assertSame(
+            'https://maintainer@o1.ingest.sentry.io/1',
+            (string) $this->hub()->getClient()?->getOptions()->getDsn(),
+        );
     }
 
     public function testTheOwnersOwnDsnIsUsedWithTheCustomOption(): void
     {
-        $this->bootWith(['POLARIS_ERROR_REPORTING' => 'custom', 'SENTRY_DSN' => self::DSN, 'SENTRY_RELEASE' => '0.1.0']);
+        $this->bootWith(
+            ['POLARIS_ERROR_REPORTING' => 'custom', 'SENTRY_DSN' => self::DSN, 'SENTRY_RELEASE' => '0.1.0']
+        );
         $options = $this->hub()->getClient()?->getOptions();
 
         self::assertNotNull($options);
@@ -142,7 +161,9 @@ final class SentryWiringTest extends KernelTestCase
 
     public function testTheOptionsAreConservative(): void
     {
-        $this->bootWith(['POLARIS_ERROR_REPORTING' => 'custom', 'SENTRY_DSN' => self::DSN, 'SENTRY_TRACES_SAMPLE_RATE' => '']);
+        $this->bootWith(
+            ['POLARIS_ERROR_REPORTING' => 'custom', 'SENTRY_DSN' => self::DSN, 'SENTRY_TRACES_SAMPLE_RATE' => '']
+        );
         $options = $this->hub()->getClient()?->getOptions();
 
         self::assertNotNull($options);
@@ -171,7 +192,9 @@ final class SentryWiringTest extends KernelTestCase
 
     public function testTheTraceRateComesFromTheEnvironment(): void
     {
-        $this->bootWith(['POLARIS_ERROR_REPORTING' => 'custom', 'SENTRY_DSN' => self::DSN, 'SENTRY_TRACES_SAMPLE_RATE' => '0.5']);
+        $this->bootWith(
+            ['POLARIS_ERROR_REPORTING' => 'custom', 'SENTRY_DSN' => self::DSN, 'SENTRY_TRACES_SAMPLE_RATE' => '0.5']
+        );
 
         self::assertEqualsWithDelta(0.5, $this->hub()->getClient()?->getOptions()->getTracesSampleRate(), 0.0001);
     }
@@ -186,11 +209,15 @@ final class SentryWiringTest extends KernelTestCase
 
     public function testAnExceptionIsSentScrubbedWhenTheOwnerOptedIn(): void
     {
-        $this->bootWith(['POLARIS_ERROR_REPORTING' => 'custom', 'SENTRY_DSN' => self::DSN, 'SENTRY_TRACES_SAMPLE_RATE' => '1']);
+        $this->bootWith(
+            ['POLARIS_ERROR_REPORTING' => 'custom', 'SENTRY_DSN' => self::DSN, 'SENTRY_TRACES_SAMPLE_RATE' => '1']
+        );
         $transport = new RecordingTransport();
         $hub = $this->hubSendingTo($transport);
 
-        $hub->captureException(new \RuntimeException('Fleet API refused ' . self::VIN . ' for jane.doe@example.test with Bearer abc.def'));
+        $hub->captureException(
+            new \RuntimeException('Fleet API refused ' . self::VIN . ' for jane.doe@example.test with Bearer abc.def')
+        );
 
         self::assertCount(1, $transport->events);
         $event = $transport->events[0];
@@ -202,7 +229,9 @@ final class SentryWiringTest extends KernelTestCase
 
     public function testATransactionIsSentScrubbed(): void
     {
-        $this->bootWith(['POLARIS_ERROR_REPORTING' => 'custom', 'SENTRY_DSN' => self::DSN, 'SENTRY_TRACES_SAMPLE_RATE' => '1']);
+        $this->bootWith(
+            ['POLARIS_ERROR_REPORTING' => 'custom', 'SENTRY_DSN' => self::DSN, 'SENTRY_TRACES_SAMPLE_RATE' => '1']
+        );
         $transport = new RecordingTransport();
         $hub = $this->hubSendingTo($transport);
 
@@ -212,7 +241,9 @@ final class SentryWiringTest extends KernelTestCase
         $hub->setSpan($transaction);
         $spanContext = new \Sentry\Tracing\SpanContext();
         $spanContext->setOp('http.client');
-        $spanContext->setDescription('GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . self::VIN . '/vehicle_data');
+        $spanContext->setDescription(
+            'GET https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles/' . self::VIN . '/vehicle_data'
+        );
         $span = $transaction->startChild($spanContext);
         $span->finish();
         $transaction->finish();
@@ -227,14 +258,20 @@ final class SentryWiringTest extends KernelTestCase
 
     public function testNoTraceHeaderLeavesForAnotherHost(): void
     {
-        $this->bootWith(['POLARIS_ERROR_REPORTING' => 'custom', 'SENTRY_DSN' => self::DSN, 'SENTRY_TRACES_SAMPLE_RATE' => '1']);
+        $this->bootWith(
+            ['POLARIS_ERROR_REPORTING' => 'custom', 'SENTRY_DSN' => self::DSN, 'SENTRY_TRACES_SAMPLE_RATE' => '1']
+        );
 
         $configured = $this->headersOfAnOutgoingRequest($this->hub());
         self::assertStringNotContainsString('sentry-trace', $configured);
         self::assertStringNotContainsString('baggage', $configured);
 
         // The same request with the SDK default (every host) carries the headers: the check above can fail.
-        $everyHost = new Hub(ClientBuilder::create(['dsn' => self::DSN, 'traces_sample_rate' => 1.0, 'trace_propagation_targets' => null])->setTransport(new RecordingTransport())->getClient());
+        $everyHost = new Hub(
+            ClientBuilder::create(
+                ['dsn' => self::DSN, 'traces_sample_rate' => 1.0, 'trace_propagation_targets' => null]
+            )->setTransport(new RecordingTransport())->getClient()
+        );
         self::assertStringContainsString('sentry-trace', $this->headersOfAnOutgoingRequest($everyHost));
     }
 
@@ -274,20 +311,24 @@ final class SentryWiringTest extends KernelTestCase
     private function headersOfAnOutgoingRequest(HubInterface $hub): string
     {
         $seen = '';
-        $inner = new MockHttpClient(static function (string $method, string $url, array $options) use (&$seen): MockResponse {
+        $respond = static function (string $method, string $url, array $options) use (&$seen): MockResponse {
             $seen = '';
             foreach (\is_array($options['headers'] ?? null) ? $options['headers'] : [] as $header) {
                 $seen .= (\is_string($header) ? $header : '') . "\n";
             }
 
             return new MockResponse('{}');
-        });
+        };
+        $inner = new MockHttpClient($respond);
 
         $context = new TransactionContext('request');
         $context->setSampled(true);
         $hub->setSpan($hub->startTransaction($context));
 
-        new TraceableHttpClientForV6($inner, $hub)->request('GET', 'https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles')->getStatusCode();
+        new TraceableHttpClientForV6(
+            $inner,
+            $hub,
+        )->request('GET', 'https://fleet-api.prd.eu.vn.cloud.tesla.com/api/1/vehicles')->getStatusCode();
 
         return $seen;
     }

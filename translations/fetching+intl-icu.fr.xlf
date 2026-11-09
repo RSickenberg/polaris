@@ -30,15 +30,17 @@ Le résultat apparaîtra à la prochaine lecture.</target>
       <trans-unit id="outcome.asleep">
         <source>outcome.asleep</source>
         <target>La voiture dort, dernier relevé conservé.
-Réveillez-la depuis l’appli Tesla, puis actualisez.</target>
+Réveillez-la depuis l’application mobile Tesla, puis actualisez.</target>
       </trans-unit>
       <trans-unit id="outcome.offline">
         <source>outcome.offline</source>
-        <target>La voiture est hors ligne, dernier relevé conservé.</target>
+        <target>La voiture est hors ligne, dernier relevé conservé.
+Réessayez quand elle a du réseau.</target>
       </trans-unit>
       <trans-unit id="outcome.unavailable">
         <source>outcome.unavailable</source>
-        <target>La voiture s’est endormie pendant la lecture, dernier relevé conservé.</target>
+        <target>La voiture a cessé de répondre pendant la lecture, dernier relevé conservé.
+Réessayez dans quelques minutes.</target>
       </trans-unit>
       <trans-unit id="outcome.not_connected">
         <source>outcome.not_connected</source>
@@ -47,7 +49,7 @@ Connectez-vous dans les réglages Tesla.</target>
       </trans-unit>
       <trans-unit id="outcome.rejected">
         <source>outcome.rejected</source>
-        <target>La voiture a indiqué un compteur inférieur à un relevé enregistré : ignoré.</target>
+        <target>La voiture a indiqué un compteur inférieur à un relevé enregistré : il n’a pas été enregistré.</target>
       </trans-unit>
       <trans-unit id="outcome.busy">
         <source>outcome.busy</source>
@@ -56,8 +58,8 @@ Réessayez dans un instant.</target>
       </trans-unit>
       <trans-unit id="outcome.failed">
         <source>outcome.failed</source>
-        <target>Tesla a renvoyé une erreur.
-Pas de nouvel essai automatique.</target>
+        <target>Tesla a renvoyé une erreur, dernier relevé conservé.
+Réessayez plus tard.</target>
       </trans-unit>
       <trans-unit id="outcome.waking">
         <source>outcome.waking</source>
@@ -65,16 +67,16 @@ Pas de nouvel essai automatique.</target>
       </trans-unit>
       <trans-unit id="outcome.wake_timeout">
         <source>outcome.wake_timeout</source>
-        <target>La voiture n’est pas revenue en ligne en 90 secondes, dernier relevé conservé.</target>
+        <target>La voiture n’est pas revenue en ligne en {seconds, number} secondes, dernier relevé conservé.</target>
       </trans-unit>
       <trans-unit id="outcome.wake_cap">
         <source>outcome.wake_cap</source>
-        <target>Réveil non envoyé : limite atteinte sur les dernières 24 heures.
+        <target>Réveil non envoyé : limite atteinte sur les dernières 24 heures.
 Dernier relevé conservé.</target>
       </trans-unit>
       <trans-unit id="outcome.wake_scope">
         <source>outcome.wake_scope</source>
-        <target>Tesla a refusé le réveil : Polaris n’a pas l’autorisation de réveiller votre voiture.
+        <target>Tesla a refusé le réveil : Polaris n’a pas l’autorisation de réveiller votre voiture.
 Reconnectez-vous à Tesla dans les réglages Tesla.</target>
       </trans-unit>
       <trans-unit id="wake.dialog.title">
@@ -83,7 +85,7 @@ Reconnectez-vous à Tesla dans les réglages Tesla.</target>
       </trans-unit>
       <trans-unit id="wake.dialog.description">
         <source>wake.dialog.description</source>
-        <target>La réveiller pour obtenir le kilométrage actuel ?
+        <target>La réveiller pour obtenir le kilométrage actuel?
 Tesla facture environ {cost} par réveil.</target>
       </trans-unit>
       <trans-unit id="wake.dialog.decline">
@@ -139,7 +141,7 @@ Réessayez à {time} ({zone}).</target>
       </trans-unit>
       <trans-unit id="wake.dialog_offline.description">
         <source>wake.dialog_offline.description</source>
-        <target>Votre voiture est hors ligne. Tesla ne pourra peut-être pas la réveiller. Essayer quand même ?
+        <target>Votre voiture est hors ligne. Tesla ne pourra peut-être pas la réveiller. Essayer quand même?
 Tesla facture environ {cost} par réveil, même sans réponse.</target>
       </trans-unit>
       <trans-unit id="outcome.wake_failed">
@@ -148,11 +150,11 @@ Tesla facture environ {cost} par réveil, même sans réponse.</target>
       </trans-unit>
       <trans-unit id="outcome.returned">
         <source>outcome.returned</source>
-        <target>Véhicule rendu : son compteur n’est plus relevé.</target>
+        <target>Voiture rendue : son compteur n’est plus relevé.</target>
       </trans-unit>
       <trans-unit id="wake.returned">
         <source>wake.returned</source>
-        <target>Véhicule rendu : il n’est plus réveillé.</target>
+        <target>Voiture rendue : elle n’est plus réveillée.</target>
       </trans-unit>
     </body>
   </file>

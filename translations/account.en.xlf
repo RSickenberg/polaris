@@ -92,7 +92,7 @@
       </trans-unit>
       <trans-unit id="link.back_to_login">
         <source>link.back_to_login</source>
-        <target>Back to the sign in</target>
+        <target>Back to sign in</target>
       </trans-unit>
       <trans-unit id="link.ask_again">
         <source>link.ask_again</source>

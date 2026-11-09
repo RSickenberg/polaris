@@ -56,7 +56,16 @@ final class TeslaOdometerReaderTest extends TestCase
 
     public function testACarThatFellAsleepBetweenTheCallsGivesNoReadingAndIsAskedOnce(): void
     {
-        $vehicles = $this->vehicles(VehicleState::Online, 1, FleetApiError::fromResponse(FleetApiOperation::VehicleData, FleetRegion::EuropeMiddleEastAfrica, 408, FleetApiResponses::vehicleNotOnline()));
+        $vehicles = $this->vehicles(
+            VehicleState::Online,
+            1,
+            FleetApiError::fromResponse(
+                FleetApiOperation::VehicleData,
+                FleetRegion::EuropeMiddleEastAfrica,
+                408,
+                FleetApiResponses::vehicleNotOnline(),
+            ),
+        );
 
         $result = new TeslaOdometerReader($vehicles)->read($this->app(), new Vin(FleetApiResponses::VIN));
 
@@ -65,7 +74,11 @@ final class TeslaOdometerReaderTest extends TestCase
 
     public function testOtherFailuresOfTheLiveCallAreNotHidden(): void
     {
-        $vehicles = $this->vehicles(VehicleState::Online, 1, FleetApiError::fromResponse(FleetApiOperation::VehicleData, FleetRegion::EuropeMiddleEastAfrica, 503, ''));
+        $vehicles = $this->vehicles(
+            VehicleState::Online,
+            1,
+            FleetApiError::fromResponse(FleetApiOperation::VehicleData, FleetRegion::EuropeMiddleEastAfrica, 503, ''),
+        );
 
         $this->expectException(FleetApiError::class);
 
@@ -84,7 +97,9 @@ final class TeslaOdometerReaderTest extends TestCase
         if ($dataFailure instanceof FleetApiError) {
             $data->willThrowException($dataFailure);
         } else {
-            $data->willReturn(new OdometerReading(Distance::fromKilometres(20000), CarbonImmutable::parse('2026-10-24 12:00:00 UTC')));
+            $data->willReturn(
+                new OdometerReading(Distance::fromKilometres(20000), CarbonImmutable::parse('2026-10-24 12:00:00 UTC'))
+            );
         }
 
         return $client;

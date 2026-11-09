@@ -19,8 +19,12 @@ final readonly class MileageRangeBuilder
     /**
      * @return non-empty-list<MileageRange>
      */
-    public function build(CarbonImmutable $start, CarbonImmutable $end, CarbonImmutable $now, bool $hasProjection): array
-    {
+    public function build(
+        CarbonImmutable $start,
+        CarbonImmutable $end,
+        CarbonImmutable $now,
+        bool $hasProjection,
+    ): array {
         $ranges = [];
 
         foreach ([

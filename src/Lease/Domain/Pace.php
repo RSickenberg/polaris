@@ -14,7 +14,9 @@ use Carbon\Constants\UnitValue;
  */
 final readonly class Pace
 {
-    public const int SECONDS_PER_DAY = UnitValue::HOURS_PER_DAY * UnitValue::MINUTES_PER_HOUR * UnitValue::SECONDS_PER_MINUTE;
+    public const int SECONDS_PER_DAY = UnitValue::HOURS_PER_DAY
+        * UnitValue::MINUTES_PER_HOUR
+        * UnitValue::SECONDS_PER_MINUTE;
 
     private function __construct(
         private float $metresPerDay,

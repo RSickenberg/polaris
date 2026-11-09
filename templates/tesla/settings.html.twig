@@ -3,7 +3,7 @@
 {% block title %}{{ 'page.title'|trans(domain='tesla') }}{% endblock %}
 
 {% block main %}
-    <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.title'|trans(domain='tesla') }}</h1>
+    <twig:Shared:PageHeader title="{{ 'page.title'|trans(domain='tesla') }}" />
 
 
     <div class="mt-6 flex flex-col gap-6">

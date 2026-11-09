@@ -16,7 +16,9 @@ final class HalfUp
     public static function scale(int $value, int $numerator, int $denominator): int
     {
         if ($value < 0 || $numerator < 0 || $denominator <= 0) {
-            throw new \InvalidArgumentException(\sprintf('Cannot scale %d x %d / %d.', $value, $numerator, $denominator));
+            throw new \InvalidArgumentException(
+                \sprintf('Cannot scale %d x %d / %d.', $value, $numerator, $denominator)
+            );
         }
 
         if (0 === $numerator || 0 === $value) {

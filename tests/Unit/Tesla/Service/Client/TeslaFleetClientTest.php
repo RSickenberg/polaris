@@ -61,7 +61,10 @@ final class TeslaFleetClientTest extends TestCase
 
     public function testTheStateOfAVehicleIsReadByVin(): void
     {
-        $state = $this->client([new MockResponse(FleetApiResponses::vehicle('online'))])->vehicleState($this->app(), new Vin(FleetApiResponses::VIN));
+        $state = $this->client([new MockResponse(FleetApiResponses::vehicle('online'))])->vehicleState(
+            $this->app(),
+            new Vin(FleetApiResponses::VIN),
+        );
 
         self::assertSame(VehicleState::Online, $state);
         self::assertSame(self::BASE_URL . '/api/1/vehicles/' . FleetApiResponses::VIN, $this->calls[0][1]);
@@ -69,17 +72,26 @@ final class TeslaFleetClientTest extends TestCase
 
     public function testTheOdometerIsConvertedFromMilesAndReadAtTeslasTimestamp(): void
     {
-        $reading = $this->client([new MockResponse(FleetApiResponses::vehicleData(980.388329))])->vehicleData($this->app(), new Vin(FleetApiResponses::VIN));
+        $reading = $this->client([new MockResponse(FleetApiResponses::vehicleData(980.388329))])->vehicleData(
+            $this->app(),
+            new Vin(FleetApiResponses::VIN),
+        );
 
         self::assertSame((int) round(980.388329 * 1609.344), $reading->odometer->metres());
-        self::assertEquals(CarbonImmutable::createFromTimestampMsUTC(FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS), $reading->readAt);
+        self::assertEquals(
+            CarbonImmutable::createFromTimestampMsUTC(FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS),
+            $reading->readAt,
+        );
         self::assertSame(0, $reading->readAt->getOffset());
         self::assertSame(FleetApiResponses::VEHICLE_DATA_TIMESTAMP_MS, (int) $reading->readAt->format('Uv'));
     }
 
     public function testTheAnswerIsKeptWithoutItsLocation(): void
     {
-        $reading = $this->client([new MockResponse(FleetApiResponses::vehicleData(980.388329))])->vehicleData($this->app(), new Vin(FleetApiResponses::VIN));
+        $reading = $this->client([new MockResponse(FleetApiResponses::vehicleData(980.388329))])->vehicleData(
+            $this->app(),
+            new Vin(FleetApiResponses::VIN),
+        );
 
         $charge = $reading->payload['charge_state'] ?? null;
         $vehicle = $reading->payload['vehicle_state'] ?? null;
@@ -87,13 +99,19 @@ final class TeslaFleetClientTest extends TestCase
         self::assertIsArray($vehicle);
         self::assertSame(76, $charge['battery_level'] ?? null);
         self::assertSame(980.388329, $vehicle['odometer'] ?? null);
-        self::assertSame(['shift_state' => null], $reading->payload['drive_state'] ?? null, 'No coordinates, no heading.');
+        self::assertSame(
+            ['shift_state' => null],
+            $reading->payload['drive_state'] ?? null,
+            'No coordinates, no heading.',
+        );
         self::assertStringNotContainsString('12.3456', json_encode($reading->payload, \JSON_THROW_ON_ERROR));
     }
 
     public function testWithoutATimestampTheClockIsTheReadTime(): void
     {
-        $reading = $this->client([new MockResponse(FleetApiResponses::vehicleData(12345.678, null))])->vehicleData($this->app(), new Vin(FleetApiResponses::VIN));
+        $reading = $this->client(
+            [new MockResponse(FleetApiResponses::vehicleData(12345.678, null))]
+        )->vehicleData($this->app(), new Vin(FleetApiResponses::VIN));
 
         self::assertSame((int) round(12345.678 * 1609.344), $reading->odometer->metres());
         self::assertEquals(CarbonImmutable::parse(self::NOW), $reading->readAt);
@@ -101,9 +119,15 @@ final class TeslaFleetClientTest extends TestCase
 
     public function testTheLiveCallSendsNoQuery(): void
     {
-        $this->client([new MockResponse(FleetApiResponses::vehicleData(1000))])->vehicleData($this->app(), new Vin(FleetApiResponses::VIN));
+        $this->client([new MockResponse(FleetApiResponses::vehicleData(1000))])->vehicleData(
+            $this->app(),
+            new Vin(FleetApiResponses::VIN),
+        );
 
-        self::assertSame(self::BASE_URL . '/api/1/vehicles/' . FleetApiResponses::VIN . '/vehicle_data', $this->calls[0][1]);
+        self::assertSame(
+            self::BASE_URL . '/api/1/vehicles/' . FleetApiResponses::VIN . '/vehicle_data',
+            $this->calls[0][1],
+        );
         self::assertStringNotContainsString('location_data', $this->calls[0][1]);
     }
 
@@ -243,7 +267,9 @@ final class TeslaFleetClientTest extends TestCase
 
     public function testTheAccessTokenNeverAppearsInAnErrorMessage(): void
     {
-        $client = $this->client([new MockResponse('{"error":"bad token ' . self::ACCESS_TOKEN . '"}', ['http_code' => 403])]);
+        $client = $this->client(
+            [new MockResponse('{"error":"bad token ' . self::ACCESS_TOKEN . '"}', ['http_code' => 403])]
+        );
 
         try {
             $client->vehicleState($this->app(), new Vin(FleetApiResponses::VIN));
@@ -280,11 +306,12 @@ final class TeslaFleetClientTest extends TestCase
      */
     private function client(array $responses, bool $connected = true, bool $stored = true): TeslaFleetClient
     {
-        $http = new MockHttpClient(function (string $method, string $url, array $options) use (&$responses): MockResponse {
+        $respond = function (string $method, string $url, array $options) use (&$responses): MockResponse {
             $this->calls[] = [$method, $url, $options];
 
             return array_shift($responses) ?? new MockResponse('{}', ['http_code' => 500]);
-        });
+        };
+        $http = new MockHttpClient($respond);
         $tokens = $this->createStub(TokenProvider::class);
 
         if ($connected) {
@@ -303,13 +330,27 @@ final class TeslaFleetClientTest extends TestCase
 
     private function app(): TeslaApp
     {
-        return new TeslaApp(new User('driver@example.test', 'not-a-real-hash', CarbonImmutable::parse(self::NOW)), 'public', 'v1:private', CarbonImmutable::parse(self::NOW));
+        return new TeslaApp(
+            new User('driver@example.test', 'not-a-real-hash', CarbonImmutable::parse(self::NOW)),
+            'public',
+            'v1:private',
+            CarbonImmutable::parse(self::NOW),
+        );
     }
 
     private function token(): OAuthToken
     {
         $now = CarbonImmutable::parse(self::NOW);
 
-        return new OAuthToken($this->app(), 'v1:a', 'v1:r', $now->addHours(2), 'openid', ConnectionMethod::OAuth, FleetRegion::EuropeMiddleEastAfrica->baseUrl(), $now);
+        return new OAuthToken(
+            $this->app(),
+            'v1:a',
+            'v1:r',
+            $now->addHours(2),
+            'openid',
+            ConnectionMethod::OAuth,
+            FleetRegion::EuropeMiddleEastAfrica->baseUrl(),
+            $now,
+        );
     }
 }

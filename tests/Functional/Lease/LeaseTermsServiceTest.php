@@ -12,6 +12,7 @@ use Polaris\Lease\Domain\RiskLevel;
 use Polaris\Lease\Entity\LeaseContract;
 use Polaris\Lease\Form\Model\LeaseContractData;
 use Polaris\Lease\Repository\LeaseContractRepository;
+use Polaris\Lease\Service\Enum\LeaseTermsRejection;
 use Polaris\Lease\Service\Exception\LeaseTermsRejected;
 use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Reading\Entity\OdometerReading;
@@ -49,7 +50,13 @@ final class LeaseTermsServiceTest extends KernelTestCase
         $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000040'), 'Model 3', self::createUser());
         $this->entityManager->persist($this->vehicle);
         // 10,000 km after 182 days of a one-year lease: about 20,000 km projected at the end.
-        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'), Distance::fromKilometres(10_000)));
+        $this->entityManager->persist(
+            OdometerReading::manual(
+                $this->vehicle,
+                CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'),
+                Distance::fromKilometres(10_000),
+            )
+        );
         $this->entityManager->flush();
     }
 
@@ -87,7 +94,10 @@ final class LeaseTermsServiceTest extends KernelTestCase
         self::assertSame(RiskLevel::Over, $before->riskLevel);
         self::assertSame(RiskLevel::Ok, $after->riskLevel);
         self::assertNotEquals($before->projectedExcess, $after->projectedExcess);
-        self::assertGreaterThan($before->projection->allowedToDate->metres(), $after->projection->allowedToDate->metres());
+        self::assertGreaterThan(
+            $before->projection->allowedToDate->metres(),
+            $after->projection->allowedToDate->metres(),
+        );
         self::assertSame($before->projection->projectedAtEnd->metres(), $after->projection->projectedAtEnd->metres());
 
         // One contract, edited in place.
@@ -112,7 +122,7 @@ final class LeaseTermsServiceTest extends KernelTestCase
             $this->service->save($this->vehicle, $data);
             self::fail('The terms must be refused.');
         } catch (LeaseTermsRejected $rejected) {
-            self::assertSame(LeaseTermsRejected::INCONSISTENT_READINGS, $rejected->getMessage());
+            self::assertSame(LeaseTermsRejection::InconsistentReadings, $rejected->reason);
         }
 
         $this->entityManager->clear();
@@ -128,22 +138,37 @@ final class LeaseTermsServiceTest extends KernelTestCase
 
         // The car is read again the next day and has not moved: only the verification is stored.
         self::mockTime('2026-07-03 12:00:00 UTC');
-        $recording = self::getContainer()->get(OdometerReadingService::class)->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-07-03 12:00:00', 'UTC'), Distance::fromKilometres(10_000));
+        $recording = self::getContainer()->get(OdometerReadingService::class)->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-07-03 12:00:00', 'UTC'),
+            Distance::fromKilometres(10_000),
+        );
         self::assertSame(RecordOutcome::Unchanged, $recording->outcome);
         $after = $this->service->assess($this->vehicle);
 
         self::assertInstanceOf(LeaseAssessment::class, $after);
         self::assertSame('2026-07-03T12:00:00+00:00', $after->projection->asOf->toIso8601String());
         self::assertSame($before->projection->driven->metres(), $after->projection->driven->metres());
-        self::assertGreaterThan($before->projection->allowedToDate->metres(), $after->projection->allowedToDate->metres());
-        self::assertGreaterThan($before->projection->margin->metres(), $after->projection->margin->metres(), 'A day without driving: the margin grows.');
+        self::assertGreaterThan(
+            $before->projection->allowedToDate->metres(),
+            $after->projection->allowedToDate->metres(),
+        );
+        self::assertGreaterThan(
+            $before->projection->margin->metres(),
+            $after->projection->margin->metres(),
+            'A day without driving: the margin grows.',
+        );
     }
 
     public function testAVerificationThatALaterReadingContradictsIsIgnored(): void
     {
         $readings = self::getContainer()->get(OdometerReadingService::class);
         self::mockTime('2026-07-03 12:00:00 UTC');
-        $readings->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-07-03 12:00:00', 'UTC'), Distance::fromKilometres(10_000));
+        $readings->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-07-03 12:00:00', 'UTC'),
+            Distance::fromKilometres(10_000),
+        );
         // A reading typed in between, at a higher odometer, makes the verification impossible.
         $data = new OdometerReadingData();
         $data->readAt = CarbonImmutable::parse('2026-07-03 08:00:00', 'UTC');

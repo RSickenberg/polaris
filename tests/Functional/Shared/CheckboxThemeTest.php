@@ -25,8 +25,14 @@ final class CheckboxThemeTest extends KernelTestCase
 
         $boxes = $crawler->filter('[data-slot=checkbox] input[type=checkbox][name="form[regions][]"]');
         self::assertCount(3, $boxes);
-        self::assertSame(['form[regions][]'], array_values(array_unique($boxes->each(static fn (Crawler $box): string => (string) $box->attr('name')))));
-        self::assertSame(['a', 'b', 'c'], $boxes->each(static fn (Crawler $box): string => (string) $box->attr('value')));
+        self::assertSame(
+            ['form[regions][]'],
+            array_values(array_unique($boxes->each(static fn (Crawler $box): string => (string) $box->attr('name')))),
+        );
+        self::assertSame(
+            ['a', 'b', 'c'],
+            $boxes->each(static fn (Crawler $box): string => (string) $box->attr('value')),
+        );
         self::assertCount(1, $crawler->filter('input[name="form[regions][]"][checked]'));
         self::assertSame('b', $crawler->filter('input[name="form[regions][]"][checked]')->attr('value'));
         // Only a choice that is ticked counts: browsers would demand every box if each carried `required`.
@@ -39,7 +45,11 @@ final class CheckboxThemeTest extends KernelTestCase
     {
         $crawler = $this->render([]);
 
-        foreach ($crawler->filter('[data-slot=checkbox] input')->each(static fn (Crawler $box): string => (string) $box->attr('id')) as $id) {
+        foreach (
+            $crawler->filter('[data-slot=checkbox] input')->each(
+                static fn (Crawler $box): string => (string) $box->attr('id')
+            ) as $id
+        ) {
             $label = $crawler->filter(\sprintf('label[for="%s"]', $id));
             self::assertCount(1, $label);
             self::assertCount(0, $label->filter('.text-destructive'));

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polaris\Vehicle\Controller;
 
 use Doctrine\ORM\Exception\ORMException;
+use Polaris\Shared\Service\Enum\ToastVariant;
 use Polaris\Vehicle\Entity\Vehicle;
 use Polaris\Vehicle\Form\Model\VehicleDataImportFormData;
 use Polaris\Vehicle\Form\VehicleDataImportType;
@@ -24,8 +25,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * Saves the data of a vehicle to a file and brings a file back: the lease, the odometer readings and the daily snapshots.
- * See {@see VehicleDataExporter} and {@see VehicleDataImporter}.
+ * Saves the data of a vehicle to a file and brings a file back: the lease, the odometer readings and the daily
+ * snapshots. See {@see VehicleDataExporter} and {@see VehicleDataImporter}.
  */
 final class VehicleDataController extends AbstractController
 {
@@ -53,12 +54,12 @@ final class VehicleDataController extends AbstractController
 
             try {
                 $result = $this->importer->import($vehicle, $data->file?->getContent() ?? '');
-                $this->addFlash('success', $this->summary($result));
+                $this->addFlash(ToastVariant::Success->value, $this->summary($result));
 
                 return $this->redirectToRoute('vehicle_data', ['id' => $vehicle->getId()->toBase32()]);
             } catch (VehicleDataRejected $rejected) {
-                $parameters = ['%detail%' => $rejected->getMessage()];
-                $message = $this->translator->trans($rejected->reason, $parameters, 'vehicle');
+                $parameters = ['%detail%' => $rejected->detail];
+                $message = $this->translator->trans($rejected->reason->value, $parameters, 'vehicle');
                 $form->get('file')->addError(new FormError($message));
             }
         }

@@ -37,7 +37,9 @@ final class PasswordResetTest extends WebTestCase
         $this->client = self::createClient();
         $this->client->disableReboot();
         self::getContainer()->get('cache.rate_limiter')->clear();
-        $this->user = self::getContainer()->get(UserCreator::class)->create(new NewUser('jane.doe@example.test', self::PASSWORD));
+        $this->user = self::getContainer()->get(UserCreator::class)->create(
+            new NewUser('jane.doe@example.test', self::PASSWORD)
+        );
     }
 
     protected function tearDown(): void
@@ -64,7 +66,10 @@ final class PasswordResetTest extends WebTestCase
         self::assertEmailAddressContains($email, 'To', 'jane.doe@example.test');
         self::assertEmailAddressContains($email, 'From', 'polaris@localhost');
         self::assertSame('Reset your Polaris password', $email->getSubject());
-        self::assertMatchesRegularExpression('#^' . preg_quote($this->publicUrl(), '#') . '/reset-password/[A-Za-z0-9_-]{63}$#', $this->link($email));
+        self::assertMatchesRegularExpression(
+            '#^' . preg_quote($this->publicUrl(), '#') . '/reset-password/[A-Za-z0-9_-]{63}$#',
+            $this->link($email),
+        );
         self::assertStringContainsString($this->link($email), (string) $email->getTextBody());
     }
 
@@ -81,7 +86,11 @@ final class PasswordResetTest extends WebTestCase
     public function testTheLinkIsBuiltFromTheConfiguredAddressNotTheHostHeader(): void
     {
         $this->client->request('GET', '/forgot-password', server: ['HTTP_HOST' => 'evil.example']);
-        $this->client->submitForm('Send the link', ['forgot_password[email]' => 'jane.doe@example.test'], serverParameters: ['HTTP_HOST' => 'evil.example']);
+        $this->client->submitForm(
+            'Send the link',
+            ['forgot_password[email]' => 'jane.doe@example.test'],
+            serverParameters: ['HTTP_HOST' => 'evil.example'],
+        );
 
         $email = self::getMailerMessage();
         self::assertInstanceOf(Email::class, $email);
@@ -168,7 +177,11 @@ final class PasswordResetTest extends WebTestCase
         ]);
 
         $this->client->request('GET', '/login');
-        $this->client->submitForm('Sign in', ['_username' => 'jane.doe@example.test', '_password' => self::NEW_PASSWORD], serverParameters: ['HTTP_ORIGIN' => 'http://localhost']);
+        $this->client->submitForm(
+            'Sign in',
+            ['_username' => 'jane.doe@example.test', '_password' => self::NEW_PASSWORD],
+            serverParameters: ['HTTP_ORIGIN' => 'http://localhost'],
+        );
 
         self::assertResponseRedirects('/');
     }
@@ -215,7 +228,12 @@ final class PasswordResetTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(422);
         self::assertSelectorTextContains('[data-slot=field-error]', 'The two passwords do not match.');
-        self::assertTrue(self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid($this->stored(), self::PASSWORD));
+        self::assertTrue(
+            self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid(
+                $this->stored(),
+                self::PASSWORD,
+            )
+        );
         $this->client->request('GET', $this->path($link));
         self::assertResponseIsSuccessful();
     }
@@ -231,7 +249,12 @@ final class PasswordResetTest extends WebTestCase
         ]);
 
         self::assertResponseStatusCodeSame(422);
-        self::assertTrue(self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid($this->stored(), self::PASSWORD));
+        self::assertTrue(
+            self::getContainer()->get(UserPasswordHasherInterface::class)->isPasswordValid(
+                $this->stored(),
+                self::PASSWORD,
+            )
+        );
     }
 
     public function testChangingThePasswordInTheSettingsCancelsPendingLinks(): void
@@ -249,7 +272,13 @@ final class PasswordResetTest extends WebTestCase
 
         $this->client->request('GET', $this->path($link));
         self::assertResponseStatusCodeSame(404);
-        self::assertCount(0, self::getContainer()->get(EntityManagerInterface::class)->getRepository(PasswordResetRequest::class)->findAll());
+        self::assertCount(
+            0,
+            self::getContainer()
+                ->get(EntityManagerInterface::class)
+                ->getRepository(PasswordResetRequest::class)
+                ->findAll(),
+        );
     }
 
     public function testTheSixthRequestFromTheSameAddressIsRefused(): void
@@ -271,7 +300,9 @@ final class PasswordResetTest extends WebTestCase
         $link = $this->link(self::getMailerMessage() ?? self::fail());
         $token = substr($link, -63);
 
-        $stored = self::getContainer()->get(EntityManagerInterface::class)->getConnection()->fetchAllAssociative('SELECT selector, hashed_verifier FROM password_reset_request');
+        $stored = self::getContainer()->get(EntityManagerInterface::class)->getConnection()->fetchAllAssociative(
+            'SELECT selector, hashed_verifier FROM password_reset_request'
+        );
 
         self::assertCount(1, $stored);
         self::assertSame(substr($token, 0, 20), $stored[0]['selector']);
@@ -287,7 +318,10 @@ final class PasswordResetTest extends WebTestCase
     private function link(Email|\Symfony\Component\Mime\RawMessage $email): string
     {
         self::assertInstanceOf(Email::class, $email);
-        self::assertSame(1, preg_match('#href="([^"]+/reset-password/[^"]+)"#', (string) $email->getHtmlBody(), $matches));
+        self::assertSame(
+            1,
+            preg_match('#href="([^"]+/reset-password/[^"]+)"#', (string) $email->getHtmlBody(), $matches),
+        );
 
         return $matches[1];
     }

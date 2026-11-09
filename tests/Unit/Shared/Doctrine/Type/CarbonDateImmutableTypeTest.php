@@ -52,7 +52,10 @@ final class CarbonDateImmutableTypeTest extends TestCase
 
     public function testWritesTheCalendarDate(): void
     {
-        self::assertSame('2028-02-29', $this->type->convertToDatabaseValue(CarbonImmutable::parse('2028-02-29', 'UTC'), $this->platform));
+        self::assertSame(
+            '2028-02-29',
+            $this->type->convertToDatabaseValue(CarbonImmutable::parse('2028-02-29', 'UTC'), $this->platform),
+        );
     }
 
     /**

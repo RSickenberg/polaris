@@ -27,7 +27,9 @@ final class VehicleImportType extends AbstractType
         $choices = [];
 
         foreach ($candidates as $candidate) {
-            $choices[\sprintf('%s (%s)', $candidate->name(), $candidate->summary->vin->value())] = $candidate->summary->vin->value();
+            $choices[
+                \sprintf('%s (%s)', $candidate->name(), $candidate->summary->vin->value())
+            ] = $candidate->summary->vin->value();
         }
 
         $builder

@@ -26,7 +26,12 @@ trait TeslaFixtures
         $encrypter = self::getContainer()->get(SecretEncrypter::class);
 
         $app = new TeslaApp($owner, 'public key', 'v1:private', CarbonImmutable::parse('2026-10-20 12:00:00 UTC'));
-        $app->configure('fake-client-id', $encrypter->encrypt('fake-client-secret'), AppDomain::fromString('polaris.example.com'), [FleetRegion::EuropeMiddleEastAfrica]);
+        $app->configure(
+            'fake-client-id',
+            $encrypter->encrypt('fake-client-secret'),
+            AppDomain::fromString('polaris.example.com'),
+            [FleetRegion::EuropeMiddleEastAfrica],
+        );
         if ($consent) {
             $app->giveConsent(CarbonImmutable::parse('2026-10-24 09:00:00 UTC'));
         }
@@ -36,8 +41,13 @@ trait TeslaFixtures
         return $app;
     }
 
-    private static function createToken(TeslaApp $app, CarbonImmutable $expiresAt, string $access = 'stored-access', string $refresh = 'stored-refresh', string $scopes = 'openid offline_access vehicle_device_data'): OAuthToken
-    {
+    private static function createToken(
+        TeslaApp $app,
+        CarbonImmutable $expiresAt,
+        string $access = 'stored-access',
+        string $refresh = 'stored-refresh',
+        string $scopes = 'openid offline_access vehicle_device_data',
+    ): OAuthToken {
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $encrypter = self::getContainer()->get(SecretEncrypter::class);
 

@@ -67,10 +67,13 @@ final readonly class MileageSeriesBuilder
 
             $metres = $sample->odometer()->metres() - $startOdometer->metres();
             if ($metres < 0) {
-                throw new \InvalidArgumentException(\sprintf('The odometer of %s is below the start odometer.', $at->toIso8601String()));
+                throw new \InvalidArgumentException(
+                    \sprintf('The odometer of %s is below the start odometer.', $at->toIso8601String())
+                );
             }
 
-            // Two readings of the same second keep the later one given; the projection refuses a disagreement before this.
+            // Two readings of the same second keep the later one given; the projection refuses a disagreement before
+            // this.
             $driven[$at->getTimestamp()] = new MileagePoint($at, Distance::fromMetres($metres));
         }
 

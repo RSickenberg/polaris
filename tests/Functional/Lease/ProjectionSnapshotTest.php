@@ -21,6 +21,7 @@ use Polaris\Lease\Repository\LeaseContractRepository;
 use Polaris\Lease\Repository\ProjectionSnapshotRepository;
 use Polaris\Lease\Service\Dto\ProjectionSnapshotPoint;
 use Polaris\Lease\Service\Enum\SnapshotOutcome;
+use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Lease\Service\ProjectionHistoryService;
 use Polaris\Lease\Service\ProjectionSnapshotService;
@@ -107,7 +108,13 @@ final class ProjectionSnapshotTest extends KernelTestCase
     public function testRunningTwiceForTheSameMidnightLeavesOneRowAndTheLastWins(): void
     {
         $this->snapshots->save($this->vehicle, $this->midnight());
-        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-02 12:30:00', 'UTC'), Distance::fromKilometres(10_100)));
+        $this->entityManager->persist(
+            OdometerReading::manual(
+                $this->vehicle,
+                CarbonImmutable::parse('2026-07-02 12:30:00', 'UTC'),
+                Distance::fromKilometres(10_100),
+            )
+        );
         $this->entityManager->flush();
         self::mockTime('2026-07-03 14:00:00 UTC');
 
@@ -158,7 +165,10 @@ final class ProjectionSnapshotTest extends KernelTestCase
     {
         $this->snapshots->save($this->vehicle, $this->midnight());
         // Returned on 2 July: the car counts as returned from the start of the 3rd, which is the midnight of the 3rd.
-        $this->leases->markReturned($this->vehicle, new \DateTimeImmutable('2026-07-02'));
+        self::getContainer()->get(LeaseReturnService::class)->markReturned(
+            $this->vehicle,
+            new \DateTimeImmutable('2026-07-02'),
+        );
 
         self::assertSame(SnapshotOutcome::SkippedReturned, $this->snapshots->save($this->vehicle, $this->midnight()));
 
@@ -168,10 +178,19 @@ final class ProjectionSnapshotTest extends KernelTestCase
     public function testReadingsThatContradictTheTermsAreSkippedNotFatal(): void
     {
         // An earlier reading with a higher odometer than the later one: the projection refuses it.
-        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-02 11:00:00', 'UTC'), Distance::fromKilometres(11_000)));
+        $this->entityManager->persist(
+            OdometerReading::manual(
+                $this->vehicle,
+                CarbonImmutable::parse('2026-07-02 11:00:00', 'UTC'),
+                Distance::fromKilometres(11_000),
+            )
+        );
         $this->entityManager->flush();
 
-        self::assertSame(SnapshotOutcome::SkippedNotAssessable, $this->snapshots->save($this->vehicle, $this->midnight()));
+        self::assertSame(
+            SnapshotOutcome::SkippedNotAssessable,
+            $this->snapshots->save($this->vehicle, $this->midnight()),
+        );
         self::assertSame([], $this->rows());
     }
 
@@ -182,7 +201,13 @@ final class ProjectionSnapshotTest extends KernelTestCase
         // A repository that misses the existing row, as if another writer stored it after the lookup.
         $blind = $this->createStub(ProjectionSnapshotRepository::class);
         $blind->method('findForDay')->willReturn(null);
-        $service = new ProjectionSnapshotService($this->leases, $blind, $this->entityManager, $container->get(LockFactory::class), $container->get(ClockInterface::class));
+        $service = new ProjectionSnapshotService(
+            $this->leases,
+            $blind,
+            $this->entityManager,
+            $container->get(LockFactory::class),
+            $container->get(ClockInterface::class),
+        );
 
         self::assertSame(SnapshotOutcome::Concurrent, $service->save($this->vehicle, $this->midnight()));
     }
@@ -191,7 +216,10 @@ final class ProjectionSnapshotTest extends KernelTestCase
     {
         $contract = $this->leases->find($this->vehicle);
         \assert(null !== $contract);
-        $lock = self::getContainer()->get(LockFactory::class)->createLock('lease_snapshot_' . $contract->getId()->toBase32(), 60);
+        $lock = self::getContainer()->get(LockFactory::class)->createLock(
+            'lease_snapshot_' . $contract->getId()->toBase32(),
+            60,
+        );
         self::assertTrue($lock->acquire());
 
         try {
@@ -201,7 +229,11 @@ final class ProjectionSnapshotTest extends KernelTestCase
         }
 
         self::assertSame([], $this->rows());
-        self::assertSame(SnapshotOutcome::Saved, $this->snapshots->save($this->vehicle, $this->midnight()), 'The lock was released.');
+        self::assertSame(
+            SnapshotOutcome::Saved,
+            $this->snapshots->save($this->vehicle, $this->midnight()),
+            'The lock was released.',
+        );
     }
 
     public function testTheHistoryIsOrderedByDayWithTypedFigures(): void
@@ -232,7 +264,11 @@ final class ProjectionSnapshotTest extends KernelTestCase
         }
         $history = $this->history();
 
-        $between = $history->history($this->vehicle, CarbonImmutable::parse('2026-07-04 15:00:00', 'UTC'), CarbonImmutable::parse('2026-07-05', 'UTC'));
+        $between = $history->history(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-07-04 15:00:00', 'UTC'),
+            CarbonImmutable::parse('2026-07-05', 'UTC'),
+        );
 
         self::assertSame(['2026-07-04', '2026-07-05'], $this->days($between));
         self::assertSame([], $history->history($this->vehicle('5YJ3E7EB2NF000093', 1_000)));
@@ -265,7 +301,10 @@ final class ProjectionSnapshotTest extends KernelTestCase
         sort($expected);
         self::assertSame($expected, $queuedFor, 'The owner\'s two leases, not the stranger\'s.');
         self::assertSame('2026-07-03', $sent[0]->localDay);
-        self::assertSame(CarbonImmutable::parse('2026-07-03 00:00:00', 'UTC')->getTimestamp(), $sent[0]->midnightTimestamp);
+        self::assertSame(
+            CarbonImmutable::parse('2026-07-03 00:00:00', 'UTC')->getTimestamp(),
+            $sent[0]->midnightTimestamp,
+        );
     }
 
     public function testTheSaveHandlerSavesQueuesABusyOneOnceMoreAndIgnoresAnUnknownVehicle(): void
@@ -273,18 +312,39 @@ final class ProjectionSnapshotTest extends KernelTestCase
         $handler = self::getContainer()->get(SaveProjectionSnapshotHandler::class);
         $this->asyncTransport();
 
-        $handler(new SaveProjectionSnapshot($this->vehicle->getId()->toRfc4122(), '2026-07-03', $this->midnight()->at->getTimestamp()));
-        $handler(new SaveProjectionSnapshot('01JZZZZZZZZZZZZZZZZZZZZZZZ', '2026-07-03', $this->midnight()->at->getTimestamp()));
+        $handler(
+            new SaveProjectionSnapshot(
+                $this->vehicle->getId()->toRfc4122(),
+                '2026-07-03',
+                $this->midnight()->at->getTimestamp(),
+            )
+        );
+        $handler(
+            new SaveProjectionSnapshot(
+                '01JZZZZZZZZZZZZZZZZZZZZZZZ',
+                '2026-07-03',
+                $this->midnight()->at->getTimestamp(),
+            )
+        );
         self::assertCount(1, $this->rows());
         self::assertSame([], $this->sent());
 
         $contract = $this->leases->find($this->vehicle);
         \assert(null !== $contract);
-        $lock = self::getContainer()->get(LockFactory::class)->createLock('lease_snapshot_' . $contract->getId()->toBase32(), 60);
+        $lock = self::getContainer()->get(LockFactory::class)->createLock(
+            'lease_snapshot_' . $contract->getId()->toBase32(),
+            60,
+        );
         self::assertTrue($lock->acquire());
 
         try {
-            $handler(new SaveProjectionSnapshot($this->vehicle->getId()->toRfc4122(), '2026-07-03', $this->midnight()->at->getTimestamp()));
+            $handler(
+                new SaveProjectionSnapshot(
+                    $this->vehicle->getId()->toRfc4122(),
+                    '2026-07-03',
+                    $this->midnight()->at->getTimestamp(),
+                )
+            );
             self::assertCount(1, $this->sent());
             $retry = $this->sent()[0];
             self::assertInstanceOf(SaveProjectionSnapshot::class, $retry);
@@ -304,10 +364,16 @@ final class ProjectionSnapshotTest extends KernelTestCase
         $tester = $this->tester();
 
         self::assertSame(Command::SUCCESS, $tester->execute([]));
-        self::assertStringContainsString('1 saved, 0 already there (updated), 1 skipped (1 no data).', $tester->getDisplay());
+        self::assertStringContainsString(
+            '1 saved, 0 already there (updated), 1 skipped (1 no data).',
+            $tester->getDisplay(),
+        );
 
         self::assertSame(Command::SUCCESS, $tester->execute([]));
-        self::assertStringContainsString('0 saved, 1 already there (updated), 1 skipped (1 no data).', $tester->getDisplay());
+        self::assertStringContainsString(
+            '0 saved, 1 already there (updated), 1 skipped (1 no data).',
+            $tester->getDisplay(),
+        );
         self::assertCount(1, $this->rows());
     }
 
@@ -324,8 +390,20 @@ final class ProjectionSnapshotTest extends KernelTestCase
 
     public function testOnlyTheReadingsUpToTheMidnightCount(): void
     {
-        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-02 23:59:59', 'UTC'), Distance::fromKilometres(10_050)));
-        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-03 00:00:01', 'UTC'), Distance::fromKilometres(10_100)));
+        $this->entityManager->persist(
+            OdometerReading::manual(
+                $this->vehicle,
+                CarbonImmutable::parse('2026-07-02 23:59:59', 'UTC'),
+                Distance::fromKilometres(10_050),
+            )
+        );
+        $this->entityManager->persist(
+            OdometerReading::manual(
+                $this->vehicle,
+                CarbonImmutable::parse('2026-07-03 00:00:01', 'UTC'),
+                Distance::fromKilometres(10_100),
+            )
+        );
         $this->entityManager->flush();
 
         // The job runs late, after both readings are stored: the figures are still those of the midnight.
@@ -340,7 +418,13 @@ final class ProjectionSnapshotTest extends KernelTestCase
 
     public function testAReadingAtTheMidnightItselfCounts(): void
     {
-        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-03 00:00:00', 'UTC'), Distance::fromKilometres(10_100)));
+        $this->entityManager->persist(
+            OdometerReading::manual(
+                $this->vehicle,
+                CarbonImmutable::parse('2026-07-03 00:00:00', 'UTC'),
+                Distance::fromKilometres(10_100),
+            )
+        );
         $this->entityManager->flush();
 
         $this->snapshots->save($this->vehicle, $this->midnight());
@@ -350,7 +434,8 @@ final class ProjectionSnapshotTest extends KernelTestCase
 
     public function testAVerificationRunningPastTheMidnightIsCutThere(): void
     {
-        $reading = $this->entityManager->getRepository(OdometerReading::class)->findOneBy(['vehicle' => $this->vehicle]);
+        $readings = $this->entityManager->getRepository(OdometerReading::class);
+        $reading = $readings->findOneBy(['vehicle' => $this->vehicle]);
         \assert($reading instanceof OdometerReading);
         self::mockTime('2026-07-03 09:00:00 UTC');
         $reading->verify(CarbonImmutable::parse('2026-07-03 08:00:00', 'UTC'));
@@ -359,7 +444,11 @@ final class ProjectionSnapshotTest extends KernelTestCase
         $this->snapshots->save($this->vehicle, $this->midnight());
 
         $row = $this->rows()[0];
-        self::assertSame('2026-07-03T00:00:00+00:00', $row->getAsOf()->toIso8601String(), 'The car still had that odometer at the midnight, not after it.');
+        self::assertSame(
+            '2026-07-03T00:00:00+00:00',
+            $row->getAsOf()->toIso8601String(),
+            'The car still had that odometer at the midnight, not after it.',
+        );
         self::assertSame(10_000_000, $row->getDriven()->metres());
     }
 
@@ -370,10 +459,23 @@ final class ProjectionSnapshotTest extends KernelTestCase
         $assessment = $this->leases->assessAt($this->vehicle, $this->midnight()->at);
         self::assertInstanceOf(LeaseAssessment::class, $assessment);
         $row = $this->rows()[0];
-        // The driver binds a float with 14 significant digits (PHP `precision`), so the stored pace is equal to within 1e-9 m/day.
-        self::assertEqualsWithDelta($assessment->projection->blendedPace->metresPerDay(), $row->getBlendedPace()?->metresPerDay(), 1e-6);
-        self::assertEqualsWithDelta($assessment->projection->overallPace->metresPerDay(), $row->getOverallPace()?->metresPerDay(), 1e-6);
-        self::assertEqualsWithDelta($assessment->projection->recentPace?->metresPerDay(), $row->getRecentPace()?->metresPerDay(), 1e-6);
+        // The driver binds a float with 14 significant digits (PHP `precision`), so the stored pace is equal to within
+        // 1e-9 m/day.
+        self::assertEqualsWithDelta(
+            $assessment->projection->blendedPace->metresPerDay(),
+            $row->getBlendedPace()?->metresPerDay(),
+            1e-6,
+        );
+        self::assertEqualsWithDelta(
+            $assessment->projection->overallPace->metresPerDay(),
+            $row->getOverallPace()?->metresPerDay(),
+            1e-6,
+        );
+        self::assertEqualsWithDelta(
+            $assessment->projection->recentPace?->metresPerDay(),
+            $row->getRecentPace()?->metresPerDay(),
+            1e-6,
+        );
         self::assertNotNull($row->getRecentPace(), 'More than 30 days into the lease.');
     }
 
@@ -384,24 +486,45 @@ final class ProjectionSnapshotTest extends KernelTestCase
         $data->startDate = new \DateTimeImmutable('2026-06-20');
         $data->endDate = new \DateTimeImmutable('2027-06-20');
         $this->leases->save($young, $data);
-        $this->entityManager->persist(OdometerReading::manual($young, CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'), Distance::fromKilometres(500)));
+        $this->entityManager->persist(
+            OdometerReading::manual(
+                $young,
+                CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'),
+                Distance::fromKilometres(500),
+            )
+        );
         $this->entityManager->flush();
 
         self::assertSame(SnapshotOutcome::Saved, $this->snapshots->save($young, $this->midnight()));
 
         $contract = $this->leases->find($young);
-        $row = $this->entityManager->getRepository(ProjectionSnapshot::class)->findOneBy(['leaseContract' => $contract]);
+        $snapshots = $this->entityManager->getRepository(ProjectionSnapshot::class);
+        $row = $snapshots->findOneBy(['leaseContract' => $contract]);
         self::assertInstanceOf(ProjectionSnapshot::class, $row);
         self::assertNull($row->getRecentPace());
-        self::assertEqualsWithDelta($row->getOverallPace()?->metresPerDay(), $row->getBlendedPace()?->metresPerDay(), 1e-6);
+        self::assertEqualsWithDelta(
+            $row->getOverallPace()?->metresPerDay(),
+            $row->getBlendedPace()?->metresPerDay(),
+            1e-6,
+        );
     }
 
     public function testAReturnAfterTheMidnightDoesNotStopThatMidnightFromBeingSnapshotted(): void
     {
-        // Returned on the 2nd (counts as returned from the start of the 3rd); the snapshot of the midnight that opens the 2nd is late.
-        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-01 12:00:00', 'UTC'), Distance::fromKilometres(5_000)));
+        // Returned on the 2nd (counts as returned from the start of the 3rd); the snapshot of the midnight that opens
+        // the 2nd is late.
+        $this->entityManager->persist(
+            OdometerReading::manual(
+                $this->vehicle,
+                CarbonImmutable::parse('2026-07-01 12:00:00', 'UTC'),
+                Distance::fromKilometres(5_000),
+            )
+        );
         $this->entityManager->flush();
-        $this->leases->markReturned($this->vehicle, new \DateTimeImmutable('2026-07-02'));
+        self::getContainer()->get(LeaseReturnService::class)->markReturned(
+            $this->vehicle,
+            new \DateTimeImmutable('2026-07-02'),
+        );
 
         self::assertSame(SnapshotOutcome::Saved, $this->snapshots->save($this->vehicle, $this->midnight('2026-07-02')));
 
@@ -412,7 +535,8 @@ final class ProjectionSnapshotTest extends KernelTestCase
 
     public function testTheLocalDayAndTheCutoffFollowTheOwnersTimeZone(): void
     {
-        // Midnight of the 3rd in Zurich (UTC+2 in summer) is 22:00 UTC on the 2nd; the reading of 12:00 UTC on the 2nd is before it.
+        // Midnight of the 3rd in Zurich (UTC+2 in summer) is 22:00 UTC on the 2nd; the reading of 12:00 UTC on the 2nd
+        // is before it.
         $midnight = $this->midnight('2026-07-03', 'Europe/Zurich');
 
         $this->snapshots->save($this->vehicle, $midnight);
@@ -435,7 +559,10 @@ final class ProjectionSnapshotTest extends KernelTestCase
     {
         $container = self::getContainer();
 
-        return new ProjectionHistoryService($container->get(LeaseContractRepository::class), $container->get(ProjectionSnapshotRepository::class));
+        return new ProjectionHistoryService(
+            $container->get(LeaseContractRepository::class),
+            $container->get(ProjectionSnapshotRepository::class),
+        );
     }
 
     private function tester(): CommandTester
@@ -493,7 +620,13 @@ final class ProjectionSnapshotTest extends KernelTestCase
         $this->entityManager->persist($vehicle);
 
         if (null !== $odometerKm) {
-            $this->entityManager->persist(OdometerReading::manual($vehicle, CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'), Distance::fromKilometres($odometerKm)));
+            $this->entityManager->persist(
+                OdometerReading::manual(
+                    $vehicle,
+                    CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'),
+                    Distance::fromKilometres($odometerKm),
+                )
+            );
         }
 
         $this->entityManager->flush();

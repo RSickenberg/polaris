@@ -79,7 +79,10 @@ final readonly class PasswordResetService
         $this->entityManager->persist(new PasswordResetRequest($user, $token, $now));
         $this->entityManager->flush();
 
-        $url = rtrim($this->publicUrl, '/') . $this->urlGenerator->generate('account_reset_password', ['token' => $token->toString()]);
+        $url = rtrim($this->publicUrl, '/') . $this->urlGenerator->generate(
+            'account_reset_password',
+            ['token' => $token->toString()],
+        );
         $message = new TemplatedEmail()
             ->from(Address::create($this->from))
             ->to($user->getEmail())
@@ -107,7 +110,11 @@ final readonly class PasswordResetService
         }
 
         $request = $this->requests->findBySelector($token->selector());
-        if (null === $request || !$request->isFor($token) || $request->isExpired(CarbonImmutable::instance($this->clock->now()))) {
+        if (
+            null === $request
+            || !$request->isFor($token)
+            || $request->isExpired(CarbonImmutable::instance($this->clock->now()))
+        ) {
             return null;
         }
 

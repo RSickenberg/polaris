@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace Polaris\Lease\Service\Exception;
 
+use Polaris\Lease\Service\Enum\LeaseReturnRejection;
+
 /**
- * The car cannot be marked as returned on that date. Nothing was saved. The message is the
- * translation key (domain "lease") the caller shows.
+ * The car cannot be marked as returned on that day. Nothing was saved. The message is an English fallback;
+ * callers translate {@see $reason}.
  */
 final class LeaseReturnRejected extends \RuntimeException
 {
-    public const string NO_CONTRACT = 'rejected.return_no_contract';
-    public const string BEFORE_START = 'rejected.return_before_start';
-    public const string IN_FUTURE = 'rejected.return_in_future';
-
-    public function __construct(string $key)
+    public function __construct(public readonly LeaseReturnRejection $reason)
     {
-        parent::__construct($key);
+        parent::__construct(\sprintf('The return of the car was rejected: %s.', $reason->name));
     }
 }

@@ -31,7 +31,11 @@ final class ProjectionCalculatorServiceTest extends KernelTestCase
         // Recent (19,000,000 - 15,400,000) / 30 = 120,000 m/day, overall 9,000,000 / 100 = 90,000 m/day:
         // 0.6 x 120,000 + 0.4 x 90,000 = 108,000 m/day.
         $projection = $calculator->calculate(
-            new LeaseTerm(new CarbonImmutable('2026-01-01', 'UTC'), new CarbonImmutable('2027-01-01', 'UTC'), EndDateConvention::Exclusive),
+            new LeaseTerm(
+                new CarbonImmutable('2026-01-01', 'UTC'),
+                new CarbonImmutable('2027-01-01', 'UTC'),
+                EndDateConvention::Exclusive,
+            ),
             Allowance::ofTotal(Distance::fromKilometres(36_500)),
             Distance::fromKilometres(10_000),
             [

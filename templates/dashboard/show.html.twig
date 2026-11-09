@@ -1,7 +1,8 @@
 {% extends 'base.html.twig' %}
 
 {% set id = vehicle.id.toBase32() %}
-{% set state = dashboard.state.value %}
+{% set state = dashboard.state %}
+{% set states = enum('Polaris\\Dashboard\\Service\\Enum\\DashboardState') %}
 {% set km = enum('Polaris\\Shared\\Domain\\DistanceUnit').Kilometre %}
 
 {# A refresh after a fetch morphs the page in place and keeps the scroll, see dashboard_refresh_controller.js. #}
@@ -13,29 +14,26 @@
 {% block title %}{{ 'page.title'|trans(domain='dashboard') }} | {{ vehicle.name }}{% endblock %}
 
 {% block main %}
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-        <h1 class="text-2xl font-semibold tracking-tight">{{ 'page.title'|trans(domain='dashboard') }} <span class="font-normal text-muted-foreground">| {{ vehicle.name }}</span></h1>
-        {% if state not in ['no_lease', 'no_reading', 'draft', 'ended', 'returned'] %}
+    <twig:Shared:PageHeader title="{{ 'page.title'|trans(domain='dashboard') }}" subject="{{ vehicle.name }}">
+        {% if state.canRefresh %}
             <twig:Fetching:OdometerRefreshButton :vehicleId="vehicle.id.toRfc4122()" class="flex w-full shrink-0 flex-col sm:w-auto" />
         {% endif %}
-    </div>
+    </twig:Shared:PageHeader>
 
     <div class="mt-6 flex flex-col gap-6">
-        {% if 'no_lease' == state %}
+        {% if states.NoLease == state %}
             {{ include('dashboard/_empty.html.twig', {text: 'empty.no_lease.text'|trans(domain='dashboard'), cta: 'empty.no_lease.cta'|trans(domain='dashboard'), href: path('lease_settings', {id: id})}) }}
-        {% elseif 'no_reading' == state %}
+        {% elseif states.NoReading == state %}
             {{ include('dashboard/_empty.html.twig', {text: 'empty.no_reading.text'|trans(domain='dashboard'), cta: 'empty.no_reading.cta'|trans(domain='dashboard'), href: path('reading_history', {id: id})}) }}
-        {% elseif 'draft' == state %}
+        {% elseif states.Draft == state %}
             {{ include('dashboard/_empty.html.twig', {text: 'empty.draft.text'|trans(domain='dashboard'), cta: 'empty.draft.cta'|trans(domain='dashboard'), href: path('lease_settings', {id: id})}) }}
         {% else %}
             {% set assessment = dashboard.assessment %}
             {% set projection = assessment.projection %}
             {% set progress = dashboard.progress %}
             {% set unit = 'unit.km'|trans(domain='shared') %}
-            {% set returned = 'returned' == state %}
-            {% set ended = 'ended' == state or returned %}
-            {% set excess = assessment.projectedExcess.metres / 1000 %}
-            {% set cost = assessment.projectedExcessCost.toDecimal()|format_currency(assessment.projectedExcessCost.currency.value) %}
+            {% set returned = states.Returned == state %}
+            {% set ended = state.hasEnded %}
             {% set cut = assessment.weeklyCut %}
 
             {% if returned %}
@@ -44,29 +42,47 @@
                 {{ include('dashboard/_empty.html.twig', {text: 'ended.text'|trans(domain='dashboard'), cta: 'ended.cta'|trans(domain='dashboard'), href: path('lease_settings', {id: id})}) }}
             {% endif %}
 
+            {# Every risk message takes the same parameters and uses the ones it needs: the figures, already formatted
+               and escaped, in bold. The message is our translation around them, so it is printed raw. #}
+            {% set riskParameters = {
+                excess: '<strong>' ~ assessment.projectedExcess|km|e ~ '&nbsp;' ~ unit|e ~ '</strong>',
+                cost: '<strong>' ~ assessment.projectedExcessCost|money|e ~ '</strong>',
+                cut: cut is null ? '' : '<strong>' ~ cut|km|e ~ '&nbsp;' ~ unit|e ~ '</strong>',
+                projected: '<strong>' ~ projection.projectedAtEnd|km|e ~ '&nbsp;' ~ unit|e ~ '</strong>',
+                allowance: '<strong>' ~ dashboard.allowance|km|e ~ '&nbsp;' ~ unit|e ~ '</strong>',
+            } %}
             <twig:Dashboard:RiskAlert :level="assessment.riskLevel.value">
-                {%- if returned -%}
-                    {%- if 'over' == assessment.riskLevel.value -%}
-                        {{- 'risk.message.returned_over'|trans({excess: excess, unit: unit, cost: cost}, 'dashboard') -}}
-                    {%- else -%}
-                        {{- 'risk.message.returned_ok'|trans({allowance: dashboard.allowance.metres / 1000, unit: unit}, 'dashboard') -}}
-                    {%- endif -%}
-                {%- elseif ended -%}
-                    {%- if 'over' == assessment.riskLevel.value -%}
-                        {{- 'risk.message.ended_over'|trans({excess: excess, unit: unit, cost: cost}, 'dashboard') -}}
-                    {%- else -%}
-                        {{- 'risk.message.ended_ok'|trans({allowance: dashboard.allowance.metres / 1000, unit: unit}, 'dashboard') -}}
-                    {%- endif -%}
-                {%- elseif 'over' == assessment.riskLevel.value -%}
-                    {%- if cut is not null and not cut.isNegative and cut.metres > 0 -%}
-                        {{- 'risk.message.over'|trans({excess: excess, unit: unit, cost: cost, cut: cut.metres / 1000}, 'dashboard') -}}
-                    {%- else -%}
-                        {{- 'risk.message.over_no_cut'|trans({excess: excess, unit: unit, cost: cost}, 'dashboard') -}}
-                    {%- endif -%}
-                {%- else -%}
-                    {{- ('risk.message.' ~ assessment.riskLevel.value)|trans({projected: projection.projectedAtEnd.metres / 1000, allowance: dashboard.allowance.metres / 1000, unit: unit}, 'dashboard') -}}
-                {%- endif -%}
+                {{- dashboard.riskMessage.value|trans(riskParameters, 'dashboard')|raw -}}
             </twig:Dashboard:RiskAlert>
+
+            {# The figures the page is for, first: where the lease ends up, then where it stands and how fresh that is. #}
+            <div class="grid gap-4 sm:grid-cols-2 {{ ended ? 'lg:grid-cols-3' : 'lg:grid-cols-4' }}">
+                {% if not ended %}
+                    <twig:Dashboard:KpiCard
+                        label="{{ 'kpi.projected'|trans(domain='dashboard') }}"
+                        value="{{ projection.projectedAtEnd|km }}"
+                        unit="{{ unit }}"
+                        hint="{{ 'kpi.projected.hint'|trans({allowance: dashboard.allowance.metres / 1000, unit: unit}, 'dashboard') }}"
+                    />
+                {% endif %}
+                <twig:Dashboard:KpiCard
+                    label="{{ 'kpi.driven'|trans(domain='dashboard') }}"
+                    value="{{ projection.driven|km }}"
+                    unit="{{ unit }}"
+                    hint="{{ 'kpi.driven.hint'|trans({odometer: (projection.driven.metres + dashboard.startOdometer.metres) / 1000, start: dashboard.startOdometer.metres / 1000, unit: unit}, 'dashboard') }}"
+                />
+                <twig:Dashboard:KpiCard
+                    label="{{ 'kpi.allowed'|trans(domain='dashboard') }}"
+                    value="{{ projection.allowedToDate|km }}"
+                    unit="{{ unit }}"
+                    hint="{{ 'kpi.allowed.hint'|trans({sign: projection.margin.isNegative ? 'negative' : 'other', margin: projection.margin.absolute.metres / 1000, unit: unit}, 'dashboard') }}"
+                />
+                <twig:Dashboard:KpiCard
+                    label="{{ 'kpi.last_reading.label'|trans(domain='dashboard') }}"
+                    value="{{ projection.asOf|humanized_datetime(timeZone) }}"
+                    hint="{{ 'kpi.last_reading.hint'|trans({'%timezone%': timeZone}, 'dashboard') }}"
+                />
+            </div>
 
             <twig:Card>
                 <twig:Card:Content>
@@ -77,6 +93,27 @@
                         label="{{ 'progress.label'|trans(domain='dashboard') }}"
                         valueText="{{ 'progress.value_text'|trans({share: progress.usedPercent / 100}, 'dashboard') }}"
                         tickLabel="{{ 'progress.tick'|trans(domain='dashboard') }}"
+                    />
+                </twig:Card:Content>
+            </twig:Card>
+
+            <twig:Card>
+                <twig:Card:Header>
+                    <twig:Card:Title><h2>{{ 'chart.title'|trans(domain='dashboard') }}</h2></twig:Card:Title>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    <twig:Dashboard:MileageChart
+                        :series="dashboard.mileage"
+                        :level="assessment.riskLevel.value"
+                        timeZone="{{ timeZone }}"
+                        label="{{ 'chart.label'|trans(domain='dashboard') }}"
+                        actualLabel="{{ 'chart.series.actual'|trans(domain='dashboard') }}"
+                        allowedLabel="{{ 'chart.series.allowed'|trans(domain='dashboard') }}"
+                        projectionLabel="{{ 'chart.series.projection'|trans(domain='dashboard') }}"
+                        distanceLabel="{{ 'chart.axis.distance'|trans({'%unit%': unit}, 'dashboard') }}"
+                        :ranges="dashboard.mileageRanges"
+                        :rangeLabels="{week: 'chart.range.week'|trans(domain='dashboard'), month: 'chart.range.month'|trans(domain='dashboard'), year: 'chart.range.year'|trans(domain='dashboard'), forecast: 'chart.range.forecast'|trans(domain='dashboard'), all: 'chart.range.all'|trans(domain='dashboard')}"
+                        rangesLabel="{{ 'chart.range.label'|trans(domain='dashboard') }}"
                     />
                 </twig:Card:Content>
             </twig:Card>
@@ -133,60 +170,6 @@
                     />
                 </div>
             {% endif %}
-
-            <twig:Card>
-                <twig:Card:Header>
-                    <twig:Card:Title>{{ 'chart.title'|trans(domain='dashboard') }}</twig:Card:Title>
-                </twig:Card:Header>
-                <twig:Card:Content>
-                    <twig:Dashboard:MileageChart
-                        :series="dashboard.mileage"
-                        :level="assessment.riskLevel.value"
-                        locale="{{ app.request.locale }}"
-                        timeZone="{{ timeZone }}"
-                        label="{{ 'chart.label'|trans(domain='dashboard') }}"
-                        actualLabel="{{ 'chart.series.actual'|trans(domain='dashboard') }}"
-                        allowedLabel="{{ 'chart.series.allowed'|trans(domain='dashboard') }}"
-                        projectionLabel="{{ 'chart.series.projection'|trans(domain='dashboard') }}"
-                        distanceLabel="{{ 'chart.axis.distance'|trans({'%unit%': unit}, 'dashboard') }}"
-                        :ranges="dashboard.mileageRanges"
-                        :rangeLabels="{week: 'chart.range.week'|trans(domain='dashboard'), month: 'chart.range.month'|trans(domain='dashboard'), year: 'chart.range.year'|trans(domain='dashboard'), forecast: 'chart.range.forecast'|trans(domain='dashboard'), all: 'chart.range.all'|trans(domain='dashboard')}"
-                        rangesLabel="{{ 'chart.range.label'|trans(domain='dashboard') }}"
-                    />
-                </twig:Card:Content>
-            </twig:Card>
-
-            <div class="grid gap-4 sm:grid-cols-2">
-                <twig:Dashboard:KpiCard
-                    label="{{ 'kpi.driven'|trans(domain='dashboard') }}"
-                    value="{{ (projection.driven.metres / 1000)|format_number({max_fraction_digit: 0}) }}"
-                    unit="{{ unit }}"
-                    :mono="false"
-                    hint="{{ 'kpi.driven.hint'|trans({odometer: (projection.driven.metres + dashboard.startOdometer.metres) / 1000, start: dashboard.startOdometer.metres / 1000, unit: unit}, 'dashboard') }}"
-                />
-                <twig:Dashboard:KpiCard
-                    label="{{ 'kpi.allowed'|trans(domain='dashboard') }}"
-                    value="{{ (projection.allowedToDate.metres / 1000)|format_number({max_fraction_digit: 0}) }}"
-                    unit="{{ unit }}"
-                    :mono="false"
-                    hint="{{ 'kpi.allowed.hint'|trans({sign: projection.margin.isNegative ? 'negative' : 'other', margin: projection.margin.absolute.metres / 1000, unit: unit}, 'dashboard') }}"
-                />
-                {% if not ended %}
-                    <twig:Dashboard:KpiCard
-                        label="{{ 'kpi.projected'|trans(domain='dashboard') }}"
-                        value="{{ (projection.projectedAtEnd.metres / 1000)|format_number({max_fraction_digit: 0}) }}"
-                        unit="{{ unit }}"
-                        :mono="false"
-                        hint="{{ 'kpi.projected.hint'|trans({allowance: dashboard.allowance.metres / 1000, unit: unit}, 'dashboard') }}"
-                    />
-                {% endif %}
-                <twig:Dashboard:KpiCard
-                    label="{{ 'kpi.last_reading.label'|trans(domain='dashboard') }}"
-                    value="{{ projection.asOf|humanized_datetime(timeZone) }}"
-                    :mono="false"
-                    hint="{{ 'kpi.last_reading.hint'|trans({'%timezone%': timeZone}, 'dashboard') }}"
-                />
-            </div>
         {% endif %}
     </div>
 {% endblock %}

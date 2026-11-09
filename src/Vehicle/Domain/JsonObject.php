@@ -110,8 +110,8 @@ final readonly class JsonObject
     }
 
     /**
-     * Whether a decoded value is a JSON object: an array with keys (`{}` decodes to an empty array, which is accepted as
-     * an object too, since PHP cannot tell it from `[]`).
+     * Whether a decoded value is a JSON object: an array with keys (`{}` decodes to an empty array, which is accepted
+     * as an object too, since PHP cannot tell it from `[]`).
      *
      * @phpstan-assert-if-true array<mixed> $value
      */

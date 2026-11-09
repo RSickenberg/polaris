@@ -108,10 +108,17 @@ final class VehicleImportControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', '/vehicles/import');
         $token = $crawler->filter('input[name="vehicle_import[_token]"]')->attr('value');
 
-        $this->client->request('POST', '/vehicles/import', ['vehicle_import' => ['vins' => ['5YJ3E7EB2NF000999'], '_token' => $token, 'save' => '']]);
+        $this->client->request(
+            'POST',
+            '/vehicles/import',
+            ['vehicle_import' => ['vins' => ['5YJ3E7EB2NF000999'], '_token' => $token, 'save' => '']],
+        );
 
         self::assertResponseStatusCodeSame(422);
-        self::assertSame([], self::getContainer()->get(EntityManagerInterface::class)->getRepository(Vehicle::class)->findAll());
+        self::assertSame(
+            [],
+            self::getContainer()->get(EntityManagerInterface::class)->getRepository(Vehicle::class)->findAll(),
+        );
     }
 
     public function testWhenEverythingIsAlreadyThereItSaysSo(): void
@@ -148,7 +155,16 @@ final class VehicleImportControllerTest extends WebTestCase
     {
         $app = self::createConfiguredApp($this->user);
         self::createToken($app, CarbonImmutable::now()->addHours(2));
-        self::getContainer()->set('http_client', new MockHttpClient(array_fill(0, $responses * 2, new MockResponse(FleetApiResponses::vehicleList(), ['http_code' => $status]))));
+        self::getContainer()->set(
+            'http_client',
+            new MockHttpClient(
+                array_fill(
+                    0,
+                    $responses * 2,
+                    new MockResponse(FleetApiResponses::vehicleList(), ['http_code' => $status]),
+                )
+            ),
+        );
     }
 
     private function add(string $vin, string $name): void

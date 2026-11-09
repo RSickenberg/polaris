@@ -42,10 +42,17 @@ class AlertLog
     #[ORM\Column(length: 32, nullable: true)]
     private ?string $channel;
 
-    public function __construct(Vehicle $vehicle, CarbonImmutable $sentAt, AlertType $type, RiskLevel $riskLevel, ?string $channel = null)
-    {
+    public function __construct(
+        Vehicle $vehicle,
+        CarbonImmutable $sentAt,
+        AlertType $type,
+        RiskLevel $riskLevel,
+        ?string $channel = null,
+    ) {
         if (0 !== $sentAt->getOffset()) {
-            throw new \InvalidArgumentException(\sprintf('An alert must be logged at a UTC instant, got %s.', $sentAt->toIso8601String()));
+            throw new \InvalidArgumentException(
+                \sprintf('An alert must be logged at a UTC instant, got %s.', $sentAt->toIso8601String())
+            );
         }
 
         $this->id = new Ulid();

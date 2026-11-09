@@ -13,4 +13,12 @@ enum ReadingRejection: string
     case HigherThanNext = 'rejected.higher_than_next';
     case DuplicateInstant = 'rejected.duplicate_instant';
     case InFuture = 'rejected.in_future';
+
+    /**
+     * Whether the date and time are what is wrong (the form puts the message on them), rather than the value.
+     */
+    public function concernsTheDate(): bool
+    {
+        return self::DuplicateInstant === $this || self::InFuture === $this;
+    }
 }

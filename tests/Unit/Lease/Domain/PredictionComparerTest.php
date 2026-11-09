@@ -40,7 +40,8 @@ final class PredictionComparerTest extends TestCase
         $comparison = $this->compare($latest, 36_000_000, [
             // Today started at 00:00, 12 hours ago: 50,000 m driven.
             '2026-07-10' => self::snapshot(36_500_000, 90_000, 80_000.0),
-            // 7 days before: 7.5 days driven, 750,000 m; budget of 100,000 m a day expects exactly that, and no pace was stored.
+            // 7 days before: 7.5 days driven, 750,000 m; budget of 100,000 m a day expects exactly that, and no pace
+            // was stored.
             '2026-07-03' => self::snapshot(36_000_000, 100_000, null),
             // 14 days before: no snapshot.
             // 30 days before: 30.5 days driven, 3,050,000 m; a budget of zero expects nothing.

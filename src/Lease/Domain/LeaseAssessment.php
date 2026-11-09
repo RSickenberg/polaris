@@ -23,7 +23,10 @@ final readonly class LeaseAssessment
         public Budget $budget,
         /** The projected distance beyond the allowance; zero when the projection stays within it. */
         public Distance $projectedExcess,
-        /** What the projected excess costs; zero when there is none. Once the lease has ended it is the cost so far; once the car is returned it is the final cost. */
+        /**
+         * What the projected excess costs; zero when there is none. Once the lease has ended it is the cost so far;
+         * once the car is returned it is the final cost.
+         */
         public Money $projectedExcessCost,
         /**
          * The projected end minus the allowance, per week left: positive is the distance to

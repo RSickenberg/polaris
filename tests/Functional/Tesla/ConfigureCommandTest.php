@@ -86,9 +86,16 @@ final class ConfigureCommandTest extends KernelTestCase
         $tester = $this->tester();
         $tester->setInputs([self::SECRET]);
 
-        $tester->execute(['--client-id' => 'client-id', '--domain' => 'polaris.example.com', '--region' => ['eu']], ['interactive' => false]);
+        $tester->execute(
+            ['--client-id' => 'client-id', '--domain' => 'polaris.example.com', '--region' => ['eu']],
+            ['interactive' => false],
+        );
 
-        self::assertSame(7, $this->app()->getDailyWakeCap(), 'Configuring the credentials does not reset the wake cap.');
+        self::assertSame(
+            7,
+            $this->app()->getDailyWakeCap(),
+            'Configuring the credentials does not reset the wake cap.',
+        );
         self::assertFalse($this->app()->keepsVehicleData());
     }
 
@@ -99,7 +106,9 @@ final class ConfigureCommandTest extends KernelTestCase
         $tester->setInputs([self::SECRET]);
 
         // No "interactive" option: like docker compose exec -T, only the input tells it is a pipe.
-        $status = $tester->execute(['--client-id' => 'client-id', '--domain' => 'polaris.example.com', '--region' => ['eu']]);
+        $status = $tester->execute(
+            ['--client-id' => 'client-id', '--domain' => 'polaris.example.com', '--region' => ['eu']]
+        );
 
         self::assertSame(Command::SUCCESS, $status);
         self::assertTrue($this->app()->isConfigured());
@@ -166,7 +175,9 @@ final class ConfigureCommandTest extends KernelTestCase
     {
         $owner = self::createUser();
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        $entityManager->persist(new TeslaApp($owner, 'public key', 'v1:private', CarbonImmutable::parse('2026-10-20 12:00:00 UTC')));
+        $entityManager->persist(
+            new TeslaApp($owner, 'public key', 'v1:private', CarbonImmutable::parse('2026-10-20 12:00:00 UTC'))
+        );
         $entityManager->flush();
     }
 
@@ -175,6 +186,7 @@ final class ConfigureCommandTest extends KernelTestCase
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->clear();
 
-        return $entityManager->getRepository(TeslaApp::class)->findOneBy([]) ?? throw new \LogicException('No Tesla app.');
+        return $entityManager->getRepository(TeslaApp::class)->findOneBy([])
+            ?? throw new \LogicException('No Tesla app.');
     }
 }

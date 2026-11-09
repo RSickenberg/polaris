@@ -43,7 +43,13 @@ final class RiskLevelCheckTriggersTest extends KernelTestCase
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $this->vehicle = new Vehicle(new Vin('5YJ3E7EB2NF000091'), 'Model 3', self::createUser());
         $entityManager->persist($this->vehicle);
-        $entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'), Distance::fromKilometres(10_000)));
+        $entityManager->persist(
+            OdometerReading::manual(
+                $this->vehicle,
+                CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'),
+                Distance::fromKilometres(10_000),
+            )
+        );
         $entityManager->flush();
 
         $transport = self::getContainer()->get('messenger.transport.async');
@@ -63,7 +69,11 @@ final class RiskLevelCheckTriggersTest extends KernelTestCase
     public function testAReadingFromTheCarQueuesACheck(): void
     {
         self::mockTime('2026-07-02 14:00:00 UTC');
-        self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-07-02 13:00:00', 'UTC'), Distance::fromKilometres(10_100));
+        self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-07-02 13:00:00', 'UTC'),
+            Distance::fromKilometres(10_100),
+        );
 
         $this->assertOneCheck();
     }
@@ -72,7 +82,11 @@ final class RiskLevelCheckTriggersTest extends KernelTestCase
     {
         self::mockTime('2026-07-03 12:00:00 UTC');
 
-        self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-07-03 12:00:00', 'UTC'), Distance::fromKilometres(10_000));
+        self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-07-03 12:00:00', 'UTC'),
+            Distance::fromKilometres(10_000),
+        );
 
         $this->assertOneCheck();
     }
@@ -80,8 +94,16 @@ final class RiskLevelCheckTriggersTest extends KernelTestCase
     public function testAValueThatChangesNothingQueuesNoCheck(): void
     {
         // The same value at an instant already stored, and a lower value: nothing moves.
-        self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'), Distance::fromKilometres(10_000));
-        self::service()->recordFromApi($this->vehicle, CarbonImmutable::parse('2026-07-02 13:00:00', 'UTC'), Distance::fromKilometres(9_000));
+        self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-07-02 12:00:00', 'UTC'),
+            Distance::fromKilometres(10_000),
+        );
+        self::service()->recordFromApi(
+            $this->vehicle,
+            CarbonImmutable::parse('2026-07-02 13:00:00', 'UTC'),
+            Distance::fromKilometres(9_000),
+        );
 
         self::assertCount(0, $this->transport->getSent());
     }

@@ -26,8 +26,8 @@ use Psr\Clock\ClockInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Records odometer readings (typed by the user or read from the car) and lists the history. The only place the rules live:
- * the form controller and the console command both call it.
+ * Records odometer readings (typed by the user or read from the car) and lists the history. The only place the rules
+ * live: the form controller and the console command both call it.
  */
 final readonly class OdometerReadingService
 {
@@ -44,13 +44,16 @@ final readonly class OdometerReadingService
      * @param OdometerReadingData $data validated first (see the constraints on the class)
      *
      * @throws \InvalidArgumentException when the data has not been validated first
-     * @throws ReadingRejected           when the reading is in the future, duplicates an instant or breaks the order of the readings
+     * @throws ReadingRejected           when the reading is in the future, duplicates an instant or breaks the order of
+     *                                   the readings
      * @throws ORMException
      */
     public function recordManual(Vehicle $vehicle, OdometerReadingData $data): OdometerReading
     {
         if (null === $data->readAt || null === $data->odometer) {
-            throw new \InvalidArgumentException('The odometer reading data is incomplete: validate it before recording it.');
+            throw new \InvalidArgumentException(
+                'The odometer reading data is incomplete: validate it before recording it.'
+            );
         }
 
         $readAt = CarbonImmutable::instance($data->readAt)->utc();
@@ -172,7 +175,8 @@ final readonly class OdometerReadingService
             return ApiRecording::unchanged();
         }
 
-        // Built first: the stored value is the one derived from the raw miles, which is what the next read is compared with.
+        // Built first: the stored value is the one derived from the raw miles, which is what the next read is compared
+        // with.
         $reading = OdometerReading::fromTesla(
             $vehicle,
             $readAt,

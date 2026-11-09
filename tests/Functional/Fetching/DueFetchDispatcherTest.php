@@ -86,7 +86,11 @@ final class DueFetchDispatcherTest extends KernelTestCase
 
     public function testTwoSlotsAreQueuedEachOnce(): void
     {
-        self::getContainer()->get(FetchScheduleService::class)->change($this->vehicle, LocalTime::fromString('08:00'), LocalTime::fromString('21:00'));
+        self::getContainer()->get(FetchScheduleService::class)->change(
+            $this->vehicle,
+            LocalTime::fromString('08:00'),
+            LocalTime::fromString('21:00'),
+        );
 
         // 08:00 in Zurich is 06:00 UTC in summer.
         self::mockTime('2026-07-10 06:05:00 UTC');
@@ -110,7 +114,11 @@ final class DueFetchDispatcherTest extends KernelTestCase
 
     public function testANewSlotDropsAnOlderOneStillRetrying(): void
     {
-        self::getContainer()->get(FetchScheduleService::class)->change($this->vehicle, LocalTime::fromString('08:00'), LocalTime::fromString('09:00'));
+        self::getContainer()->get(FetchScheduleService::class)->change(
+            $this->vehicle,
+            LocalTime::fromString('08:00'),
+            LocalTime::fromString('09:00'),
+        );
 
         // 08:00 and 09:00 in Zurich are 06:00 and 07:00 UTC in summer.
         self::mockTime('2026-07-10 06:01:00 UTC');
@@ -146,7 +154,11 @@ final class DueFetchDispatcherTest extends KernelTestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        self::getContainer()->get(FetchScheduleService::class)->change($this->vehicle, LocalTime::fromString('07:30'), LocalTime::fromString('07:30'));
+        self::getContainer()->get(FetchScheduleService::class)->change(
+            $this->vehicle,
+            LocalTime::fromString('07:30'),
+            LocalTime::fromString('07:30'),
+        );
     }
 
     private function dispatch(): int

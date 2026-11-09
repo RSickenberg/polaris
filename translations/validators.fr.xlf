@@ -24,11 +24,11 @@
       </trans-unit>
       <trans-unit id="tesla.domain.invalid">
         <source>tesla.domain.invalid</source>
-        <target>Saisissez uniquement le domaine, par ex. polaris.example.com, sans https:// ni chemin.</target>
+        <target>Saisissez uniquement le domaine, par exemple polaris.example.com, sans https:// ni chemin.</target>
       </trans-unit>
       <trans-unit id="tesla.region.not_supported">
         <source>tesla.region.not_supported</source>
-        <target>Cette région n’est pas prise en charge.</target>
+        <target>Cette région n’est pas prise en charge. Choisissez l’Amérique du Nord ou l’Europe.</target>
       </trans-unit>
       <trans-unit id="tesla.client_secret.required">
         <source>tesla.client_secret.required</source>
@@ -44,11 +44,11 @@
       </trans-unit>
       <trans-unit id="tesla.callback_url.required">
         <source>tesla.callback_url.required</source>
-        <target>Collez l'URL de rappel.</target>
+        <target>Collez l’URL de rappel.</target>
       </trans-unit>
       <trans-unit id="tesla.refresh_token.required">
         <source>tesla.refresh_token.required</source>
-        <target>Collez le jeton d'actualisation.</target>
+        <target>Collez le jeton d’actualisation.</target>
       </trans-unit>
       <trans-unit id="vehicle.import.none_selected">
         <source>vehicle.import.none_selected</source>
@@ -56,7 +56,7 @@
       </trans-unit>
       <trans-unit id="tesla.wake_cap.range">
         <source>tesla.wake_cap.range</source>
-        <target>La limite de réveils doit être comprise entre 0 et 20.</target>
+        <target>La limite de réveils doit être comprise entre 0 et {{ max }}.</target>
       </trans-unit>
       <trans-unit id="vehicle.data.file_required">
         <source>vehicle.data.file_required</source>

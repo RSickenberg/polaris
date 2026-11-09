@@ -59,7 +59,10 @@ final class MileageChartTest extends WebTestCase
         self::assertResponseIsSuccessful();
         $chart = $crawler->filter(self::CHART);
         self::assertCount(1, $chart);
-        self::assertSame('Distance driven since the lease start, against the allowance and the projection to the lease end', $crawler->filter(self::CANVAS)->attr('aria-label'));
+        self::assertSame(
+            'Distance driven since the lease start, against the allowance and the projection to the lease end',
+            $crawler->filter(self::CANVAS)->attr('aria-label'),
+        );
         self::assertSame('line', $chart->attr('data-chart-type-value'));
         self::assertSame('en', $chart->attr('data-chart-locale-value'));
         self::assertSame('UTC', $chart->attr('data-chart-time-zone-value'));
@@ -70,7 +73,11 @@ final class MileageChartTest extends WebTestCase
         self::assertSame(['Driven', 'Projection', 'Allowed'], array_column($series, 'name'));
         // Points are [Unix milliseconds, kilometres]: the start point, then one per reading.
         self::assertSame(
-            [[self::ms('2026-01-01'), 0], [self::ms('2026-04-01 10:00:00'), 4_000], [self::ms('2026-07-02 11:00:00'), 10_000]],
+            [
+                [self::ms('2026-01-01'), 0],
+                [self::ms('2026-04-01 10:00:00'), 4_000],
+                [self::ms('2026-07-02 11:00:00'), 10_000],
+            ],
             $series[0]['data'],
         );
         self::assertSame([self::ms('2026-07-02 11:00:00'), 10_000], $series[1]['data'][0]);
@@ -88,10 +95,19 @@ final class MileageChartTest extends WebTestCase
         $crawler = $this->client->request('GET', $this->url());
 
         $buttons = $crawler->filter('[role=group] button[data-chart-target=range]');
-        self::assertSame(['week', 'month', 'year', 'forecast', 'all'], $buttons->each(static fn ($button): ?string => $button->attr('data-range')));
-        self::assertSame(['7 days', '30 days', '1 year', 'To lease end', 'Whole lease'], $buttons->each(static fn ($button): string => trim($button->text())));
+        self::assertSame(
+            ['week', 'month', 'year', 'forecast', 'all'],
+            $buttons->each(static fn ($button): ?string => $button->attr('data-range')),
+        );
+        self::assertSame(
+            ['7 days', '30 days', '1 year', 'To lease end', 'Whole lease'],
+            $buttons->each(static fn ($button): string => trim($button->text())),
+        );
         self::assertSame('Period shown', $crawler->filter('[data-controller=chart] [role=group]')->attr('aria-label'));
-        self::assertSame(['false', 'false', 'false', 'false', 'true'], $buttons->each(static fn ($button): ?string => $button->attr('aria-pressed')));
+        self::assertSame(
+            ['false', 'false', 'false', 'false', 'true'],
+            $buttons->each(static fn ($button): ?string => $button->attr('aria-pressed')),
+        );
 
         $week = $buttons->eq(0);
         self::assertSame('chart#zoom', $week->attr('data-action'));
@@ -109,7 +125,12 @@ final class MileageChartTest extends WebTestCase
 
         $crawler = $this->client->request('GET', $this->url());
 
-        self::assertSame(['year', 'all'], $crawler->filter('button[data-chart-target=range]')->each(static fn ($button): ?string => $button->attr('data-range')));
+        self::assertSame(
+            ['year', 'all'],
+            $crawler->filter('button[data-chart-target=range]')->each(
+                static fn ($button): ?string => $button->attr('data-range')
+            ),
+        );
     }
 
     public function testAnEndedLeaseShowsTheChartWithoutProjection(): void
@@ -154,8 +175,12 @@ final class MileageChartTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         $chart = $crawler->filter(self::CHART);
-        self::assertSame('fr', $chart->attr('data-chart-locale-value'));
-        self::assertSame(['Parcouru', 'Projection', 'Autorisé'], array_column($this->series($chart->attr('data-chart-series-value')), 'name'));
+        self::assertSame('fr-CH', $chart->attr('data-chart-locale-value'));
+        self::assertSame('’', $chart->attr('data-chart-grouping-value'));
+        self::assertSame(
+            ['Parcouru', 'Projection', 'Autorisé'],
+            array_column($this->series($chart->attr('data-chart-series-value')), 'name'),
+        );
         self::assertStringContainsString('Distance (km)', (string) $chart->attr('data-chart-options-value'));
         self::assertSelectorTextContains('main', 'Kilométrage sur la durée du leasing');
     }
@@ -194,7 +219,9 @@ final class MileageChartTest extends WebTestCase
 
     private function reading(string $at, int $km): void
     {
-        $this->entityManager->persist(OdometerReading::manual($this->vehicle, CarbonImmutable::parse($at, 'UTC'), Distance::fromKilometres($km)));
+        $this->entityManager->persist(
+            OdometerReading::manual($this->vehicle, CarbonImmutable::parse($at, 'UTC'), Distance::fromKilometres($km))
+        );
         $this->entityManager->flush();
     }
 
