@@ -1,5 +1,12 @@
 <?php
 
+// The hosted layer adds its bundle at `src/Hosted/HostedBundle.php`; without that class nothing is registered.
+$optionalBundles = [];
+
+if (class_exists(Polaris\Hosted\HostedBundle::class)) {
+    $optionalBundles[Polaris\Hosted\HostedBundle::class] = ['all' => true];
+}
+
 return [
     Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],
     Doctrine\Bundle\DoctrineBundle\DoctrineBundle::class => ['all' => true],
@@ -20,4 +27,4 @@ return [
     Symfony\UX\LiveComponent\LiveComponentBundle::class => ['all' => true],
     Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
     Sentry\SentryBundle\SentryBundle::class => ['prod' => true],
-];
+] + $optionalBundles;
