@@ -67,6 +67,45 @@ final class LoginTest extends WebTestCase
         self::assertSelectorTextContains('[data-slot=sidebar-footer]', 'login-ok@example.test');
     }
 
+    public function testTickingRememberMeSetsTheCookieAndItRestoresTheSession(): void
+    {
+        $this->createAccount('remember@example.test');
+
+        $this->client->request('GET', '/login');
+        $this->client->submitForm(
+            $this->submitLabel([]),
+            ['_username' => 'remember@example.test', '_password' => self::PASSWORD, '_remember_me' => 'on'],
+            serverParameters: ['HTTP_ORIGIN' => 'http://localhost'],
+        );
+
+        self::assertResponseRedirects('/');
+        $cookie = $this->client->getCookieJar()->get('REMEMBERME');
+        self::assertNotNull($cookie);
+
+        // The session is gone, the remember me cookie alone signs the user in again.
+        $this->client->getCookieJar()->expire('MOCKSESSID');
+        $this->client->request('GET', '/');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('[data-slot=sidebar-footer]', 'remember@example.test');
+    }
+
+    public function testWithoutTheBoxNoRememberMeCookieIsSet(): void
+    {
+        $this->createAccount('forget@example.test');
+
+        $this->login('forget@example.test', self::PASSWORD);
+
+        self::assertResponseRedirects('/');
+        self::assertNull($this->client->getCookieJar()->get('REMEMBERME'));
+    }
+
+    public function testTheLoginPageOffersTheRememberMeBox(): void
+    {
+        $this->client->request('GET', '/login');
+
+        self::assertSelectorExists('form input[type=checkbox][name=_remember_me]');
+    }
+
     public function testTheEmailIsMatchedWithoutCaseOrSpaces(): void
     {
         $this->createAccount('case@example.test');

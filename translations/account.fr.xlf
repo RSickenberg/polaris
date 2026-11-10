@@ -18,6 +18,10 @@
         <source>form.password.label</source>
         <target>Mot de passe</target>
       </trans-unit>
+      <trans-unit id="form.remember_me.label">
+        <source>form.remember_me.label</source>
+        <target>Rester connecté pendant 30 jours</target>
+      </trans-unit>
       <trans-unit id="form.submit">
         <source>form.submit</source>
         <target>Se connecter</target>
