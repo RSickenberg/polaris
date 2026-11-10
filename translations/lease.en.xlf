@@ -227,17 +227,17 @@ The lease is tracked again.</target>
       </trans-unit>
       <trans-unit id="hours.help.question">
         <source>hours.help.question</source>
-        <target>When do you usually finish driving for the day, and when do you start again the next day?</target>
+        <target>When do you usually stop driving for the day, and when do you start again the next day?</target>
       </trans-unit>
       <trans-unit id="hours.help.how">
         <source>hours.help.how</source>
-        <target>Polaris uses these times to spread the distance between two readings only over your usual driving hours.
+        <target>Polaris uses these times to spread the kilometres driven between two readings only over your usual driving hours.
 
-For example, if your last reading is taken at 21:00, the kilometres driven during the night are not attributed to the previous day.</target>
+For example, if a reading is taken at 21:00, the kilometres driven during the night are attributed to the following day, not the previous one.</target>
       </trans-unit>
       <trans-unit id="hours.help.empty">
         <source>hours.help.empty</source>
-        <target>If you leave both fields empty, Polaris spreads the distance evenly over the 24 hours of the day, night included.</target>
+        <target>If you leave both fields empty, Polaris spreads the kilometres evenly over the 24 hours of the day, night included.</target>
       </trans-unit>
       <trans-unit id="hours.help.scope">
         <source>hours.help.scope</source>
@@ -249,7 +249,7 @@ For example, if your last reading is taken at 21:00, the kilometres driven durin
       </trans-unit>
       <trans-unit id="form.hours_from.help">
         <source>form.hours_from.help</source>
-        <target>Enter the local time at which you usually stop driving, for example 22:00.</target>
+        <target>Enter your usual stop time, in local time. For example: 22:00.</target>
       </trans-unit>
       <trans-unit id="form.hours_until.label">
         <source>form.hours_until.label</source>
@@ -257,33 +257,33 @@ For example, if your last reading is taken at 21:00, the kilometres driven durin
       </trans-unit>
       <trans-unit id="form.hours_until.help">
         <source>form.hours_until.help</source>
-        <target>Enter the local time at which you usually start driving again, for example 06:30.
+        <target>Enter your usual start time, in local time. For example: 06:30.
 
-This time can be earlier than the stop time: it simply means your rest period continues past midnight.</target>
+The start time can be earlier than the stop time if your rest period continues past midnight.</target>
       </trans-unit>
       <trans-unit id="form.hours_submit">
         <source>form.hours_submit</source>
-        <target>Save my driving hours</target>
+        <target>Save the driving hours</target>
       </trans-unit>
       <trans-unit id="flash.hours_saved">
         <source>flash.hours_saved</source>
-        <target>Driving hours saved.</target>
+        <target>Your driving hours have been saved.</target>
       </trans-unit>
       <trans-unit id="rejected.hours_no_contract">
         <source>rejected.hours_no_contract</source>
-        <target>Save the lease terms first, then set the driving hours.</target>
+        <target>Please save your lease terms first before setting your driving hours.</target>
       </trans-unit>
       <trans-unit id="rejected.hours_incomplete">
         <source>rejected.hours_incomplete</source>
-        <target>Fill in both times, or leave both empty.</target>
+        <target>Fill in both times or leave both fields empty.</target>
       </trans-unit>
       <trans-unit id="rejected.hours_invalid">
         <source>rejected.hours_invalid</source>
-        <target>Use a time written HH:MM, for example 22:00.</target>
+        <target>Use the HH:MM format to enter a time. For example: 22:00.</target>
       </trans-unit>
       <trans-unit id="rejected.hours_same_time">
         <source>rejected.hours_same_time</source>
-        <target>The two times must differ. Pick a start time after or before the stop time.</target>
+        <target>The two times must be different. Choose a start time earlier or later than your stop time.</target>
       </trans-unit>
       <trans-unit id="terms.title">
         <source>terms.title</source>
@@ -295,7 +295,9 @@ This time can be earlier than the stop time: it simply means your rest period co
       </trans-unit>
       <trans-unit id="form.hours_whole_day.help">
         <source>form.hours_whole_day.help</source>
-        <target>By default, “Today” is compared with what was expected up to your latest reading. Tick this box to compare it with what was expected for the whole day instead.</target>
+        <target>By default, Polaris compares the kilometres driven today with those expected up to your latest reading.
+
+Tick this option to compare against the whole day, up to midnight, instead of stopping at the time of your latest reading.</target>
       </trans-unit>
     </body>
   </file>
