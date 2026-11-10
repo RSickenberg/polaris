@@ -30,7 +30,7 @@ final class FrenchTypographyTest extends TestCase
         $problems = [];
 
         foreach (glob(\dirname(__DIR__, 3) . '/translations/*.fr.xlf') ?: [] as $file) {
-            $xml = simplexml_load_file($file);
+            $xml = simplexml_load_string(file_get_contents($file));
             self::assertNotFalse($xml, $file);
             $xml->registerXPathNamespace('x', 'urn:oasis:names:tc:xliff:document:1.2');
 
