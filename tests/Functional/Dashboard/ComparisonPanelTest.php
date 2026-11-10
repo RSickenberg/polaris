@@ -175,7 +175,11 @@ final class ComparisonPanelTest extends KernelTestCase
     {
         $dialog = $this->panel('fr', help: 'compare_pace')->filter('dialog');
 
-        self::assertSame("Roulez-vous plus ou moins que d’habitude\u{a0}?", $this->text($dialog->filter('[data-help-answer]')));
+        // The helper collapses every space, the no-break one before the question mark included.
+        self::assertSame(
+            'Roulez-vous plus ou moins que d’habitude ?',
+            $this->text($dialog->filter('[data-help-answer]')),
+        );
     }
 
     public function testWithoutAnExplanationThereIsNoInfoButton(): void
