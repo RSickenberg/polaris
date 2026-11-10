@@ -80,6 +80,30 @@ final class ComparisonPanelTest extends KernelTestCase
         self::assertCount(0, $this->panel('en')->filter('[data-fallback-days]'));
     }
 
+    public function testTodayBeforeTheFirstReadingOfTheDaySaysSoInsteadOfShowingFigures(): void
+    {
+        $english = $this->panel('en', todayAwaitingReading: true);
+        $french = $this->panel('fr', todayAwaitingReading: true);
+
+        $row = $english->filter('[data-period=today]');
+        self::assertSame('Today', $this->text($row->filter('td')->first()->filter('span')->first()));
+        self::assertSame('No reading yet today', $this->text($row->filter('[data-awaiting-reading]')));
+        self::assertCount(0, $row->filter('[data-figure]'));
+        self::assertCount(0, $row->filter('[data-no-history]'));
+        self::assertSame('Pas encore de relevé aujourd’hui', $this->text($french->filter('[data-awaiting-reading]')));
+        self::assertSame('+3 km', $this->text($english->filter('[data-period=two_weeks] [data-figure=delta]')));
+    }
+
+    public function testYesterdayHasItsOwnRowInBothLanguages(): void
+    {
+        $english = $this->panel('en')->filter('[data-period=yesterday]');
+        $french = $this->panel('fr')->filter('[data-period=yesterday]');
+
+        self::assertSame('Yesterday', $this->text($english->filter('td')->first()->filter('span')->first()));
+        self::assertSame('44 / 45 km', $this->text($english->filter('[data-figure=figures]')));
+        self::assertSame('Hier', $this->text($french->filter('td')->first()->filter('span')->first()));
+    }
+
     public function testTheFrenchPanelUsesFrenchWordsAndASwissPercentage(): void
     {
         $panel = $this->panel('fr');
@@ -130,6 +154,7 @@ final class ComparisonPanelTest extends KernelTestCase
         bool $withHistory = true,
         ?string $help = null,
         int $todayFallbackDays = 0,
+        bool $todayAwaitingReading = false,
     ): Crawler {
         self::bootKernel();
         $translator = self::getContainer()->get('translator');
@@ -137,7 +162,13 @@ final class ComparisonPanelTest extends KernelTestCase
         // The number formats of Twig follow the default locale of PHP, which a request sets in the application.
         \Locale::setDefault($locale);
         $rows = [
-            new ComparisonRow(ComparisonPeriod::Today, $this->figures(50_000, 45_000), $todayFallbackDays),
+            new ComparisonRow(
+                ComparisonPeriod::Today,
+                $todayAwaitingReading ? null : $this->figures(50_000, 45_000),
+                $todayFallbackDays,
+                awaitingReading: $todayAwaitingReading,
+            ),
+            new ComparisonRow(ComparisonPeriod::Yesterday, $withHistory ? $this->figures(44_000, 45_000) : null),
             new ComparisonRow(ComparisonPeriod::LastWeek, $withHistory ? $this->figures(38_000, 40_000) : null),
             new ComparisonRow(ComparisonPeriod::LastTwoWeeks, $withHistory ? $this->figures(3_000, 0) : null),
             new ComparisonRow(ComparisonPeriod::LastMonth, $withHistory ? $this->figures(9_000, 9_000) : null),

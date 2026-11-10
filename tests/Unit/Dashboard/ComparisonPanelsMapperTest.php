@@ -17,7 +17,7 @@ use Polaris\Shared\Domain\Distance;
 #[CoversClass(ComparisonPanelsMapper::class)]
 final class ComparisonPanelsMapperTest extends TestCase
 {
-    public function testTheThreeComparisonsBecomeThreePanelsOfFourRowsInOrder(): void
+    public function testTheThreeComparisonsBecomeThreePanelsOfFiveRowsInOrder(): void
     {
         $comparison = Comparison::of(Distance::fromMetres(55_000), Distance::fromMetres(50_000));
         $rows = array_map(
@@ -35,6 +35,7 @@ final class ComparisonPanelsMapperTest extends TestCase
             self::assertSame(
                 [
                     ComparisonPeriod::Today,
+                    ComparisonPeriod::Yesterday,
                     ComparisonPeriod::LastWeek,
                     ComparisonPeriod::LastTwoWeeks,
                     ComparisonPeriod::LastMonth,
@@ -49,7 +50,7 @@ final class ComparisonPanelsMapperTest extends TestCase
         self::assertSame(50_000, $figures->expected->metres());
         self::assertSame(5_000, $figures->delta->metres());
         self::assertSame(0.1, $figures->ratio);
-        self::assertNull($panels->budget[2]->figures, 'No result stays no figures.');
+        self::assertNull($panels->budget[3]->figures, 'No result stays no figures.');
         self::assertSame(2, $panels->budget[0]->fallbackDays);
         self::assertSame(0, $panels->budget[1]->fallbackDays);
     }

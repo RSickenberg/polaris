@@ -70,25 +70,30 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
         self::assertFalse($result->budget[0]->live, 'A stored snapshot is not live.');
         $pace = $result->pace[0]->comparison;
         self::assertSame([50_000, 40_000, 10_000], $this->figures($pace));
-        $week = $result->budget[1]->comparison;
+        $week = $result->budget[2]->comparison;
         self::assertSame([750_000, 750_000, 0], $this->figures($week));
         // The projection now is 36,500 km; this morning's said 36,000 km.
         self::assertSame(500_000, $result->projectedEnd[0]->comparison?->delta->metres());
-        self::assertNull($result->budget[2]->comparison, 'No snapshot 14 days before.');
-        self::assertNull($result->budget[3]->comparison, 'No snapshot 30 days before.');
+        self::assertNull($result->budget[3]->comparison, 'No snapshot 14 days before.');
+        self::assertNull($result->budget[4]->comparison, 'No snapshot 30 days before.');
     }
 
-    public function testTodayIsTheDayOfTheLatestReadingEvenWhenItIsOld(): void
+    public function testTodayIsTheDayOfTheClockAndWaitsForTheFirstReadingOfThatDay(): void
     {
         $this->lease();
-        $this->reading('2026-07-10 12:00:00', 19_050);
+        $this->reading('2026-07-09 12:00:00', 18_950);
         $this->snapshot('2026-07-10', projectedAtEndKm: 36_000, dailyBudgetKm: 90, paceMetresPerDay: 80_000.0);
-        // A week without a reading: the clock moved on, the figures did not.
-        self::mockTime('2026-07-17 09:00:00 UTC');
+        $this->snapshot('2026-07-03', projectedAtEndKm: 36_500, dailyBudgetKm: 100, paceMetresPerDay: 100_000.0);
+        // 02:00 on the 10th: the reading of the evening before is not today's.
+        self::mockTime('2026-07-10 02:00:00 UTC');
 
         $result = $this->comparison->compare($this->vehicle);
 
-        self::assertSame(45_000, $result?->budget[0]->comparison?->expected->metres());
+        self::assertNotNull($result);
+        self::assertTrue($result->budget[0]->awaitingReading);
+        self::assertNull($result->budget[0]->comparison);
+        // The week starts at the owner's midnight of the 3rd and ends at the reading, 6.5 days later.
+        self::assertSame(650_000, $result->budget[2]->comparison?->actual->metres());
     }
 
     public function testTodayIsRebuiltWhenTheMidnightJobSavedNothingForIt(): void
@@ -108,7 +113,7 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
         self::assertSame(25_000, $result->budget[0]->comparison?->actual->metres());
         self::assertNotNull($result->pace[0]->comparison);
         self::assertNotNull($result->projectedEnd[0]->comparison);
-        self::assertNull($result->budget[1]->comparison, 'The other windows still need a stored snapshot.');
+        self::assertNull($result->budget[2]->comparison, 'The other windows still need a stored snapshot.');
         $this->assertNoSnapshotStoredFor('2026-07-10');
     }
 

@@ -43,6 +43,7 @@ final readonly class ComparisonPanelsMapper
                 null === $result ? null : $this->figures($result),
                 $window->fallbackDays,
                 $window->live,
+                $window->awaitingReading,
             );
         }
 
@@ -58,6 +59,7 @@ final readonly class ComparisonPanelsMapper
     {
         return match ($window) {
             ComparisonWindow::Today => ComparisonPeriod::Today,
+            ComparisonWindow::Yesterday => ComparisonPeriod::Yesterday,
             ComparisonWindow::LastWeek => ComparisonPeriod::LastWeek,
             ComparisonWindow::LastTwoWeeks => ComparisonPeriod::LastTwoWeeks,
             ComparisonWindow::LastMonth => ComparisonPeriod::LastMonth,

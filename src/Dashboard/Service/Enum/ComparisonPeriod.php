@@ -11,6 +11,7 @@ enum ComparisonPeriod: string
 {
     /** Since the owner's last midnight. */
     case Today = 'today';
+    case Yesterday = 'yesterday';
     case LastWeek = 'week';
     case LastTwoWeeks = 'two_weeks';
     case LastMonth = 'month';

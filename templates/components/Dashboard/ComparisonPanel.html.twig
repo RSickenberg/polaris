@@ -11,7 +11,7 @@
     help = null
 -%}
 {# A card with one row per period: the period with the two figures under it (what happened, what was expected), and the gap on the right, as large as the period. A positive gap is more than expected: the gap is a red pill, and a gap of zero or less a green one. Only the digits are monospaced. Before any period has history (the first days after deploy), one line says so instead of four empty rows. #}
-{% set withHistory = rows|filter(row => row.figures is not null)|length > 0 %}
+{% set withHistory = rows|filter(row => row.figures is not null or row.awaitingReading)|length > 0 %}
 {% set unit = 'unit.km'|trans(domain='shared') %}
 <twig:Card data-comparison="{{ key }}" {{ ...attributes }}>
     <twig:Card:Header>
@@ -66,7 +66,9 @@
                                         </span>
                                     {% endif %}
                                 </twig:Table:Cell>
-                                {% if figures is null %}
+                                {% if row.awaitingReading %}
+                                    <twig:Table:Cell class="py-3 ps-2 pe-4 whitespace-normal text-end text-sm text-muted-foreground/70" data-awaiting-reading>{{ 'compare.no_reading_today'|trans(domain='dashboard') }}</twig:Table:Cell>
+                                {% elseif figures is null %}
                                     <twig:Table:Cell class="py-3 ps-2 pe-4 whitespace-normal text-end text-sm text-muted-foreground/70" data-no-history>{{ 'compare.no_history'|trans(domain='dashboard') }}</twig:Table:Cell>
                                 {% else %}
                                     {% set sign = '' %}

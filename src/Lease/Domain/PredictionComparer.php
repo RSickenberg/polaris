@@ -11,10 +11,18 @@ use Polaris\Shared\Domain\OwnerMidnight;
 /**
  * Compares what happened since the owner's last midnights with what the daily snapshots predicted then.
  *
- * Every window ends at the latest reading, not at the clock. "Today" starts at the owner's last midnight at or before
- * that reading; the other windows start at the owner's midnight 7, 14 or 30 days before it, and use the snapshot of
- * that local day (never the nearest one). A window with no snapshot, or that starts before the lease did, has no
- * result ("not enough history").
+ * Every window ends at the latest reading. It starts at the owner's midnight 0, 7, 14 or 30 days before the owner's
+ * current day (read from the clock, not from the reading), and uses the snapshot of that local day (never the nearest
+ * one). A window with no snapshot, or that starts before the lease did, has no result ("not enough history").
+ *
+ * "Yesterday" is the closed previous day: its midnight to the owner's current midnight (or the latest reading when that
+ * is earlier), against the snapshot of that day; its projected end is the snapshot of today's midnight against it.
+ *
+ * "Today" with no reading since the owner's current midnight has nothing to measure: it is marked
+ * {@see WindowComparison::$awaitingReading} instead of showing the figures of an earlier day.
+ *
+ * On a short window the share of the expected distance is noise (5 km driven against 1 km expected is +400 %): below
+ * {@see self::MIN_SECONDS_FOR_RATIO} the distances stay and the percentage goes.
  *
  * One exception: "today" without a snapshot of its own day (the owner's midnight job has not run yet, or was missed)
  * falls back on the latest earlier snapshot and is measured from that snapshot's midnight, so it covers more than the
@@ -22,8 +30,12 @@ use Polaris\Shared\Domain\OwnerMidnight;
  */
 final readonly class PredictionComparer
 {
+    /** A window shorter than this (from its start to the latest reading) shows no percentage: 6 hours. */
+    public const int MIN_SECONDS_FOR_RATIO = 21_600;
+
     /**
      * @param array<string, SnapshotFigures> $snapshots the figures by local day (`Y-m-d`)
+     * @param CarbonImmutable                $now       decides which local day is "today"; the windows end at the latest reading
      *
      * @throws \InvalidArgumentException when the time zone is not an IANA name
      */
@@ -32,14 +44,25 @@ final readonly class PredictionComparer
         Projection $latest,
         string $timeZone,
         array $snapshots,
+        CarbonImmutable $now,
     ): PredictionComparison {
-        $lastMidnight = OwnerMidnight::latestAt($latest->asOf, $timeZone);
+        $lastMidnight = OwnerMidnight::latestAt($now, $timeZone);
         $budget = [];
         $pace = [];
         $projectedEnd = [];
 
         foreach (ComparisonWindow::cases() as $window) {
             $day = $lastMidnight->localDay->subDays($window->days());
+
+            if (ComparisonWindow::Today === $window && $latest->asOf < $lastMidnight->at) {
+                $waiting = new WindowComparison($window, null, awaitingReading: true);
+                $budget[] = $waiting;
+                $pace[] = $waiting;
+                $projectedEnd[] = $waiting;
+
+                continue;
+            }
+
             $figures = $snapshots[$day->format('Y-m-d')] ?? null;
             $fallbackDays = 0;
 
@@ -54,8 +77,10 @@ final readonly class PredictionComparer
             }
 
             $start = OwnerMidnight::opening($day, $timeZone)->at;
-            $driven = $this->drivenSince($timeline, $start, $latest->asOf);
-            $seconds = $latest->asOf->getTimestamp() - $start->getTimestamp();
+            // Yesterday is a closed day: it ends at the owner's last midnight, or at the latest reading if that came first.
+            $end = ComparisonWindow::Yesterday === $window ? min($lastMidnight->at, $latest->asOf) : $latest->asOf;
+            $driven = $end > $start ? $this->drivenSince($timeline, $start, $end) : null;
+            $seconds = $end->getTimestamp() - $start->getTimestamp();
 
             $budget[] = new WindowComparison(
                 $window,
@@ -71,7 +96,12 @@ final readonly class PredictionComparer
             );
             $projectedEnd[] = new WindowComparison(
                 $window,
-                $this->againstProjectedEnd($figures, $latest),
+                $this->againstProjectedEnd(
+                    $figures,
+                    ComparisonWindow::Yesterday === $window
+                        ? ($snapshots[$lastMidnight->localDay->format('Y-m-d')]->projectedAtEnd ?? null)
+                        : $latest->projectedAtEnd,
+                ),
                 $fallbackDays,
                 $figures->live ?? false,
             );
@@ -108,7 +138,7 @@ final readonly class PredictionComparer
 
         $expected = HalfUp::scale($figures->dailyBudget->metres(), $seconds, Pace::SECONDS_PER_DAY);
 
-        return Comparison::of($driven, Distance::fromMetres($expected));
+        return $this->withoutNoise(Comparison::of($driven, Distance::fromMetres($expected)), $seconds);
     }
 
     private function againstPace(?SnapshotFigures $figures, ?Distance $driven, int $seconds): ?Comparison
@@ -119,16 +149,21 @@ final readonly class PredictionComparer
 
         $expected = (int) round($figures->blendedPace->metresIn($seconds));
 
-        return Comparison::of($driven, Distance::fromMetres($expected));
+        return $this->withoutNoise(Comparison::of($driven, Distance::fromMetres($expected)), $seconds);
     }
 
-    private function againstProjectedEnd(?SnapshotFigures $figures, Projection $latest): ?Comparison
+    private function withoutNoise(Comparison $comparison, int $seconds): Comparison
     {
-        if (null === $figures) {
+        return $seconds < self::MIN_SECONDS_FOR_RATIO ? $comparison->withoutRatio() : $comparison;
+    }
+
+    private function againstProjectedEnd(?SnapshotFigures $figures, ?Distance $projectedNow): ?Comparison
+    {
+        if (null === $figures || null === $projectedNow) {
             return null;
         }
 
-        return Comparison::of($latest->projectedAtEnd, $figures->projectedAtEnd);
+        return Comparison::of($projectedNow, $figures->projectedAtEnd);
     }
 
     /**
