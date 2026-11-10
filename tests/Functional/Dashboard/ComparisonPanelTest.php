@@ -138,26 +138,44 @@ final class ComparisonPanelTest extends KernelTestCase
 
     public function testAnInfoButtonOpensTheExplanationOfThePanel(): void
     {
-        $panel = $this->panel('en', help: 'First line.\\nSecond line.');
+        $panel = $this->panel('en', help: 'compare_budget');
 
         $button = $panel->filter('[data-help=compare-budget]');
         self::assertCount(1, $button);
         self::assertSame('About “Title”', $button->attr('aria-label'));
-        self::assertStringContainsString('First line.', $panel->filter('dialog')->text());
-        self::assertStringContainsString('Second line.', $panel->filter('dialog')->text());
-        self::assertStringNotContainsString('\\n', $panel->filter('dialog')->text());
-        self::assertCount(1, $panel->filter('dialog br'));
+        self::assertSame(
+            'Did you stay within your budget?',
+            $this->text($panel->filter('dialog [data-help-answer]')),
+        );
     }
 
-    public function testTheFirstParagraphOfTheExplanationIsItsLeadAndTheOthersFollow(): void
+    public function testTheExplanationHasAnExampleRowTheGapLegendAndOneCardPerTopic(): void
     {
-        $panel = $this->panel('en', help: 'The answer.\\n\\nHow it works.\\n\\nHow to read it.');
+        $dialog = $this->panel('en', help: 'compare_budget')->filter('dialog');
 
-        self::assertSame('The answer.', $panel->filter('dialog [data-slot=dialog-description]')->text());
-        self::assertSame(
-            ['How it works.', 'How to read it.'],
-            $panel->filter('dialog [data-help-details] p')->each(static fn ($p): string => $p->text()),
-        );
+        // The example row is 320 / 280 km, 40 km over, 14 %.
+        self::assertStringContainsString('320', $dialog->filter('[data-help-anatomy]')->text());
+        self::assertStringContainsString('+40', $dialog->filter('[data-help-anatomy]')->text());
+        self::assertStringContainsString('+14%', $dialog->filter('[data-help-anatomy]')->text());
+        self::assertCount(1, $dialog->filter('[data-help-gap]'));
+        // Periods, reference, how today is counted, the live badge, missing history.
+        self::assertCount(5, $dialog->filter('[data-help-section]'));
+        self::assertStringContainsString('Driving hours', $dialog->filter('[data-help-details]')->text());
+    }
+
+    public function testTheProjectedEndExplanationDoesNotTalkAboutTheNight(): void
+    {
+        $dialog = $this->panel('en', help: 'compare_projected_end')->filter('dialog');
+
+        self::assertCount(4, $dialog->filter('[data-help-section]'));
+        self::assertStringNotContainsString('Driving hours', $dialog->filter('[data-help-details]')->text());
+    }
+
+    public function testTheExplanationIsTranslated(): void
+    {
+        $dialog = $this->panel('fr', help: 'compare_pace')->filter('dialog');
+
+        self::assertSame('Roulez-vous plus ou moins que d’habitude?', $this->text($dialog->filter('[data-help-answer]')));
     }
 
     public function testWithoutAnExplanationThereIsNoInfoButton(): void

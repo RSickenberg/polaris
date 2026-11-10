@@ -125,7 +125,7 @@
                         title="{{ 'current_pace.title'|trans(domain='dashboard') }}"
                         basis="{{ 'current_pace.basis'|trans(domain='dashboard') }}"
                         :budget="assessment.currentPace"
-                        help="{{ 'help.current_pace'|trans(domain='dashboard') }}"
+                        help="current_pace"
                     />
                     <twig:Dashboard:PaceCard
                         key="budget"
@@ -133,14 +133,14 @@
                         basis="{{ 'budget.basis'|trans(domain='dashboard') }}"
                         :budget="assessment.budget"
                         fallback="{{ 'budget.none'|trans(domain='dashboard') }}"
-                        help="{{ 'help.budget'|trans(domain='dashboard') }}"
+                        help="budget"
                     />
                     <twig:Dashboard:PaceCard
                         key="even"
                         title="{{ 'even_pace.title'|trans(domain='dashboard') }}"
                         basis="{{ 'even_pace.basis'|trans(domain='dashboard') }}"
                         :budget="dashboard.evenPace"
-                        help="{{ 'help.even_pace'|trans(domain='dashboard') }}"
+                        help="even_pace"
                     />
                 </div>
             {% endif %}
@@ -153,7 +153,7 @@
                         basis="{{ 'compare.budget.basis'|trans(domain='dashboard') }}"
                         :rows="dashboard.comparison.budget"
                         :recalculating="dashboard.comparison.recalculating"
-                        help="{{ 'help.compare_budget'|trans(domain='dashboard') }}"
+                        help="compare_budget"
                     />
                     <twig:Dashboard:ComparisonPanel
                         key="pace"
@@ -161,7 +161,7 @@
                         basis="{{ 'compare.pace.basis'|trans(domain='dashboard') }}"
                         :rows="dashboard.comparison.pace"
                         :recalculating="dashboard.comparison.recalculating"
-                        help="{{ 'help.compare_pace'|trans(domain='dashboard') }}"
+                        help="compare_pace"
                     />
                     <twig:Dashboard:ComparisonPanel
                         key="projected_end"
@@ -169,7 +169,7 @@
                         basis="{{ 'compare.projected_end.basis'|trans(domain='dashboard') }}"
                         :rows="dashboard.comparison.projectedEnd"
                         :recalculating="dashboard.comparison.recalculating"
-                        help="{{ 'help.compare_projected_end'|trans(domain='dashboard') }}"
+                        help="compare_projected_end"
                     />
                 </div>
             {% endif %}

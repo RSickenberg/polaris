@@ -3,10 +3,10 @@
     name,
     ## string The translated title of the card the help is about.
     title,
-    ## string The translated explanation: a one-line answer, then paragraphs, separated by a written \n\n; a single written \n becomes a line break.
-    text
+    ## string The key of the help: its answer is `help.<help>.answer` in the dashboard domain and its body the template `dashboard/help/<help>.html.twig`.
+    help
 -%}
-{# The info button at the top right of a card header, which opens a dialog that explains the card. #}
+{# The info button at the top right of a card header, which opens a wide dialog that explains the card: the answer in a callout, then cards with an icon each. #}
 <twig:Card:Action>
     <twig:Dialog :id="'help-' ~ name">
         <twig:Dialog:Trigger>
@@ -22,20 +22,18 @@
                 <twig:ux:icon name="lucide:info" aria-hidden="true" />
             </twig:Button>
         </twig:Dialog:Trigger>
-        {# The first paragraph is the answer in one line, in the text color; the others explain, one block each. #}
-        {% set paragraphs = text|split('\\n\\n') %}
-        <twig:Dialog:Content>
+        <twig:Dialog:Content class="max-h-[calc(100dvh-2rem)] gap-5 overflow-y-auto p-5 sm:max-w-3xl sm:p-6">
             <twig:Dialog:Header>
-                <twig:Dialog:Title>{{ title }}</twig:Dialog:Title>
-                <twig:Dialog:Description class="text-pretty font-medium text-foreground">{{ paragraphs|first|replace({'\\n': "\n"})|nl2br }}</twig:Dialog:Description>
+                <twig:Dialog:Title class="text-base">{{ title }}</twig:Dialog:Title>
+                {# The answer in one line, in a callout. #}
+                <twig:Dialog:Description class="flex items-start gap-3 rounded-lg border border-info/30 bg-info-surface p-3 text-pretty font-medium text-info-foreground" data-help-answer>
+                    <twig:ux:icon name="lucide:lightbulb" class="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+                    <span>{{ ('help.' ~ help ~ '.answer')|trans(domain='dashboard') }}</span>
+                </twig:Dialog:Description>
             </twig:Dialog:Header>
-            {% if paragraphs|length > 1 %}
-                <div class="flex flex-col gap-3 text-sm text-pretty text-muted-foreground" data-help-details>
-                    {% for paragraph in paragraphs|slice(1) %}
-                        <p>{{ paragraph|replace({'\\n': "\n"})|nl2br }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
+            <div class="flex flex-col gap-3" data-help-details>
+                {{ include('dashboard/help/' ~ help ~ '.html.twig') }}
+            </div>
         </twig:Dialog:Content>
     </twig:Dialog>
 </twig:Card:Action>

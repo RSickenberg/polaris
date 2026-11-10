@@ -1,0 +1,17 @@
+{%- props
+    ## string The translated meaning of a gap with a plus (more than expected).
+    over,
+    ## string The translated meaning of a gap with a minus (less than expected).
+    under
+-%}
+{# What the colour and the sign of a gap mean: red with a plus, green with a minus, each with its arrow. #}
+<div class="grid gap-3 sm:grid-cols-2" data-help-gap>
+    <div class="flex items-start gap-3 rounded-lg border border-danger/30 bg-danger-surface p-3 text-danger-foreground">
+        <twig:ux:icon name="lucide:trending-up" class="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+        <p class="text-sm text-pretty"><strong class="font-semibold">+</strong> {{ over }}</p>
+    </div>
+    <div class="flex items-start gap-3 rounded-lg border border-success/30 bg-success-surface p-3 text-success-foreground">
+        <twig:ux:icon name="lucide:trending-down" class="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+        <p class="text-sm text-pretty"><strong class="font-semibold">−</strong> {{ under }}</p>
+    </div>
+</div>

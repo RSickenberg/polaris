@@ -270,29 +270,177 @@
         <source>help.open</source>
         <target>À propos de «  %title%  »</target>
       </trans-unit>
-      <trans-unit id="help.current_pace">
-        <source>help.current_pace</source>
-        <target>Où vous mènent vos habitudes de conduite.\n\nCe sont les kilomètres que vous parcourez en ce moment par jour, par semaine et par mois. Polaris regarde tout votre leasing et donne plus de poids aux 30 derniers jours : un changement d’habitudes apparaît ici en quelques semaines.\n\nComparez avec « Dès maintenant » : si cette carte est plus haute, vous êtes en route pour dépasser votre kilométrage autorisé.</target>
+      <trans-unit id="help.current_pace.answer">
+        <source>help.current_pace.answer</source>
+        <target>Où vous mènent vos habitudes de conduite.</target>
       </trans-unit>
-      <trans-unit id="help.budget">
-        <source>help.budget</source>
-        <target>Ce qu’il vous reste à parcourir.\n\nCe sont les kilomètres par jour, par semaine et par mois qui épuisent exactement votre kilométrage autorisé à la fin du leasing : les kilomètres qu’il vous reste, répartis sur le temps qu’il vous reste.\n\nIls augmentent quand vous roulez moins et diminuent quand vous roulez plus. Restez en dessous et vous ne paierez pas de kilomètres en trop.</target>
+      <trans-unit id="help.current_pace.what">
+        <source>help.current_pace.what</source>
+        <target>Ce sont les kilomètres que vous parcourez en ce moment par jour, par semaine et par mois. Polaris regarde tout votre leasing et donne plus de poids aux 30 derniers jours : un changement d’habitudes apparaît ici en quelques semaines.</target>
       </trans-unit>
-      <trans-unit id="help.even_pace">
-        <source>help.even_pace</source>
-        <target>Votre kilométrage autorisé, réparti régulièrement.\n\nCe sont les kilomètres par jour, par semaine et par mois que votre contrat autorise en moyenne, du premier au dernier jour du leasing. Ils ne changent jamais, quoi que vous rouliez.\n\nServez-vous-en comme repère pour les deux autres cartes.</target>
+      <trans-unit id="help.current_pace.use">
+        <source>help.current_pace.use</source>
+        <target>Comparez avec « Dès maintenant » : si cette carte est plus haute, vous êtes en route pour dépasser votre kilométrage autorisé.</target>
       </trans-unit>
-      <trans-unit id="help.compare_budget">
-        <source>help.compare_budget</source>
-        <target>Avez-vous roulé dans les limites de votre budget?\n\nVotre budget, ce sont les kilomètres par jour qui vous amènent pile à votre kilométrage autorisé à la fin du leasing.\n\nChaque ligne est une période : aujourd’hui (depuis votre minuit), hier (la journée entière), puis les 7, 14 et 30 derniers jours, comptés depuis votre minuit.\nToutes se terminent à votre dernier relevé, qui peut dater de quelques heures. Avant le premier relevé de la journée, la première ligne indique « Pas encore de relevé aujourd’hui ».\n\nSous chaque période, deux chiffres :\n• ce que vous avez roulé;\n• ce que le budget permettait.\nPar exemple « 320 / 280 km » : vous avez roulé 320 km alors que le budget en permettait 280.\n\nL’écart à droite dit de combien :\n• en rouge avec un +, vous avez roulé plus que permis;\n• en vert avec un −, moins.\nLe pourcentage donne cet écart par rapport au second chiffre. Il est omis tant que moins de 6 heures de la période se sont écoulées, car il varierait trop.\n\nPolaris compte la distance entre deux relevés dans les heures où vous roulez d’habitude (voir « Heures de conduite » dans les conditions du leasing). Sans elles, il répartit cette distance régulièrement sur toute la journée, nuit comprise, de sorte qu’un relevé à 21:00 attribue une partie du lendemain matin à la veille.\n\nPolaris prend le budget du début de la période, noté chaque jour à minuit.\n\nLe badge « En direct » sur la première ligne : l’instantané d’aujourd’hui n’est pas encore enregistré, car Polaris l’enregistre à minuit. La ligne est alors comparée à une projection recalculée à l’instant. Ces chiffres en direct sont ceux que la tâche de minuit enregistrerait; rien n’en est conservé.\n\nSi même cela est impossible, la ligne est comparée au dernier enregistrement précédent et affiche « Depuis hier » ou « Depuis N jours ».</target>
+      <trans-unit id="help.budget.answer">
+        <source>help.budget.answer</source>
+        <target>Ce qu’il vous reste à parcourir.</target>
       </trans-unit>
-      <trans-unit id="help.compare_pace">
-        <source>help.compare_pace</source>
-        <target>Roulez-vous plus ou moins que d’habitude?\n\nVotre rythme habituel, c’est votre moyenne de kilomètres par jour depuis le début du leasing, avec plus de poids sur les 30 derniers jours.\n\nChaque ligne est une période : aujourd’hui (depuis votre minuit), hier (la journée entière), puis les 7, 14 et 30 derniers jours, comptés depuis votre minuit.\nToutes se terminent à votre dernier relevé, qui peut dater de quelques heures. Avant le premier relevé de la journée, la première ligne indique « Pas encore de relevé aujourd’hui ».\n\nSous chaque période, deux chiffres :\n• ce que vous avez roulé;\n• ce que votre rythme laissait prévoir.\nPar exemple « 320 / 280 km » : vous avez roulé 40 km de plus que d’habitude.\n\nL’écart à droite dit de combien :\n• en rouge avec un +, vous avez roulé plus que d’habitude;\n• en vert avec un −, moins.\nLe pourcentage donne cet écart par rapport au second chiffre. Il est omis tant que moins de 6 heures de la période se sont écoulées, car il varierait trop.\n\nPolaris compte la distance entre deux relevés dans les heures où vous roulez d’habitude (voir « Heures de conduite » dans les conditions du leasing). Sans elles, il répartit cette distance régulièrement sur toute la journée, nuit comprise, de sorte qu’un relevé à 21:00 attribue une partie du lendemain matin à la veille.\n\nPolaris note votre rythme chaque jour à minuit.\nTant qu’il n’a pas de note pour le premier jour d’une période, la ligne affiche « Historique insuffisant ».\n\nLe badge « En direct » sur la première ligne : l’instantané d’aujourd’hui n’est pas encore enregistré, car Polaris l’enregistre à minuit. La ligne est alors comparée à une projection recalculée à l’instant. Ces chiffres en direct sont ceux que la tâche de minuit enregistrerait; rien n’en est conservé.\n\nSi même cela est impossible, la ligne est comparée au dernier enregistrement précédent et affiche « Depuis hier » ou « Depuis N jours ».</target>
+      <trans-unit id="help.budget.what">
+        <source>help.budget.what</source>
+        <target>Ce sont les kilomètres par jour, par semaine et par mois qui épuisent exactement votre kilométrage autorisé à la fin du leasing : les kilomètres qu’il vous reste, répartis sur le temps qu’il vous reste.</target>
       </trans-unit>
-      <trans-unit id="help.compare_projected_end">
-        <source>help.compare_projected_end</source>
-        <target>Votre fin de leasing s’annonce-t-elle mieux ou moins bien?\n\nChaque jour, Polaris estime combien de kilomètres vous aurez roulés à la fin du leasing. Ce panneau compare l’estimation d’aujourd’hui avec celle du début de chaque période.\n\nChaque ligne est une période : aujourd’hui (depuis votre minuit), hier (la journée entière), puis les 7, 14 et 30 derniers jours, comptés depuis votre minuit.\nToutes se terminent à votre dernier relevé, qui peut dater de quelques heures. Avant le premier relevé de la journée, la première ligne indique « Pas encore de relevé aujourd’hui ».\n\nSous chaque période, deux chiffres :\n• l’estimation d’aujourd’hui;\n• celle que Polaris faisait au début de la période.\nPar exemple « 61’200 / 60’500 km » : votre estimation a augmenté de 700 km depuis le début de la période.\n\nL’écart à droite dit de combien :\n• en rouge avec un +, l’estimation a augmenté;\n• en vert avec un −, elle a baissé : vous roulez moins qu’avant.\nLe pourcentage donne cet écart par rapport au second chiffre.\n\nPolaris note son estimation chaque jour à minuit.\nTant qu’il n’a pas de note pour le premier jour d’une période, la ligne affiche « Historique insuffisant ».\n\nLe badge « En direct » sur la première ligne : l’instantané d’aujourd’hui n’est pas encore enregistré, car Polaris l’enregistre à minuit. La ligne est alors comparée à une projection recalculée à l’instant. Ces chiffres en direct sont ceux que la tâche de minuit enregistrerait; rien n’en est conservé.\n\nSi même cela est impossible, la ligne est comparée au dernier enregistrement précédent et affiche « Depuis hier » ou « Depuis N jours ».</target>
+      <trans-unit id="help.budget.use">
+        <source>help.budget.use</source>
+        <target>Ils augmentent quand vous roulez moins et diminuent quand vous roulez plus. Restez en dessous et vous ne paierez pas de kilomètres en trop.</target>
+      </trans-unit>
+      <trans-unit id="help.even_pace.answer">
+        <source>help.even_pace.answer</source>
+        <target>Votre kilométrage autorisé, réparti régulièrement.</target>
+      </trans-unit>
+      <trans-unit id="help.even_pace.what">
+        <source>help.even_pace.what</source>
+        <target>Ce sont les kilomètres par jour, par semaine et par mois que votre contrat autorise en moyenne, du premier au dernier jour du leasing. Ils ne changent jamais, quoi que vous rouliez.</target>
+      </trans-unit>
+      <trans-unit id="help.even_pace.use">
+        <source>help.even_pace.use</source>
+        <target>Servez-vous-en comme repère pour les deux autres cartes.</target>
+      </trans-unit>
+      <trans-unit id="help.section.periods">
+        <source>help.section.periods</source>
+        <target>Les périodes</target>
+      </trans-unit>
+      <trans-unit id="help.section.reference">
+        <source>help.section.reference</source>
+        <target>Avec quoi on compare</target>
+      </trans-unit>
+      <trans-unit id="help.section.today">
+        <source>help.section.today</source>
+        <target>Comment « aujourd’hui » est compté</target>
+      </trans-unit>
+      <trans-unit id="help.section.live">
+        <source>help.section.live</source>
+        <target>Le badge « En direct »</target>
+      </trans-unit>
+      <trans-unit id="help.section.fallback">
+        <source>help.section.fallback</source>
+        <target>Quand l’historique manque</target>
+      </trans-unit>
+      <trans-unit id="help.section.what">
+        <source>help.section.what</source>
+        <target>Ce que c’est</target>
+      </trans-unit>
+      <trans-unit id="help.section.use">
+        <source>help.section.use</source>
+        <target>Comment s’en servir</target>
+      </trans-unit>
+      <trans-unit id="help.anatomy.period">
+        <source>help.anatomy.period</source>
+        <target>La période</target>
+      </trans-unit>
+      <trans-unit id="help.anatomy.gap">
+        <source>help.anatomy.gap</source>
+        <target>L’écart, avec sa part du second chiffre</target>
+      </trans-unit>
+      <trans-unit id="help.common.periods">
+        <source>help.common.periods</source>
+        <target>Chaque ligne est une période : aujourd’hui (depuis votre minuit), hier (la journée entière), puis les 7, 14 et 30 derniers jours, comptés depuis votre minuit. Toutes se terminent à votre dernier relevé, qui peut dater de quelques heures. Avant le premier relevé de la journée, la première ligne indique « Pas encore de relevé aujourd’hui ».</target>
+      </trans-unit>
+      <trans-unit id="help.common.today">
+        <source>help.common.today</source>
+        <target>Polaris compte la distance entre deux relevés dans les heures où vous roulez d’habitude (voir « Heures de conduite » dans les conditions du leasing). Sans elles, il répartit cette distance régulièrement sur toute la journée, nuit comprise, de sorte qu’un relevé à 21:00 attribue une partie du lendemain matin à la veille.</target>
+      </trans-unit>
+      <trans-unit id="help.common.live">
+        <source>help.common.live</source>
+        <target>L’instantané d’aujourd’hui n’est pas encore enregistré, car Polaris l’enregistre à minuit. La ligne est alors comparée à une projection recalculée à l’instant : ce que la tâche de minuit enregistrerait. Rien n’en est conservé.</target>
+      </trans-unit>
+      <trans-unit id="help.common.fallback">
+        <source>help.common.fallback</source>
+        <target>Si même cela est impossible, la ligne est comparée au dernier enregistrement précédent et affiche « Depuis hier » ou « Depuis N jours ».</target>
+      </trans-unit>
+      <trans-unit id="help.compare_budget.answer">
+        <source>help.compare_budget.answer</source>
+        <target>Avez-vous roulé dans les limites de votre budget?</target>
+      </trans-unit>
+      <trans-unit id="help.compare_budget.actual">
+        <source>help.compare_budget.actual</source>
+        <target>Ce que vous avez roulé</target>
+      </trans-unit>
+      <trans-unit id="help.compare_budget.expected">
+        <source>help.compare_budget.expected</source>
+        <target>Ce que le budget permettait</target>
+      </trans-unit>
+      <trans-unit id="help.compare_budget.over">
+        <source>help.compare_budget.over</source>
+        <target>Vous avez roulé plus que le budget ne le permettait.</target>
+      </trans-unit>
+      <trans-unit id="help.compare_budget.under">
+        <source>help.compare_budget.under</source>
+        <target>Vous avez roulé moins que le budget ne le permettait.</target>
+      </trans-unit>
+      <trans-unit id="help.compare_budget.reference">
+        <source>help.compare_budget.reference</source>
+        <target>Votre budget, ce sont les kilomètres par jour qui vous amènent pile à votre kilométrage autorisé à la fin du leasing. Polaris prend celui du début de la période, noté chaque jour à minuit.</target>
+      </trans-unit>
+      <trans-unit id="help.compare_budget.percent">
+        <source>help.compare_budget.percent</source>
+        <target>Le pourcentage donne cet écart par rapport au second chiffre. Il est omis tant que moins de 6 heures de la période se sont écoulées, car il varierait trop.</target>
+      </trans-unit>
+      <trans-unit id="help.compare_pace.answer">
+        <source>help.compare_pace.answer</source>
+        <target>Roulez-vous plus ou moins que d’habitude?</target>
+      </trans-unit>
+      <trans-unit id="help.compare_pace.actual">
+        <source>help.compare_pace.actual</source>
+        <target>Ce que vous avez roulé</target>
+      </trans-unit>
+      <trans-unit id="help.compare_pace.expected">
+        <source>help.compare_pace.expected</source>
+        <target>Ce que votre rythme laissait prévoir</target>
+      </trans-unit>
+      <trans-unit id="help.compare_pace.over">
+        <source>help.compare_pace.over</source>
+        <target>Vous avez roulé plus que d’habitude.</target>
+      </trans-unit>
+      <trans-unit id="help.compare_pace.under">
+        <source>help.compare_pace.under</source>
+        <target>Vous avez roulé moins que d’habitude.</target>
+      </trans-unit>
+      <trans-unit id="help.compare_pace.reference">
+        <source>help.compare_pace.reference</source>
+        <target>Votre rythme habituel, c’est votre moyenne de kilomètres par jour depuis le début du leasing, avec plus de poids sur les 30 derniers jours. Polaris le note chaque jour à minuit; tant qu’il n’a pas de note pour le premier jour d’une période, la ligne affiche « Historique insuffisant ».</target>
+      </trans-unit>
+      <trans-unit id="help.compare_pace.percent">
+        <source>help.compare_pace.percent</source>
+        <target>Le pourcentage donne cet écart par rapport au second chiffre. Il est omis tant que moins de 6 heures de la période se sont écoulées, car il varierait trop.</target>
+      </trans-unit>
+      <trans-unit id="help.compare_projected_end.answer">
+        <source>help.compare_projected_end.answer</source>
+        <target>Votre fin de leasing s’annonce-t-elle mieux ou moins bien?</target>
+      </trans-unit>
+      <trans-unit id="help.compare_projected_end.actual">
+        <source>help.compare_projected_end.actual</source>
+        <target>L’estimation d’aujourd’hui</target>
+      </trans-unit>
+      <trans-unit id="help.compare_projected_end.expected">
+        <source>help.compare_projected_end.expected</source>
+        <target>L’estimation au début de la période</target>
+      </trans-unit>
+      <trans-unit id="help.compare_projected_end.over">
+        <source>help.compare_projected_end.over</source>
+        <target>L’estimation a augmenté : vous visez plus de kilomètres.</target>
+      </trans-unit>
+      <trans-unit id="help.compare_projected_end.under">
+        <source>help.compare_projected_end.under</source>
+        <target>L’estimation a baissé : vous roulez moins qu’avant.</target>
+      </trans-unit>
+      <trans-unit id="help.compare_projected_end.reference">
+        <source>help.compare_projected_end.reference</source>
+        <target>Chaque jour, Polaris estime combien de kilomètres vous aurez roulés à la fin du leasing et le note à minuit. Tant qu’il n’a pas de note pour le premier jour d’une période, la ligne affiche « Historique insuffisant ».</target>
+      </trans-unit>
+      <trans-unit id="help.compare_projected_end.percent">
+        <source>help.compare_projected_end.percent</source>
+        <target>Le pourcentage donne cet écart par rapport au second chiffre.</target>
       </trans-unit>
       <trans-unit id="page.debug.title">
         <source>page.debug.title</source>

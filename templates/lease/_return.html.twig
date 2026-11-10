@@ -8,7 +8,7 @@
     </twig:Card:Header>
     <twig:Card:Content class="flex flex-col gap-4">
         {% if returnedOn is null %}
-            <p class="text-sm text-muted-foreground text-pretty">{{ 'return.help'|trans(domain='lease') }}</p>
+            <p class="text-sm text-muted-foreground text-pretty">{{ 'return.help'|trans(domain='lease')|nl2br }}</p>
         {% else %}
             <p class="text-sm text-pretty" data-returned>{{ 'return.status'|trans({on: returnedOn}, 'lease') }}</p>
             <p class="text-sm text-muted-foreground text-pretty">{{ 'return.status_help'|trans(domain='lease') }}</p>
