@@ -81,6 +81,7 @@ final class PredictionComparerTest extends TestCase
             self::assertSame(
                 [
                     ComparisonWindow::Today,
+                    ComparisonWindow::Yesterday,
                     ComparisonWindow::LastWeek,
                     ComparisonWindow::LastTwoWeeks,
                     ComparisonWindow::LastMonth,
@@ -88,7 +89,7 @@ final class PredictionComparerTest extends TestCase
                 array_map(static fn (WindowComparison $row): ComparisonWindow => $row->window, $rows),
             );
             self::assertSame(
-                [null, null, null, null],
+                [null, null, null, null, null],
                 array_map(static fn (WindowComparison $row): ?Comparison => $row->comparison, $rows),
             );
         }
