@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.6.0](https://github.com/RSickenberg/polaris/compare/v0.5.0...v0.6.0) (2026-11-10)
+
+### Features
+
+* **account:** add a "remember me" option to the login ([6d6daaf](https://github.com/RSickenberg/polaris/commit/6d6daafb3fca97eee21a8127a3a8d91ac80e1bbb))
+* **dashboard:** better ui for "live data" ([2b9a951](https://github.com/RSickenberg/polaris/commit/2b9a951c796806873a23471107054c5744fed838))
+* **dashboard:** redesign the help dialogs with icons, cards and an example row ([1e87dc5](https://github.com/RSickenberg/polaris/commit/1e87dc5fa897fb1e8b4cc06dd5145a5c9d35f9c1))
+* **dashboard:** show where the lease stands on each home card ([966c65d](https://github.com/RSickenberg/polaris/commit/966c65d5c82b2c8be64b42ef6ea70f154fb496ef))
+* **lease:** count driving between readings in the owner's driving hours ([d34131b](https://github.com/RSickenberg/polaris/commit/d34131bf93d06a85d158f9f9e606ac15389098aa))
+* **lease:** let the owner compare "Today" with the whole day ([db93e39](https://github.com/RSickenberg/polaris/commit/db93e3978e54150f944a2f14d303dc2167a4cc8c))
+* **lease:** log the change of the newest prediction after a snapshot recalculation ([684327b](https://github.com/RSickenberg/polaris/commit/684327bf81eba6d95205c105222e7b6978a1818b))
+* **lease:** recalculate projection snapshots when the lease terms change ([cbf4ec8](https://github.com/RSickenberg/polaris/commit/cbf4ec87e61ba9578e14ab6b61a8fe416704f580))
+
+### Bug Fixes
+
+* **dashboard:** anchor the comparison panels on the owner's current day ([889af32](https://github.com/RSickenberg/polaris/commit/889af324c42c5a0ced79eed6b454100c03622069))
+* **dashboard:** clearer help for the comparison panels ([5607564](https://github.com/RSickenberg/polaris/commit/560756422337cfc663362196f543eda2f4feda03))
+* **dashboard:** draw the chart again from scratch when its data changes ([c9e88cc](https://github.com/RSickenberg/polaris/commit/c9e88ccc60b9fc586857580ea49a90700eb14403))
+* **dashboard:** keep the chart range when Turbo's morph reconnects the controller ([8ae0f44](https://github.com/RSickenberg/polaris/commit/8ae0f4484fc3d560fd95ab015773c76922725020))
+* **lease:** ignore verifications recorded after the midnight in a projection snapshot ([fb7d004](https://github.com/RSickenberg/polaris/commit/fb7d0041f9a5b64e05eb2cd624dcc5e4a0ddb662))
+* **lease:** put the terms.title key inside the body of lease.fr.xlf ([831cf70](https://github.com/RSickenberg/polaris/commit/831cf708a19418e60a212aea66b2456e17556f9a))
+* **trans:** French typography puts a no-break space before ; ! ? and : ([cb3177c](https://github.com/RSickenberg/polaris/commit/cb3177c3fd2aae18b9d5ed2e3848cf1dc445d81f))
+* **trans:** no space before the question mark in return.help ([d0cf1ab](https://github.com/RSickenberg/polaris/commit/d0cf1abec5ed3dd31dd346c88b7a62c7056b0cc7))
+
 ## [0.5.0](https://github.com/RSickenberg/polaris/compare/v0.4.0...v0.5.0) (2026-11-09)
 
 ### Features
