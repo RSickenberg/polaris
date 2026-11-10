@@ -1,0 +1,27 @@
+#!/bin/sh
+# Creates the test database of each ParaTest worker (TEST_TOKEN 1..N) and applies the migrations to it.
+# Usage: bin/test-db [workers]. Without a count, one database for a plain PHPUnit run.
+set -e
+cd "$(dirname "$0")/.."
+
+prepare() {
+    TEST_TOKEN="$1" php bin/console doctrine:database:create --env=test --if-not-exists --no-interaction
+    TEST_TOKEN="$1" php bin/console doctrine:migrations:migrate --env=test --no-interaction --all-or-nothing
+}
+
+if [ -z "$1" ]; then
+    prepare ""
+    exit 0
+fi
+
+# Warm the cache once so the workers do not build it at the same time.
+php bin/console cache:warmup --env=test --no-interaction
+
+pids=""
+for token in $(seq 1 "$1"); do
+    prepare "$token" > /dev/null &
+    pids="$pids $!"
+done
+for pid in $pids; do
+    wait "$pid"
+done

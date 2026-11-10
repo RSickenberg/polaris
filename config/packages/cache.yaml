@@ -17,3 +17,10 @@ framework:
         # Namespaced pools use the above "app" backend by default
         #pools:
             #my.dedicated.cache: null
+
+when@test:
+    framework:
+        cache:
+            # One filesystem cache per ParaTest worker ("TEST_TOKEN" is set by ParaTest): a test clearing the rate
+            # limiter pool must not wipe the limiter state of a test running in another worker.
+            directory: '%kernel.cache_dir%/pools_%env(default::TEST_TOKEN)%'

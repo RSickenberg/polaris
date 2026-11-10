@@ -55,7 +55,7 @@ final class VehicleDataCommandsTest extends KernelTestCase
 
     protected function tearDown(): void
     {
-        array_map(unlink(...), glob(sys_get_temp_dir() . '/polaris-test-*.json') ?: []);
+        array_map(unlink(...), glob(sys_get_temp_dir() . '/polaris-test-' . getmypid() . '-*.json') ?: []);
         parent::tearDown();
     }
 
@@ -73,7 +73,7 @@ final class VehicleDataCommandsTest extends KernelTestCase
 
     public function testTheExportCanBeWrittenToAFileAndImportedBack(): void
     {
-        $file = sys_get_temp_dir() . '/polaris-test-' . bin2hex(random_bytes(6)) . '.json';
+        $file = sys_get_temp_dir() . '/polaris-test-' . getmypid() . '-' . bin2hex(random_bytes(6)) . '.json';
         $export = $this->tester('polaris:vehicle:data:export');
         self::assertSame(Command::SUCCESS, $export->execute(['vin' => self::SOURCE_VIN, '--file' => $file]));
         self::assertFileExists($file);
@@ -108,7 +108,7 @@ final class VehicleDataCommandsTest extends KernelTestCase
         self::assertSame(Command::FAILURE, $tester->execute($missing));
         self::assertStringContainsString('cannot be read', $tester->getDisplay());
 
-        $file = sys_get_temp_dir() . '/polaris-test-' . bin2hex(random_bytes(6)) . '.json';
+        $file = sys_get_temp_dir() . '/polaris-test-' . getmypid() . '-' . bin2hex(random_bytes(6)) . '.json';
         file_put_contents($file, '{"hello": "world"}');
         self::assertSame(Command::FAILURE, $tester->execute(['vin' => self::TARGET_VIN, 'file' => $file]));
         self::assertStringContainsString('not an export of Polaris', $tester->getDisplay());

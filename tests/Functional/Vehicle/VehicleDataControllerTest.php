@@ -67,7 +67,7 @@ final class VehicleDataControllerTest extends WebTestCase
 
     protected function tearDown(): void
     {
-        array_map(unlink(...), glob(sys_get_temp_dir() . '/polaris-test-*.json') ?: []);
+        array_map(unlink(...), glob(sys_get_temp_dir() . '/polaris-test-' . getmypid() . '-*.json') ?: []);
         parent::tearDown();
     }
 
@@ -161,7 +161,7 @@ final class VehicleDataControllerTest extends WebTestCase
 
     private function temporaryFile(string $content): string
     {
-        $path = sys_get_temp_dir() . '/polaris-test-' . bin2hex(random_bytes(6)) . '.json';
+        $path = sys_get_temp_dir() . '/polaris-test-' . getmypid() . '-' . bin2hex(random_bytes(6)) . '.json';
         file_put_contents($path, $content);
 
         return $path;

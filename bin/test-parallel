@@ -1,0 +1,10 @@
+#!/bin/sh
+# Runs the PHPUnit suite with ParaTest. Each worker has a database of its own (polaris_test<token>), created and
+# migrated here first. PROCESSES sets the number of workers (default 4); extra arguments go to ParaTest.
+set -e
+cd "$(dirname "$0")/.."
+
+processes="${PROCESSES:-4}"
+
+bin/test-db "$processes"
+exec vendor/bin/paratest --processes="$processes" "$@"

@@ -11,7 +11,7 @@ Polaris is a Symfony application. These are the rules for working in it; they wi
 
 ## Workflow
 
-- Everything runs through Docker and the Makefile (see README): `make start`, `make test` (PHPUnit, `ARGS="--filter=..."`), `make ci` (php-cs-fixer, PHPStan, Deptrac, translations, PHPUnit), `make cs-fix`, `make sf ARGS="..."` for any console command. `lint:twig templates/` is not in `make ci`: run it when templates change.
+- Everything runs through Docker and the Makefile (see README): `make start`, `make test` (PHPUnit in parallel through ParaTest, one database `polaris_test<token>` and one filesystem cache per worker, `PROCESSES=4` by default, `ARGS="--filter=..."`; `make test-serial` is plain PHPUnit in one process), `make ci` (php-cs-fixer, PHPStan, Deptrac, translations, PHPUnit), `make cs-fix`, `make sf ARGS="..."` for any console command. `lint:twig templates/` is not in `make ci`: run it when templates change.
 - Tests read the real environment of the `php` container, and Compose loads `.env.local` into it: a local value such as `POLARIS_KEY_HOSTING=external` overrides `.env.test` (it makes `PublicKeyControllerTest` fail locally). Override it for the run: `docker compose exec -e POLARIS_KEY_HOSTING=polaris -e POLARIS_KEY_HOSTING_URL= php bin/phpunit`.
 - On failure read `var/log/dev.log` and the profiler (`/_profiler`) before changing code.
 - Capabilities come from `composer require <package>` and its Flex recipe. Exception: `twig-tailwind-extra` (needed by kit templates) ships a recipes-contrib recipe and `extra.symfony.allow-contrib` is `false`, so its bundle is registered by hand in `config/bundles.php`.

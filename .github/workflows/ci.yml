@@ -121,5 +121,5 @@ jobs:
       - name: Check that the migrations match the entity mapping
         run: php bin/console doctrine:schema:validate --env=test
 
-      - name: Run PHPUnit
-        run: composer test
+      - name: Run PHPUnit in parallel
+        run: composer test:parallel
