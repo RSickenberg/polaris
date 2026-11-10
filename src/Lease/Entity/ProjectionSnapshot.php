@@ -18,8 +18,11 @@ use Symfony\Component\Uid\Ulid;
 /**
  * What Polaris projected for a lease at the owner's midnight: the figures of the assessment with only the readings up
  * to that midnight, kept so that past projections can be compared with what was driven. One row per lease and local
- * day; a run for the same midnight replaces the figures (the last wins). It is a record: editing the terms or adding a
- * reading later never changes a row.
+ * day; a run for the same midnight replaces the figures (the last wins). It is a record of what was projected then:
+ * adding a reading later never changes a row. The one exception is an edit of what a projection depends on (lease
+ * start, end date, allowance, start odometer): every row is then recalculated under the new terms with the readings
+ * stored now (see {@see \Polaris\Lease\Service\ProjectionSnapshotService::recalculate()}), or deleted when it can no
+ * longer be assessed, so that the comparisons never mix terms.
  *
  * The local day is the calendar date the midnight OPENS (it is that day's first instant): the row of 2026-11-07 is the
  * projection at the very start of 7 November, so it describes the end of the 6th. "Today's snapshot" is the row with
@@ -161,6 +164,43 @@ class ProjectionSnapshot
         $this->overallPaceMetresPerDay = $overallPace->metresPerDay();
         $this->recentPaceMetresPerDay = $recentPace?->metresPerDay();
         $this->blendedPaceMetresPerDay = $blendedPace->metresPerDay();
+    }
+
+    /**
+     * Whether the row already holds these figures (paces within a millionth of a metre per day, the driver keeps 14
+     * significant digits). When it does, a recalculation leaves it alone.
+     */
+    public function hasSameFigures(
+        CarbonImmutable $cutoffAt,
+        CarbonImmutable $asOf,
+        Distance $driven,
+        Distance $allowedToDate,
+        Distance $projectedAtEnd,
+        Distance $dailyBudget,
+        RiskLevel $riskLevel,
+        Pace $overallPace,
+        ?Pace $recentPace,
+        Pace $blendedPace,
+    ): bool {
+        return true === $this->cutoffAt?->equalTo($cutoffAt)
+            && $this->asOf->equalTo($asOf)
+            && $this->drivenMetres === $driven->metres()
+            && $this->allowedToDateMetres === $allowedToDate->metres()
+            && $this->projectedAtEndMetres === $projectedAtEnd->metres()
+            && $this->dailyBudgetMetres === $dailyBudget->metres()
+            && $this->riskLevel === $riskLevel
+            && self::samePace($this->overallPaceMetresPerDay, $overallPace->metresPerDay())
+            && self::samePace($this->recentPaceMetresPerDay, $recentPace?->metresPerDay())
+            && self::samePace($this->blendedPaceMetresPerDay, $blendedPace->metresPerDay());
+    }
+
+    private static function samePace(?float $stored, ?float $pace): bool
+    {
+        if (null === $stored || null === $pace) {
+            return $stored === $pace;
+        }
+
+        return abs($stored - $pace) < 1e-6;
     }
 
     public function getId(): Ulid

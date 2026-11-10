@@ -44,6 +44,11 @@ final class ComparisonPanelsMapperTest extends TestCase
             );
         }
 
+        self::assertFalse($panels->recalculating);
+        self::assertTrue(
+            new ComparisonPanelsMapper()->map(new PredictionComparison($rows, $rows, $rows, true))->recalculating,
+        );
+
         $figures = $panels->budget[0]->figures;
         self::assertNotNull($figures);
         self::assertSame(55_000, $figures->actual->metres());

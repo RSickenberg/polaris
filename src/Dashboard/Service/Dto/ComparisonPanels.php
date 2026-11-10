@@ -28,6 +28,8 @@ final readonly class ComparisonPanels
          * @var list<ComparisonRow>
          */
         public array $projectedEnd,
+        /** True while the snapshots are recalculated after an edit of the lease terms: the empty rows say so. */
+        public bool $recalculating = false,
     ) {
     }
 }

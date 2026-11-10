@@ -258,6 +258,14 @@
         <source>compare.no_history</source>
         <target>Historique insuffisant</target>
       </trans-unit>
+      <trans-unit id="compare.recalculating">
+        <source>compare.recalculating</source>
+        <target>Vous avez modifié les conditions de votre leasing. Les lignes passées sont recalculées avec elles et reviennent dans un instant, rechargez la page pour les voir.</target>
+      </trans-unit>
+      <trans-unit id="compare.recalculating_row">
+        <source>compare.recalculating_row</source>
+        <target>Recalcul en cours</target>
+      </trans-unit>
       <trans-unit id="help.open">
         <source>help.open</source>
         <target>À propos de «  %title%  »</target>

@@ -68,6 +68,22 @@ final class ComparisonPanelTest extends KernelTestCase
         self::assertCount(0, $row->filter('[data-figure]'));
     }
 
+    public function testWhileTheSnapshotsAreRecalculatedTheEmptyRowsSayIt(): void
+    {
+        $panel = $this->panel('en', withHistory: false, recalculating: true);
+
+        self::assertSame(
+            'You changed your lease terms. The past rows are being recalculated with them and come back in a moment;'
+            . ' reload the page to see them.',
+            $this->text($panel->filter('[data-recalculating]')),
+        );
+        self::assertSame('Recalculating', $this->text($panel->filter('[data-period=week] [data-no-history]')));
+        self::assertSame('Recalcul en cours', $this->text(
+            $this->panel('fr', withHistory: false, recalculating: true)->filter('[data-period=week] [data-no-history]'),
+        ));
+        self::assertCount(0, $this->panel('en', withHistory: false)->filter('[data-recalculating]'));
+    }
+
     public function testTodayThatFellBackSaysSinceWhenItStarted(): void
     {
         $yesterday = $this->panel('en', todayFallbackDays: 1)->filter('[data-period=today] [data-fallback-days]');
@@ -155,6 +171,7 @@ final class ComparisonPanelTest extends KernelTestCase
         ?string $help = null,
         int $todayFallbackDays = 0,
         bool $todayAwaitingReading = false,
+        bool $recalculating = false,
     ): Crawler {
         self::bootKernel();
         $translator = self::getContainer()->get('translator');
@@ -175,11 +192,11 @@ final class ComparisonPanelTest extends KernelTestCase
         ];
 
         $template = "{{ component('Dashboard:ComparisonPanel', {"
-            . "key: 'budget', title: 'Title', basis: 'Basis', rows: rows, help: help"
+            . "key: 'budget', title: 'Title', basis: 'Basis', rows: rows, help: help, recalculating: recalculating"
             . '}) }}';
         $html = self::getContainer()->get(Environment::class)
             ->createTemplate($template)
-            ->render(['rows' => $rows, 'help' => $help]);
+            ->render(['rows' => $rows, 'help' => $help, 'recalculating' => $recalculating]);
 
         return new Crawler($html);
     }

@@ -24,6 +24,7 @@ final readonly class ComparisonPanelsMapper
             $this->rows($comparison->budget),
             $this->rows($comparison->pace),
             $this->rows($comparison->projectedEnd),
+            $comparison->recalculating,
         );
     }
 
