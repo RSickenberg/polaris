@@ -57,9 +57,11 @@ export default class extends Controller {
 
     connect() {
         this._dark = this._isDark();
-        this._range = null;
-        this._pressed = null;
-        this._ticket = 0;
+        // Turbo's morph can take the element out of the page and put it back: Stimulus then connects the same
+        // controller again, and the range the owner chose must survive that.
+        this._range ??= null;
+        this._pressed ??= null;
+        this._ticket ??= 0;
         this._connected = true;
         this._draw();
 
@@ -70,6 +72,15 @@ export default class extends Controller {
             }
         };
         document.addEventListener('turbo:before-morph-element', this._onBeforeMorph);
+
+        // The morph rewrites the range buttons even when the data did not change: mark the pressed one again.
+        this._onMorph = () => {
+            this._followPressedRange();
+            if (this._chart && this._range) {
+                this._chart.updateOptions({ xaxis: this._range }, false, false);
+            }
+        };
+        document.addEventListener('turbo:morph', this._onMorph);
 
         this._observer = new MutationObserver(() => this._onThemeChange());
         this._observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
@@ -92,6 +103,7 @@ export default class extends Controller {
         ++this._ticket;
         document.removeEventListener('turbo:before-cache', this._onBeforeCache);
         document.removeEventListener('turbo:before-morph-element', this._onBeforeMorph);
+        document.removeEventListener('turbo:morph', this._onMorph);
         this._observer?.disconnect();
         this._observer = null;
         this._destroy();
