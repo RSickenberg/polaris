@@ -64,6 +64,7 @@ final readonly class RecalculateProjectionSnapshotsHandler
             );
         }
 
+        $latest = $result->latest;
         $this->logger->info(
             'Projection snapshots recalculated.',
             [
@@ -71,6 +72,14 @@ final readonly class RecalculateProjectionSnapshotsHandler
                 'recomputed' => $result->recomputed,
                 'deleted' => $result->deleted,
                 'unchanged' => $result->unchanged,
+                // The newest surviving prediction, before and after (metres), to see what the edit did to it.
+                'latest_day' => $latest?->localDay,
+                'projected_end_before' => $latest?->projectedAtEndBefore->metres(),
+                'projected_end_after' => $latest?->projectedAtEndAfter->metres(),
+                'daily_budget_before' => $latest?->dailyBudgetBefore->metres(),
+                'daily_budget_after' => $latest?->dailyBudgetAfter->metres(),
+                'risk_before' => $latest?->riskLevelBefore->value,
+                'risk_after' => $latest?->riskLevelAfter->value,
             ],
         );
     }

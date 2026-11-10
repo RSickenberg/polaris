@@ -18,6 +18,8 @@ final readonly class SnapshotRecalculation
         public int $unchanged = 0,
         /** True when another save of the lease was running: nothing was done, try again later. */
         public bool $busy = false,
+        /** The newest row that survived, before and after; null when none did. */
+        public ?SnapshotChange $latest = null,
     ) {
     }
 

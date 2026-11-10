@@ -26,6 +26,7 @@ use Polaris\Shared\Domain\OwnerMidnight;
 use Polaris\Tests\Support\SignsIn;
 use Polaris\Vehicle\Domain\Vin;
 use Polaris\Vehicle\Entity\Vehicle;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Clock\Test\ClockSensitiveTrait;
 use Symfony\Component\Lock\LockFactory;
@@ -121,6 +122,11 @@ final class ProjectionRecalculationTest extends KernelTestCase
         // Two years: 15,000 km a year is 30,000 km, and 10,000 km after 182.5 of 730 days projects 40,000 km.
         self::assertSame([3, 0, 0], [$result->recomputed, $result->deleted, $result->unchanged]);
         self::assertFalse($result->busy);
+        // The newest row, the 5th, goes from the projection of one year to the one of two.
+        self::assertSame('2026-07-05', $result->latest?->localDay);
+        self::assertSame(20_000_000, $result->latest->projectedAtEndBefore->metres());
+        self::assertSame(40_000_000, $result->latest->projectedAtEndAfter->metres());
+        self::assertSame(RiskLevel::Over, $result->latest->riskLevelBefore);
         self::assertSame(40_000_000, $this->figures()['2026-07-03']['projectedAtEnd']);
         self::assertFalse($this->contract()->hasStaleSnapshots());
         self::assertSame('2026-07-05T08:00:00+00:00', $this->rows()[0]->getComputedAt()->toIso8601String());
@@ -311,6 +317,32 @@ final class ProjectionRecalculationTest extends KernelTestCase
 
         $handler(new RecalculateProjectionSnapshots($this->vehicle->getId()->toRfc4122()));
         self::assertSame(40_000_000, $this->figures()['2026-07-03']['projectedAtEnd']);
+    }
+
+    public function testTheHandlerLogsWhatTheEditDidToTheNewestPrediction(): void
+    {
+        $this->leases->save($this->vehicle, self::data(end: '2028-01-01'));
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(self::once())->method('info')->with(
+            'Projection snapshots recalculated.',
+            [
+                'vehicle' => $this->vehicle->getId()->toRfc4122(),
+                'recomputed' => 3,
+                'deleted' => 0,
+                'unchanged' => 0,
+                'latest_day' => '2026-07-05',
+                'projected_end_before' => 20_000_000,
+                'projected_end_after' => 40_000_000,
+                // 5,000 km left over 182.5 days, then 20,000 km over 547.5.
+                'daily_budget_before' => 27_397,
+                'daily_budget_after' => 36_530,
+                'risk_before' => 'over',
+                'risk_after' => 'over',
+            ],
+        );
+        $handler = new RecalculateProjectionSnapshotsHandler($this->snapshots, $this->entityManager, $logger);
+
+        $handler(new RecalculateProjectionSnapshots($this->vehicle->getId()->toRfc4122()));
     }
 
     public function testAVehicleWithoutAContractHasNothingToRecalculate(): void

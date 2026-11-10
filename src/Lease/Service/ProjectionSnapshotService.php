@@ -16,6 +16,7 @@ use Polaris\Lease\Entity\LeaseContract;
 use Polaris\Lease\Entity\ProjectionSnapshot;
 use Polaris\Lease\Repository\ProjectionSnapshotRepository;
 use Polaris\Lease\Service\Dto\ProjectionSnapshotPoint;
+use Polaris\Lease\Service\Dto\SnapshotChange;
 use Polaris\Lease\Service\Dto\SnapshotRecalculation;
 use Polaris\Lease\Service\Dto\SnapshotsImportResult;
 use Polaris\Lease\Service\Enum\SnapshotOutcome;
@@ -208,6 +209,7 @@ final readonly class ProjectionSnapshotService
         $recomputed = 0;
         $deleted = 0;
         $unchanged = 0;
+        $latest = null;
 
         foreach ($this->snapshots->findHistory($contract) as $row) {
             $lock->refresh();
@@ -243,6 +245,16 @@ final readonly class ProjectionSnapshotService
                 $projection->blendedPace,
             );
 
+            $latest = new SnapshotChange(
+                $row->getLocalDay()->format('Y-m-d'),
+                $row->getProjectedAtEnd(),
+                $projection->projectedAtEnd,
+                $row->getDailyBudget(),
+                $assessment->budget->perDay,
+                $row->getRiskLevel(),
+                $assessment->riskLevel,
+            );
+
             if ($same) {
                 ++$unchanged;
 
@@ -268,7 +280,7 @@ final readonly class ProjectionSnapshotService
         $this->entityManager->flush();
         $this->markFollowing($contract, $revision);
 
-        return new SnapshotRecalculation($recomputed, $deleted, $unchanged);
+        return new SnapshotRecalculation($recomputed, $deleted, $unchanged, latest: $latest);
     }
 
     /**
