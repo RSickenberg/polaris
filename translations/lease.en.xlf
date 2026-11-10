@@ -230,15 +230,17 @@ The lease is tracked again.</target>
       </trans-unit>
       <trans-unit id="hours.help.how">
         <source>hours.help.how</source>
-        <target>Polaris uses these times to spread the distance between two readings only over your usual driving hours. So if a reading is taken at 21:00, the distance driven overnight is not attributed to the previous day.</target>
+        <target>Polaris uses these times to spread the distance between two readings only over your usual driving hours.
+
+For example, if your last reading is taken at 21:00, the kilometres driven during the night are not attributed to the previous day.</target>
       </trans-unit>
       <trans-unit id="hours.help.empty">
         <source>hours.help.empty</source>
-        <target>If you leave both fields empty, Polaris spreads the distance evenly over the whole day.</target>
+        <target>If you leave both fields empty, Polaris spreads the distance evenly over the 24 hours of the day, night included.</target>
       </trans-unit>
       <trans-unit id="hours.help.scope">
         <source>hours.help.scope</source>
-        <target>These settings only affect the “Today” figures and the periods shown on the dashboard.</target>
+        <target>These settings only affect the “Today” statistics and the different periods shown on the dashboard.</target>
       </trans-unit>
       <trans-unit id="form.hours_from.label">
         <source>form.hours_from.label</source>
@@ -246,7 +248,7 @@ The lease is tracked again.</target>
       </trans-unit>
       <trans-unit id="form.hours_from.help">
         <source>form.hours_from.help</source>
-        <target>Local time, for example 22:00.</target>
+        <target>Enter the local time at which you usually stop driving, for example 22:00.</target>
       </trans-unit>
       <trans-unit id="form.hours_until.label">
         <source>form.hours_until.label</source>
@@ -254,11 +256,13 @@ The lease is tracked again.</target>
       </trans-unit>
       <trans-unit id="form.hours_until.help">
         <source>form.hours_until.help</source>
-        <target>Local time, for example 06:30. It may be earlier than the stop time: the quiet hours then cross midnight.</target>
+        <target>Enter the local time at which you usually start driving again, for example 06:30.
+
+This time can be earlier than the stop time: it simply means your rest period continues past midnight.</target>
       </trans-unit>
       <trans-unit id="form.hours_submit">
         <source>form.hours_submit</source>
-        <target>Save the driving hours</target>
+        <target>Save my driving hours</target>
       </trans-unit>
       <trans-unit id="flash.hours_saved">
         <source>flash.hours_saved</source>

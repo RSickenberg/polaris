@@ -272,27 +272,33 @@
       </trans-unit>
       <trans-unit id="help.current_pace.answer">
         <source>help.current_pace.answer</source>
-        <target>Where your driving habits lead.</target>
+        <target>Where your current driving pace is taking you.</target>
       </trans-unit>
       <trans-unit id="help.current_pace.what">
         <source>help.current_pace.what</source>
-        <target>These are the kilometres you drive right now per day, week and month. Polaris looks at your whole lease and gives more weight to the last 30 days, so a change in your habits shows here within a few weeks.</target>
+        <target>This card shows how many kilometres you currently drive on average per day, per week and per month.
+
+Polaris takes your whole lease into account, giving more weight to the last 30 days. So if your habits change, the values adjust gradually over the following weeks.</target>
       </trans-unit>
       <trans-unit id="help.current_pace.use">
         <source>help.current_pace.use</source>
-        <target>Compare it with “From now on”: if this card is higher, you are on course to go over your allowance.</target>
+        <target>Compare these values with those of the “Budget” card. If your current pace is above your budget, you may exceed your allowance at the end of the lease.</target>
       </trans-unit>
       <trans-unit id="help.budget.answer">
         <source>help.budget.answer</source>
-        <target>What you can still drive.</target>
+        <target>How many kilometres can you still drive?</target>
       </trans-unit>
       <trans-unit id="help.budget.what">
         <source>help.budget.what</source>
-        <target>These are the kilometres per day, week and month that use up your allowance exactly at the end of the lease: the kilometres you have left, spread over the time you have left.</target>
+        <target>This card shows how many kilometres you can drive on average per day, per week and per month to use exactly your allowance by the end of the lease.
+
+The calculation takes into account the kilometres you have left and the time remaining until the end of your contract.</target>
       </trans-unit>
       <trans-unit id="help.budget.use">
         <source>help.budget.use</source>
-        <target>They go up when you drive less and down when you drive more. Stay at or below them and you will not pay for extra kilometres.</target>
+        <target>Your budget goes up when you drive less and down when you drive more.
+
+By keeping your driving pace below these values, you avoid exceeding your allowance and paying for extra kilometres.</target>
       </trans-unit>
       <trans-unit id="help.even_pace.answer">
         <source>help.even_pace.answer</source>
@@ -300,23 +306,25 @@
       </trans-unit>
       <trans-unit id="help.even_pace.what">
         <source>help.even_pace.what</source>
-        <target>These are the kilometres per day, week and month your contract allows on average, from the first day of the lease to the last. They never change, whatever you drive.</target>
+        <target>This card shows the average number of kilometres your contract allows you to drive per day, per week and per month over the whole lease.
+
+These values are fixed and do not change with how you actually use the vehicle.</target>
       </trans-unit>
       <trans-unit id="help.even_pace.use">
         <source>help.even_pace.use</source>
-        <target>Use them as the yardstick for the other two cards.</target>
+        <target>Use this card as a reference to compare your current driving pace and your remaining budget.</target>
       </trans-unit>
       <trans-unit id="help.section.periods">
         <source>help.section.periods</source>
-        <target>The periods</target>
+        <target>The periods shown</target>
       </trans-unit>
       <trans-unit id="help.section.reference">
         <source>help.section.reference</source>
-        <target>What it is compared with</target>
+        <target>The reference values</target>
       </trans-unit>
       <trans-unit id="help.section.today">
         <source>help.section.today</source>
-        <target>How “today” is counted</target>
+        <target>How the day is counted</target>
       </trans-unit>
       <trans-unit id="help.section.live">
         <source>help.section.live</source>
@@ -324,67 +332,81 @@
       </trans-unit>
       <trans-unit id="help.section.fallback">
         <source>help.section.fallback</source>
-        <target>When history is missing</target>
+        <target>What happens when history is incomplete?</target>
       </trans-unit>
       <trans-unit id="help.section.what">
         <source>help.section.what</source>
-        <target>What it is</target>
+        <target>What is it?</target>
       </trans-unit>
       <trans-unit id="help.section.use">
         <source>help.section.use</source>
-        <target>How to use it</target>
+        <target>How to use this information?</target>
       </trans-unit>
       <trans-unit id="help.anatomy.period">
         <source>help.anatomy.period</source>
-        <target>The period</target>
+        <target>The period analysed</target>
       </trans-unit>
       <trans-unit id="help.anatomy.gap">
         <source>help.anatomy.gap</source>
-        <target>The gap, with its share of the second figure</target>
+        <target>The gap between the two values and its percentage</target>
       </trans-unit>
       <trans-unit id="help.common.periods">
         <source>help.common.periods</source>
-        <target>Each row is a period: today (since your midnight), yesterday (the whole day), then the last 7, 14 and 30 days, counted from your midnight. They all end at your latest reading, which can be a few hours old. Before the first reading of the day, the first row says “No reading yet today”.</target>
+        <target>Each row is a different period:
+
+• Today, since midnight.
+• Yesterday, the whole day.
+• The last 7, 14 and 30 days, counted from midnight.
+
+All periods end at the time of your latest odometer reading, which can be several hours old.
+
+Until a reading has been made today, the first row says “No reading yet today”.</target>
       </trans-unit>
       <trans-unit id="help.common.today">
         <source>help.common.today</source>
-        <target>Polaris counts the distance between two readings in the hours you usually drive (see “Driving hours” in the lease terms). Without them it spreads that distance evenly over the whole day, night included, so a reading at 21:00 gives part of the next morning to the day before.</target>
+        <target>Polaris spreads the distance driven between two readings according to your usual driving hours (see “Driving hours” in the lease terms).
+
+If you do not set these times, the distance is spread evenly over the 24 hours of the day, night included. For example, a reading at 21:00 can then attribute part of the kilometres driven during the night to the previous day.</target>
       </trans-unit>
       <trans-unit id="help.common.live">
         <source>help.common.live</source>
-        <target>The snapshot of today is not saved yet, because Polaris saves it at midnight. The row is then compared with a projection rebuilt just now: what the midnight job would have saved. Nothing is stored from it.</target>
+        <target>Today’s data is not permanently saved yet: Polaris saves it every day at midnight.
+
+Until then, the “Today” row is compared with an estimate refreshed in real time. It shows the values Polaris would save if the midnight job ran at this moment.
+
+This estimate is temporary and is not kept in the history.</target>
       </trans-unit>
       <trans-unit id="help.common.fallback">
         <source>help.common.fallback</source>
-        <target>If even that is not possible, the row is compared with the latest earlier record and says “Since yesterday” or “Since N days ago”.</target>
+        <target>If no reference data is available, Polaris uses the latest known record for the comparison. The period is then labelled “Since yesterday” or “Since N days ago”, depending on how old that record is.</target>
       </trans-unit>
       <trans-unit id="help.compare_budget.answer">
         <source>help.compare_budget.answer</source>
-        <target>Did you stay within your budget?</target>
+        <target>Did you stay within your mileage budget?</target>
       </trans-unit>
       <trans-unit id="help.compare_budget.actual">
         <source>help.compare_budget.actual</source>
-        <target>What you drove</target>
+        <target>Distance actually driven</target>
       </trans-unit>
       <trans-unit id="help.compare_budget.expected">
         <source>help.compare_budget.expected</source>
-        <target>What the budget allowed</target>
+        <target>Distance allowed by your budget</target>
       </trans-unit>
       <trans-unit id="help.compare_budget.over">
         <source>help.compare_budget.over</source>
-        <target>You drove more than the budget allowed.</target>
+        <target>You drove more kilometres than your budget allowed.</target>
       </trans-unit>
       <trans-unit id="help.compare_budget.under">
         <source>help.compare_budget.under</source>
-        <target>You drove less than the budget allowed.</target>
+        <target>You drove fewer kilometres than your budget allowed.</target>
       </trans-unit>
       <trans-unit id="help.compare_budget.reference">
         <source>help.compare_budget.reference</source>
-        <target>Your budget is the distance per day that brings you exactly to your allowance at the end of the lease. Polaris uses it as it was at the start of the period, recorded every day at midnight.</target>
+        <target>Your budget is the number of kilometres you can drive each day to reach exactly your allowance at the end of the lease. Polaris uses the budget calculated at the start of the period, recorded every day at midnight.</target>
       </trans-unit>
       <trans-unit id="help.compare_budget.percent">
         <source>help.compare_budget.percent</source>
-        <target>The percentage gives this gap against the second figure. It is left out while less than 6 hours of the period have passed, because it would swing too much.</target>
+        <target>The percentage shows the gap between the two values, relative to the distance your budget allowed. It only appears once 6 hours of the period have passed, to avoid swings that are too large.</target>
       </trans-unit>
       <trans-unit id="help.compare_pace.answer">
         <source>help.compare_pace.answer</source>
@@ -392,55 +414,59 @@
       </trans-unit>
       <trans-unit id="help.compare_pace.actual">
         <source>help.compare_pace.actual</source>
-        <target>What you drove</target>
+        <target>Distance actually driven</target>
       </trans-unit>
       <trans-unit id="help.compare_pace.expected">
         <source>help.compare_pace.expected</source>
-        <target>What your pace predicted</target>
+        <target>Distance estimated from your usual pace</target>
       </trans-unit>
       <trans-unit id="help.compare_pace.over">
         <source>help.compare_pace.over</source>
-        <target>You drove more than usual.</target>
+        <target>You drove more kilometres than usual.</target>
       </trans-unit>
       <trans-unit id="help.compare_pace.under">
         <source>help.compare_pace.under</source>
-        <target>You drove less than usual.</target>
+        <target>You drove fewer kilometres than usual.</target>
       </trans-unit>
       <trans-unit id="help.compare_pace.reference">
         <source>help.compare_pace.reference</source>
-        <target>Your usual pace is your average distance per day since the start of the lease, with more weight on the last 30 days. Polaris records it every day at midnight; until it has a record for the first day of a period, the row says “Not enough history”.</target>
+        <target>Your usual pace is your average number of kilometres driven per day since the start of the lease. The last 30 days weigh more in this calculation so that it better reflects your recent habits.
+
+Polaris records this average every day at midnight. If no data is available for the first day of a period, the row says “Not enough history”.</target>
       </trans-unit>
       <trans-unit id="help.compare_pace.percent">
         <source>help.compare_pace.percent</source>
-        <target>The percentage gives this gap against the second figure. It is left out while less than 6 hours of the period have passed, because it would swing too much.</target>
+        <target>The percentage shows the gap between the two values, relative to your usual pace. It only appears once 6 hours of the period have passed, to avoid swings that are too large.</target>
       </trans-unit>
       <trans-unit id="help.compare_projected_end.answer">
         <source>help.compare_projected_end.answer</source>
-        <target>Is your end of lease looking better or worse?</target>
+        <target>Is your end-of-lease estimate improving or getting worse?</target>
       </trans-unit>
       <trans-unit id="help.compare_projected_end.actual">
         <source>help.compare_projected_end.actual</source>
-        <target>Today’s estimate</target>
+        <target>Current estimate</target>
       </trans-unit>
       <trans-unit id="help.compare_projected_end.expected">
         <source>help.compare_projected_end.expected</source>
-        <target>The estimate at the start of the period</target>
+        <target>Estimate at the start of the period</target>
       </trans-unit>
       <trans-unit id="help.compare_projected_end.over">
         <source>help.compare_projected_end.over</source>
-        <target>The estimate went up: you are heading for more kilometres.</target>
+        <target>The estimate went up: you should drive more kilometres by the end of the lease.</target>
       </trans-unit>
       <trans-unit id="help.compare_projected_end.under">
         <source>help.compare_projected_end.under</source>
-        <target>The estimate went down: you are driving less than before.</target>
+        <target>The estimate went down: you should drive fewer kilometres by the end of the lease.</target>
       </trans-unit>
       <trans-unit id="help.compare_projected_end.reference">
         <source>help.compare_projected_end.reference</source>
-        <target>Every day, Polaris estimates how far you will have driven by the end of the lease and records it at midnight. Until it has a record for the first day of a period, the row says “Not enough history”.</target>
+        <target>Every day at midnight, Polaris estimates the total number of kilometres you will have driven by the end of your lease and records that estimate.
+
+If no estimate is available for the first day of a period, the row says “Not enough history”.</target>
       </trans-unit>
       <trans-unit id="help.compare_projected_end.percent">
         <source>help.compare_projected_end.percent</source>
-        <target>The percentage gives this gap against the second figure.</target>
+        <target>The percentage shows how the estimate changed compared with its value at the start of the period.</target>
       </trans-unit>
       <trans-unit id="page.debug.title">
         <source>page.debug.title</source>

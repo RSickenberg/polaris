@@ -70,7 +70,7 @@ final class DrivingHoursTest extends WebTestCase
         $crawler = $this->client->request('GET', $this->url());
         self::assertSelectorExists('#lease-driving-hours');
 
-        $this->client->submit($crawler->selectButton('Save the driving hours')->form([
+        $this->client->submit($crawler->selectButton('Save my driving hours')->form([
             'driving_hours[from]' => '22:00',
             'driving_hours[until]' => '06:00',
         ]));
@@ -86,7 +86,7 @@ final class DrivingHoursTest extends WebTestCase
     public function testOneTimeAloneIsRefusedAndNothingIsSaved(): void
     {
         $crawler = $this->client->request('GET', $this->url());
-        $this->client->submit($crawler->selectButton('Save the driving hours')->form([
+        $this->client->submit($crawler->selectButton('Save my driving hours')->form([
             'driving_hours[from]' => '22:00',
             'driving_hours[until]' => '',
         ]));

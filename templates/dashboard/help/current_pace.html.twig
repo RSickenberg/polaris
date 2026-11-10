@@ -1,9 +1,9 @@
 {# The help of a card of figures per day, week and month. #}
 <div class="mt-2 gap-x-8 sm:columns-2">
     <twig:Dashboard:HelpSection icon="lucide:gauge" title="{{ 'help.section.what'|trans(domain='dashboard') }}">
-        {{ 'help.current_pace.what'|trans(domain='dashboard') }}
+        {{ 'help.current_pace.what'|trans(domain='dashboard')|nl2br }}
     </twig:Dashboard:HelpSection>
     <twig:Dashboard:HelpSection icon="lucide:trending-up" title="{{ 'help.section.use'|trans(domain='dashboard') }}">
-        {{ 'help.current_pace.use'|trans(domain='dashboard') }}
+        {{ 'help.current_pace.use'|trans(domain='dashboard')|nl2br }}
     </twig:Dashboard:HelpSection>
 </div>

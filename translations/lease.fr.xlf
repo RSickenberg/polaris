@@ -230,23 +230,25 @@ Le leasing est de nouveau suivi.</target>
       </trans-unit>
       <trans-unit id="hours.help.how">
         <source>hours.help.how</source>
-        <target>Polaris utilise ces horaires pour répartir les distances entre deux relevés uniquement sur vos heures habituelles de déplacement. Ainsi, si un relevé est effectué à 21 h, la distance parcourue pendant la nuit ne sera pas attribuée à la journée précédente.</target>
+        <target>Polaris utilise ces horaires pour répartir les distances entre deux relevés uniquement sur vos heures habituelles de conduite.
+
+Par exemple, si votre dernier relevé est effectué à 21 h, les kilomètres parcourus pendant la nuit ne seront pas attribués à la journée précédente.</target>
       </trans-unit>
       <trans-unit id="hours.help.empty">
         <source>hours.help.empty</source>
-        <target>Si vous laissez ces deux champs vides, Polaris répartira la distance de manière uniforme sur l’ensemble de la journée.</target>
+        <target>Si vous laissez ces deux champs vides, Polaris répartira la distance uniformément sur les 24 heures de la journée, nuit comprise.</target>
       </trans-unit>
       <trans-unit id="hours.help.scope">
         <source>hours.help.scope</source>
-        <target>Ces paramètres influencent uniquement les statistiques « Aujourd’hui » et les périodes affichées dans le tableau de bord.</target>
+        <target>Ces paramètres influencent uniquement les statistiques « Aujourd’hui » et les différentes périodes affichées dans le tableau de bord.</target>
       </trans-unit>
       <trans-unit id="form.hours_from.label">
         <source>form.hours_from.label</source>
-        <target>Arrêt habituel de la conduite à</target>
+        <target>Fin habituelle de la conduite à</target>
       </trans-unit>
       <trans-unit id="form.hours_from.help">
         <source>form.hours_from.help</source>
-        <target>Heure locale, par exemple 22:00.</target>
+        <target>Indiquez l’heure locale à laquelle vous arrêtez généralement de conduire, par exemple 22:00.</target>
       </trans-unit>
       <trans-unit id="form.hours_until.label">
         <source>form.hours_until.label</source>
@@ -254,11 +256,13 @@ Le leasing est de nouveau suivi.</target>
       </trans-unit>
       <trans-unit id="form.hours_until.help">
         <source>form.hours_until.help</source>
-        <target>Heure locale, par exemple 06:30. Elle peut être avant l’heure d’arrêt : la période de repos passe alors minuit.</target>
+        <target>Indiquez l’heure locale à laquelle vous reprenez généralement la conduite, par exemple 06:30.
+
+Cette heure peut être antérieure à l’heure d’arrêt : cela signifie simplement que votre période de repos se poursuit après minuit.</target>
       </trans-unit>
       <trans-unit id="form.hours_submit">
         <source>form.hours_submit</source>
-        <target>Enregistrer les heures de conduite</target>
+        <target>Enregistrer mes heures de conduite</target>
       </trans-unit>
       <trans-unit id="flash.hours_saved">
         <source>flash.hours_saved</source>

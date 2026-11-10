@@ -144,7 +144,7 @@ final class ComparisonPanelTest extends KernelTestCase
         self::assertCount(1, $button);
         self::assertSame('About “Title”', $button->attr('aria-label'));
         self::assertSame(
-            'Did you stay within your budget?',
+            'Did you stay within your mileage budget?',
             $this->text($panel->filter('dialog [data-help-answer]')),
         );
     }
