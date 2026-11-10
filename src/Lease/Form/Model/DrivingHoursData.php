@@ -15,4 +15,7 @@ final class DrivingHoursData
     public ?string $from = null;
 
     public ?string $until = null;
+
+    /** Whether "Today" is compared with what was expected for the whole day, not prorated. */
+    public bool $todayWholeDay = false;
 }

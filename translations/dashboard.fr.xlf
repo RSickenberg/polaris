@@ -366,7 +366,9 @@ Tant qu’aucun relevé n’a été effectué aujourd’hui, la première ligne 
         <source>help.common.today</source>
         <target>Polaris répartit la distance parcourue entre deux relevés en fonction de vos heures habituelles de conduite (voir « Heures de conduite » dans les conditions du leasing).
 
-Si vous ne renseignez pas ces horaires, la distance est répartie uniformément sur les 24 heures de la journée, nuit comprise. Par exemple, un relevé à 21 h peut alors attribuer une partie des kilomètres parcourus pendant la nuit à la journée précédente.</target>
+Si vous ne renseignez pas ces horaires, la distance est répartie uniformément sur les 24 heures de la journée, nuit comprise. Par exemple, un relevé à 21 h peut alors attribuer une partie des kilomètres parcourus pendant la nuit à la journée précédente.
+
+Par défaut, la ligne « Aujourd’hui » est comparée à ce qui était attendu jusqu’à votre dernier relevé. Un réglage dans « Heures de conduite » permet de la comparer plutôt à la journée entière.</target>
       </trans-unit>
       <trans-unit id="help.common.live">
         <source>help.common.live</source>

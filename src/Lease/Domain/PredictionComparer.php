@@ -34,8 +34,10 @@ final readonly class PredictionComparer
     public const int MIN_SECONDS_FOR_RATIO = 21_600;
 
     /**
-     * @param array<string, SnapshotFigures> $snapshots the figures by local day (`Y-m-d`)
-     * @param CarbonImmutable                $now       decides which local day is "today"; the windows end at the latest reading
+     * @param array<string, SnapshotFigures> $snapshots     the figures by local day (`Y-m-d`)
+     * @param CarbonImmutable                $now           decides which local day is "today"; the windows end at the latest reading
+     * @param bool                           $todayWholeDay whether "today" is measured against what was expected for the
+     *                                                      whole day, instead of the part of it up to the latest reading
      *
      * @throws \InvalidArgumentException when the time zone is not an IANA name
      */
@@ -45,6 +47,7 @@ final readonly class PredictionComparer
         string $timeZone,
         array $snapshots,
         CarbonImmutable $now,
+        bool $todayWholeDay = false,
     ): PredictionComparison {
         $lastMidnight = OwnerMidnight::latestAt($now, $timeZone);
         $budget = [];
@@ -81,16 +84,22 @@ final readonly class PredictionComparer
             $end = ComparisonWindow::Yesterday === $window ? min($lastMidnight->at, $latest->asOf) : $latest->asOf;
             $driven = $end > $start ? $this->drivenSince($timeline, $start, $end) : null;
             $seconds = $end->getTimestamp() - $start->getTimestamp();
+            // By default every window expects what fits between its start and the latest reading. For today the owner
+            // may choose the whole day instead: with the snapshot of its own day (no fallback, which spans several
+            // days) the expectation is a full local day, 23 or 25 hours on a daylight saving change.
+            $expectedSeconds = $todayWholeDay && ComparisonWindow::Today === $window && 0 === $fallbackDays
+                ? OwnerMidnight::opening($day->addDay(), $timeZone)->at->getTimestamp() - $start->getTimestamp()
+                : $seconds;
 
             $budget[] = new WindowComparison(
                 $window,
-                $this->againstBudget($figures, $driven, $seconds),
+                $this->againstBudget($figures, $driven, $expectedSeconds),
                 $fallbackDays,
                 $figures->live ?? false,
             );
             $pace[] = new WindowComparison(
                 $window,
-                $this->againstPace($figures, $driven, $seconds),
+                $this->againstPace($figures, $driven, $expectedSeconds),
                 $fallbackDays,
                 $figures->live ?? false,
             );

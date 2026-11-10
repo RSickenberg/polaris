@@ -94,6 +94,14 @@ class LeaseContract
     #[ORM\Column(length: 5, nullable: true)]
     private ?string $quietUntil = null;
 
+    /**
+     * Whether the "Today" row of the comparison panels is measured against what was expected for the whole day (as
+     * recorded at its midnight) rather than prorated to the latest reading. A display choice: no snapshot depends on
+     * it.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $todayWholeDay = false;
+
     public function __construct(
         Vehicle $vehicle,
         LeaseTerm $term,
@@ -201,6 +209,16 @@ class LeaseContract
 
         $this->quietFrom = $from;
         $this->quietUntil = $until;
+    }
+
+    public function changeTodayWholeDay(bool $todayWholeDay): void
+    {
+        $this->todayWholeDay = $todayWholeDay;
+    }
+
+    public function isTodayWholeDay(): bool
+    {
+        return $this->todayWholeDay;
     }
 
     public function getQuietFrom(): ?string

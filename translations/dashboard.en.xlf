@@ -366,7 +366,9 @@ Until a reading has been made today, the first row says “No reading yet today�
         <source>help.common.today</source>
         <target>Polaris spreads the distance driven between two readings according to your usual driving hours (see “Driving hours” in the lease terms).
 
-If you do not set these times, the distance is spread evenly over the 24 hours of the day, night included. For example, a reading at 21:00 can then attribute part of the kilometres driven during the night to the previous day.</target>
+If you do not set these times, the distance is spread evenly over the 24 hours of the day, night included. For example, a reading at 21:00 can then attribute part of the kilometres driven during the night to the previous day.
+
+By default the “Today” row is compared with what was expected up to your latest reading. A setting in “Driving hours” lets you compare it with the whole day instead.</target>
       </trans-unit>
       <trans-unit id="help.common.live">
         <source>help.common.live</source>

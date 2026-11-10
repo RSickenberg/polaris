@@ -25,22 +25,27 @@ final readonly class DrivingHoursService
     }
 
     /**
-     * @return array{from: ?string, until: ?string} local "HH:MM" times, null when not set
+     * @return array{from: ?string, until: ?string, todayWholeDay: bool} local "HH:MM" times, null when not set, and
+     *                                                                   whether "Today" is compared with the whole day
      */
     public function find(Vehicle $vehicle): array
     {
         $contract = $this->contracts->findForVehicle($vehicle);
 
-        return ['from' => $contract?->getQuietFrom(), 'until' => $contract?->getQuietUntil()];
+        return [
+            'from' => $contract?->getQuietFrom(),
+            'until' => $contract?->getQuietUntil(),
+            'todayWholeDay' => $contract?->isTodayWholeDay() ?? false,
+        ];
     }
 
     /**
-     * Saves the usual stop and start times; both null clears them.
+     * Saves the usual stop and start times (both null clears them) and how "Today" is compared.
      *
      * @throws DrivingHoursRejected when there is no contract, only one time is given, or the times are not valid
      * @throws ORMException
      */
-    public function save(Vehicle $vehicle, ?string $from, ?string $until): void
+    public function save(Vehicle $vehicle, ?string $from, ?string $until, bool $todayWholeDay = false): void
     {
         $contract = $this->contracts->findForVehicle($vehicle);
 
@@ -65,6 +70,7 @@ final readonly class DrivingHoursService
             throw new DrivingHoursRejected(DrivingHoursRejection::Invalid);
         }
 
+        $contract->changeTodayWholeDay($todayWholeDay);
         $this->entityManager->flush();
     }
 }

@@ -163,7 +163,7 @@ final class LeaseSettingsController extends AbstractController
 
         if ($hoursForm->isSubmitted() && $hoursForm->isValid()) {
             try {
-                $this->drivingHours->save($vehicle, $data->from, $data->until);
+                $this->drivingHours->save($vehicle, $data->from, $data->until, $data->todayWholeDay);
                 $this->addFlash(
                     ToastVariant::Success->value,
                     $this->translator->trans('flash.hours_saved', domain: 'lease'),
@@ -193,6 +193,7 @@ final class LeaseSettingsController extends AbstractController
         $data = new DrivingHoursData();
         $data->from = $saved['from'];
         $data->until = $saved['until'];
+        $data->todayWholeDay = $saved['todayWholeDay'];
 
         return $this->createForm(
             DrivingHoursType::class,

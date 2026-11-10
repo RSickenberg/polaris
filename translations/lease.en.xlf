@@ -288,6 +288,14 @@ This time can be earlier than the stop time: it simply means your rest period co
         <source>terms.title</source>
         <target>Lease contract</target>
       </trans-unit>
+      <trans-unit id="form.hours_whole_day.label">
+        <source>form.hours_whole_day.label</source>
+        <target>Compare “Today” with the whole day</target>
+      </trans-unit>
+      <trans-unit id="form.hours_whole_day.help">
+        <source>form.hours_whole_day.help</source>
+        <target>By default, “Today” is compared with what was expected up to your latest reading. Tick this box to compare it with what was expected for the whole day instead.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

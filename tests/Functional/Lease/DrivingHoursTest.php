@@ -78,7 +78,7 @@ final class DrivingHoursTest extends WebTestCase
         self::assertResponseRedirects($this->url());
         $this->entityManager->clear();
         self::assertSame(
-            ['from' => '22:00', 'until' => '06:00'],
+            ['from' => '22:00', 'until' => '06:00', 'todayWholeDay' => false],
             self::getContainer()->get(DrivingHoursService::class)->find($this->vehicle),
         );
     }
@@ -94,7 +94,7 @@ final class DrivingHoursTest extends WebTestCase
         self::assertResponseStatusCodeSame(422);
         self::assertSelectorTextContains('#lease-driving-hours', 'Fill in both times');
         self::assertSame(
-            ['from' => null, 'until' => null],
+            ['from' => null, 'until' => null, 'todayWholeDay' => false],
             self::getContainer()->get(DrivingHoursService::class)->find($this->vehicle),
         );
     }
@@ -112,13 +112,38 @@ final class DrivingHoursTest extends WebTestCase
         }
     }
 
+    public function testTheWholeDayChoiceIsSavedWithTheHours(): void
+    {
+        $crawler = $this->client->request('GET', $this->url());
+        $form = $crawler->selectButton('Save my driving hours')->form();
+        $form->setValues(['driving_hours[todayWholeDay]' => true]);
+        $this->client->submit($form);
+
+        self::assertResponseRedirects($this->url());
+        $this->entityManager->clear();
+        $saved = self::getContainer()->get(DrivingHoursService::class)->find($this->vehicle);
+        self::assertTrue($saved['todayWholeDay']);
+        self::assertNull($saved['from']);
+
+        $this->client->request('GET', $this->url());
+        self::assertSelectorExists('#lease-driving-hours input[type=checkbox][checked]');
+    }
+
+    public function testTodayIsProratedByDefault(): void
+    {
+        self::assertFalse(self::getContainer()->get(DrivingHoursService::class)->find($this->vehicle)['todayWholeDay']);
+    }
+
     public function testClearingTheHoursRestoresTheLinearOdometer(): void
     {
         $hours = self::getContainer()->get(DrivingHoursService::class);
         $hours->save($this->vehicle, '20:00', '06:00');
         $hours->save($this->vehicle, null, null);
 
-        self::assertSame(['from' => null, 'until' => null], $hours->find($this->vehicle));
+        self::assertSame(
+            ['from' => null, 'until' => null, 'todayWholeDay' => false],
+            $hours->find($this->vehicle),
+        );
     }
 
     public function testTheOdometerAtMidnightIgnoresTheNight(): void

@@ -7,6 +7,7 @@ namespace Polaris\Lease\Form;
 use Polaris\Lease\Form\Model\DrivingHoursData;
 use Polaris\Shared\Domain\TimeZone;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -37,6 +38,11 @@ final class DrivingHoursType extends AbstractType
             ->add('until', TimeType::class, $time + [
                 'label' => 'form.hours_until.label',
                 'help' => 'form.hours_until.help',
+            ])
+            ->add('todayWholeDay', CheckboxType::class, [
+                'label' => 'form.hours_whole_day.label',
+                'help' => 'form.hours_whole_day.help',
+                'required' => false,
             ])
             ->add('save', SubmitType::class, ['label' => 'form.hours_submit']);
     }
