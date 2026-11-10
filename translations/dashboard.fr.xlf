@@ -286,7 +286,7 @@ Polaris prend en compte l’ensemble de votre leasing, tout en accordant davanta
       </trans-unit>
       <trans-unit id="help.budget.answer">
         <source>help.budget.answer</source>
-        <target>Combien de kilomètres pouvez-vous encore parcourir?</target>
+        <target>Combien de kilomètres pouvez-vous encore parcourir ?</target>
       </trans-unit>
       <trans-unit id="help.budget.what">
         <source>help.budget.what</source>
@@ -332,15 +332,15 @@ Ces valeurs sont fixes et ne changent pas en fonction de votre utilisation réel
       </trans-unit>
       <trans-unit id="help.section.fallback">
         <source>help.section.fallback</source>
-        <target>Que se passe-t-il lorsque l’historique est incomplet?</target>
+        <target>Que se passe-t-il lorsque l’historique est incomplet ?</target>
       </trans-unit>
       <trans-unit id="help.section.what">
         <source>help.section.what</source>
-        <target>De quoi s’agit-il?</target>
+        <target>De quoi s’agit-il ?</target>
       </trans-unit>
       <trans-unit id="help.section.use">
         <source>help.section.use</source>
-        <target>Comment utiliser cette information?</target>
+        <target>Comment utiliser cette information ?</target>
       </trans-unit>
       <trans-unit id="help.anatomy.period">
         <source>help.anatomy.period</source>
@@ -384,7 +384,7 @@ Cette estimation est temporaire et n’est pas conservée dans l’historique.</
       </trans-unit>
       <trans-unit id="help.compare_budget.answer">
         <source>help.compare_budget.answer</source>
-        <target>Avez-vous respecté votre budget kilométrique?</target>
+        <target>Avez-vous respecté votre budget kilométrique ?</target>
       </trans-unit>
       <trans-unit id="help.compare_budget.actual">
         <source>help.compare_budget.actual</source>
@@ -412,7 +412,7 @@ Cette estimation est temporaire et n’est pas conservée dans l’historique.</
       </trans-unit>
       <trans-unit id="help.compare_pace.answer">
         <source>help.compare_pace.answer</source>
-        <target>Roulez-vous plus ou moins que d’habitude?</target>
+        <target>Roulez-vous plus ou moins que d’habitude ?</target>
       </trans-unit>
       <trans-unit id="help.compare_pace.actual">
         <source>help.compare_pace.actual</source>
@@ -442,7 +442,7 @@ Polaris enregistre cette moyenne chaque jour à minuit. Si aucune donnée n’es
       </trans-unit>
       <trans-unit id="help.compare_projected_end.answer">
         <source>help.compare_projected_end.answer</source>
-        <target>Votre estimation de fin de leasing s’améliore-t-elle ou se dégrade-t-elle?</target>
+        <target>Votre estimation de fin de leasing s’améliore-t-elle ou se dégrade-t-elle ?</target>
       </trans-unit>
       <trans-unit id="help.compare_projected_end.actual">
         <source>help.compare_projected_end.actual</source>

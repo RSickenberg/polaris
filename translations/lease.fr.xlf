@@ -140,7 +140,7 @@
       </trans-unit>
       <trans-unit id="return.help">
         <source>return.help</source>
-        <target>Voiture rendue?
+        <target>Voiture rendue ?
 Marquez-la comme rendue pour figer les chiffres et arrêter les lectures du compteur.</target>
       </trans-unit>
       <trans-unit id="return.status_help">
@@ -165,7 +165,7 @@ Marquez-la comme rendue pour figer les chiffres et arrêter les lectures du comp
       </trans-unit>
       <trans-unit id="return.dialog.title">
         <source>return.dialog.title</source>
-        <target>Marquer la voiture comme rendue?</target>
+        <target>Marquer la voiture comme rendue ?</target>
       </trans-unit>
       <trans-unit id="return.dialog.description">
         <source>return.dialog.description</source>
@@ -173,7 +173,7 @@ Marquez-la comme rendue pour figer les chiffres et arrêter les lectures du comp
       </trans-unit>
       <trans-unit id="return.undo_dialog.title">
         <source>return.undo_dialog.title</source>
-        <target>Annuler la restitution?</target>
+        <target>Annuler la restitution ?</target>
       </trans-unit>
       <trans-unit id="return.undo_dialog.description">
         <source>return.undo_dialog.description</source>
@@ -227,7 +227,7 @@ Le leasing est de nouveau suivi.</target>
       </trans-unit>
       <trans-unit id="hours.help.question">
         <source>hours.help.question</source>
-        <target>À quelle heure terminez-vous généralement vos déplacements pour la journée, et à quelle heure reprenez-vous le lendemain?</target>
+        <target>À quelle heure terminez-vous généralement vos déplacements pour la journée, et à quelle heure reprenez-vous le lendemain ?</target>
       </trans-unit>
       <trans-unit id="hours.help.how">
         <source>hours.help.how</source>

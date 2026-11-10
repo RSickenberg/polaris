@@ -85,7 +85,7 @@ Reconnectez-vous à Tesla dans les réglages Tesla.</target>
       </trans-unit>
       <trans-unit id="wake.dialog.description">
         <source>wake.dialog.description</source>
-        <target>La réveiller pour obtenir le kilométrage actuel?
+        <target>La réveiller pour obtenir le kilométrage actuel ?
 Tesla facture environ {cost} par réveil.</target>
       </trans-unit>
       <trans-unit id="wake.dialog.decline">
@@ -141,7 +141,7 @@ Réessayez à {time} ({zone}).</target>
       </trans-unit>
       <trans-unit id="wake.dialog_offline.description">
         <source>wake.dialog_offline.description</source>
-        <target>Votre voiture est hors ligne. Tesla ne pourra peut-être pas la réveiller. Essayer quand même?
+        <target>Votre voiture est hors ligne. Tesla ne pourra peut-être pas la réveiller. Essayer quand même ?
 Tesla facture environ {cost} par réveil, même sans réponse.</target>
       </trans-unit>
       <trans-unit id="outcome.wake_failed">

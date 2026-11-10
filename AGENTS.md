@@ -122,9 +122,9 @@ One word per thing, in both languages:
 | the app on developer.tesla.com | Tesla developer app | application développeur Tesla |
 | Tesla's phone app | Tesla mobile app | application mobile Tesla |
 
-### French typography (Swiss)
+### French typography
 
-No space before `;`, `!`, `?`; a no-break space (U+00A0) before `:` and inside `« »`; the typographic apostrophe `’`. Vocabulary is Swiss: leasing, e-mail. `FrenchTypographyTest` checks every `fr` file.
+A no-break space (U+00A0) before `;`, `!`, `?`, `:` and inside `« »`; the typographic apostrophe `’`. Vocabulary is Swiss: leasing, e-mail. `FrenchTypographyTest` checks every `fr` file.
 
 ## Writing
 

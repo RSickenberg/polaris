@@ -168,7 +168,7 @@
       </trans-unit>
       <trans-unit id="page.callback.description">
         <source>page.callback.description</source>
-        <target>Le navigateur n’a pas pu ouvrir Polaris après l’approbation? Copiez l’adresse complète de la barre d’adresse et collez-la ici.</target>
+        <target>Le navigateur n’a pas pu ouvrir Polaris après l’approbation ? Copiez l’adresse complète de la barre d’adresse et collez-la ici.</target>
       </trans-unit>
       <trans-unit id="form.callback_url.label">
         <source>form.callback_url.label</source>
@@ -188,7 +188,7 @@
       </trans-unit>
       <trans-unit id="page.token.description">
         <source>page.token.description</source>
-        <target>Utilisez un jeton d’actualisation obtenu hors de Polaris. Il est utilisé une fois pour le vérifier; Polaris conserve les nouveaux jetons renvoyés par Tesla.</target>
+        <target>Utilisez un jeton d’actualisation obtenu hors de Polaris. Il est utilisé une fois pour le vérifier ; Polaris conserve les nouveaux jetons renvoyés par Tesla.</target>
       </trans-unit>
       <trans-unit id="form.refresh_token.label">
         <source>form.refresh_token.label</source>

@@ -92,7 +92,7 @@
       </trans-unit>
       <trans-unit id="link.forgot">
         <source>link.forgot</source>
-        <target>Mot de passe oublié?</target>
+        <target>Mot de passe oublié ?</target>
       </trans-unit>
       <trans-unit id="link.back_to_login">
         <source>link.back_to_login</source>
@@ -104,7 +104,7 @@
       </trans-unit>
       <trans-unit id="page.forgot.title">
         <source>page.forgot.title</source>
-        <target>Mot de passe oublié?</target>
+        <target>Mot de passe oublié ?</target>
       </trans-unit>
       <trans-unit id="page.forgot.description">
         <source>page.forgot.description</source>
@@ -165,7 +165,7 @@ Connectez-vous avec le nouveau.</target>
       </trans-unit>
       <trans-unit id="email.reset.ignore">
         <source>email.reset.ignore</source>
-        <target>Ce n’était pas vous? Ignorez cet e-mail, votre mot de passe reste inchangé.</target>
+        <target>Ce n’était pas vous ? Ignorez cet e-mail, votre mot de passe reste inchangé.</target>
       </trans-unit>
       <trans-unit id="page.settings.reporting">
         <source>page.settings.reporting</source>
