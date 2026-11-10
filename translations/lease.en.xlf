@@ -140,7 +140,8 @@
       </trans-unit>
       <trans-unit id="return.help">
         <source>return.help</source>
-        <target>Gave the car back? Mark it returned to freeze the final figures and stop odometer reads.</target>
+        <target>Gave the car back?
+Mark it returned to freeze the final figures and stop odometer reads.</target>
       </trans-unit>
       <trans-unit id="return.status_help">
         <source>return.status_help</source>

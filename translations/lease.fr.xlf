@@ -140,7 +140,8 @@
       </trans-unit>
       <trans-unit id="return.help">
         <source>return.help</source>
-        <target>Voiture rendue? Marquez-la comme rendue pour figer les chiffres et arrêter les lectures du compteur.</target>
+        <target>Voiture rendue ?
+Marquez-la comme rendue pour figer les chiffres et arrêter les lectures du compteur.</target>
       </trans-unit>
       <trans-unit id="return.status_help">
         <source>return.status_help</source>
