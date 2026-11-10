@@ -280,10 +280,10 @@ Le leasing est de nouveau suivi.</target>
         <source>rejected.hours_same_time</source>
         <target>Les deux heures doivent différer. Choisissez une heure de reprise avant ou après l’heure d’arrêt.</target>
       </trans-unit>
-    </body>
       <trans-unit id="terms.title">
         <source>terms.title</source>
         <target>Contrat de leasing</target>
       </trans-unit>
+    </body>
   </file>
 </xliff>
