@@ -432,24 +432,45 @@ final class ProjectionSnapshotTest extends KernelTestCase
         self::assertSame(10_100_000, $this->rows()[0]->getDriven()->metres());
     }
 
-    public function testAVerificationRunningPastTheMidnightIsCutThere(): void
+    public function testAVerificationAfterTheMidnightChangesNothingWhetherTheJobRunsBeforeOrAfterIt(): void
+    {
+        $readings = $this->entityManager->getRepository(OdometerReading::class);
+        $reading = $readings->findOneBy(['vehicle' => $this->vehicle]);
+        \assert($reading instanceof OdometerReading);
+
+        // The job ran first, then a check found the car unchanged just after the midnight.
+        self::mockTime('2026-07-03 00:06:00 UTC');
+        $this->snapshots->save($this->vehicle, $this->midnight());
+        $before = $this->rows()[0];
+        $asOfBefore = $before->getAsOf()->toIso8601String();
+        $allowedBefore = $before->getAllowedToDate()->metres();
+        $paceBefore = $before->getOverallPace()?->metresPerDay();
+
+        self::mockTime('2026-07-03 00:30:00 UTC');
+        $reading->verify(CarbonImmutable::parse('2026-07-03 00:20:00', 'UTC'));
+        $this->entityManager->flush();
+
+        // A rerun, as a late job or the console command would do, gives the very same figures.
+        $this->snapshots->save($this->vehicle, $this->midnight());
+
+        $after = $this->rows()[0];
+        self::assertSame($asOfBefore, $after->getAsOf()->toIso8601String());
+        self::assertSame($allowedBefore, $after->getAllowedToDate()->metres());
+        self::assertSame($paceBefore, $after->getOverallPace()?->metresPerDay());
+    }
+
+    public function testAVerificationBeforeTheMidnightCounts(): void
     {
         $readings = $this->entityManager->getRepository(OdometerReading::class);
         $reading = $readings->findOneBy(['vehicle' => $this->vehicle]);
         \assert($reading instanceof OdometerReading);
         self::mockTime('2026-07-03 09:00:00 UTC');
-        $reading->verify(CarbonImmutable::parse('2026-07-03 08:00:00', 'UTC'));
+        $reading->verify(CarbonImmutable::parse('2026-07-02 23:58:00', 'UTC'));
         $this->entityManager->flush();
 
         $this->snapshots->save($this->vehicle, $this->midnight());
 
-        $row = $this->rows()[0];
-        self::assertSame(
-            '2026-07-03T00:00:00+00:00',
-            $row->getAsOf()->toIso8601String(),
-            'The car still had that odometer at the midnight, not after it.',
-        );
-        self::assertSame(10_000_000, $row->getDriven()->metres());
+        self::assertSame('2026-07-02T23:58:00+00:00', $this->rows()[0]->getAsOf()->toIso8601String());
     }
 
     public function testTheSnapshotStoresThePaceTheProjectionUsed(): void

@@ -166,8 +166,9 @@ final readonly class LeaseTermsService
     }
 
     /**
-     * The projection as it stood at $cutoff (an owner's midnight): only readings and verifications up to it count, a
-     * verification running past it is cut there, and the lease is judged (ended or not, time left) at that instant.
+     * The projection as it stood at $cutoff (an owner's midnight): only readings and verifications recorded up to it
+     * count. A verification of a later instant is left out, not cut at $cutoff: it was not known then, so the figures
+     * do not depend on when the job runs. The lease is judged (ended or not, time left) at that instant.
      * A car returned at or before $cutoff is a returned lease, as in {@see self::assess()}; a return after it is
      * ignored, as the car was still leased then. Null without a contract.
      *
@@ -192,7 +193,7 @@ final readonly class LeaseTermsService
                 $contract->getExcessCostPerKm(),
                 $contract->getTolerance()
             ),
-            $this->samples($vehicle, $returned ? $returnedAt : $cutoff),
+            $this->samples($vehicle, $returned ? $returnedAt : $cutoff, $cutoff),
             $returned ? $returnedAt : null,
             $cutoff
         );
@@ -280,10 +281,16 @@ final readonly class LeaseTermsService
      * Nothing counts after $returnedAt (inclusive): a later reading is left out, and a verification that runs past it
      * is cut there, as the car still had that odometer at the return.
      *
+     * With $knownAt (the cutoff of a projection snapshot), a verification of a later instant is left out: it was not
+     * known at $knownAt.
+     *
      * @return list<OdometerSample>
      */
-    private function samples(Vehicle $vehicle, ?CarbonImmutable $returnedAt = null): array
-    {
+    private function samples(
+        Vehicle $vehicle,
+        ?CarbonImmutable $returnedAt = null,
+        ?CarbonImmutable $knownAt = null,
+    ): array {
         $readings = array_reverse($this->readings->history($vehicle));
         $samples = [];
 
@@ -295,6 +302,10 @@ final readonly class LeaseTermsService
             $samples[] = $reading->toSample();
             $lastVerifiedAt = $reading->getLastVerifiedAt();
             $next = $readings[$index + 1] ?? null;
+
+            if (null !== $knownAt && null !== $lastVerifiedAt && $lastVerifiedAt->greaterThan($knownAt)) {
+                continue;
+            }
 
             if (null !== $lastVerifiedAt && (null === $next || $lastVerifiedAt->lessThan($next->getReadAt()))) {
                 $samples[] = new OdometerSample(
