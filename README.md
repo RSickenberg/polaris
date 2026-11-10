@@ -178,7 +178,7 @@ make composer ARGS="outdated"   # any Composer command
 make down                       # stop everything (docker compose down -v also deletes the data)
 ```
 
-Each CI check also runs alone: `make phpstan` (level max), `make cs` (dry run), `make deptrac` (module boundaries), `make translations` (`en` and `fr` complete), `make test`; or the same names with `composer`. Fix findings rather than adding PHPStan baselines or ignores.
+Each CI check also runs alone: `make phpstan` (level max), `make cs` (dry run), `make deptrac` (module boundaries), `make translations` (`en` and `fr` complete), `make test` (PHPUnit in parallel with ParaTest, `PROCESSES=8` for more workers; `make test-serial` for one process); or the same names with `composer`. Fix findings rather than adding PHPStan baselines or ignores.
 
 - **CSS:** the `tailwind` service rebuilds it in dev; on a fresh checkout run `make tailwind` once (`test` and `ci` do it for you).
 - **Ports:** `HTTP_PORT`, `HTTPS_PORT`, `HTTP3_PORT`, `DATABASE_PORT`, `REDIS_PORT`, `MAILPIT_SMTP_PORT`, `MAILPIT_UI_PORT`.
