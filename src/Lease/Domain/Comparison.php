@@ -33,4 +33,12 @@ final readonly class Comparison
             0 === $expected->metres() ? null : $delta->metres() / $expected->metres(),
         );
     }
+
+    /**
+     * The same comparison without the share of the expected distance (a window too short for it to mean anything).
+     */
+    public function withoutRatio(): self
+    {
+        return new self($this->actual, $this->expected, $this->delta, null);
+    }
 }

@@ -17,6 +17,8 @@ final readonly class WindowComparison
         public int $fallbackDays = 0,
         /** True when the figures of the window's start were rebuilt on the fly, not read from a stored snapshot. */
         public bool $live = false,
+        /** True when nothing was read since the window opened: "today" before the first reading of the owner's day. */
+        public bool $awaitingReading = false,
     ) {
     }
 }
