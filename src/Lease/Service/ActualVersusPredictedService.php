@@ -27,6 +27,10 @@ use Psr\Clock\ClockInterface;
  * figures are rebuilt in memory with {@see LeaseTermsService::assessAt()}, the very computation the job runs, so
  * "today" still compares with the projection of the day's start. Nothing is saved: a stored row stays the record of
  * what was projected then, and the other windows keep needing their own stored snapshot.
+ *
+ * After an edit of the lease terms the stored snapshots are recalculated under the new ones
+ * ({@see ProjectionSnapshotService::recalculate()}). Until that is done they are not used at all: only today's rebuilt
+ * figures show, the other rows are empty, and the comparison says it is recalculating.
  */
 final readonly class ActualVersusPredictedService
 {
@@ -62,8 +66,12 @@ final readonly class ActualVersusPredictedService
         $lastMidnight = OwnerMidnight::latestAt($now, $timeZone);
         $earliest = $lastMidnight->localDay->subDays(ComparisonWindow::LastMonth->days());
         $snapshots = [];
+        // Snapshots taken under terms that were edited since say nothing about today's terms: they are left out until
+        // the recalculation is done, and today's figures are rebuilt below like on a day without a snapshot.
+        $recalculating = $this->leases->find($vehicle)?->hasStaleSnapshots() ?? false;
+        $history = $recalculating ? [] : $this->history->history($vehicle, $earliest, $lastMidnight->localDay);
 
-        foreach ($this->history->history($vehicle, $earliest, $lastMidnight->localDay) as $point) {
+        foreach ($history as $point) {
             $snapshots[$point->localDay->format('Y-m-d')] = new SnapshotFigures(
                 $point->projectedAtEnd,
                 $point->dailyBudget,
@@ -81,7 +89,16 @@ final readonly class ActualVersusPredictedService
             }
         }
 
-        return $this->comparer->compare($timeline, $assessment->projection, $timeZone, $snapshots, $now);
+        $comparison = $this->comparer->compare($timeline, $assessment->projection, $timeZone, $snapshots, $now);
+
+        return $recalculating
+            ? new PredictionComparison(
+                $comparison->budget,
+                $comparison->pace,
+                $comparison->projectedEnd,
+                recalculating: true,
+            )
+            : $comparison;
     }
 
     /**

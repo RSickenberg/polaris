@@ -28,6 +28,11 @@ final readonly class PredictionComparison
          * @var list<WindowComparison>
          */
         public array $projectedEnd,
+        /**
+         * True while the snapshots are being recalculated after an edit of the lease terms: the rows that need them
+         * are left out, so that old and new terms never mix.
+         */
+        public bool $recalculating = false,
     ) {
     }
 }

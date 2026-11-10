@@ -77,6 +77,8 @@ final readonly class LeaseTermsService
             throw new LeaseTermsRejected(LeaseTermsRejection::StartAfterReturn);
         }
 
+        $changed = false;
+
         if (null === $contract) {
             $contract = new LeaseContract(
                 $vehicle,
@@ -88,7 +90,7 @@ final readonly class LeaseTermsService
             );
             $this->entityManager->persist($contract);
         } else {
-            $contract->updateTerms(
+            $changed = $contract->updateTerms(
                 $terms->term,
                 $terms->allowance,
                 $terms->startOdometer,
@@ -97,8 +99,9 @@ final readonly class LeaseTermsService
             );
         }
 
+        // The revision moves in the same flush as the terms, so the snapshots are stale from the moment they change.
         $this->entityManager->flush();
-        $this->events->dispatch(new LeaseTermsSaved($vehicle));
+        $this->events->dispatch(new LeaseTermsSaved($vehicle, $changed));
 
         return $assessment;
     }

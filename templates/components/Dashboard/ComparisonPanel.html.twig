@@ -8,7 +8,9 @@
     ## list<\Polaris\Dashboard\Service\Dto\ComparisonRow> The four periods, today first.
     rows,
     ## string|null The translated explanation of the panel, shown in a dialog behind an info button.
-    help = null
+    help = null,
+    ## bool True while the past snapshots are recalculated after an edit of the lease terms: the rows without figures say so.
+    recalculating = false
 -%}
 {# A card with one row per period: the period with the two figures under it (what happened, what was expected), and the gap on the right, as large as the period. A positive gap is more than expected: the gap is a red pill, and a gap of zero or less a green one. Only the digits are monospaced. Before any period has history (the first days after deploy), one line says so instead of four empty rows. #}
 {% set withHistory = rows|filter(row => row.figures is not null or row.awaitingReading)|length > 0 %}
@@ -22,8 +24,13 @@
         {% endif %}
     </twig:Card:Header>
     <twig:Card:Content>
+        {% if recalculating %}
+            <p class="mb-3 text-sm text-muted-foreground" data-recalculating>{{ 'compare.recalculating'|trans(domain='dashboard') }}</p>
+        {% endif %}
         {% if not withHistory %}
-            <p class="text-sm text-muted-foreground" data-no-history>{{ 'compare.no_history_yet'|trans(domain='dashboard') }}</p>
+            {% if not recalculating %}
+                <p class="text-sm text-muted-foreground" data-no-history>{{ 'compare.no_history_yet'|trans(domain='dashboard') }}</p>
+            {% endif %}
         {% else %}
             {# The table sits in the card as a rounded, inset block: border, soft background and a light shadow give it depth. #}
             <div class="overflow-hidden rounded-xl border border-border bg-muted/30 shadow-xs">
@@ -69,7 +76,7 @@
                                 {% if row.awaitingReading %}
                                     <twig:Table:Cell class="py-3 ps-2 pe-4 whitespace-normal text-end text-sm text-muted-foreground/70" data-awaiting-reading>{{ 'compare.no_reading_today'|trans(domain='dashboard') }}</twig:Table:Cell>
                                 {% elseif figures is null %}
-                                    <twig:Table:Cell class="py-3 ps-2 pe-4 whitespace-normal text-end text-sm text-muted-foreground/70" data-no-history>{{ 'compare.no_history'|trans(domain='dashboard') }}</twig:Table:Cell>
+                                    <twig:Table:Cell class="py-3 ps-2 pe-4 whitespace-normal text-end text-sm text-muted-foreground/70" data-no-history>{{ (recalculating ? 'compare.recalculating_row' : 'compare.no_history')|trans(domain='dashboard') }}</twig:Table:Cell>
                                 {% else %}
                                     {% set sign = '' %}
                                     {% if figures.delta.isNegative %}

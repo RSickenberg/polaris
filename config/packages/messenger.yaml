@@ -5,7 +5,7 @@ framework:
         failure_transport: failed
 
         transports:
-            # General background work: the risk level checks of the Alert module and the daily projection snapshots of Lease.
+            # General background work: the risk level checks of the Alert module and the daily projection snapshots and their recalculation after a terms edit (Lease).
             async:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 options:
@@ -33,6 +33,7 @@ framework:
             Polaris\Fetching\Message\FetchOdometerMessage: tesla
             Polaris\Alert\Message\CheckRiskLevel: async
             Polaris\Lease\Message\SaveProjectionSnapshot: async
+            Polaris\Lease\Message\RecalculateProjectionSnapshots: async
             Polaris\Account\Message\OwnerMidnightPassed: async
 
 when@test:

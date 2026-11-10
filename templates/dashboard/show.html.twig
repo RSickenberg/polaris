@@ -152,6 +152,7 @@
                         title="{{ 'compare.budget.title'|trans(domain='dashboard') }}"
                         basis="{{ 'compare.budget.basis'|trans(domain='dashboard') }}"
                         :rows="dashboard.comparison.budget"
+                        :recalculating="dashboard.comparison.recalculating"
                         help="{{ 'help.compare_budget'|trans(domain='dashboard') }}"
                     />
                     <twig:Dashboard:ComparisonPanel
@@ -159,6 +160,7 @@
                         title="{{ 'compare.pace.title'|trans(domain='dashboard') }}"
                         basis="{{ 'compare.pace.basis'|trans(domain='dashboard') }}"
                         :rows="dashboard.comparison.pace"
+                        :recalculating="dashboard.comparison.recalculating"
                         help="{{ 'help.compare_pace'|trans(domain='dashboard') }}"
                     />
                     <twig:Dashboard:ComparisonPanel
@@ -166,6 +168,7 @@
                         title="{{ 'compare.projected_end.title'|trans(domain='dashboard') }}"
                         basis="{{ 'compare.projected_end.basis'|trans(domain='dashboard') }}"
                         :rows="dashboard.comparison.projectedEnd"
+                        :recalculating="dashboard.comparison.recalculating"
                         help="{{ 'help.compare_projected_end'|trans(domain='dashboard') }}"
                     />
                 </div>

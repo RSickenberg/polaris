@@ -68,6 +68,20 @@ class LeaseContract
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?CarbonImmutable $returnedAt = null;
 
+    /**
+     * Counts the edits of what a projection depends on (lease start, end date, allowance, start odometer): the
+     * stored snapshots follow it, see {@see self::$snapshotsRevision}.
+     */
+    #[ORM\Column(options: ['default' => 0])]
+    private int $termsRevision = 0;
+
+    /**
+     * The {@see self::$termsRevision} the stored projection snapshots were last recalculated for. While it is behind,
+     * the snapshots describe other terms and the dashboard does not compare with them.
+     */
+    #[ORM\Column(options: ['default' => 0])]
+    private int $snapshotsRevision = 0;
+
     public function __construct(
         Vehicle $vehicle,
         LeaseTerm $term,
@@ -78,13 +92,50 @@ class LeaseContract
     ) {
         $this->id = new Ulid();
         $this->vehicle = $vehicle;
-        $this->updateTerms($term, $allowance, $startOdometer, $excessCostPerKm, $tolerance);
+        $this->apply($term, $allowance, $startOdometer, $excessCostPerKm, $tolerance);
     }
 
     /**
      * Replaces the terms in place: a vehicle has one contract, and an edit corrects it.
+     *
+     * @return bool whether something a projection depends on changed (lease start, end date and its convention,
+     *              allowance, start odometer); the excess cost and the tolerance do not count. The snapshots are
+     *              then stale until they are recalculated.
      */
     public function updateTerms(
+        LeaseTerm $term,
+        Allowance $allowance,
+        Distance $startOdometer,
+        Money $excessCostPerKm,
+        Tolerance $tolerance,
+    ): bool {
+        $changed = !$this->startDate->equalTo($term->start())
+            || !$this->endDate->equalTo($term->end())
+            || $this->endDateConvention !== $term->endDateConvention()
+            || $this->allowanceMetres !== $allowance->total()->metres()
+            || $this->startOdometerMetres !== $startOdometer->metres();
+
+        $this->apply($term, $allowance, $startOdometer, $excessCostPerKm, $tolerance);
+
+        if ($changed) {
+            ++$this->termsRevision;
+        }
+
+        return $changed;
+    }
+
+    /** Whether the projection snapshots were taken under terms that have been edited since. */
+    public function hasStaleSnapshots(): bool
+    {
+        return $this->snapshotsRevision < $this->termsRevision;
+    }
+
+    public function getTermsRevision(): int
+    {
+        return $this->termsRevision;
+    }
+
+    private function apply(
         LeaseTerm $term,
         Allowance $allowance,
         Distance $startOdometer,

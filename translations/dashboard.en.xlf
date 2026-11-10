@@ -258,6 +258,14 @@
         <source>compare.no_history</source>
         <target>Not enough history</target>
       </trans-unit>
+      <trans-unit id="compare.recalculating">
+        <source>compare.recalculating</source>
+        <target>You changed your lease terms. The past rows are being recalculated with them and come back in a moment; reload the page to see them.</target>
+      </trans-unit>
+      <trans-unit id="compare.recalculating_row">
+        <source>compare.recalculating_row</source>
+        <target>Recalculating</target>
+      </trans-unit>
       <trans-unit id="help.open">
         <source>help.open</source>
         <target>About “%title%”</target>

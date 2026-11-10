@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Polaris\Lease\Domain\Comparison;
+use Polaris\Lease\Domain\LeaseAssessment;
 use Polaris\Lease\Domain\Pace;
 use Polaris\Lease\Domain\RiskLevel;
 use Polaris\Lease\Entity\LeaseContract;
@@ -16,6 +17,7 @@ use Polaris\Lease\Form\Model\LeaseContractData;
 use Polaris\Lease\Service\ActualVersusPredictedService;
 use Polaris\Lease\Service\LeaseReturnService;
 use Polaris\Lease\Service\LeaseTermsService;
+use Polaris\Lease\Service\ProjectionSnapshotService;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Shared\Domain\Currency;
 use Polaris\Shared\Domain\Distance;
@@ -76,6 +78,40 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
         self::assertSame(500_000, $result->projectedEnd[0]->comparison?->delta->metres());
         self::assertNull($result->budget[3]->comparison, 'No snapshot 14 days before.');
         self::assertNull($result->budget[4]->comparison, 'No snapshot 30 days before.');
+    }
+
+    public function testAfterATermsEditTheOldSnapshotsAreLeftOutUntilTheyAreRecalculatedUnderTheNewTerms(): void
+    {
+        $this->lease();
+        $this->reading('2026-07-02 12:00:00', 18_250);
+        $this->reading('2026-07-10 12:00:00', 19_050);
+        // A row taken under the original terms: 90 km a day, projecting 36,000 km.
+        $this->snapshot('2026-07-03', projectedAtEndKm: 36_000, dailyBudgetKm: 90, paceMetresPerDay: 100_000.0);
+        self::assertNotNull($this->comparison->compare($this->vehicle)?->budget[2]->comparison, 'Before the edit.');
+
+        // Half the allowance: the budget and the projection of every past day change.
+        $this->lease(allowance: 18_250);
+
+        $stale = $this->comparison->compare($this->vehicle);
+        self::assertNotNull($stale);
+        self::assertTrue($stale->recalculating);
+        self::assertNull($stale->budget[2]->comparison, 'The row of 7 days ago is on other terms, so it is not shown.');
+        self::assertNull($stale->projectedEnd[2]->comparison);
+        self::assertNotNull($stale->budget[0]->comparison, 'Today is rebuilt under the current terms.');
+        self::assertTrue($stale->budget[0]->live);
+
+        self::getContainer()->get(ProjectionSnapshotService::class)->recalculate($this->vehicle);
+
+        $fresh = $this->comparison->compare($this->vehicle);
+        self::assertNotNull($fresh);
+        self::assertFalse($fresh->recalculating);
+        $week = $fresh->budget[2]->comparison;
+        self::assertNotNull($week);
+        // The row of 3 July now holds the budget of the current terms, over the 7.5 days to the latest reading.
+        $budget = $this->leases->assessAt($this->vehicle, CarbonImmutable::parse('2026-07-03', 'UTC'));
+        self::assertInstanceOf(LeaseAssessment::class, $budget);
+        self::assertNotSame(90_000, $budget->budget->perDay->metres());
+        self::assertEqualsWithDelta($budget->budget->perDay->metres() * 7.5, $week->expected->metres(), 1);
     }
 
     public function testTodayIsTheDayOfTheClockAndWaitsForTheFirstReadingOfThatDay(): void
@@ -174,12 +210,12 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
         return [$comparison?->actual->metres(), $comparison?->expected->metres(), $comparison?->delta->metres()];
     }
 
-    private function lease(): void
+    private function lease(int $allowance = 36_500): void
     {
         $data = new LeaseContractData();
         $data->startDate = new \DateTimeImmutable('2026-01-01');
         $data->endDate = new \DateTimeImmutable('2027-01-01');
-        $data->allowance = 36_500;
+        $data->allowance = $allowance;
         $data->startOdometer = 0;
         $data->excessCostPerKm = '0.12';
         $data->currency = Currency::CHF;
