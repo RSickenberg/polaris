@@ -25,6 +25,13 @@ security:
                 csrf_token_id: authenticate
                 default_target_path: dashboard_home
 
+            # Only when the user ticks the box (the `_remember_me` field). The cookie is signed with the
+            # password hash, so changing the password ends every remembered session.
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 2592000 # 30 days
+                signature_properties: [password]
+
             logout:
                 path: account_logout
                 target: account_login
