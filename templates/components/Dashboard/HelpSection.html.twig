@@ -1,0 +1,16 @@
+{%- props
+    ## string The Lucide icon of the section ("lucide:calendar-days").
+    icon,
+    ## string The translated title of the section.
+    title
+-%}
+{# One block of a help dialog, flat (no card around it): an icon in a tinted tile beside the title, then the paragraph (the content) over the whole width of the card. Never split between two columns. #}
+<section {{ attributes.defaults({class: 'mb-5 flex break-inside-avoid flex-col gap-2', 'data-help-section': true}) }}>
+    <div class="flex items-center gap-3">
+        <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-info-surface text-info-foreground" aria-hidden="true">
+            <twig:ux:icon :name="icon" class="size-4.5" />
+        </span>
+        <h3 class="text-sm font-semibold text-foreground">{{ title }}</h3>
+    </div>
+    <div class="text-sm leading-relaxed text-pretty text-muted-foreground">{% block content %}{% endblock %}</div>
+</section>

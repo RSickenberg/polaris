@@ -7,8 +7,19 @@
 
     {# The form and, from the large breakpoint, the projection stacked on its right; on a phone one below the other. #}
     <div class="my-4 grid items-start gap-8 lg:grid-cols-[minmax(0,48rem)_20rem]">
-        <div>
-            {{ form(form) }}
+        <div class="flex flex-col gap-6">
+            <twig:Card id="lease-terms">
+                <twig:Card:Header>
+                    <twig:Card:Title><h2>{{ 'terms.title'|trans(domain='lease') }}</h2></twig:Card:Title>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    {{ form(form) }}
+                </twig:Card:Content>
+            </twig:Card>
+
+            {% if hasContract %}
+                {{ include('lease/_driving_hours.html.twig') }}
+            {% endif %}
         </div>
 
         <aside class="flex flex-col gap-6 lg:sticky lg:top-4">

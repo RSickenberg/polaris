@@ -140,7 +140,8 @@
       </trans-unit>
       <trans-unit id="return.help">
         <source>return.help</source>
-        <target>Voiture rendue? Marquez-la comme rendue pour figer les chiffres et arrêter les lectures du compteur.</target>
+        <target>Voiture rendue ?
+Marquez-la comme rendue pour figer les chiffres et arrêter les lectures du compteur.</target>
       </trans-unit>
       <trans-unit id="return.status_help">
         <source>return.status_help</source>
@@ -164,7 +165,7 @@
       </trans-unit>
       <trans-unit id="return.dialog.title">
         <source>return.dialog.title</source>
-        <target>Marquer la voiture comme rendue?</target>
+        <target>Marquer la voiture comme rendue ?</target>
       </trans-unit>
       <trans-unit id="return.dialog.description">
         <source>return.dialog.description</source>
@@ -172,7 +173,7 @@
       </trans-unit>
       <trans-unit id="return.undo_dialog.title">
         <source>return.undo_dialog.title</source>
-        <target>Annuler la restitution?</target>
+        <target>Annuler la restitution ?</target>
       </trans-unit>
       <trans-unit id="return.undo_dialog.description">
         <source>return.undo_dialog.description</source>
@@ -219,6 +220,84 @@ Le leasing est de nouveau suivi.</target>
       <trans-unit id="rejected.start_after_return">
         <source>rejected.start_after_return</source>
         <target>Le début doit précéder le jour où la voiture a été rendue. Annulez la restitution ou choisissez un début plus tôt.</target>
+      </trans-unit>
+      <trans-unit id="hours.title">
+        <source>hours.title</source>
+        <target>Heures de conduite</target>
+      </trans-unit>
+      <trans-unit id="hours.help.question">
+        <source>hours.help.question</source>
+        <target>À quelle heure arrêtez-vous généralement de conduire pour la journée, et à quelle heure reprenez-vous le lendemain ?</target>
+      </trans-unit>
+      <trans-unit id="hours.help.how">
+        <source>hours.help.how</source>
+        <target>Polaris utilise ces horaires pour répartir les kilomètres parcourus entre deux relevés uniquement sur vos heures habituelles de conduite.
+
+Par exemple, si un relevé est effectué à 21 h, les kilomètres parcourus pendant la nuit seront attribués à la journée suivante, et non à la journée précédente.</target>
+      </trans-unit>
+      <trans-unit id="hours.help.empty">
+        <source>hours.help.empty</source>
+        <target>Si vous laissez ces deux champs vides, Polaris répartira les kilomètres de manière uniforme sur les 24 heures de la journée, y compris pendant la nuit.</target>
+      </trans-unit>
+      <trans-unit id="hours.help.scope">
+        <source>hours.help.scope</source>
+        <target>Ces paramètres influencent uniquement les statistiques « Aujourd’hui » et les différentes périodes affichées dans le tableau de bord.</target>
+      </trans-unit>
+      <trans-unit id="form.hours_from.label">
+        <source>form.hours_from.label</source>
+        <target>Arrêt habituel de la conduite à</target>
+      </trans-unit>
+      <trans-unit id="form.hours_from.help">
+        <source>form.hours_from.help</source>
+        <target>Indiquez votre heure habituelle d’arrêt, en heure locale. Par exemple : 22:00.</target>
+      </trans-unit>
+      <trans-unit id="form.hours_until.label">
+        <source>form.hours_until.label</source>
+        <target>Reprise habituelle de la conduite à</target>
+      </trans-unit>
+      <trans-unit id="form.hours_until.help">
+        <source>form.hours_until.help</source>
+        <target>Indiquez votre heure habituelle de reprise, en heure locale. Par exemple : 06:30.
+
+L’heure de reprise peut être antérieure à celle de l’arrêt si votre période de repos se poursuit après minuit.</target>
+      </trans-unit>
+      <trans-unit id="form.hours_submit">
+        <source>form.hours_submit</source>
+        <target>Enregistrer les heures de conduite</target>
+      </trans-unit>
+      <trans-unit id="flash.hours_saved">
+        <source>flash.hours_saved</source>
+        <target>Vos heures de conduite ont été enregistrées.</target>
+      </trans-unit>
+      <trans-unit id="rejected.hours_no_contract">
+        <source>rejected.hours_no_contract</source>
+        <target>Veuillez d’abord enregistrer les conditions de votre leasing avant de configurer vos heures de conduite.</target>
+      </trans-unit>
+      <trans-unit id="rejected.hours_incomplete">
+        <source>rejected.hours_incomplete</source>
+        <target>Renseignez les deux horaires ou laissez les deux champs vides.</target>
+      </trans-unit>
+      <trans-unit id="rejected.hours_invalid">
+        <source>rejected.hours_invalid</source>
+        <target>Utilisez le format HH:MM pour saisir une heure. Par exemple : 22:00.</target>
+      </trans-unit>
+      <trans-unit id="rejected.hours_same_time">
+        <source>rejected.hours_same_time</source>
+        <target>Les deux horaires doivent être différents. Choisissez une heure de reprise antérieure ou postérieure à votre heure d’arrêt.</target>
+      </trans-unit>
+      <trans-unit id="terms.title">
+        <source>terms.title</source>
+        <target>Contrat de leasing</target>
+      </trans-unit>
+      <trans-unit id="form.hours_whole_day.label">
+        <source>form.hours_whole_day.label</source>
+        <target>Comparer « Aujourd’hui » à la journée entière</target>
+      </trans-unit>
+      <trans-unit id="form.hours_whole_day.help">
+        <source>form.hours_whole_day.help</source>
+        <target>Par défaut, Polaris compare les kilomètres parcourus aujourd’hui à ceux qui étaient prévus jusqu’à votre dernier relevé.
+
+Cochez cette option pour effectuer la comparaison sur la base de la journée entière, jusqu’à minuit, plutôt que de vous limiter à l’heure de votre dernier relevé.</target>
       </trans-unit>
     </body>
   </file>

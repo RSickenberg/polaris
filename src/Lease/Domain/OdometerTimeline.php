@@ -14,6 +14,9 @@ use Polaris\Shared\Domain\TimeZone;
  * linear between two of them. The projection and the comparison with past predictions read the odometer the same way
  * from here.
  *
+ * With quiet hours the odometer is linear in active time instead: it stays put in the hours the owner does not
+ * drive, so the driving between two readings is counted on the right day.
+ *
  * Samples may come in any order. Samples at or before the lease start are ignored. A sample after the instant given as
  * "now", an odometer lower than an earlier one (or than the start odometer), and two different odometers at the same
  * second are rejected.
@@ -23,7 +26,7 @@ final readonly class OdometerTimeline
     /**
      * @param non-empty-array<int, int> $odometers metres by Unix timestamp, sorted, starting with the lease start
      */
-    private function __construct(private array $odometers)
+    private function __construct(private array $odometers, private ?QuietHours $quietHours = null)
     {
     }
 
@@ -36,7 +39,8 @@ final readonly class OdometerTimeline
         CarbonImmutable $start,
         Distance $startOdometer,
         array $samples,
-        CarbonImmutable $now
+        CarbonImmutable $now,
+        ?QuietHours $quietHours = null,
     ): self {
         $odometers = [];
 
@@ -87,7 +91,7 @@ final readonly class OdometerTimeline
             $previous = $odometer;
         }
 
-        return new self($timeline);
+        return new self($timeline, $quietHours);
     }
 
     /**
@@ -133,13 +137,31 @@ final readonly class OdometerTimeline
             }
 
             if ($readAt > $instant) {
-                return $this->odometers[$beforeAt] + ($odometer - $this->odometers[$beforeAt]) * (($instant - $beforeAt)
-                        / ($readAt - $beforeAt));
+                return $this->odometers[$beforeAt]
+                    + ($odometer - $this->odometers[$beforeAt]) * $this->share($beforeAt, $instant, $readAt);
             }
 
             $beforeAt = $readAt;
         }
 
         throw new \LogicException('An instant covered by the timeline lies between two of its points.');
+    }
+
+    /**
+     * The share of the odometer change between two samples that is done by $instant. Linear in clock time, or in
+     * active time when quiet hours are set: the car is taken not to move in a quiet period. Two samples inside one
+     * quiet period leave no active time between them: the clock is used for that pair.
+     */
+    private function share(int $beforeAt, int $instant, int $afterAt): float
+    {
+        if ($this->quietHours instanceof QuietHours) {
+            $active = ($afterAt - $beforeAt) - $this->quietHours->secondsBetween($beforeAt, $afterAt);
+
+            if ($active > 0) {
+                return (($instant - $beforeAt) - $this->quietHours->secondsBetween($beforeAt, $instant)) / $active;
+            }
+        }
+
+        return ($instant - $beforeAt) / ($afterAt - $beforeAt);
     }
 }

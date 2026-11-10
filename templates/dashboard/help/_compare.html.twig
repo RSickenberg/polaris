@@ -1,0 +1,38 @@
+{# The help of a comparison panel. Variables: `help` (the key), `figures` (example: actual, expected, gap, share), `today` (whether the figures are distances driven, so the way "today" is counted matters), `reference_icon`. #}
+{% set key = 'help.' ~ help %}
+<div class="grid items-stretch gap-3 lg:grid-cols-[3fr_2fr]">
+<twig:Dashboard:HelpAnatomy
+    period="{{ 'compare.period.week'|trans(domain='dashboard') }}"
+    actual="{{ figures.actual|figure }}"
+    expected="{{ figures.expected|figure }}"
+    gap="+{{ figures.gap|figure }}"
+    share="+{{ figures.share|percent }}"
+    actualLabel="{{ (key ~ '.actual')|trans(domain='dashboard') }}"
+    expectedLabel="{{ (key ~ '.expected')|trans(domain='dashboard') }}"
+    gapLabel="{{ 'help.anatomy.gap'|trans(domain='dashboard') }}"
+/>
+    <div class="flex flex-col justify-between gap-3">
+    <twig:Dashboard:HelpGap over="{{ (key ~ '.over')|trans(domain='dashboard') }}" under="{{ (key ~ '.under')|trans(domain='dashboard') }}" />
+    <p class="text-sm text-pretty text-muted-foreground">{{ (key ~ '.percent')|trans(domain='dashboard') }}</p>
+    </div>
+</div>
+{# Columns, not rows: the cards differ in length and a grid would leave holes. #}
+<div class="mt-2 gap-x-8 sm:columns-2 lg:columns-3">
+    <twig:Dashboard:HelpSection icon="lucide:calendar-days" title="{{ 'help.section.periods'|trans(domain='dashboard') }}">
+        {{ 'help.common.periods'|trans(domain='dashboard')|nl2br }}
+    </twig:Dashboard:HelpSection>
+    <twig:Dashboard:HelpSection :icon="reference_icon" title="{{ 'help.section.reference'|trans(domain='dashboard') }}">
+        {{ (key ~ '.reference')|trans(domain='dashboard')|nl2br }}
+    </twig:Dashboard:HelpSection>
+    {% if today %}
+        <twig:Dashboard:HelpSection icon="lucide:moon" title="{{ 'help.section.today'|trans(domain='dashboard') }}">
+            {{ 'help.common.today'|trans(domain='dashboard')|nl2br }}
+        </twig:Dashboard:HelpSection>
+    {% endif %}
+    <twig:Dashboard:HelpSection icon="lucide:radio" title="{{ 'help.section.live'|trans(domain='dashboard') }}">
+        {{ 'help.common.live'|trans(domain='dashboard')|nl2br }}
+    </twig:Dashboard:HelpSection>
+    <twig:Dashboard:HelpSection icon="lucide:history" title="{{ 'help.section.fallback'|trans(domain='dashboard') }}">
+        {{ 'help.common.fallback'|trans(domain='dashboard')|nl2br }}
+    </twig:Dashboard:HelpSection>
+</div>

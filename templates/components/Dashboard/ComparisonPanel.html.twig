@@ -7,7 +7,7 @@
     basis,
     ## list<\Polaris\Dashboard\Service\Dto\ComparisonRow> The four periods, today first.
     rows,
-    ## string|null The translated explanation of the panel, shown in a dialog behind an info button.
+    ## string|null The key of the explanation of the panel (`help.<key>.answer` and `dashboard/help/<key>.html.twig`), shown in a dialog behind an info button.
     help = null,
     ## bool True while the past snapshots are recalculated after an edit of the lease terms: the rows without figures say so.
     recalculating = false
@@ -20,7 +20,7 @@
         <twig:Card:Title><h2>{{ title }}</h2></twig:Card:Title>
         <twig:Card:Description>{{ basis }}</twig:Card:Description>
         {% if help is not null %}
-            <twig:Dashboard:CardHelp name="compare-{{ key }}" :title="title" :text="help" />
+            <twig:Dashboard:CardHelp name="compare-{{ key }}" :title="title" :help="help" />
         {% endif %}
     </twig:Card:Header>
     <twig:Card:Content>

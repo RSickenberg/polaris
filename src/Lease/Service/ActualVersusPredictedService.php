@@ -89,7 +89,14 @@ final readonly class ActualVersusPredictedService
             }
         }
 
-        $comparison = $this->comparer->compare($timeline, $assessment->projection, $timeZone, $snapshots, $now);
+        $comparison = $this->comparer->compare(
+            $timeline,
+            $assessment->projection,
+            $timeZone,
+            $snapshots,
+            $now,
+            $this->leases->find($vehicle)?->isTodayWholeDay() ?? false,
+        );
 
         return $recalculating
             ? new PredictionComparison(

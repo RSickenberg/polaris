@@ -14,8 +14,9 @@ const TOKEN = /^var\((--[\w-]+)\)$/;
  * Datetime x axes and numeric y axes are formatted in the browser with Intl, for `locale`
  * and `timeZone`; series times are Unix milliseconds (UTC instants).
  *
- * When the `series` or `options` values change (a morphed page), the chart is updated in place, keeping the
- * zoom of the last range button. Turbo's morph skips the chart container itself (its markup is the chart's).
+ * When the `series` or `options` values change (a morphed page), the chart is drawn again from scratch, keeping the
+ * range button the owner pressed (with the window that button now has). Turbo's morph skips the chart container
+ * itself (its markup is the chart's).
  *
  * The chart is destroyed when the element disconnects and before Turbo caches the page, so
  * a snapshot never holds chart markup and a restored page never shows two charts.
@@ -56,9 +57,13 @@ export default class extends Controller {
 
     connect() {
         this._dark = this._isDark();
-        this._range = null;
-        this._chart = new ApexCharts(this._container(), this._config());
-        this._rendered = this._chart.render();
+        // Turbo's morph can take the element out of the page and put it back: Stimulus then connects the same
+        // controller again, and the range the owner chose must survive that.
+        this._range ??= null;
+        this._pressed ??= null;
+        this._ticket ??= 0;
+        this._connected = true;
+        this._draw();
 
         // The server sends the canvas empty: a morph would strip the markup ApexCharts injected and leave no chart.
         this._onBeforeMorph = (event) => {
@@ -68,6 +73,15 @@ export default class extends Controller {
         };
         document.addEventListener('turbo:before-morph-element', this._onBeforeMorph);
 
+        // The morph rewrites the range buttons even when the data did not change: mark the pressed one again.
+        this._onMorph = () => {
+            this._followPressedRange();
+            if (this._chart && this._range) {
+                this._chart.updateOptions({ xaxis: this._range }, false, false);
+            }
+        };
+        document.addEventListener('turbo:morph', this._onMorph);
+
         this._observer = new MutationObserver(() => this._onThemeChange());
         this._observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
@@ -75,18 +89,21 @@ export default class extends Controller {
         document.addEventListener('turbo:before-cache', this._onBeforeCache);
     }
 
-    /** The series and options change when Turbo morphs the page after a fetch: the chart follows without a reload. */
+    /** The series and options change when Turbo morphs the page after a fetch: the chart is drawn again from them. */
     seriesValueChanged() {
-        this._refresh();
+        this._redraw();
     }
 
     optionsValueChanged() {
-        this._refresh();
+        this._redraw();
     }
 
     disconnect() {
+        this._connected = false;
+        ++this._ticket;
         document.removeEventListener('turbo:before-cache', this._onBeforeCache);
         document.removeEventListener('turbo:before-morph-element', this._onBeforeMorph);
+        document.removeEventListener('turbo:morph', this._onMorph);
         this._observer?.disconnect();
         this._observer = null;
         this._destroy();
@@ -99,9 +116,8 @@ export default class extends Controller {
         }
 
         this._range = { min, max };
-        for (const button of this.rangeTargets) {
-            button.setAttribute('aria-pressed', String(button === event.currentTarget));
-        }
+        this._pressed = this.rangeTargets.indexOf(event.currentTarget);
+        this._markPressed();
 
         this._chart.updateOptions({ xaxis: { min, max } }, false, false);
     }
@@ -110,9 +126,53 @@ export default class extends Controller {
         return this.hasCanvasTarget ? this.canvasTarget : this.element;
     }
 
-    _refresh() {
-        // Stimulus also calls the value callbacks before connect(), when there is no chart yet.
-        this._chart?.updateOptions(this._config(), false, false);
+    /** Stimulus also calls the value callbacks before connect(), when nothing is drawn yet. */
+    _redraw() {
+        if (this._connected) {
+            this._draw();
+        }
+    }
+
+    /**
+     * Draws the chart from the current values, from scratch: the previous chart is destroyed first and only then the
+     * new one is rendered into the same container, so the end of the one can never wipe the other. Several calls in a row
+     * (the series and the options change together) leave one chart, the last asked for. Updating a chart in place was
+     * not reliable when the data of a series grows.
+     */
+    async _draw() {
+        const ticket = ++this._ticket;
+        await this._destroy();
+
+        if (ticket !== this._ticket || !this._connected) {
+            return;
+        }
+
+        this._followPressedRange();
+        this._chart = new ApexCharts(this._container(), this._config());
+        this._rendered = this._chart.render();
+    }
+
+    /**
+     * A morph rewrites the range buttons: the one the owner pressed keeps its place, with the window it now has (the
+     * end of "the last 7 days" moves with the latest reading), and is marked again.
+     */
+    _followPressedRange() {
+        const button = null === this._pressed ? null : this.rangeTargets[this._pressed];
+        if (!button) {
+            return;
+        }
+
+        const min = Number(button.dataset.chartMinParam);
+        const max = Number(button.dataset.chartMaxParam);
+        if (Number.isFinite(min) && Number.isFinite(max)) {
+            this._range = { min, max };
+        }
+
+        this._markPressed();
+    }
+
+    _markPressed() {
+        this.rangeTargets.forEach((button, index) => button.setAttribute('aria-pressed', String(index === this._pressed)));
     }
 
     _onThemeChange() {
@@ -125,19 +185,25 @@ export default class extends Controller {
         this._chart.updateOptions(this._config(), false, false);
     }
 
-    async _destroy() {
+    /** Destroys the chart, once it has finished rendering; resolves when the markup is gone. */
+    _destroy() {
         const chart = this._chart;
         if (!chart) {
-            return;
+            return this._destroying ?? Promise.resolve();
         }
 
         this._chart = null;
-        try {
-            // Destroying a chart that is still rendering would leave its markup behind.
-            await this._rendered;
-        } finally {
-            chart.destroy();
-        }
+        const rendered = this._rendered;
+        this._destroying = (async () => {
+            try {
+                // Destroying a chart that is still rendering would leave its markup behind.
+                await rendered;
+            } finally {
+                chart.destroy();
+            }
+        })();
+
+        return this._destroying;
     }
 
     _isDark() {

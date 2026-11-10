@@ -71,6 +71,43 @@ final class PredictionComparerTest extends TestCase
         self::assertNull($comparison->projectedEnd[3]->comparison);
     }
 
+    public function testTodayCanBeMeasuredAgainstTheWholeDayAndTheOtherWindowsStayTheSame(): void
+    {
+        $latest = '2026-07-10 12:00:00';
+        $snapshots = [
+            '2026-07-10' => self::snapshot(36_500_000, 90_000, 80_000.0),
+            '2026-07-03' => self::snapshot(36_000_000, 100_000, null),
+        ];
+
+        $prorated = $this->compareIn('UTC', $latest, $snapshots, 36_000_000);
+        $wholeDay = $this->compareIn('UTC', $latest, $snapshots, 36_000_000, null, todayWholeDay: true);
+
+        // 50,000 m driven in 12 hours. Prorated: 45,000 m of the 90,000 m budget are expected by now. Whole day: all
+        // 90,000 m, so 40,000 m are still allowed.
+        self::assertSame([50_000, 45_000, 5_000], $this->figures($prorated->budget[0]));
+        self::assertSame([50_000, 90_000, -40_000], $this->figures($wholeDay->budget[0]));
+        // The pace: 80,000 m a day.
+        self::assertSame([50_000, 80_000, -30_000], $this->figures($wholeDay->pace[0]));
+        self::assertEqualsWithDelta(-0.375, $wholeDay->pace[0]->comparison?->ratio, 1e-12);
+        // The 7 day window and the projected end do not move.
+        self::assertSame($this->figures($prorated->budget[2]), $this->figures($wholeDay->budget[2]));
+        self::assertSame($this->figures($prorated->projectedEnd[0]), $this->figures($wholeDay->projectedEnd[0]));
+    }
+
+    public function testTheWholeDayIsTheLengthOfTheLocalDayOnADaylightSavingChange(): void
+    {
+        // Zurich leaves summer time on 2026-10-25: 25 hours, from 22:00 UTC the evening before. Five hours in, a
+        // budget of 100,000 m a day expects the whole day: 25 hours are 100,000 m x 25 / 24.
+        $snapshots = ['2026-10-25' => self::snapshot(1, self::METRES_PER_DAY, null)];
+
+        $comparison = $this->compareIn('Europe/Zurich', '2026-10-25 03:00:00', $snapshots, 1, null, true);
+
+        self::assertSame(
+            (int) round(25 / 24 * self::METRES_PER_DAY),
+            $this->figures($comparison->budget[0])[1],
+        );
+    }
+
     public function testTheWindowsAreInTheOrderOfTheEnum(): void
     {
         $latest = '2026-07-10 12:00:00';
@@ -366,6 +403,7 @@ final class PredictionComparerTest extends TestCase
         array $snapshots,
         int $projectedAtEnd = 1,
         ?string $now = null,
+        bool $todayWholeDay = false,
     ): PredictionComparison {
         return new PredictionComparer()->compare(
             $this->timeline($latest),
@@ -373,6 +411,7 @@ final class PredictionComparerTest extends TestCase
             $timeZone,
             $snapshots,
             CarbonImmutable::parse($now ?? $latest, 'UTC'),
+            $todayWholeDay,
         );
     }
 
