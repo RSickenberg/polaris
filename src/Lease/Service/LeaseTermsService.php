@@ -222,6 +222,7 @@ final readonly class LeaseTermsService
                 $contract->getStartOdometer(),
                 $this->samples($vehicle, $contract->getReturnedAt()),
                 CarbonImmutable::instance($this->clock->now()),
+                $contract->getQuietHours($vehicle->getOwner()->getTimeZone()),
             );
         } catch (\InvalidArgumentException $e) {
             throw new LeaseTermsRejected(previous: $e);

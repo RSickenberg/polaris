@@ -220,6 +220,54 @@ Le leasing est de nouveau suivi.</target>
         <source>rejected.start_after_return</source>
         <target>Le début doit précéder le jour où la voiture a été rendue. Annulez la restitution ou choisissez un début plus tôt.</target>
       </trans-unit>
+      <trans-unit id="hours.title">
+        <source>hours.title</source>
+        <target>Heures de conduite</target>
+      </trans-unit>
+      <trans-unit id="hours.help">
+        <source>hours.help</source>
+        <target>À quelle heure arrêtez-vous d’habitude de rouler pour la journée, et quand reprenez-vous? Polaris compte alors la distance entre deux relevés dans les heures où vous roulez, de sorte qu’un relevé à 21:00 ne donne pas la nuit à la veille. Laissez les deux vides pour répartir la distance régulièrement sur toute la journée. Seuls les chiffres d’« aujourd’hui » et des périodes du tableau de bord s’en servent.</target>
+      </trans-unit>
+      <trans-unit id="form.hours_from.label">
+        <source>form.hours_from.label</source>
+        <target>Arrêt habituel de la conduite à</target>
+      </trans-unit>
+      <trans-unit id="form.hours_from.help">
+        <source>form.hours_from.help</source>
+        <target>Heure locale, par exemple 22:00.</target>
+      </trans-unit>
+      <trans-unit id="form.hours_until.label">
+        <source>form.hours_until.label</source>
+        <target>Reprise habituelle de la conduite à</target>
+      </trans-unit>
+      <trans-unit id="form.hours_until.help">
+        <source>form.hours_until.help</source>
+        <target>Heure locale, par exemple 06:30. Elle peut être avant l’heure d’arrêt : la période de repos passe alors minuit.</target>
+      </trans-unit>
+      <trans-unit id="form.hours_submit">
+        <source>form.hours_submit</source>
+        <target>Enregistrer les heures de conduite</target>
+      </trans-unit>
+      <trans-unit id="flash.hours_saved">
+        <source>flash.hours_saved</source>
+        <target>Heures de conduite enregistrées.</target>
+      </trans-unit>
+      <trans-unit id="rejected.hours_no_contract">
+        <source>rejected.hours_no_contract</source>
+        <target>Enregistrez d’abord les conditions du leasing, puis les heures de conduite.</target>
+      </trans-unit>
+      <trans-unit id="rejected.hours_incomplete">
+        <source>rejected.hours_incomplete</source>
+        <target>Renseignez les deux heures, ou laissez les deux vides.</target>
+      </trans-unit>
+      <trans-unit id="rejected.hours_invalid">
+        <source>rejected.hours_invalid</source>
+        <target>Utilisez une heure écrite HH:MM, par exemple 22:00.</target>
+      </trans-unit>
+      <trans-unit id="rejected.hours_same_time">
+        <source>rejected.hours_same_time</source>
+        <target>Les deux heures doivent différer. Choisissez une heure de reprise avant ou après l’heure d’arrêt.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

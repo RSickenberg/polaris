@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Polaris\Lease\Domain\Allowance;
 use Polaris\Lease\Domain\EndDateConvention;
 use Polaris\Lease\Domain\LeaseTerm;
+use Polaris\Lease\Domain\QuietHours;
 use Polaris\Lease\Domain\Tolerance;
 use Polaris\Shared\Doctrine\Type\CarbonDateImmutableType;
 use Polaris\Shared\Domain\Currency;
@@ -81,6 +82,17 @@ class LeaseContract
      */
     #[ORM\Column(options: ['default' => 0])]
     private int $snapshotsRevision = 0;
+
+    /**
+     * The usual stop time and start time of driving, local "HH:MM" in the owner's time zone; both set or both null.
+     * They only shape how the odometer is read between two readings (see {@see QuietHours}), so no projection
+     * snapshot depends on them and editing them does not touch {@see self::$termsRevision}.
+     */
+    #[ORM\Column(length: 5, nullable: true)]
+    private ?string $quietFrom = null;
+
+    #[ORM\Column(length: 5, nullable: true)]
+    private ?string $quietUntil = null;
 
     public function __construct(
         Vehicle $vehicle,
@@ -173,6 +185,44 @@ class LeaseContract
     public function undoReturn(): void
     {
         $this->returnedAt = null;
+    }
+
+    /**
+     * @throws \InvalidArgumentException when only one time is given, or they are not valid and different
+     */
+    public function changeQuietHours(?string $from, ?string $until): void
+    {
+        if (null !== $from && null !== $until) {
+            // Validates both times; the zone does not matter here.
+            QuietHours::between($from, $until, 'UTC');
+        } elseif (null !== $from || null !== $until) {
+            throw new \InvalidArgumentException('The quiet hours need both a stop time and a start time.');
+        }
+
+        $this->quietFrom = $from;
+        $this->quietUntil = $until;
+    }
+
+    public function getQuietFrom(): ?string
+    {
+        return $this->quietFrom;
+    }
+
+    public function getQuietUntil(): ?string
+    {
+        return $this->quietUntil;
+    }
+
+    /**
+     * The quiet hours in the owner's time zone, null when none are set.
+     */
+    public function getQuietHours(string $timeZone): ?QuietHours
+    {
+        if (null === $this->quietFrom || null === $this->quietUntil) {
+            return null;
+        }
+
+        return QuietHours::between($this->quietFrom, $this->quietUntil, $timeZone);
     }
 
     public function getReturnedAt(): ?CarbonImmutable

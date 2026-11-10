@@ -220,6 +220,54 @@ The lease is tracked again.</target>
         <source>rejected.start_after_return</source>
         <target>The start must be before the day the car went back. Undo the return or pick an earlier start.</target>
       </trans-unit>
+      <trans-unit id="hours.title">
+        <source>hours.title</source>
+        <target>Driving hours</target>
+      </trans-unit>
+      <trans-unit id="hours.help">
+        <source>hours.help</source>
+        <target>When do you usually stop driving for the day, and start again? Polaris then counts the distance between two readings in the hours you drive, so a reading at 21:00 does not give the night to the day before. Leave both empty to spread the distance evenly over the whole day. Only the “today” and period figures of the dashboard use this.</target>
+      </trans-unit>
+      <trans-unit id="form.hours_from.label">
+        <source>form.hours_from.label</source>
+        <target>Usually stop driving at</target>
+      </trans-unit>
+      <trans-unit id="form.hours_from.help">
+        <source>form.hours_from.help</source>
+        <target>Local time, for example 22:00.</target>
+      </trans-unit>
+      <trans-unit id="form.hours_until.label">
+        <source>form.hours_until.label</source>
+        <target>Usually start driving at</target>
+      </trans-unit>
+      <trans-unit id="form.hours_until.help">
+        <source>form.hours_until.help</source>
+        <target>Local time, for example 06:30. It may be earlier than the stop time: the quiet hours then cross midnight.</target>
+      </trans-unit>
+      <trans-unit id="form.hours_submit">
+        <source>form.hours_submit</source>
+        <target>Save the driving hours</target>
+      </trans-unit>
+      <trans-unit id="flash.hours_saved">
+        <source>flash.hours_saved</source>
+        <target>Driving hours saved.</target>
+      </trans-unit>
+      <trans-unit id="rejected.hours_no_contract">
+        <source>rejected.hours_no_contract</source>
+        <target>Save the lease terms first, then set the driving hours.</target>
+      </trans-unit>
+      <trans-unit id="rejected.hours_incomplete">
+        <source>rejected.hours_incomplete</source>
+        <target>Fill in both times, or leave both empty.</target>
+      </trans-unit>
+      <trans-unit id="rejected.hours_invalid">
+        <source>rejected.hours_invalid</source>
+        <target>Use a time written HH:MM, for example 22:00.</target>
+      </trans-unit>
+      <trans-unit id="rejected.hours_same_time">
+        <source>rejected.hours_same_time</source>
+        <target>The two times must differ. Pick a start time after or before the stop time.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

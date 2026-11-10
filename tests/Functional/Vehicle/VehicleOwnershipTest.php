@@ -53,6 +53,7 @@ final class VehicleOwnershipTest extends WebTestCase
         yield 'add a reading' => ['POST', '/readings'];
         yield 'lease' => ['GET', '/lease'];
         yield 'save the lease' => ['POST', '/lease'];
+        yield 'save the driving hours' => ['POST', '/lease/driving-hours'];
         yield 'data' => ['GET', '/data'];
         yield 'import data' => ['POST', '/data'];
         yield 'export data' => ['GET', '/data/export'];
