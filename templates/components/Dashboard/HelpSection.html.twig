@@ -4,8 +4,8 @@
     ## string The translated title of the section.
     title
 -%}
-{# One block of a help dialog: an icon in a tinted tile beside the title, then the paragraph (the content) over the whole width of the card. Never split between two columns. #}
-<section {{ attributes.defaults({class: 'mb-3 flex break-inside-avoid flex-col gap-2 rounded-xl border bg-card p-4 shadow-xs', 'data-help-section': true}) }}>
+{# One block of a help dialog, flat (no card around it): an icon in a tinted tile beside the title, then the paragraph (the content) over the whole width of the card. Never split between two columns. #}
+<section {{ attributes.defaults({class: 'mb-5 flex break-inside-avoid flex-col gap-2', 'data-help-section': true}) }}>
     <div class="flex items-center gap-3">
         <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-info-surface text-info-foreground" aria-hidden="true">
             <twig:ux:icon :name="icon" class="size-4.5" />
