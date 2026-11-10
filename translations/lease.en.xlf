@@ -280,6 +280,10 @@ The lease is tracked again.</target>
         <source>rejected.hours_same_time</source>
         <target>The two times must differ. Pick a start time after or before the stop time.</target>
       </trans-unit>
+      <trans-unit id="terms.title">
+        <source>terms.title</source>
+        <target>Lease contract</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
