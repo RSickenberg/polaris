@@ -1,5 +1,6 @@
 {# The help of a comparison panel. Variables: `help` (the key), `figures` (example: actual, expected, gap, share), `today` (whether the figures are distances driven, so the way "today" is counted matters), `reference_icon`. #}
 {% set key = 'help.' ~ help %}
+<div class="grid items-start gap-3 lg:grid-cols-2">
 <twig:Dashboard:HelpAnatomy
     period="{{ 'compare.period.week'|trans(domain='dashboard') }}"
     actual="{{ figures.actual|figure }}"
@@ -10,9 +11,12 @@
     expectedLabel="{{ (key ~ '.expected')|trans(domain='dashboard') }}"
     gapLabel="{{ 'help.anatomy.gap'|trans(domain='dashboard') }}"
 />
-<twig:Dashboard:HelpGap over="{{ (key ~ '.over')|trans(domain='dashboard') }}" under="{{ (key ~ '.under')|trans(domain='dashboard') }}" />
-<p class="text-sm text-pretty text-muted-foreground">{{ (key ~ '.percent')|trans(domain='dashboard') }}</p>
-<div class="grid gap-3 sm:grid-cols-2">
+    <div class="flex flex-col gap-3">
+    <twig:Dashboard:HelpGap over="{{ (key ~ '.over')|trans(domain='dashboard') }}" under="{{ (key ~ '.under')|trans(domain='dashboard') }}" />
+    <p class="text-sm text-pretty text-muted-foreground">{{ (key ~ '.percent')|trans(domain='dashboard') }}</p>
+    </div>
+</div>
+<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
     <twig:Dashboard:HelpSection icon="lucide:calendar-days" title="{{ 'help.section.periods'|trans(domain='dashboard') }}">
         {{ 'help.common.periods'|trans(domain='dashboard') }}
     </twig:Dashboard:HelpSection>
