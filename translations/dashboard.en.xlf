@@ -346,6 +346,30 @@
         <source>debug.filter.none</source>
         <target>No row matches.</target>
       </trans-unit>
+      <trans-unit id="card.time_left">
+        <source>card.time_left</source>
+        <target>Time left</target>
+      </trans-unit>
+      <trans-unit id="card.state.no_lease">
+        <source>card.state.no_lease</source>
+        <target>No lease terms yet. Add them to see where you stand.</target>
+      </trans-unit>
+      <trans-unit id="card.state.no_reading">
+        <source>card.state.no_reading</source>
+        <target>No reading since the lease start.</target>
+      </trans-unit>
+      <trans-unit id="card.state.draft">
+        <source>card.state.draft</source>
+        <target>The lease has not started yet.</target>
+      </trans-unit>
+      <trans-unit id="card.state.ended">
+        <source>card.state.ended</source>
+        <target>The lease has ended. Open the dashboard for the final figures.</target>
+      </trans-unit>
+      <trans-unit id="card.state.returned">
+        <source>card.state.returned</source>
+        <target>The car was handed back to the lessor.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

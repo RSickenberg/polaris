@@ -62,6 +62,14 @@
         <source>debug.rows</source>
         <target>{shown, number} lignes sur {total, number}</target>
       </trans-unit>
+      <trans-unit id="card.driven">
+        <source>card.driven</source>
+        <target>{driven, number, ::precision-integer} sur {allowance, number, ::precision-integer} {unit} parcourus</target>
+      </trans-unit>
+      <trans-unit id="card.time_left.value">
+        <source>card.time_left.value</source>
+        <target>{months, plural, =0 {{days, plural, one {# jour} other {# jours}}} one {# mois} other {# mois}}</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

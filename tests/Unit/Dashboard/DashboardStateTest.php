@@ -7,6 +7,7 @@ namespace Polaris\Tests\Unit\Dashboard;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Polaris\Dashboard\Service\Enum\DashboardState;
+use Polaris\Lease\Domain\LeaseStatus;
 
 #[CoversClass(DashboardState::class)]
 final class DashboardStateTest extends TestCase
@@ -24,6 +25,13 @@ final class DashboardStateTest extends TestCase
 
         foreach (DashboardState::cases() as $state) {
             self::assertSame(\in_array($state, $ended, true), $state->hasEnded(), $state->name);
+        }
+    }
+
+    public function testEveryLeaseStatusMapsToTheStateOfTheSameName(): void
+    {
+        foreach (LeaseStatus::cases() as $status) {
+            self::assertSame($status->value, DashboardState::forStatus($status)->value, $status->name);
         }
     }
 }

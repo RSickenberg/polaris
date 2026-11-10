@@ -15,7 +15,6 @@ use Polaris\Dashboard\Service\Enum\DashboardState;
 use Polaris\Dashboard\Service\Enum\RiskMessage;
 use Polaris\Lease\Domain\Budget;
 use Polaris\Lease\Domain\LeaseAssessment;
-use Polaris\Lease\Domain\LeaseStatus;
 use Polaris\Lease\Domain\NoData;
 use Polaris\Lease\Domain\RiskLevel;
 use Polaris\Lease\Service\ActualVersusPredictedService;
@@ -54,12 +53,7 @@ final readonly class DashboardService
 
         $allowance = $contract->getAllowance()->total();
         $projection = $assessment->projection;
-        $state = match ($assessment->status) {
-            LeaseStatus::Draft => DashboardState::Draft,
-            LeaseStatus::Active => DashboardState::Active,
-            LeaseStatus::Ended => DashboardState::Ended,
-            LeaseStatus::Returned => DashboardState::Returned,
-        };
+        $state = DashboardState::forStatus($assessment->status);
 
         // A lease that has not started has no curve and no zoom presets.
         $mileage = null;

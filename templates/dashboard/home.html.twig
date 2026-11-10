@@ -11,26 +11,7 @@
 
     <div class="mt-6 flex flex-col gap-4">
         {% for vehicle in vehicles %}
-            {% set isReturned = returned[vehicle.id.toBase32()] %}
-            <twig:Card class="{{ isReturned ? 'border-dashed bg-muted/40 text-muted-foreground' }}" data-returned="{{ isReturned ? 'true' : 'false' }}">
-                <twig:Card:Header>
-                    <twig:Card:Title class="flex flex-wrap items-center gap-2">
-                        <h2>{{ vehicle.name }}</h2>
-                        {% if isReturned %}
-                            <twig:Badge variant="outline" data-returned-badge>
-                                <twig:ux:icon name="lucide:undo-2" aria-hidden="true" data-icon="inline-start" />
-                                {{ 'home.returned'|trans(domain='dashboard') }}
-                            </twig:Badge>
-                        {% endif %}
-                    </twig:Card:Title>
-                    <twig:Card:Description class="font-mono">{{ vehicle.vin.value }}</twig:Card:Description>
-                </twig:Card:Header>
-                <twig:Card:Content class="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                    <twig:Button as="a" href="{{ path('dashboard_show', {id: vehicle.id.toBase32()}) }}">{{ 'home.dashboard'|trans(domain='dashboard') }}</twig:Button>
-                    <twig:Button as="a" variant="outline" href="{{ path('reading_history', {id: vehicle.id.toBase32()}) }}">{{ 'home.readings'|trans(domain='dashboard') }}</twig:Button>
-                    <twig:Button as="a" variant="outline" href="{{ path('lease_settings', {id: vehicle.id.toBase32()}) }}">{{ 'home.lease'|trans(domain='dashboard') }}</twig:Button>
-                </twig:Card:Content>
-            </twig:Card>
+            <twig:Dashboard:VehicleCard :card="cards[vehicle.id.toBase32()]" :vehicle="vehicle" timeZone="{{ timeZone }}" />
         {% else %}
             {{ include('dashboard/_empty.html.twig', {
                 text: 'page.home.empty'|trans(domain='dashboard'),
