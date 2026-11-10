@@ -346,6 +346,30 @@
         <source>debug.filter.none</source>
         <target>Aucune ligne ne correspond.</target>
       </trans-unit>
+      <trans-unit id="card.time_left">
+        <source>card.time_left</source>
+        <target>Temps restant</target>
+      </trans-unit>
+      <trans-unit id="card.state.no_lease">
+        <source>card.state.no_lease</source>
+        <target>Pas encore de conditions de leasing. Ajoutez-les pour voir où vous en êtes.</target>
+      </trans-unit>
+      <trans-unit id="card.state.no_reading">
+        <source>card.state.no_reading</source>
+        <target>Aucun relevé depuis le début du leasing.</target>
+      </trans-unit>
+      <trans-unit id="card.state.draft">
+        <source>card.state.draft</source>
+        <target>Le leasing n’a pas encore commencé.</target>
+      </trans-unit>
+      <trans-unit id="card.state.ended">
+        <source>card.state.ended</source>
+        <target>Le leasing est terminé. Ouvrez le tableau de bord pour les chiffres finaux.</target>
+      </trans-unit>
+      <trans-unit id="card.state.returned">
+        <source>card.state.returned</source>
+        <target>La voiture a été rendue au bailleur.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

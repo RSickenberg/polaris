@@ -6,7 +6,8 @@ namespace Polaris\Dashboard\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Polaris\Account\Entity\User;
-use Polaris\Lease\Service\LeaseReturnService;
+use Polaris\Dashboard\Service\Enum\DashboardState;
+use Polaris\Dashboard\Service\VehicleCardService;
 use Polaris\Vehicle\Entity\Vehicle;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,14 +15,14 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 /**
- * Where the login lands: the vehicles of the user by name, each linking to its dashboard,
- * or a note when there is none. Vehicles whose lease is returned come last, and are marked.
+ * Where the login lands: the vehicles of the user by name, each as a card of where its lease stands linking to its
+ * dashboard, or a note when there is none. Vehicles whose lease is returned come last, and are marked.
  */
 final class HomeController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly LeaseReturnService $leaseReturns,
+        private readonly VehicleCardService $cards,
     ) {
     }
 
@@ -30,9 +31,12 @@ final class HomeController extends AbstractController
     {
         $vehicles = $this->entityManager->getRepository(Vehicle::class)->findBy(['owner' => $user], ['name' => 'ASC']);
 
+        $cards = [];
         $returned = [];
         foreach ($vehicles as $vehicle) {
-            $returned[$vehicle->getId()->toBase32()] = $this->leaseReturns->isReturned($vehicle);
+            $card = $this->cards->cardFor($vehicle);
+            $cards[$vehicle->getId()->toBase32()] = $card;
+            $returned[$vehicle->getId()->toBase32()] = DashboardState::Returned === $card->state;
         }
 
         // The sort is stable: the vehicles keep their order by name inside each group.
@@ -41,7 +45,8 @@ final class HomeController extends AbstractController
 
         return $this->render('dashboard/home.html.twig', [
             'vehicles' => $vehicles,
-            'returned' => $returned,
+            'cards' => $cards,
+            'timeZone' => $user->getTimeZone(),
         ]);
     }
 }

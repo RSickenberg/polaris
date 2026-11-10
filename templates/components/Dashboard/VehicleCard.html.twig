@@ -1,0 +1,75 @@
+{%- props
+    ## Polaris\Dashboard\Service\Dto\VehicleCard What the card shows.
+    card,
+    ## Polaris\Vehicle\Entity\Vehicle The vehicle of the card.
+    vehicle,
+    ## string The time zone of the owner: the last reading is written in it.
+    timeZone
+-%}
+{# A running lease shows its figures; every other state shows one sentence. The risk level is told by the icon and the words as well as by the color (tokens --risk-* and the tones of app.css). #}
+{% set states = enum('Polaris\\Dashboard\\Service\\Enum\\DashboardState') %}
+{% set id = vehicle.id.toBase32() %}
+{% set returned = states.Returned == card.state %}
+{% set unit = 'unit.km'|trans(domain='shared') %}
+{% set levelStyles = {
+    ok: {icon: 'lucide:circle-check', class: 'border-risk-ok bg-success-surface text-success-foreground'},
+    watch: {icon: 'lucide:triangle-alert', class: 'border-risk-watch bg-warning-surface text-warning-foreground'},
+    over: {icon: 'lucide:circle-alert', class: 'border-risk-over bg-danger-surface text-danger-foreground'},
+} %}
+<twig:Card class="{{ returned ? 'border-dashed bg-muted/40 text-muted-foreground' }}" data-vehicle-card data-state="{{ card.state.value }}" data-returned="{{ returned ? 'true' : 'false' }}">
+    <twig:Card:Header>
+        <twig:Card:Title class="flex flex-wrap items-center gap-2">
+            <h2>{{ vehicle.name }}</h2>
+            {% if returned %}
+                <twig:Badge variant="outline" data-returned-badge>
+                    <twig:ux:icon name="lucide:undo-2" aria-hidden="true" data-icon="inline-start" />
+                    {{ 'home.returned'|trans(domain='dashboard') }}
+                </twig:Badge>
+            {% elseif card.riskLevel is not null %}
+                {% set level = card.riskLevel.value %}
+                <twig:Badge variant="outline" class="{{ levelStyles[level].class }}" data-risk="{{ level }}">
+                    <twig:ux:icon :name="levelStyles[level].icon" aria-hidden="true" data-icon="inline-start" />
+                    {{ ('risk.' ~ level)|trans(domain='lease') }}
+                </twig:Badge>
+            {% endif %}
+        </twig:Card:Title>
+        <twig:Card:Description class="font-mono break-all">{{ vehicle.vin.value }}</twig:Card:Description>
+    </twig:Card:Header>
+    <twig:Card:Content class="flex flex-col gap-4">
+        {% if card.hasFigures %}
+            {% set progress = card.progress %}
+            <twig:Dashboard:LeaseProgress
+                :used="progress.usedPercent"
+                :earned="progress.earnedPercent"
+                :level="card.riskLevel.value"
+                label="{{ 'card.driven'|trans({driven: card.driven.metres / 1000, allowance: card.allowance.metres / 1000, unit: unit}, 'dashboard') }}"
+                valueText="{{ 'progress.value_text'|trans({share: progress.usedPercent / 100}, 'dashboard') }}"
+                tickLabel="{{ 'progress.tick'|trans(domain='dashboard') }}"
+                data-card-progress
+            />
+            <dl class="grid gap-3 text-sm sm:grid-cols-3">
+                <div data-card-figure="projected">
+                    <dt class="text-muted-foreground">{{ 'kpi.projected'|trans(domain='dashboard') }}</dt>
+                    <dd class="font-light">{{ card.projectedAtEnd|km }}&nbsp;{{ unit }}</dd>
+                </div>
+                <div data-card-figure="time_left">
+                    <dt class="text-muted-foreground">{{ 'card.time_left'|trans(domain='dashboard') }}</dt>
+                    <dd class="font-light">{{ 'card.time_left.value'|trans({months: card.timeLeft.months, days: card.timeLeft.days}, 'dashboard') }}</dd>
+                </div>
+                <div data-card-figure="last_reading">
+                    <dt class="text-muted-foreground">{{ 'kpi.last_reading.label'|trans(domain='dashboard') }}</dt>
+                    <dd class="font-light">{{ card.lastReadingAt|humanized_datetime(timeZone) }}</dd>
+                </div>
+            </dl>
+        {% elseif not returned %}
+            <p class="text-sm text-muted-foreground" data-card-state-text>{{ ('card.state.' ~ card.state.value)|trans(domain='dashboard') }}</p>
+        {% else %}
+            <p class="text-sm" data-card-state-text>{{ 'card.state.returned'|trans(domain='dashboard') }}</p>
+        {% endif %}
+        <div class="flex flex-col gap-2 sm:flex-row">
+            <twig:Button as="a" class="sm:flex-1" href="{{ path('dashboard_show', {id: id}) }}">{{ 'home.dashboard'|trans(domain='dashboard') }}</twig:Button>
+            <twig:Button as="a" variant="outline" class="sm:flex-1" href="{{ path('reading_history', {id: id}) }}">{{ 'home.readings'|trans(domain='dashboard') }}</twig:Button>
+            <twig:Button as="a" variant="outline" class="sm:flex-1" href="{{ path('lease_settings', {id: id}) }}">{{ 'home.lease'|trans(domain='dashboard') }}</twig:Button>
+        </div>
+    </twig:Card:Content>
+</twig:Card>
