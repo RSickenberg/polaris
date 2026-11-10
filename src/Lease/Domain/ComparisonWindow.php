@@ -12,6 +12,8 @@ enum ComparisonWindow: int
 {
     /** Since the owner's last midnight. */
     case Today = 0;
+    /** The whole of the owner's previous day: from its midnight to the owner's last midnight (or the latest reading). */
+    case Yesterday = 1;
     case LastWeek = 7;
     case LastTwoWeeks = 14;
     case LastMonth = 30;

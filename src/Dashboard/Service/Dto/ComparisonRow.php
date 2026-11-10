@@ -18,6 +18,8 @@ final readonly class ComparisonRow
         public int $fallbackDays = 0,
         /** True when the expected figures are rebuilt live, the midnight snapshot of the day not being saved yet. */
         public bool $live = false,
+        /** True for "today" before the first reading of the owner's day: nothing to measure yet. */
+        public bool $awaitingReading = false,
     ) {
     }
 }

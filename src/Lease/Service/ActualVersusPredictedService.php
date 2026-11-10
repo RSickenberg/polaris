@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Lease\Service;
 
+use Carbon\CarbonImmutable;
 use Polaris\Lease\Domain\ComparisonWindow;
 use Polaris\Lease\Domain\LeaseAssessment;
 use Polaris\Lease\Domain\LeaseStatus;
@@ -14,6 +15,7 @@ use Polaris\Lease\Domain\SnapshotPolicy;
 use Polaris\Lease\Service\Exception\LeaseTermsRejected;
 use Polaris\Shared\Domain\OwnerMidnight;
 use Polaris\Vehicle\Entity\Vehicle;
+use Psr\Clock\ClockInterface;
 
 /**
  * Compares what the last days brought with what the daily snapshots predicted ({@see PredictionComparer}): the
@@ -32,6 +34,7 @@ final readonly class ActualVersusPredictedService
         private LeaseTermsService $leases,
         private ProjectionHistoryService $history,
         private PredictionComparer $comparer,
+        private ClockInterface $clock,
     ) {
     }
 
@@ -55,7 +58,8 @@ final readonly class ActualVersusPredictedService
         }
 
         $timeZone = $vehicle->getOwner()->getTimeZone();
-        $lastMidnight = OwnerMidnight::latestAt($assessment->projection->asOf, $timeZone);
+        $now = CarbonImmutable::instance($this->clock->now());
+        $lastMidnight = OwnerMidnight::latestAt($now, $timeZone);
         $earliest = $lastMidnight->localDay->subDays(ComparisonWindow::LastMonth->days());
         $snapshots = [];
 
@@ -77,7 +81,7 @@ final readonly class ActualVersusPredictedService
             }
         }
 
-        return $this->comparer->compare($timeline, $assessment->projection, $timeZone, $snapshots);
+        return $this->comparer->compare($timeline, $assessment->projection, $timeZone, $snapshots, $now);
     }
 
     /**
