@@ -224,9 +224,21 @@ Le leasing est de nouveau suivi.</target>
         <source>hours.title</source>
         <target>Heures de conduite</target>
       </trans-unit>
-      <trans-unit id="hours.help">
-        <source>hours.help</source>
-        <target>À quelle heure arrêtez-vous d’habitude de rouler pour la journée, et quand reprenez-vous? Polaris compte alors la distance entre deux relevés dans les heures où vous roulez, de sorte qu’un relevé à 21:00 ne donne pas la nuit à la veille. Laissez les deux vides pour répartir la distance régulièrement sur toute la journée. Seuls les chiffres d’« aujourd’hui » et des périodes du tableau de bord s’en servent.</target>
+      <trans-unit id="hours.help.question">
+        <source>hours.help.question</source>
+        <target>À quelle heure terminez-vous généralement vos déplacements pour la journée, et à quelle heure reprenez-vous le lendemain?</target>
+      </trans-unit>
+      <trans-unit id="hours.help.how">
+        <source>hours.help.how</source>
+        <target>Polaris utilise ces horaires pour répartir les distances entre deux relevés uniquement sur vos heures habituelles de déplacement. Ainsi, si un relevé est effectué à 21 h, la distance parcourue pendant la nuit ne sera pas attribuée à la journée précédente.</target>
+      </trans-unit>
+      <trans-unit id="hours.help.empty">
+        <source>hours.help.empty</source>
+        <target>Si vous laissez ces deux champs vides, Polaris répartira la distance de manière uniforme sur l’ensemble de la journée.</target>
+      </trans-unit>
+      <trans-unit id="hours.help.scope">
+        <source>hours.help.scope</source>
+        <target>Ces paramètres influencent uniquement les statistiques « Aujourd’hui » et les périodes affichées dans le tableau de bord.</target>
       </trans-unit>
       <trans-unit id="form.hours_from.label">
         <source>form.hours_from.label</source>
