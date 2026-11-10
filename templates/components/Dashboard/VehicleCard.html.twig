@@ -18,21 +18,24 @@
 } %}
 <twig:Card class="{{ returned ? 'border-dashed bg-muted/40 text-muted-foreground' }}" data-vehicle-card data-state="{{ card.state.value }}" data-returned="{{ returned ? 'true' : 'false' }}">
     <twig:Card:Header>
-        <twig:Card:Title class="flex flex-wrap items-center gap-2">
-            <h2>{{ vehicle.name }}</h2>
-            {% if returned %}
-                <twig:Badge variant="outline" data-returned-badge>
-                    <twig:ux:icon name="lucide:undo-2" aria-hidden="true" data-icon="inline-start" />
-                    {{ 'home.returned'|trans(domain='dashboard') }}
-                </twig:Badge>
-            {% elseif card.riskLevel is not null %}
-                {% set level = card.riskLevel.value %}
-                <twig:Badge variant="outline" class="{{ levelStyles[level].class }}" data-risk="{{ level }}">
-                    <twig:ux:icon :name="levelStyles[level].icon" aria-hidden="true" data-icon="inline-start" />
-                    {{ ('risk.' ~ level)|trans(domain='lease') }}
-                </twig:Badge>
-            {% endif %}
-        </twig:Card:Title>
+        <twig:Card:Title><h2>{{ vehicle.name }}</h2></twig:Card:Title>
+        {# The pill is at the top right of the card. #}
+        {% if returned or card.riskLevel is not null %}
+            <twig:Card:Action>
+                {% if returned %}
+                    <twig:Badge variant="outline" data-returned-badge>
+                        <twig:ux:icon name="lucide:undo-2" aria-hidden="true" data-icon="inline-start" />
+                        {{ 'home.returned'|trans(domain='dashboard') }}
+                    </twig:Badge>
+                {% else %}
+                    {% set level = card.riskLevel.value %}
+                    <twig:Badge variant="outline" class="{{ levelStyles[level].class }}" data-risk="{{ level }}">
+                        <twig:ux:icon :name="levelStyles[level].icon" aria-hidden="true" data-icon="inline-start" />
+                        {{ ('risk.' ~ level)|trans(domain='lease') }}
+                    </twig:Badge>
+                {% endif %}
+            </twig:Card:Action>
+        {% endif %}
         <twig:Card:Description class="font-mono break-all">{{ vehicle.vin.value }}</twig:Card:Description>
     </twig:Card:Header>
     <twig:Card:Content class="flex flex-col gap-4">
