@@ -554,6 +554,10 @@ If no estimate is available for the first day of a period, the row says “Not e
         <source>card.state.returned</source>
         <target>The car was handed back to the lessor.</target>
       </trans-unit>
+      <trans-unit id="card.as_of">
+        <source>card.as_of</source>
+        <target>Based on the last reading: %when%</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

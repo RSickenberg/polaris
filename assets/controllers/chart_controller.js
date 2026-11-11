@@ -128,6 +128,12 @@ export default class extends Controller {
      * flattening the curves against an axis that starts far below them. The y axis never goes under 0.
      */
     _window(range) {
+        // The whole data: nothing to fit, the axis the options give (from 0, a nice scale) stays.
+        const xs = this.seriesValue.flatMap((serie) => serie.data.map(([x]) => x));
+        if (0 === xs.length || (range.min <= Math.min(...xs) && range.max >= Math.max(...xs))) {
+            return { xaxis: range };
+        }
+
         const values = this.seriesValue.flatMap((serie) => {
             const inside = serie.data.filter(([x, y]) => x >= range.min && x <= range.max && Number.isFinite(y));
             const edges = [range.min, range.max].map((x) => this._interpolate(serie.data, x));

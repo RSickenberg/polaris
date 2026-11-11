@@ -125,6 +125,8 @@
                         title="{{ 'current_pace.title'|trans(domain='dashboard') }}"
                         basis="{{ 'current_pace.basis'|trans(domain='dashboard') }}"
                         :budget="assessment.currentPace"
+                        :asOf="projection.asOf"
+                        timeZone="{{ timeZone }}"
                         help="current_pace"
                     />
                     <twig:Dashboard:PaceCard
@@ -133,6 +135,8 @@
                         basis="{{ 'budget.basis'|trans(domain='dashboard') }}"
                         :budget="assessment.budget"
                         fallback="{{ 'budget.none'|trans(domain='dashboard') }}"
+                        :asOf="projection.asOf"
+                        timeZone="{{ timeZone }}"
                         help="budget"
                     />
                     <twig:Dashboard:PaceCard
@@ -140,6 +144,8 @@
                         title="{{ 'even_pace.title'|trans(domain='dashboard') }}"
                         basis="{{ 'even_pace.basis'|trans(domain='dashboard') }}"
                         :budget="dashboard.evenPace"
+                        :asOf="projection.asOf"
+                        timeZone="{{ timeZone }}"
                         help="even_pace"
                     />
                 </div>
@@ -153,6 +159,8 @@
                         basis="{{ 'compare.budget.basis'|trans(domain='dashboard') }}"
                         :rows="dashboard.comparison.budget"
                         :recalculating="dashboard.comparison.recalculating"
+                        :asOf="projection.asOf"
+                        timeZone="{{ timeZone }}"
                         help="compare_budget"
                     />
                     <twig:Dashboard:ComparisonPanel
@@ -161,6 +169,8 @@
                         basis="{{ 'compare.pace.basis'|trans(domain='dashboard') }}"
                         :rows="dashboard.comparison.pace"
                         :recalculating="dashboard.comparison.recalculating"
+                        :asOf="projection.asOf"
+                        timeZone="{{ timeZone }}"
                         help="compare_pace"
                     />
                     <twig:Dashboard:ComparisonPanel
@@ -169,6 +179,8 @@
                         basis="{{ 'compare.projected_end.basis'|trans(domain='dashboard') }}"
                         :rows="dashboard.comparison.projectedEnd"
                         :recalculating="dashboard.comparison.recalculating"
+                        :asOf="projection.asOf"
+                        timeZone="{{ timeZone }}"
                         help="compare_projected_end"
                     />
                 </div>
