@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Polaris\Lease\Form\Model\LeaseContractData;
+use Polaris\Lease\Message\RecalculateProjectionSnapshots;
 use Polaris\Lease\Service\LeaseTermsService;
 use Polaris\Lease\Service\ProjectionHistoryService;
 use Polaris\Lease\Service\ProjectionSnapshotService;
@@ -31,6 +32,8 @@ use Polaris\Vehicle\Service\VehicleDataImporter;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Clock\Test\ClockSensitiveTrait;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
 
 /**
  * @phpstan-type Override array{
@@ -157,6 +160,25 @@ final class VehicleDataTransferTest extends KernelTestCase
         self::assertSame([0, 2, 0], $this->readingCounts($again));
         self::assertSame([0, 1, 0], $this->snapshotCounts($again));
         self::assertSame($before, $this->exporter->export($this->target));
+    }
+
+    public function testAnImportThatChangesReadingsQueuesTheRecalculationOfTheSnapshotsOnce(): void
+    {
+        $json = $this->exporter->export($this->source);
+        $transport = self::getContainer()->get('messenger.transport.async');
+        self::assertInstanceOf(InMemoryTransport::class, $transport);
+
+        $this->importer->import($this->target, $json);
+        $queued = array_filter(
+            $transport->getSent(),
+            static fn (Envelope $envelope): bool => $envelope->getMessage() instanceof RecalculateProjectionSnapshots,
+        );
+        self::assertCount(1, $queued);
+
+        $transport->reset();
+        $this->importer->import($this->target, $json);
+
+        self::assertCount(0, $transport->getSent(), 'Importing the same file again changes no reading: nothing queued.');
     }
 
     public function testAnExistingLeaseIsKeptAndMissingReadingsAreAdded(): void

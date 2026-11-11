@@ -14,6 +14,7 @@ use Polaris\Lease\Domain\LeaseTerm;
 use Polaris\Lease\Domain\Pace;
 use Polaris\Lease\Domain\RiskLevel;
 use Polaris\Lease\Domain\Tolerance;
+use Polaris\Lease\Message\RecalculateProjectionSnapshots;
 use Polaris\Lease\Service\Dto\LeaseTerms;
 use Polaris\Lease\Service\Dto\ProjectionSnapshotPoint;
 use Polaris\Lease\Service\Exception\LeaseTermsRejected;
@@ -34,6 +35,8 @@ use Polaris\Vehicle\Service\Dto\VehicleDataImportResult;
 use Polaris\Vehicle\Service\Enum\LeaseImportOutcome;
 use Polaris\Vehicle\Service\Enum\VehicleDataRejection;
 use Polaris\Vehicle\Service\Exception\VehicleDataRejected;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 /**
  * Reads back a file written by {@see VehicleDataExporter} into a vehicle, merging with what it has: the lease is
@@ -51,12 +54,14 @@ final readonly class VehicleDataImporter
         private LeaseTermsService $leases,
         private OdometerReadingService $readings,
         private ProjectionSnapshotService $snapshots,
+        private MessageBusInterface $bus,
     ) {
     }
 
     /**
      * @throws VehicleDataRejected when the file is not an export, of an unknown version, or has an invalid value
      * @throws ORMException
+     * @throws ExceptionInterface
      */
     public function import(Vehicle $vehicle, string $json): VehicleDataImportResult
     {
@@ -96,13 +101,20 @@ final readonly class VehicleDataImporter
         }
 
         try {
-            return $this->entityManager->wrapInTransaction(
+            $result = $this->entityManager->wrapInTransaction(
                 fn (): VehicleDataImportResult => new VehicleDataImportResult(
                     $this->importLease($vehicle, $terms, $returnedAt),
                     $this->readings->import($vehicle, $readings),
                     $this->snapshots->import($vehicle, $points),
                 ),
             );
+
+            // Readings that arrived change what each past midnight would have projected: the request does not wait.
+            if ($result->readings->changedReadings()) {
+                $this->bus->dispatch(new RecalculateProjectionSnapshots($vehicle->getId()->toRfc4122()));
+            }
+
+            return $result;
         } catch (LeaseTermsRejected $e) {
             throw new VehicleDataRejected(VehicleDataRejection::Invalid, $e->reason->value, $e);
         } catch (\InvalidArgumentException $e) {
