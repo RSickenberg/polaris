@@ -1,0 +1,64 @@
+name: Clean up images
+
+# Deletes old images of ghcr.io/rsickenberg/polaris:
+# - releases: the two newest release images stay (latest is the newest of them), older ones go;
+# - nightlies: latest-nightly stays, older nightly-<commit> images go;
+# - untagged images that no kept image refers to (left by an earlier deletion or a failed build).
+#
+# A multi-arch image is an index whose platform images (amd64, arm64) and attestations are its
+# children: the action sets them aside before applying any rule and deletes them only with their
+# parent, so a kept image always keeps its platforms. A deleted version can be restored for 30 days
+# in the package settings.
+#
+# The workflow's token deletes versions only if the package gives this repository the Admin role
+# (package settings > Manage Actions access).
+#
+# Pull requests that change this file and manual runs (unless unticked) only list what would be
+# deleted. A scheduled workflow runs from the default branch, so the schedule starts once this file
+# is on main.
+on:
+  schedule:
+    # Mondays, after the nightly build (02:17 UTC).
+    - cron: '41 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Only list what would be deleted
+        type: boolean
+        default: true
+  pull_request:
+    paths:
+      - .github/workflows/cleanup-images.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cleanup-images
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    env:
+      DRY_RUN: ${{ github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.dry-run) }}
+    steps:
+      # Nightlies are left out, so the two newest images counted are releases.
+      - name: Keep the two newest releases
+        uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          package: polaris
+          exclude-tags: latest-nightly,nightly-*
+          keep-n-tagged: 2
+          dry-run: ${{ env.DRY_RUN }}
+
+      - name: Keep latest-nightly, delete older nightlies and untagged leftovers
+        uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          package: polaris
+          delete-tags: nightly-*
+          exclude-tags: latest-nightly
+          delete-untagged: true
+          dry-run: ${{ env.DRY_RUN }}

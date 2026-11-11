@@ -102,7 +102,7 @@ done
 Replace `<version>` in the URL too. The commands in this guide run from this folder.
 
 > [!IMPORTANT]
-> Pin a version and keep it in `.env` (next step). There is no `latest` tag until the first stable release. The `latest-nightly` image is built every night from the `dev` branch and moves to each new build: it can break, and its database migrations are not guaranteed to upgrade to the next release. Do not use it for data you care about.
+> Pin a version and keep it in `.env` (next step). There is no `latest` tag until the first stable release. The registry keeps the two newest releases; older images are deleted every week, so upgrade before your version is two releases behind, or keep a copy (`docker save`). The `latest-nightly` image is built every night from the `dev` branch and moves to each new build: it can break, and its database migrations are not guaranteed to upgrade to the next release. Do not use it for data you care about.
 
 ## 2. Configure
 
@@ -409,7 +409,7 @@ Do not start the whole stack before the restore: the `php` container would creat
 
 The `php` container applies the pending database migrations at start, all or none (`--all-or-nothing`). If it does not become healthy, `docker compose logs php` says why.
 
-**Going back.** The migrations are not written to be undone, and the guide promises no downgrade. To return to an older version, restore the backup you took before the upgrade (see [Restore](#restore)) with the older `POLARIS_VERSION`.
+**Going back.** The migrations are not written to be undone, and the guide promises no downgrade. To return to an older version, restore the backup you took before the upgrade (see [Restore](#restore)) with the older `POLARIS_VERSION`. The registry still has the release before the latest one; for anything older, use a copy you kept (`docker save` before the upgrade, `docker load` to bring it back).
 
 **Nightly.** The `latest-nightly` image is a beta; its migrations may not upgrade to the next release. Use it with a database you can lose.
 

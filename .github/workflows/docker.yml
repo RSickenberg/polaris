@@ -3,8 +3,9 @@ name: Docker
 # Builds the production image and pushes it to GHCR:
 # - from the commit a release tag points at, as <version> (no "v") and, for a stable
 #   release, latest;
-# - with "nightly", from the tip of the dev branch, as nightly-<commit> (kept) and
+# - with "nightly", from the tip of the dev branch, as nightly-<commit> and
 #   latest-nightly, which each nightly build moves to itself.
+# cleanup-images.yml deletes old images every week: the two newest releases and latest-nightly stay.
 #
 # Ways in, never both for one release:
 # - "release: published" covers a release published by hand in the GitHub UI.
