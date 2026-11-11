@@ -13,7 +13,7 @@ SYMFONY  = $(PHP) bin/console
 .DEFAULT_GOAL = help
 ARGS          =
 PROCESSES     = 4
-.PHONY        : help build up start down logs sh install composer vendor sf cc tailwind migrate diff test-db seed test test-serial phpstan cs cs-fix deptrac translations ci release
+.PHONY        : help build up start down logs sh install composer vendor sf cc tailwind migrate diff test-db dump import seed test test-serial phpstan cs cs-fix deptrac translations ci release
 
 ## == 🧭 The Polaris Makefile 🧭 ==================================
 help: ## Outputs this help screen
@@ -64,6 +64,12 @@ migrate: ## Apply the pending Doctrine migrations
 
 diff: ## Generate a migration from the difference between the entity mapping and the database
 	@$(SYMFONY) doctrine:migrations:diff --no-interaction
+
+dump: ## Write a SQL dump of the database to stdout, e.g. make dump > polaris.sql
+	@$(DOCKER_COMP) exec -T database sh -c 'pg_dump -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" --clean --if-exists --no-owner'
+
+import: ## Load a SQL dump from stdin into the database (replaces its tables), e.g. make import < polaris.sql
+	@$(DOCKER_COMP) exec -T database sh -c 'psql -v ON_ERROR_STOP=1 --single-transaction -q -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'
 
 test-db: ## Create the test database if needed and apply the migrations to it
 	@$(SYMFONY) doctrine:database:create --env=test --if-not-exists
