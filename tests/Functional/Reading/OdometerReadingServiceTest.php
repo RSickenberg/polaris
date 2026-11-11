@@ -11,6 +11,7 @@ use Polaris\Reading\Domain\ReadingRejection;
 use Polaris\Reading\Domain\ReadingSource;
 use Polaris\Reading\Entity\OdometerReading;
 use Polaris\Reading\Form\Model\OdometerReadingData;
+use Polaris\Reading\Service\Dto\ReadingImport;
 use Polaris\Reading\Service\Enum\RecordOutcome;
 use Polaris\Reading\Service\Exception\ReadingRejected;
 use Polaris\Reading\Service\OdometerReadingService;
@@ -404,6 +405,36 @@ final class OdometerReadingServiceTest extends KernelTestCase
     private static function service(): OdometerReadingService
     {
         return self::getContainer()->get(OdometerReadingService::class);
+    }
+
+    public function testImportMovesAVerificationToTheLatestReadingWithTheSameOdometer(): void
+    {
+        $distance = Distance::fromMetres(2_227_561);
+        // A live fetch already stored the later reading, with an earlier verification.
+        $latest = OdometerReading::restore(
+            vehicle: $this->vehicle,
+            readAt: CarbonImmutable::parse('2026-10-20 10:24:30 UTC'),
+            odometer: $distance,
+            source: ReadingSource::Manual,
+            odometerRaw: null,
+            odometerRawUnit: null,
+            lastVerifiedAt: CarbonImmutable::parse('2026-10-20 10:25:35 UTC'),
+        );
+        self::entityManager()->persist($latest);
+        self::entityManager()->flush();
+
+        // The export has the same odometer a minute and a half earlier, verified later than the stored one.
+        $result = self::service()->import($this->vehicle, [
+            new ReadingImport(
+                readAt: CarbonImmutable::parse('2026-10-20 10:22:57 UTC'),
+                odometer: $distance,
+                source: ReadingSource::Manual,
+                lastVerifiedAt: CarbonImmutable::parse('2026-10-20 11:26:14 UTC'),
+            ),
+        ]);
+
+        self::assertSame(1, $result->added);
+        self::assertSame('2026-10-20T11:26:14+00:00', $latest->getLastVerifiedAt()?->toIso8601String());
     }
 
     private static function entityManager(): EntityManagerInterface

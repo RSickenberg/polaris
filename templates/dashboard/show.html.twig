@@ -178,20 +178,20 @@
             {% if dashboard.comparison is not null %}
                 <div class="grid gap-4 lg:grid-cols-3">
                     <twig:Dashboard:ComparisonPanel
-                        key="budget"
-                        title="{{ 'compare.budget.title'|trans(domain='dashboard') }}"
-                        basis="{{ 'compare.budget.basis'|trans(domain='dashboard') }}"
-                        :rows="dashboard.comparison.budget"
-                        :recalculating="dashboard.comparison.recalculating"
-                        help="compare_budget"
-                    />
-                    <twig:Dashboard:ComparisonPanel
                         key="pace"
                         title="{{ 'compare.pace.title'|trans(domain='dashboard') }}"
                         basis="{{ 'compare.pace.basis'|trans(domain='dashboard') }}"
                         :rows="dashboard.comparison.pace"
                         :recalculating="dashboard.comparison.recalculating"
                         help="compare_pace"
+                    />
+                    <twig:Dashboard:ComparisonPanel
+                        key="budget"
+                        title="{{ 'compare.budget.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'compare.budget.basis'|trans(domain='dashboard') }}"
+                        :rows="dashboard.comparison.budget"
+                        :recalculating="dashboard.comparison.recalculating"
+                        help="compare_budget"
                     />
                     <twig:Dashboard:ComparisonPanel
                         key="projected_end"

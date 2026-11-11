@@ -15,6 +15,16 @@ final readonly class ReadingsImportResult
         public int $alreadyThere,
         /** Readings in the future, or that would break the order of the stored readings. */
         public int $rejected,
+        /** Whether a verification moved to the latest reading. */
+        public bool $verified = false,
     ) {
+    }
+
+    /**
+     * Whether the stored readings changed, so what was projected from them may be stale.
+     */
+    public function changedReadings(): bool
+    {
+        return $this->added > 0 || $this->verified;
     }
 }

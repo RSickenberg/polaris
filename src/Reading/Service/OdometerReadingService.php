@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\NonUniqueResultException;
 use Polaris\Reading\Domain\ReadingOrder;
 use Polaris\Reading\Domain\ReadingRejection;
 use Polaris\Reading\Entity\OdometerReading;
@@ -108,6 +109,7 @@ final readonly class OdometerReadingService
      *
      * @throws \InvalidArgumentException when a reading's raw odometer does not fit its source
      * @throws ORMException
+     * @throws NonUniqueResultException
      */
     public function import(Vehicle $vehicle, array $readings): ReadingsImportResult
     {
@@ -151,12 +153,56 @@ final readonly class OdometerReadingService
             ++$added;
         }
 
-        if ($added > 0) {
+        $verified = $this->moveVerificationsToLatest($vehicle, $readings, $now);
+
+        if ($added > 0 || $verified) {
             $this->entityManager->flush();
-            $this->events->dispatch(new ReadingStored($vehicle));
         }
 
-        return new ReadingsImportResult($added, $alreadyThere, $rejected);
+        if ($added > 0) {
+            $this->events->dispatch(new ReadingStored($vehicle));
+        } elseif ($verified) {
+            $this->events->dispatch(new ReadingVerified($vehicle));
+        }
+
+        return new ReadingsImportResult($added, $alreadyThere, $rejected, $verified);
+    }
+
+    /**
+     * A verification is only kept on the latest reading: when an imported reading was verified and a later stored
+     * reading has the same odometer (the car did not move in between), the verification moves to that latest reading.
+     * It only moves forward and never past the clock.
+     *
+     * @param list<ReadingImport> $readings
+     *
+     * @return bool whether a verification moved
+     *
+     * @throws NonUniqueResultException
+     */
+    private function moveVerificationsToLatest(Vehicle $vehicle, array $readings, CarbonImmutable $now): bool
+    {
+        $latest = $this->readings->findBefore($vehicle, $now->addMicrosecond());
+
+        if (null === $latest) {
+            return false;
+        }
+
+        $verified = false;
+
+        foreach ($readings as $import) {
+            $at = $import->lastVerifiedAt?->min($now);
+            $sameOdometer = $import->odometer->equals($latest->getOdometer());
+
+            if (null === $at || !$sameOdometer || $import->readAt->greaterThan($latest->getReadAt())) {
+                continue;
+            }
+
+            $before = $latest->getLastVerifiedAt();
+            $latest->verify($at);
+            $verified = $verified || $before != $latest->getLastVerifiedAt();
+        }
+
+        return $verified;
     }
 
     /**
