@@ -564,7 +564,7 @@ If no estimate is available for the first day of a period, the row says “Not e
       </trans-unit>
       <trans-unit id="predictions.snapshot">
         <source>predictions.snapshot</source>
-        <target>Latest snapshot</target>
+        <target>Reference projection</target>
       </trans-unit>
     </body>
   </file>

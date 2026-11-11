@@ -564,7 +564,7 @@ Si aucune estimation n’est disponible pour le premier jour d’une période, l
       </trans-unit>
       <trans-unit id="predictions.snapshot">
         <source>predictions.snapshot</source>
-        <target>Dernier instantané</target>
+        <target>Projection de référence</target>
       </trans-unit>
     </body>
   </file>

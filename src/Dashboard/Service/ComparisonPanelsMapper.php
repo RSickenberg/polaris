@@ -25,7 +25,7 @@ final readonly class ComparisonPanelsMapper
             $this->rows($comparison->pace),
             $this->rows($comparison->projectedEnd),
             $comparison->recalculating,
-            $comparison->snapshotComputedAt,
+            $comparison->snapshotCutoffAt,
         );
     }
 

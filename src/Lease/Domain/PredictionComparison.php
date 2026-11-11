@@ -35,8 +35,8 @@ final readonly class PredictionComparison
          * are left out, so that old and new terms never mix.
          */
         public bool $recalculating = false,
-        /** When the newest stored snapshot was computed; null when none is stored or while recalculating. */
-        public ?CarbonImmutable $snapshotComputedAt = null,
+        /** The midnight the newest stored snapshot describes; null when none is stored or while recalculating. */
+        public ?CarbonImmutable $snapshotCutoffAt = null,
     ) {
     }
 }

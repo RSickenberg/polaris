@@ -133,7 +133,7 @@
                                     <dd class="font-light" data-reading-at>{{ projection.asOf|humanized_datetime(timeZone) }}</dd>
                                 </div>
                             </div>
-                            {% if dashboard.comparison is not null and dashboard.comparison.snapshotComputedAt is not null %}
+                            {% if dashboard.comparison is not null and dashboard.comparison.snapshotCutoffAt is not null %}
                                 <div class="h-9 w-px shrink-0 bg-border" role="presentation"></div>
                                 <div class="flex flex-1 items-center justify-center gap-3">
                                     <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-info-surface text-info-foreground">
@@ -141,7 +141,7 @@
                                     </span>
                                     <div>
                                         <dt class="text-xs text-muted-foreground">{{ 'predictions.snapshot'|trans(domain='dashboard') }}</dt>
-                                        <dd class="font-light" data-snapshot-at>{{ dashboard.comparison.snapshotComputedAt|humanized_datetime(timeZone) }}</dd>
+                                        <dd class="font-light" data-snapshot-at>{{ dashboard.comparison.snapshotCutoffAt|humanized_datetime(timeZone) }}</dd>
                                     </div>
                                 </div>
                             {% endif %}
