@@ -98,14 +98,15 @@ final readonly class ActualVersusPredictedService
             $this->leases->find($vehicle)?->isTodayWholeDay() ?? false,
         );
 
-        return $recalculating
-            ? new PredictionComparison(
-                $comparison->budget,
-                $comparison->pace,
-                $comparison->projectedEnd,
-                recalculating: true,
-            )
-            : $comparison;
+        $latestSnapshot = [] === $history ? null : $history[array_key_last($history)];
+
+        return new PredictionComparison(
+            $comparison->budget,
+            $comparison->pace,
+            $comparison->projectedEnd,
+            $recalculating,
+            $latestSnapshot?->computedAt,
+        );
     }
 
     /**

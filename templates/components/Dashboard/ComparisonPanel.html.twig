@@ -10,11 +10,7 @@
     ## string|null The key of the explanation of the panel (`help.<key>.answer` and `dashboard/help/<key>.html.twig`), shown in a dialog behind an info button.
     help = null,
     ## bool True while the past snapshots are recalculated after an edit of the lease terms: the rows without figures say so.
-    recalculating = false,
-    ## \Carbon\CarbonImmutable|null The instant of the reading the figures are calculated from; the footer says so when it is given.
-    asOf = null,
-    ## string|null The user's IANA time zone, to write `asOf`.
-    timeZone = null
+    recalculating = false
 -%}
 {# A card with one row per period: the period with the two figures under it (what happened, what was expected), and the gap on the right, as large as the period. A positive gap is more than expected: the gap is a red pill, and a gap of zero or less a green one. Only the digits are monospaced. Before any period has history (the first days after deploy), one line says so instead of four empty rows. #}
 {% set withHistory = rows|filter(row => row.figures is not null or row.awaitingReading)|length > 0 %}
@@ -120,9 +116,4 @@
             </div>
         {% endif %}
     </twig:Card:Content>
-    {% if asOf is not null and timeZone is not null %}
-        <twig:Card:Footer class="text-sm text-muted-foreground" data-as-of>
-            {{ 'card.as_of'|trans({'%when%': asOf|humanized_datetime(timeZone)}, domain='dashboard') }}
-        </twig:Card:Footer>
-    {% endif %}
 </twig:Card>

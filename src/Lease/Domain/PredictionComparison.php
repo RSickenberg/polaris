@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Polaris\Lease\Domain;
 
+use Carbon\CarbonImmutable;
+
 /**
  * The latest figures compared with what the snapshots of the last days predicted, in three ways, one row per window.
  */
@@ -33,6 +35,8 @@ final readonly class PredictionComparison
          * are left out, so that old and new terms never mix.
          */
         public bool $recalculating = false,
+        /** When the newest stored snapshot was computed; null when none is stored or while recalculating. */
+        public ?CarbonImmutable $snapshotComputedAt = null,
     ) {
     }
 }

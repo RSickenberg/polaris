@@ -554,9 +554,17 @@ Si aucune estimation n’est disponible pour le premier jour d’une période, l
         <source>card.state.returned</source>
         <target>La voiture a été rendue au bailleur.</target>
       </trans-unit>
-      <trans-unit id="card.as_of">
-        <source>card.as_of</source>
-        <target>Calculé d’après le dernier relevé : %when%</target>
+      <trans-unit id="predictions.title">
+        <source>predictions.title</source>
+        <target>Sur quoi se basent les projections</target>
+      </trans-unit>
+      <trans-unit id="predictions.reading">
+        <source>predictions.reading</source>
+        <target>Dernier relevé</target>
+      </trans-unit>
+      <trans-unit id="predictions.snapshot">
+        <source>predictions.snapshot</source>
+        <target>Dernier instantané</target>
       </trans-unit>
     </body>
   </file>

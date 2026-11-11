@@ -303,6 +303,13 @@ final class DashboardControllerTest extends WebTestCase
 
         self::assertSelectorTextContains('[data-comparison=budget]', 'Budget');
         self::assertSelectorTextContains('[data-comparison=budget] [data-no-history]', 'Not enough history yet.');
+
+        // One note says which reading the predictions are based on, not one per card.
+        self::assertSelectorCount(1, '[data-as-of]');
+        self::assertSelectorTextContains('[data-as-of]', 'What the predictions are based on');
+        self::assertSelectorExists('[data-as-of] [data-reading-at]');
+        // No snapshot is stored yet: nothing to say about one.
+        self::assertSelectorNotExists('[data-snapshot-at]');
     }
 
     public function testASnapshotOfTodayGivesFiguresToThePanels(): void
@@ -333,6 +340,7 @@ final class DashboardControllerTest extends WebTestCase
         $this->client->request('GET', $this->url());
 
         self::assertResponseIsSuccessful();
+        self::assertSelectorExists('[data-as-of] [data-snapshot-at]');
 
         foreach (['budget', 'pace', 'projected_end'] as $panel) {
             $today = \sprintf('[data-comparison=%s] [data-period=today]', $panel);
