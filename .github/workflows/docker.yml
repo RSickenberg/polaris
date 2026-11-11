@@ -3,8 +3,10 @@ name: Docker
 # Builds the production image and pushes it to GHCR:
 # - from the commit a release tag points at, as <version> (no "v") and, for a stable
 #   release, latest;
-# - with "nightly", from the tip of the dev branch, as nightly-<commit> (kept) and
-#   latest-nightly, which each nightly build moves to itself.
+# - with "nightly", from the tip of the dev branch, as latest-nightly only, which each
+#   nightly build moves to itself. Its version nightly-<commit> is in the labels and
+#   SENTRY_RELEASE, not a tag: the build before it is left untagged.
+# cleanup-images.yml deletes old images every week: the two newest releases and latest-nightly stay.
 #
 # Ways in, never both for one release:
 # - "release: published" covers a release published by hand in the GitHub UI.
@@ -98,7 +100,7 @@ jobs:
           images: ${{ env.IMAGE }}
           flavor: latest=false
           tags: |
-            type=raw,value=${{ steps.ref.outputs.version }}
+            type=raw,value=${{ steps.ref.outputs.version }},enable=${{ env.NIGHTLY != 'true' }}
             type=raw,value=latest,enable=${{ env.NIGHTLY != 'true' && env.PRERELEASE != 'true' }}
             type=raw,value=latest-nightly,enable=${{ env.NIGHTLY == 'true' }}
           labels: |
