@@ -128,9 +128,9 @@ export default class extends Controller {
      * flattening the curves against an axis that starts far below them. The y axis never goes under 0.
      */
     _window(range) {
-        // The whole data: nothing to fit, the axis the options give (from 0, a nice scale) stays.
+        // A window that runs to the end of the data (the whole lease, the forecast): the axis the options give stays.
         const xs = this.seriesValue.flatMap((serie) => serie.data.map(([x]) => x));
-        if (0 === xs.length || (range.min <= Math.min(...xs) && range.max >= Math.max(...xs))) {
+        if (0 === xs.length || range.max >= Math.max(...xs)) {
             return { xaxis: range };
         }
 
