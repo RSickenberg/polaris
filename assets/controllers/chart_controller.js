@@ -77,7 +77,7 @@ export default class extends Controller {
         this._onMorph = () => {
             this._followPressedRange();
             if (this._chart && this._range) {
-                this._chart.updateOptions({ xaxis: this._range }, false, false);
+                this._chart.updateOptions(this._config(), false, false);
             }
         };
         document.addEventListener('turbo:morph', this._onMorph);
@@ -119,7 +119,30 @@ export default class extends Controller {
         this._pressed = this.rangeTargets.indexOf(event.currentTarget);
         this._markPressed();
 
-        this._chart.updateOptions({ xaxis: { min, max } }, false, false);
+        this._chart.updateOptions(this._config(), false, false);
+    }
+
+    /**
+     * The x window and, fitted to it, the y window: the lowest and highest value any series takes inside the window
+     * (interpolated at its edges), with some air around. A close date range then fills the chart instead of
+     * flattening the curves against an axis that starts far below them. The y axis never goes under 0.
+     */
+    _window(range) {
+        const values = this.seriesValue.flatMap((serie) => {
+            const inside = serie.data.filter(([x, y]) => x >= range.min && x <= range.max && Number.isFinite(y));
+            const edges = [range.min, range.max].map((x) => this._interpolate(serie.data, x));
+
+            return [...inside.map(([, y]) => y), ...edges].filter((y) => Number.isFinite(y));
+        });
+        if (0 === values.length) {
+            return { xaxis: range };
+        }
+
+        const low = Math.min(...values);
+        const high = Math.max(...values);
+        const air = Math.max((high - low) * 0.08, Math.abs(high) * 0.005, 1);
+
+        return { xaxis: range, yaxis: { min: Math.max(0, Math.floor(low - air)), max: Math.ceil(high + air) } };
     }
 
     _container() {
@@ -232,7 +255,7 @@ export default class extends Controller {
             series: this.seriesValue,
         };
 
-        const range = this._range ? { xaxis: this._range } : {};
+        const range = this._range ? this._window(this._range) : {};
         const config = this._merge(base, this._resolve(this.optionsValue, token), this._formatters(), range);
 
         return this.alignValue > 0 ? this._aligned(config) : config;
