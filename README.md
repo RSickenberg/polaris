@@ -172,6 +172,8 @@ make test                       # PHPUnit (ARGS="--filter=..."); builds the CSS 
 make ci                         # every CI check: PHP-CS-Fixer, PHPStan, Deptrac, translations, PHPUnit
 make migrate                    # apply pending Doctrine migrations
 make diff                       # generate a migration from the entity mapping
+make dump > polaris.sql          # SQL dump of the database to a file
+make import < polaris.sql       # load a SQL dump (replaces the tables)
 make cs-fix                     # apply the coding standard
 make sf ARGS="about"            # any bin/console command
 make composer ARGS="outdated"   # any Composer command
