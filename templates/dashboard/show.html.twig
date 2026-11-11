@@ -119,14 +119,42 @@
             </twig:Card>
 
             {% if not ended %}
+                {# One note for all the predictions below: they share the same reading and snapshot, so they are said once. #}
+                <twig:Card data-as-of>
+                    <twig:Card:Content>
+                        <p class="mb-3 font-medium">{{ 'predictions.title'|trans(domain='dashboard') }}</p>
+                        <dl class="flex items-center gap-4">
+                            <div class="flex flex-1 items-center justify-center gap-3">
+                                <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-info-surface text-info-foreground">
+                                    <twig:ux:icon name="lucide:gauge" class="size-4.5" aria-hidden="true" />
+                                </span>
+                                <div>
+                                    <dt class="text-xs text-muted-foreground">{{ 'predictions.reading'|trans(domain='dashboard') }}</dt>
+                                    <dd class="font-light" data-reading-at>{{ projection.asOf|humanized_datetime(timeZone) }}</dd>
+                                </div>
+                            </div>
+                            {% if dashboard.comparison is not null and dashboard.comparison.snapshotCutoffAt is not null %}
+                                <div class="h-9 w-px shrink-0 bg-border" role="presentation"></div>
+                                <div class="flex flex-1 items-center justify-center gap-3">
+                                    <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-info-surface text-info-foreground">
+                                        <twig:ux:icon name="lucide:camera" class="size-4.5" aria-hidden="true" />
+                                    </span>
+                                    <div>
+                                        <dt class="text-xs text-muted-foreground">{{ 'predictions.snapshot'|trans(domain='dashboard') }}</dt>
+                                        <dd class="font-light" data-snapshot-at>{{ dashboard.comparison.snapshotCutoffAt|humanized_datetime(timeZone) }}</dd>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </dl>
+                    </twig:Card:Content>
+                </twig:Card>
+
                 <div class="grid gap-4 lg:grid-cols-3">
                     <twig:Dashboard:PaceCard
                         key="current"
                         title="{{ 'current_pace.title'|trans(domain='dashboard') }}"
                         basis="{{ 'current_pace.basis'|trans(domain='dashboard') }}"
                         :budget="assessment.currentPace"
-                        :asOf="projection.asOf"
-                        timeZone="{{ timeZone }}"
                         help="current_pace"
                     />
                     <twig:Dashboard:PaceCard
@@ -135,8 +163,6 @@
                         basis="{{ 'budget.basis'|trans(domain='dashboard') }}"
                         :budget="assessment.budget"
                         fallback="{{ 'budget.none'|trans(domain='dashboard') }}"
-                        :asOf="projection.asOf"
-                        timeZone="{{ timeZone }}"
                         help="budget"
                     />
                     <twig:Dashboard:PaceCard
@@ -144,8 +170,6 @@
                         title="{{ 'even_pace.title'|trans(domain='dashboard') }}"
                         basis="{{ 'even_pace.basis'|trans(domain='dashboard') }}"
                         :budget="dashboard.evenPace"
-                        :asOf="projection.asOf"
-                        timeZone="{{ timeZone }}"
                         help="even_pace"
                     />
                 </div>
@@ -159,8 +183,6 @@
                         basis="{{ 'compare.budget.basis'|trans(domain='dashboard') }}"
                         :rows="dashboard.comparison.budget"
                         :recalculating="dashboard.comparison.recalculating"
-                        :asOf="projection.asOf"
-                        timeZone="{{ timeZone }}"
                         help="compare_budget"
                     />
                     <twig:Dashboard:ComparisonPanel
@@ -169,8 +191,6 @@
                         basis="{{ 'compare.pace.basis'|trans(domain='dashboard') }}"
                         :rows="dashboard.comparison.pace"
                         :recalculating="dashboard.comparison.recalculating"
-                        :asOf="projection.asOf"
-                        timeZone="{{ timeZone }}"
                         help="compare_pace"
                     />
                     <twig:Dashboard:ComparisonPanel
@@ -179,8 +199,6 @@
                         basis="{{ 'compare.projected_end.basis'|trans(domain='dashboard') }}"
                         :rows="dashboard.comparison.projectedEnd"
                         :recalculating="dashboard.comparison.recalculating"
-                        :asOf="projection.asOf"
-                        timeZone="{{ timeZone }}"
                         help="compare_projected_end"
                     />
                 </div>

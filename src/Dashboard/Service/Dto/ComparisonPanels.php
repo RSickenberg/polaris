@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Polaris\Dashboard\Service\Dto;
 
+use Carbon\CarbonImmutable;
+
 /**
  * The three actual-versus-predicted panels of an active lease, one row per period.
  */
@@ -30,6 +32,8 @@ final readonly class ComparisonPanels
         public array $projectedEnd,
         /** True while the snapshots are recalculated after an edit of the lease terms: the empty rows say so. */
         public bool $recalculating = false,
+        /** The midnight the newest stored snapshot the rows compare with describes; null when there is none. */
+        public ?CarbonImmutable $snapshotCutoffAt = null,
     ) {
     }
 }

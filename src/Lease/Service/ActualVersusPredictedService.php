@@ -98,14 +98,24 @@ final readonly class ActualVersusPredictedService
             $this->leases->find($vehicle)?->isTodayWholeDay() ?? false,
         );
 
-        return $recalculating
-            ? new PredictionComparison(
-                $comparison->budget,
-                $comparison->pace,
-                $comparison->projectedEnd,
-                recalculating: true,
-            )
-            : $comparison;
+        // The newest snapshot that knows its midnight (the rows saved before #107 do not).
+        $latestCutoff = null;
+
+        foreach (array_reverse($history) as $point) {
+            if (null !== $point->cutoffAt) {
+                $latestCutoff = $point->cutoffAt;
+
+                break;
+            }
+        }
+
+        return new PredictionComparison(
+            $comparison->budget,
+            $comparison->pace,
+            $comparison->projectedEnd,
+            $recalculating,
+            $latestCutoff,
+        );
     }
 
     /**
