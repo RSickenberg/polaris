@@ -1,8 +1,8 @@
 name: Nightly
 
 # Builds the tip of the dev branch every night and pushes it to GHCR as
-# ghcr.io/rsickenberg/polaris:nightly-<commit>, and moves latest-nightly to it,
-# so latest-nightly always is the latest dev. It is a beta: the stable image is <version> / latest,
+# ghcr.io/rsickenberg/polaris:latest-nightly, so latest-nightly always is the latest dev
+# (its version nightly-<commit> is in the image labels, not a tag). It is a beta: the stable image is <version> / latest,
 # built from main when a release is cut (release.yml).
 #
 # A scheduled workflow runs from the default branch, so this file must be on main; it

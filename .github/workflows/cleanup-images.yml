@@ -2,8 +2,11 @@ name: Clean up images
 
 # Deletes old images of ghcr.io/rsickenberg/polaris:
 # - releases: the two newest release images stay (latest is the newest of them), older ones go;
-# - nightlies: latest-nightly stays, older nightly-<commit> images go;
-# - untagged images that no kept image refers to (left by an earlier deletion or a failed build).
+# - nightlies: latest-nightly stays. A nightly is tagged latest-nightly only, so the build before
+#   it is untagged and goes with the leftovers below; delete-tags removes the nightly-<commit> tags
+#   that builds before docker.yml dropped them still carry;
+# - untagged images that no kept image refers to (a replaced nightly, an earlier deletion or a failed
+#   build).
 #
 # A multi-arch image is an index whose platform images (amd64, arm64) and attestations are its
 # children: the action sets them aside before applying any rule and deletes them only with their

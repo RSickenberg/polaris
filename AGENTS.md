@@ -291,7 +291,7 @@ A no-break space (U+00A0) before `;`, `!`, `?`, `:` and inside `« »`; the typo
 
 - Conventional Commits (`feat`, `fix`, `docs`, `refactor`, `test`, `build`, `ci`, `chore`); PR titles are checked in CI.
 - Versions and `CHANGELOG.md` come from release-it: don't edit by hand.
-- `main` is the released code (tags, image `latest`); `dev` is the next release and its tip is built every night into the image `nightly-<commit>`, and `latest-nightly` moves to it (`nightly.yml`). Every Monday `cleanup-images.yml` deletes older images: the two newest releases and `latest-nightly` stay. Branch from `dev` and open PRs against it, except a fix that cannot wait, which goes to `main` and is merged back into `dev`.
+- `main` is the released code (tags, image `latest`); `dev` is the next release and its tip is built every night into the image `latest-nightly` (`nightly.yml`; its version `nightly-<commit>` is in the labels and `SENTRY_RELEASE`, not a tag). Every Monday `cleanup-images.yml` deletes older images: the two newest releases and `latest-nightly` stay. Branch from `dev` and open PRs against it, except a fix that cannot wait, which goes to `main` and is merged back into `dev`.
 - One issue per small PR, with "Closes #N"; squash-merged into `dev`. A release is a PR `dev` to `main` merged with a merge commit (never squashed), then the Release workflow.
 - No `.bak` or backup copies: git is the history.
 
