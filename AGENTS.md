@@ -73,6 +73,7 @@ Follow https://symfony.com/doc/current/best_practices.html:
 
 - Functional tests extend `WebTestCase`, service tests `KernelTestCase`, `Domain/` tests plain `TestCase`. A feature is done with a test that exercises it as a caller would (HTTP request for a controller, service call for a service).
 - Functional tests sign in with `Polaris\Tests\Support\SignsIn`; post the login form only when testing login.
+- A test of a self-hosted default of `src/Extension/`, or one whose expectations follow from it, sets that default in the container itself before the first service that reads it (`self::getContainer()->set(ErrorReportingPolicy::class, new SelfHostedErrorReportingPolicy())`). The hosted layer replaces these defaults and its CI runs this suite: a test that takes the default from the container fails there.
 - Tests never reach the network: `MockHttpClient`, swapped in with `getContainer()->set('http_client', $client)` (public alias `test.polaris.http_client` in `when@test`).
 - Hand-worked figures are explained in a comment beside the case, and expected values that are not obvious are named (named arguments or keys rather than positional tuples).
 
