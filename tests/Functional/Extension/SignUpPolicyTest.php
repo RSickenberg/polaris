@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polaris\Tests\Functional\Extension;
 
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Polaris\Account\Repository\UserRepository;
 use Polaris\Account\Service\Dto\NewUser;
@@ -22,6 +23,10 @@ final class SignUpPolicyTest extends KernelTestCase
     public function testSelfHostedDefaultAllowsASingleUser(): void
     {
         self::bootKernel();
+        self::getContainer()->set(
+            SignUpPolicy::class,
+            new SingleUserSignUpPolicy(self::getContainer()->get(EntityManagerInterface::class)),
+        );
         $creator = self::getContainer()->get(UserCreator::class);
         $creator->create(new NewUser('first@example.test', self::PASSWORD));
 

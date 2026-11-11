@@ -9,6 +9,8 @@ use PHPUnit\Framework\Attributes\CoversNothing;
 use Polaris\Account\Entity\User;
 use Polaris\Account\Service\Dto\NewUser;
 use Polaris\Account\Service\UserCreator;
+use Polaris\Extension\ErrorReportingPolicy;
+use Polaris\Extension\SelfHostedErrorReportingPolicy;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -29,6 +31,8 @@ final class SettingsTest extends WebTestCase
     protected function setUp(): void
     {
         $this->client = self::createClient();
+        // The page is tested with the self-hosted default (new users opted in), whatever another edition binds.
+        self::getContainer()->set(ErrorReportingPolicy::class, new SelfHostedErrorReportingPolicy());
         $this->user = self::getContainer()->get(UserCreator::class)->create(
             new NewUser('jane.doe@example.test', self::PASSWORD)
         );

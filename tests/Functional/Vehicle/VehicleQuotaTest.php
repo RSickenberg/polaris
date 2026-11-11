@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Polaris\Account\Entity\User;
 use Polaris\Extension\SingleVehicleLimitPolicy;
+use Polaris\Extension\VehicleLimitPolicy;
 use Polaris\Tests\Support\FleetApiResponses;
 use Polaris\Tests\Support\LiftsVehicleLimit;
 use Polaris\Tests\Support\SignsIn;
@@ -28,6 +29,7 @@ final class VehicleQuotaTest extends KernelTestCase
     public function testSelfHostedDefaultAllowsASingleVehicle(): void
     {
         self::bootKernel();
+        self::useSelfHostedLimit();
         $owner = self::createUser();
 
         self::assertSame(1, self::quota()->remaining($owner));
@@ -43,6 +45,7 @@ final class VehicleQuotaTest extends KernelTestCase
     public function testTheLimitIsPerOwner(): void
     {
         self::bootKernel();
+        self::useSelfHostedLimit();
         $first = self::createUser();
         $second = self::createUser('other@example.test');
         $this->add($first, FleetApiResponses::VIN);
@@ -53,6 +56,7 @@ final class VehicleQuotaTest extends KernelTestCase
     public function testSeveralVehiclesAtOnceAreCountedTogether(): void
     {
         self::bootKernel();
+        self::useSelfHostedLimit();
         $owner = self::createUser();
 
         $this->expectException(VehicleLimitReached::class);
@@ -69,6 +73,14 @@ final class VehicleQuotaTest extends KernelTestCase
 
         self::assertNull(self::quota()->remaining($owner));
         self::quota()->assertCanAdd($owner, 10);
+    }
+
+    /**
+     * The self-hosted default (one vehicle), whatever another edition binds. Before the first service that reads it.
+     */
+    private static function useSelfHostedLimit(): void
+    {
+        self::getContainer()->set(VehicleLimitPolicy::class, new SingleVehicleLimitPolicy());
     }
 
     private function add(User $owner, string $vin): void

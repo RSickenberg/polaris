@@ -210,6 +210,8 @@ final class RiskLevelWatcherTest extends KernelTestCase
             )
         );
 
+        // The self-hosted default, whatever another edition binds. Before the handler and its watcher are built.
+        self::getContainer()->set(RiskAlertNotifier::class, new NullRiskAlertNotifier());
         $handler = self::getContainer()->get(CheckRiskLevelHandler::class);
         $id = $this->vehicle->getId()->toRfc4122();
         $handler(new CheckRiskLevel($id));
