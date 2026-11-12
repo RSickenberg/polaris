@@ -29,8 +29,13 @@ final class AccessControlTest extends WebTestCase
         'account_forgot_password_sent',
         'account_reset_password',
         'tesla_public_key',
-        'dashboard_root',
     ];
+
+    /**
+     * Paths public by their own rule in `security.yaml`, whichever route serves them: the root (`^/$`), where an
+     * edition can serve its own page with a route of higher priority than `dashboard_root`.
+     */
+    private const array PUBLIC_PATHS = ['/'];
 
     /**
      * Development tooling: open in the dev and test environments only (parameter
@@ -47,7 +52,8 @@ final class AccessControlTest extends WebTestCase
         $checked = [];
         foreach ($routes as $name => $route) {
             $path = $route->getPath();
-            if (\in_array($name, self::PUBLIC_ROUTES, true) || $this->isTooling($path)) {
+            $public = \in_array($name, self::PUBLIC_ROUTES, true) || \in_array($path, self::PUBLIC_PATHS, true);
+            if ($public || $this->isTooling($path)) {
                 continue;
             }
 
@@ -81,12 +87,20 @@ final class AccessControlTest extends WebTestCase
         self::assertResponseRedirects('/login');
     }
 
-    public function testTheRootRedirectsToTheDashboardAndThenToLogin(): void
+    public function testTheRootIsPublicAndRedirectsToTheDashboardAndThenToLogin(): void
     {
         $client = self::createClient();
         self::getContainer()->set(PublicRequestMatcher::class, new ClosedPublicRequestMatcher());
 
         $client->request('GET', '/');
+        self::assertFalse($client->getResponse()->isRedirect('http://localhost/login'), 'The root is public.');
+
+        // An edition that serves its own page on / (a route of higher priority) stops here: the redirects below are
+        // the ones of polaris' own root.
+        if ('dashboard_root' !== self::getContainer()->get(RouterInterface::class)->match('/')['_route']) {
+            return;
+        }
+
         self::assertResponseRedirects('/dashboard');
 
         $client->request('GET', '/dashboard');
