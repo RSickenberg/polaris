@@ -89,7 +89,7 @@ final class VehicleOwnershipTest extends WebTestCase
 
     public function testTheLandingPageListsOnlyMyVehicles(): void
     {
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('main', 'Mine');
@@ -101,7 +101,7 @@ final class VehicleOwnershipTest extends WebTestCase
     {
         self::signIn($this->client, self::createUser('nobody@example.test'));
 
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('main', 'No vehicle yet.');

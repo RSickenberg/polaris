@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Polaris\Tests\Functional\Account;
 
 use PHPUnit\Framework\Attributes\CoversNothing;
+use Polaris\Extension\ClosedPublicRequestMatcher;
+use Polaris\Extension\PublicRequestMatcher;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
@@ -26,6 +29,7 @@ final class AccessControlTest extends WebTestCase
         'account_forgot_password_sent',
         'account_reset_password',
         'tesla_public_key',
+        'dashboard_root',
     ];
 
     /**
@@ -37,6 +41,7 @@ final class AccessControlTest extends WebTestCase
     public function testEveryRouteRequiresAuthenticationUnlessItIsPublic(): void
     {
         $client = self::createClient();
+        self::getContainer()->set(PublicRequestMatcher::class, new ClosedPublicRequestMatcher());
         $routes = self::getContainer()->get(RouterInterface::class)->getRouteCollection();
 
         $checked = [];
@@ -74,6 +79,38 @@ final class AccessControlTest extends WebTestCase
 
         $client->request('GET', '/locale/fr', ['redirect' => '/login']);
         self::assertResponseRedirects('/login');
+    }
+
+    public function testTheRootRedirectsToTheDashboardAndThenToLogin(): void
+    {
+        $client = self::createClient();
+        self::getContainer()->set(PublicRequestMatcher::class, new ClosedPublicRequestMatcher());
+
+        $client->request('GET', '/');
+        self::assertResponseRedirects('/dashboard');
+
+        $client->request('GET', '/dashboard');
+        self::assertResponseRedirects('http://localhost/login');
+    }
+
+    public function testAReplacedMatcherOpensOnlyWhatItMatches(): void
+    {
+        $client = self::createClient();
+        $matcher = $this->createStub(PublicRequestMatcher::class);
+        $matcher->method('matches')->willReturnCallback(
+            static fn (Request $request): bool => '/vehicles' === $request->getPathInfo(),
+        );
+        self::getContainer()->set(PublicRequestMatcher::class, $matcher);
+
+        $client->request('GET', '/vehicles');
+        self::assertNotSame(302, $client->getResponse()->getStatusCode(), 'The matched page is open.');
+        self::assertFalse($client->getResponse()->isRedirect('http://localhost/login'));
+
+        // The catch-all still protects every other page.
+        foreach (['/dashboard', '/vehicles/import', '/settings'] as $path) {
+            $client->request('GET', $path);
+            self::assertResponseRedirects('http://localhost/login', null, $path);
+        }
     }
 
     private function isTooling(string $path): bool

@@ -83,7 +83,7 @@ final class VehicleImportControllerTest extends WebTestCase
         $box->tick();
         $this->client->submit($form);
 
-        self::assertResponseRedirects('/');
+        self::assertResponseRedirects('/dashboard');
         $vehicles = self::getContainer()->get(EntityManagerInterface::class)->getRepository(Vehicle::class)->findAll();
         self::assertCount(1, $vehicles);
         self::assertSame(FleetApiResponses::OTHER_VIN, $vehicles[0]->getVin()->value());
@@ -182,11 +182,11 @@ final class VehicleImportControllerTest extends WebTestCase
 
     public function testTheHomePageLinksToTheImport(): void
     {
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
         self::assertSelectorExists('main a[href="/vehicles/import"]');
 
         $this->add(FleetApiResponses::VIN, 'Mine');
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
         self::assertSelectorExists('main a[href="/vehicles/import"]');
     }
 

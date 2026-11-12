@@ -54,6 +54,9 @@ security:
         - { path: ^/reset-password/, roles: PUBLIC_ACCESS }
         # Tesla fetches the public key anonymously; it is the only thing this route answers.
         - { path: ^/\.well-known/appspecific/com\.tesla\.3p\.public-key\.pem$, roles: PUBLIC_ACCESS }
+        - { path: ^/$, roles: PUBLIC_ACCESS }
+        # The hosted layer opens its own pages through this matcher (a rule cannot be added from another bundle).
+        - { request_matcher: Polaris\Extension\PublicRequestMatcher, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: ROLE_USER }
 
 when@test:

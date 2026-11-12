@@ -26,7 +26,17 @@ final class HomeController extends AbstractController
     ) {
     }
 
-    #[Route('/', name: 'dashboard_home', methods: ['GET'])]
+    /**
+     * The root is public, so an edition can serve its own page there (a route on `/` with a higher priority). Here it
+     * sends the visitor on: an anonymous one reaches the login page through the catch-all.
+     */
+    #[Route('/', name: 'dashboard_root', methods: ['GET'])]
+    public function root(): Response
+    {
+        return $this->redirectToRoute('dashboard_home');
+    }
+
+    #[Route('/dashboard', name: 'dashboard_home', methods: ['GET'])]
     public function home(#[CurrentUser] User $user): Response
     {
         $vehicles = $this->entityManager->getRepository(Vehicle::class)->findBy(['owner' => $user], ['name' => 'ASC']);
