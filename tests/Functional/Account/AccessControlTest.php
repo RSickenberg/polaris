@@ -96,12 +96,11 @@ final class AccessControlTest extends WebTestCase
     public function testAReplacedMatcherOpensOnlyWhatItMatches(): void
     {
         $client = self::createClient();
-        self::getContainer()->set(PublicRequestMatcher::class, new class implements PublicRequestMatcher {
-            public function matches(Request $request): bool
-            {
-                return '/vehicles' === $request->getPathInfo();
-            }
-        });
+        $matcher = $this->createStub(PublicRequestMatcher::class);
+        $matcher->method('matches')->willReturnCallback(
+            static fn (Request $request): bool => '/vehicles' === $request->getPathInfo(),
+        );
+        self::getContainer()->set(PublicRequestMatcher::class, $matcher);
 
         $client->request('GET', '/vehicles');
         self::assertNotSame(302, $client->getResponse()->getStatusCode(), 'The matched page is open.');
