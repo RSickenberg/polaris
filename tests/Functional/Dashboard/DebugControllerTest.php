@@ -85,7 +85,7 @@ final class DebugControllerTest extends WebTestCase
     {
         self::signIn($this->client);
 
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
 
         self::assertSelectorExists('[data-slot=sidebar] a[href="/debug"]');
     }
@@ -99,7 +99,7 @@ final class DebugControllerTest extends WebTestCase
         $this->client->request('GET', '/debug');
         self::assertResponseStatusCodeSame(404);
 
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
         self::assertSelectorNotExists('[data-slot=sidebar] a[href="/debug"]');
     }
 }

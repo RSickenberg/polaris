@@ -107,7 +107,7 @@ final class SettingsTest extends WebTestCase
         $hasher = self::getContainer()->get(UserPasswordHasherInterface::class);
         self::assertTrue($hasher->isPasswordValid($this->stored(), self::NEW_PASSWORD));
         self::assertFalse($hasher->isPasswordValid($this->stored(), self::PASSWORD));
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
         self::assertResponseIsSuccessful();
     }
 

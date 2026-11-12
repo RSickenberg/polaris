@@ -183,7 +183,7 @@ final class PasswordResetTest extends WebTestCase
             serverParameters: ['HTTP_ORIGIN' => 'http://localhost'],
         );
 
-        self::assertResponseRedirects('/');
+        self::assertResponseRedirects('/dashboard');
     }
 
     public function testAnExpiredLinkDoesNotWork(): void

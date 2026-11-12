@@ -47,7 +47,7 @@ final class HomeControllerTest extends WebTestCase
 
     public function testWithoutAVehicleItShowsAnEmptyState(): void
     {
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('main h1', 'Your vehicles');
@@ -56,11 +56,11 @@ final class HomeControllerTest extends WebTestCase
 
     public function testTheSidebarAlwaysLinksToTheVehicleList(): void
     {
-        $this->client->request('GET', '/');
-        self::assertSelectorTextContains('[data-slot=sidebar] a[href="/"][data-active=true]', 'My vehicles');
+        $this->client->request('GET', '/dashboard');
+        self::assertSelectorTextContains('[data-slot=sidebar] a[href="/dashboard"][data-active=true]', 'My vehicles');
 
         $this->client->request('GET', '/settings');
-        self::assertSelectorTextContains('[data-slot=sidebar] a[href="/"][data-active=false]', 'My vehicles');
+        self::assertSelectorTextContains('[data-slot=sidebar] a[href="/dashboard"][data-active=false]', 'My vehicles');
         // No vehicle page, no other links, so nothing to separate.
         self::assertSelectorNotExists('[data-slot=sidebar] [data-slot=sidebar-separator]');
     }
@@ -74,7 +74,7 @@ final class HomeControllerTest extends WebTestCase
         $entityManager->persist($first);
         $entityManager->flush();
 
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('main h1', 'Your vehicles');
@@ -111,7 +111,7 @@ final class HomeControllerTest extends WebTestCase
             ->get(LeaseReturnService::class)
             ->markReturned($returned, new \DateTimeImmutable('2021-01-02'));
 
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
 
         self::assertResponseIsSuccessful();
         self::assertSame(
@@ -122,7 +122,7 @@ final class HomeControllerTest extends WebTestCase
         self::assertSelectorTextContains('[data-returned=true] [data-returned-badge]', 'Returned');
         self::assertSelectorNotExists('[data-returned=false] [data-returned-badge]');
 
-        $this->client->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'fr']);
+        $this->client->request('GET', '/dashboard', server: ['HTTP_ACCEPT_LANGUAGE' => 'fr']);
         self::assertSelectorTextContains('[data-returned-badge]', 'Rendu');
     }
 
@@ -148,7 +148,7 @@ final class HomeControllerTest extends WebTestCase
         $this->lease($vehicle, '2026-01-01', 15_000, $tolerance);
         $this->reading($vehicle, '2026-07-02 11:00:00', $driven);
 
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
 
         self::assertResponseIsSuccessful();
         $card = '[data-vehicle-card][data-state=active]';
@@ -174,7 +174,7 @@ final class HomeControllerTest extends WebTestCase
         $assessment = self::getContainer()->get(LeaseTermsService::class)->assess($vehicle);
         self::assertInstanceOf(LeaseAssessment::class, $assessment);
 
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
 
         $projected = $this->client->getCrawler()->filter('[data-card-figure=projected] dd')->text();
         self::assertSame(
@@ -189,7 +189,7 @@ final class HomeControllerTest extends WebTestCase
         $this->lease($vehicle, '2026-01-01', 15_000, 0);
         $this->reading($vehicle, '2026-07-02 11:00:00', 7_000);
 
-        $this->client->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'fr']);
+        $this->client->request('GET', '/dashboard', server: ['HTTP_ACCEPT_LANGUAGE' => 'fr']);
 
         $text = preg_replace('/\s+/u', ' ', $this->client->getCrawler()->filter('[data-vehicle-card]')->text()) ?? '';
         self::assertStringContainsString('7’000 sur 15’000 km parcourus', $text);
@@ -220,7 +220,7 @@ final class HomeControllerTest extends WebTestCase
             default => throw new \LogicException($state),
         };
 
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
 
         self::assertResponseIsSuccessful();
         $card = '[data-vehicle-card][data-state=' . $state . ']';

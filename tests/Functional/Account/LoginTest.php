@@ -61,7 +61,7 @@ final class LoginTest extends WebTestCase
 
         $this->login('login-ok@example.test', self::PASSWORD);
 
-        self::assertResponseRedirects('/');
+        self::assertResponseRedirects('/dashboard');
         $this->client->followRedirect();
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('[data-slot=sidebar-footer]', 'login-ok@example.test');
@@ -78,13 +78,13 @@ final class LoginTest extends WebTestCase
             serverParameters: ['HTTP_ORIGIN' => 'http://localhost'],
         );
 
-        self::assertResponseRedirects('/');
+        self::assertResponseRedirects('/dashboard');
         $cookie = $this->client->getCookieJar()->get('REMEMBERME');
         self::assertNotNull($cookie);
 
         // The session is gone, the remember me cookie alone signs the user in again.
         $this->client->getCookieJar()->expire('MOCKSESSID');
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('[data-slot=sidebar-footer]', 'remember@example.test');
     }
@@ -95,7 +95,7 @@ final class LoginTest extends WebTestCase
 
         $this->login('forget@example.test', self::PASSWORD);
 
-        self::assertResponseRedirects('/');
+        self::assertResponseRedirects('/dashboard');
         self::assertNull($this->client->getCookieJar()->get('REMEMBERME'));
     }
 
@@ -112,7 +112,7 @@ final class LoginTest extends WebTestCase
 
         $this->login('  CASE@Example.test ', self::PASSWORD);
 
-        self::assertResponseRedirects('/');
+        self::assertResponseRedirects('/dashboard');
     }
 
     public function testAWrongPasswordShowsATranslatedErrorAndKeepsTheEmail(): void
@@ -196,7 +196,7 @@ final class LoginTest extends WebTestCase
         }
 
         $this->login('other@example.test', self::PASSWORD);
-        self::assertResponseRedirects('/');
+        self::assertResponseRedirects('/dashboard');
     }
 
     public function testAnonymousVisitorsGoToTheLoginThenToTheirPage(): void
@@ -227,7 +227,7 @@ final class LoginTest extends WebTestCase
 
         $this->client->request('GET', '/login');
 
-        self::assertResponseRedirects('/');
+        self::assertResponseRedirects('/dashboard');
     }
 
     public function testLogoutEndsTheSession(): void
@@ -242,7 +242,7 @@ final class LoginTest extends WebTestCase
         $this->client->request('GET', (string) $logout->attr('href'), server: ['HTTP_SEC_FETCH_SITE' => 'same-origin']);
 
         self::assertResponseRedirects('http://localhost/login');
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
         self::assertResponseRedirects('http://localhost/login');
     }
 
@@ -258,7 +258,7 @@ final class LoginTest extends WebTestCase
         );
 
         self::assertResponseStatusCodeSame(403);
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/dashboard');
         self::assertResponseIsSuccessful();
     }
 
@@ -273,7 +273,7 @@ final class LoginTest extends WebTestCase
         self::assertSelectorExists('html[lang=fr]');
 
         // Switching to English is kept for the user, not only in the cookie.
-        $this->client->request('GET', '/locale/en', ['redirect' => '/']);
+        $this->client->request('GET', '/locale/en', ['redirect' => '/dashboard']);
         $this->client->followRedirect();
         self::assertSelectorExists('html[lang=en]');
         $stored = self::getContainer()
