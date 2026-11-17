@@ -4,7 +4,7 @@ updates:
     directory: /
     target-branch: dev
     schedule:
-      interval: weekly
+      interval: daily
     groups:
       release-tooling:
         patterns: ["*"]
@@ -15,7 +15,7 @@ updates:
     directory: /
     target-branch: dev
     schedule:
-      interval: weekly
+      interval: daily
     groups:
       actions:
         patterns: ["*"]
@@ -26,7 +26,7 @@ updates:
     directory: /
     target-branch: dev
     schedule:
-      interval: weekly
+      interval: daily
     groups:
       symfony:
         patterns: ["symfony/*"]
@@ -46,7 +46,7 @@ updates:
     directory: /
     target-branch: dev
     schedule:
-      interval: weekly
+      interval: daily
     groups:
       docker:
         patterns: ["*"]
@@ -57,7 +57,7 @@ updates:
     directory: /
     target-branch: dev
     schedule:
-      interval: weekly
+      interval: daily
     groups:
       docker-compose:
         patterns: ["*"]
