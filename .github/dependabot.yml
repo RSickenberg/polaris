@@ -33,6 +33,13 @@ updates:
       symfony-security:
         applies-to: security-updates
         patterns: ["symfony/*"]
+      # A dependency joins the first group it matches, so this catch-all
+      # collects everything that is not Symfony (dev and production alike).
+      composer:
+        patterns: ["*"]
+      composer-security:
+        applies-to: security-updates
+        patterns: ["*"]
     ignore:
       # Flex's extra.symfony.require is not honoured by Dependabot: Symfony
       # minor and major upgrades stay deliberate, only patches are automatic.
