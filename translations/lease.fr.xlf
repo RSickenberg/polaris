@@ -267,11 +267,11 @@ L’heure de reprise peut être antérieure à celle de l’arrêt si votre pér
       </trans-unit>
       <trans-unit id="flash.hours_saved">
         <source>flash.hours_saved</source>
-        <target>Vos heures de conduite ont été enregistrées.</target>
+        <target>Heures de conduite enregistrées.</target>
       </trans-unit>
       <trans-unit id="rejected.hours_no_contract">
         <source>rejected.hours_no_contract</source>
-        <target>Veuillez d’abord enregistrer les conditions de votre leasing avant de configurer vos heures de conduite.</target>
+        <target>Enregistrez les conditions de votre leasing avant de configurer vos heures de conduite.</target>
       </trans-unit>
       <trans-unit id="rejected.hours_incomplete">
         <source>rejected.hours_incomplete</source>
