@@ -267,11 +267,11 @@ The start time can be earlier than the stop time if your rest period continues p
       </trans-unit>
       <trans-unit id="flash.hours_saved">
         <source>flash.hours_saved</source>
-        <target>Your driving hours have been saved.</target>
+        <target>Driving hours saved.</target>
       </trans-unit>
       <trans-unit id="rejected.hours_no_contract">
         <source>rejected.hours_no_contract</source>
-        <target>Please save your lease terms first before setting your driving hours.</target>
+        <target>Save your lease terms before setting your driving hours.</target>
       </trans-unit>
       <trans-unit id="rejected.hours_incomplete">
         <source>rejected.hours_incomplete</source>
