@@ -15,7 +15,7 @@
 {# A card with one row per period: the period with the two figures under it (what happened, what was expected), and the gap on the right, as large as the period. A positive gap is more than expected: the gap is a red pill, and a gap of zero or less a green one. Only the digits are monospaced. Before any period has history (the first days after deploy), one line says so instead of four empty rows. #}
 {% set withHistory = rows|filter(row => row.figures is not null or row.awaitingReading)|length > 0 %}
 {% set unit = 'unit.km'|trans(domain='shared') %}
-<twig:Card data-comparison="{{ key }}" {{ ...attributes }}>
+<twig:Card class="min-w-0" data-comparison="{{ key }}" {{ ...attributes }}>
     <twig:Card:Header>
         <twig:Card:Title><h2>{{ title }}</h2></twig:Card:Title>
         <twig:Card:Description>{{ basis }}</twig:Card:Description>
@@ -23,7 +23,7 @@
             <twig:Dashboard:CardHelp name="compare-{{ key }}" :title="title" :help="help" />
         {% endif %}
     </twig:Card:Header>
-    <twig:Card:Content>
+    <twig:Card:Content class="flex-1">
         {% if recalculating %}
             <p class="mb-3 text-sm text-muted-foreground" data-recalculating>{{ 'compare.recalculating'|trans(domain='dashboard') }}</p>
         {% endif %}
@@ -33,8 +33,8 @@
             {% endif %}
         {% else %}
             {# The table sits in the card as a rounded, inset block: border, soft background and a light shadow give it depth. #}
-            <div class="overflow-hidden rounded-xl border border-border bg-muted/30 shadow-xs">
-                <twig:Table>
+            <div class="h-full overflow-hidden rounded-xl border border-border bg-muted/30 shadow-xs [&_[data-slot=table-container]]:h-full">
+                <twig:Table class="h-full">
                     <twig:Table:Header>
                         {# The header row is not a row to point at: no hover colour (the kit row has one). #}
                         <twig:Table:Row class="bg-muted/50 hover:bg-muted/50!">
@@ -52,7 +52,7 @@
                                         {% if row.fallbackDays > 0 %}
                                             <span data-fallback-days="{{ row.fallbackDays }}">{{ 'compare.period.since_days'|trans({count: row.fallbackDays}, domain='dashboard') }}</span>
                                         {% else %}
-                                            <span{{ figures is null ? ' class="text-muted-foreground"' : '' }}>{{ ('compare.period.' ~ row.period.value)|trans(domain='dashboard') }}</span>
+                                            <span class="whitespace-nowrap{{ figures is null ? ' text-muted-foreground' : '' }}">{{ ('compare.period.' ~ row.period.value)|trans(domain='dashboard') }}</span>
                                         {% endif %}
                                         {# Rebuilt on the fly: the midnight snapshot of the day is not saved yet. A pulsing dot and the words, never colour alone. #}
                                         {% if row.live and figures is not null %}
@@ -66,10 +66,10 @@
                                         {% endif %}
                                     </div>
                                     {% if figures is not null %}
-                                        <span class="mt-1 block text-xs text-muted-foreground" data-figure="figures">
+                                        <span class="mt-1 block text-xs whitespace-nowrap text-muted-foreground" data-figure="figures">
                                             {%- set actual = figures.actual|km -%}
                                             {%- set expected = figures.expected|km -%}
-                                            <span class="font-mono">{{ actual }}</span> / <span class="font-mono">{{ expected }}</span> {{ unit }}
+                                            <span class="font-mono">{{ actual }}</span> / <span class="font-mono">{{ expected }}</span>&nbsp;{{ unit }}
                                         </span>
                                     {% endif %}
                                 </twig:Table:Cell>
@@ -97,10 +97,10 @@
                                     <twig:Table:Cell class="py-3 ps-2 pe-4 whitespace-normal text-end">
                                         <twig:Badge
                                             variant="outline"
-                                            class="h-7 gap-1.5 px-3 text-sm font-semibold {{ tone }}"
+                                            class="h-auto min-h-7 max-w-full flex-wrap gap-x-1.5 py-1 px-3 text-sm font-semibold {{ tone }}"
                                         >
                                             <twig:ux:icon :name="trend" aria-hidden="true" />
-                                            <span data-figure="delta" data-tone="{{ good ? 'good' : 'bad' }}"><span class="font-mono">{{ sign }}{{ figures.delta.absolute|km }}</span> {{ unit }}</span>
+                                            <span class="whitespace-nowrap" data-figure="delta" data-tone="{{ good ? 'good' : 'bad' }}"><span class="font-mono">{{ sign }}{{ figures.delta.absolute|km }}</span>&nbsp;{{ unit }}</span>
                                             {# The gap as a share of what was expected, after a thin vertical rule. #}
                                             {% if figures.ratio is not null %}
                                                 <span class="h-3.5 w-px bg-current opacity-30" aria-hidden="true"></span>
