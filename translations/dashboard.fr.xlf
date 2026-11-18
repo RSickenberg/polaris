@@ -204,11 +204,11 @@
       </trans-unit>
       <trans-unit id="compare.projected_end.title">
         <source>compare.projected_end.title</source>
-        <target>Projection de fin</target>
+        <target>Projeté à la fin du leasing</target>
       </trans-unit>
       <trans-unit id="compare.projected_end.basis">
         <source>compare.projected_end.basis</source>
-        <target>Aujourd’hui / au début de la période</target>
+        <target>Estimation aujourd’hui / au début de la période</target>
       </trans-unit>
       <trans-unit id="compare.period.today">
         <source>compare.period.today</source>
@@ -220,15 +220,15 @@
       </trans-unit>
       <trans-unit id="compare.period.week">
         <source>compare.period.week</source>
-        <target>7 derniers jours</target>
+        <target>−7 jours</target>
       </trans-unit>
       <trans-unit id="compare.period.two_weeks">
         <source>compare.period.two_weeks</source>
-        <target>14 derniers jours</target>
+        <target>−14 jours</target>
       </trans-unit>
       <trans-unit id="compare.period.month">
         <source>compare.period.month</source>
-        <target>30 derniers jours</target>
+        <target>−30 jours</target>
       </trans-unit>
       <trans-unit id="compare.column.period">
         <source>compare.column.period</source>
