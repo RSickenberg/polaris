@@ -223,3 +223,33 @@ jobs:
         env:
           TAGS: ${{ needs.prepare.outputs.tags }}
         run: docker buildx imagetools inspect "$(head -n1 <<< "$TAGS")"
+
+  # Tells Sentry the version exists once its image is published, so error reports tagged with
+  # SENTRY_RELEASE (the same version) match a release with its commits and deploy. Needs the
+  # secret SENTRY_AUTH_TOKEN and the variables SENTRY_ORG and SENTRY_PROJECT (the maintainer's
+  # project, not the instance owners'); a fork without them skips the job.
+  sentry-release:
+    if: vars.SENTRY_ORG != '' && vars.SENTRY_PROJECT != ''
+    needs: [prepare, merge]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # The whole history, so Sentry can list the commits since the previous release.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: getsentry/action-release@v3
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+        with:
+          release: ${{ needs.prepare.outputs.version }}
+          # The name the app reports (kernel.environment), so the deploy matches the events.
+          environment: prod
+          set_commits: auto
+          ignore_missing: true
