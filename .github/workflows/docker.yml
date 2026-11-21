@@ -250,6 +250,6 @@ jobs:
         with:
           release: ${{ needs.prepare.outputs.version }}
           # The name the app reports (kernel.environment), so the deploy matches the events.
-          environment: prod
+          environment: production
           set_commits: auto
           ignore_missing: true
