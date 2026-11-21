@@ -50,3 +50,4 @@ jobs:
     uses: ./.github/workflows/docker.yml
     with:
       nightly: true
+    secrets: inherit

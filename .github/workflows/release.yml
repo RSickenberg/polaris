@@ -68,3 +68,4 @@ jobs:
     with:
       tag: ${{ needs.release.outputs.tag }}
       prerelease: ${{ needs.release.outputs.prerelease == 'true' }}
+    secrets: inherit
