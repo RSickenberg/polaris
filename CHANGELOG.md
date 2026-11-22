@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.7.0](https://github.com/RSickenberg/polaris/compare/v0.6.0...v0.7.0) (2026-11-22)
+
+### Features
+
+* **bundles:** Allow hosted layer to inject more bundles if required ([6b07fa7](https://github.com/RSickenberg/polaris/commit/6b07fa7d913bdcd1755d7d21becd609cdb9fac53)), closes [#131](https://github.com/RSickenberg/polaris/issues/131)
+* **dashboard:** compare the margin instead of the projected end ([e9a2865](https://github.com/RSickenberg/polaris/commit/e9a286535b0a1c535b83325bf2039b416ce0380d))
+* **dashboard:** fit the chart's y axis to the zoomed range ([a17a0d8](https://github.com/RSickenberg/polaris/commit/a17a0d8312f09c9424e38c8edcf7940247a862a7))
+* **dashboard:** say which reading and snapshot the predictions come from ([352c4e8](https://github.com/RSickenberg/polaris/commit/352c4e838a5442dc11f333685383ea37bdbe1775))
+* **dashboard:** show the midnight of the reference projection, not when it was computed ([92e8ff1](https://github.com/RSickenberg/polaris/commit/92e8ff18b1ce2ace744bb5e2602f33ad65873a04))
+* **dashboard:** show the pace comparison before the budget one ([a7d8142](https://github.com/RSickenberg/polaris/commit/a7d8142dbcf95f6c7b4bd3f8926225da8c83ad83))
+* **extension:** add PublicRequestMatcher and move the vehicle list to /dashboard ([4d65e45](https://github.com/RSickenberg/polaris/commit/4d65e4595c1c668fb0a3a11b3212759d4e19b191))
+* **lease:** order the lease cards projection first on a phone ([0916276](https://github.com/RSickenberg/polaris/commit/091627633545f6ea5828189da83019d156c42545))
+* **make:** add dump and import targets for the database ([9905b78](https://github.com/RSickenberg/polaris/commit/9905b787c38b279b470ddc88cd8113a6dd8a0aa8))
+
+### Bug Fixes
+
+* **ci:** inherit secrets when calling docker.yml from nightly and release workflows ([2647621](https://github.com/RSickenberg/polaris/commit/264762118ce626ea36ae2fd815312bc7701ceed6))
+* **dashboard:** keep the chart's own y axis for windows that reach the end of the data ([a992690](https://github.com/RSickenberg/polaris/commit/a992690c41c073363241eb8446e12a3c07aec6bb))
+* **dashboard:** keep the chart's own y axis when the zoom shows all the data ([b61100b](https://github.com/RSickenberg/polaris/commit/b61100b7be9628e438c9c10592a19c8615dbac91))
+* **dashboard:** tidy the comparison panels ([3ee9a33](https://github.com/RSickenberg/polaris/commit/3ee9a3341d2dcdfb8e803c038eb835e3b186f537))
+* **reading:** move an imported verification to the latest reading and recalculate snapshots ([9a5129b](https://github.com/RSickenberg/polaris/commit/9a5129b569dd075f6ca9bc60dd2a9e36fc9fd7b8))
+
 ## [0.6.0](https://github.com/RSickenberg/polaris/compare/v0.5.0...v0.6.0) (2026-11-10)
 
 ### Features
