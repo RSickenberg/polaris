@@ -2,15 +2,17 @@
     ## string The translated meaning of a gap with a plus (more than expected).
     over,
     ## string The translated meaning of a gap with a minus (less than expected).
-    under
+    under,
+    ## bool True when a plus is good news (the margin): the colours are swapped.
+    higherIsBetter = false
 -%}
-{# What the colour and the sign of a gap mean: red with a plus, green with a minus, each with its arrow. #}
+{# What the colour and the sign of a gap mean: red with a plus, green with a minus (the other way round for the margin), each with its arrow. #}
 <div class="flex flex-col gap-3" data-help-gap>
-    <div class="flex items-center gap-3 rounded-xl border border-danger/30 bg-danger-surface p-3 text-danger-foreground">
+    <div class="flex items-center gap-3 rounded-xl border p-3 {{ higherIsBetter ? 'border-success/30 bg-success-surface text-success-foreground' : 'border-danger/30 bg-danger-surface text-danger-foreground' }}">
         <twig:ux:icon name="lucide:trending-up" class="size-5 shrink-0" aria-hidden="true" />
         <p class="text-sm text-pretty"><strong class="font-semibold">+</strong> {{ over }}</p>
     </div>
-    <div class="flex items-center gap-3 rounded-xl border border-success/30 bg-success-surface p-3 text-success-foreground">
+    <div class="flex items-center gap-3 rounded-xl border p-3 {{ higherIsBetter ? 'border-danger/30 bg-danger-surface text-danger-foreground' : 'border-success/30 bg-success-surface text-success-foreground' }}">
         <twig:ux:icon name="lucide:trending-down" class="size-5 shrink-0" aria-hidden="true" />
         <p class="text-sm text-pretty"><strong class="font-semibold">−</strong> {{ under }}</p>
     </div>

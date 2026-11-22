@@ -202,13 +202,13 @@
         <source>compare.pace.basis</source>
         <target>Parcouru / attendu à votre rythme habituel</target>
       </trans-unit>
-      <trans-unit id="compare.projected_end.title">
-        <source>compare.projected_end.title</source>
-        <target>Projeté à la fin du leasing</target>
+      <trans-unit id="compare.margin.title">
+        <source>compare.margin.title</source>
+        <target>Autorisé à ce jour</target>
       </trans-unit>
-      <trans-unit id="compare.projected_end.basis">
-        <source>compare.projected_end.basis</source>
-        <target>Estimation aujourd’hui / au début de la période</target>
+      <trans-unit id="compare.margin.basis">
+        <source>compare.margin.basis</source>
+        <target>Marge aujourd’hui / au début de la période</target>
       </trans-unit>
       <trans-unit id="compare.period.today">
         <source>compare.period.today</source>
@@ -440,35 +440,35 @@ Polaris enregistre cette moyenne chaque jour à minuit. Si aucune donnée n’es
         <source>help.compare_pace.percent</source>
         <target>Le pourcentage indique l’écart entre les deux valeurs, exprimé par rapport à votre rythme habituel. Il n’apparaît qu’après 6 heures écoulées dans la période, afin d’éviter des variations trop importantes.</target>
       </trans-unit>
-      <trans-unit id="help.compare_projected_end.answer">
-        <source>help.compare_projected_end.answer</source>
-        <target>Votre estimation de fin de leasing s’améliore-t-elle ou se dégrade-t-elle ?</target>
+      <trans-unit id="help.compare_margin.answer">
+        <source>help.compare_margin.answer</source>
+        <target>Votre marge sur le kilométrage autorisé augmente-t-elle ou diminue-t-elle ?</target>
       </trans-unit>
-      <trans-unit id="help.compare_projected_end.actual">
-        <source>help.compare_projected_end.actual</source>
-        <target>Estimation actuelle</target>
+      <trans-unit id="help.compare_margin.actual">
+        <source>help.compare_margin.actual</source>
+        <target>Marge actuelle</target>
       </trans-unit>
-      <trans-unit id="help.compare_projected_end.expected">
-        <source>help.compare_projected_end.expected</source>
-        <target>Estimation au début de la période</target>
+      <trans-unit id="help.compare_margin.expected">
+        <source>help.compare_margin.expected</source>
+        <target>Marge au début de la période</target>
       </trans-unit>
-      <trans-unit id="help.compare_projected_end.over">
-        <source>help.compare_projected_end.over</source>
-        <target>L’estimation a augmenté : vous devriez parcourir davantage de kilomètres d’ici la fin du leasing.</target>
+      <trans-unit id="help.compare_margin.over">
+        <source>help.compare_margin.over</source>
+        <target>La marge a augmenté : vous avez davantage d’avance sur le kilométrage autorisé qu’au début de la période.</target>
       </trans-unit>
-      <trans-unit id="help.compare_projected_end.under">
-        <source>help.compare_projected_end.under</source>
-        <target>L’estimation a diminué : vous devriez parcourir moins de kilomètres d’ici la fin du leasing.</target>
+      <trans-unit id="help.compare_margin.under">
+        <source>help.compare_margin.under</source>
+        <target>La marge a diminué : vous êtes plus près du kilométrage autorisé, ou plus au-dessus, qu’au début de la période.</target>
       </trans-unit>
-      <trans-unit id="help.compare_projected_end.reference">
-        <source>help.compare_projected_end.reference</source>
-        <target>Chaque jour à minuit, Polaris estime le nombre total de kilomètres que vous aurez parcourus à la fin de votre leasing et enregistre cette estimation.
+      <trans-unit id="help.compare_margin.reference">
+        <source>help.compare_margin.reference</source>
+        <target>Chaque jour à minuit, Polaris enregistre le kilométrage autorisé à ce jour et la distance parcourue ; leur différence est votre marge (négative en cas de dépassement).
 
-Si aucune estimation n’est disponible pour le premier jour d’une période, la ligne indique « Historique insuffisant ».</target>
+Si aucun instantané n’est disponible pour le premier jour d’une période, la ligne indique « Historique insuffisant ».</target>
       </trans-unit>
-      <trans-unit id="help.compare_projected_end.percent">
-        <source>help.compare_projected_end.percent</source>
-        <target>Le pourcentage indique l’évolution de l’estimation par rapport à sa valeur au début de la période.</target>
+      <trans-unit id="help.compare_margin.percent">
+        <source>help.compare_margin.percent</source>
+        <target>Le pourcentage indique l’évolution de la marge par rapport à sa valeur au début de la période.</target>
       </trans-unit>
       <trans-unit id="page.debug.title">
         <source>page.debug.title</source>

@@ -23,7 +23,7 @@ final readonly class ComparisonPanelsMapper
         return new ComparisonPanels(
             $this->rows($comparison->budget),
             $this->rows($comparison->pace),
-            $this->rows($comparison->projectedEnd),
+            $this->rows($comparison->margin),
             $comparison->recalculating,
             $comparison->snapshotCutoffAt,
         );

@@ -25,11 +25,11 @@ final readonly class PredictionComparison
          */
         public array $pace,
         /**
-         * The distance projected at the lease end now against the one the snapshot projected.
+         * The margin left on the allowance now (allowed to date minus driven) against the snapshot's margin.
          *
          * @var list<WindowComparison>
          */
-        public array $projectedEnd,
+        public array $margin,
         /**
          * True while the snapshots are being recalculated after an edit of the lease terms: the rows that need them
          * are left out, so that old and new terms never mix.

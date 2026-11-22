@@ -13,9 +13,9 @@ use Polaris\Shared\Domain\DistanceDelta;
 final readonly class ComparisonFigures
 {
     public function __construct(
-        public Distance $actual,
-        public Distance $expected,
-        /** Positive when more than expected. */
+        public Distance|DistanceDelta $actual,
+        public Distance|DistanceDelta $expected,
+        /** Positive when more than expected (for the margin panel: when the margin grew). */
         public DistanceDelta $delta,
         /** The delta as a share of the expected distance (0.1 is 10 %); null when nothing was expected. */
         public ?float $ratio,

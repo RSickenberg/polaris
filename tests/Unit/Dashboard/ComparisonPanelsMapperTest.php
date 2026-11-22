@@ -31,7 +31,7 @@ final class ComparisonPanelsMapperTest extends TestCase
 
         $panels = new ComparisonPanelsMapper()->map(new PredictionComparison($rows, $rows, $rows));
 
-        foreach ([$panels->budget, $panels->pace, $panels->projectedEnd] as $panel) {
+        foreach ([$panels->budget, $panels->pace, $panels->margin] as $panel) {
             self::assertSame(
                 [
                     ComparisonPeriod::Today,

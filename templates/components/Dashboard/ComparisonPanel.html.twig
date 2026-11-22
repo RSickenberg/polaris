@@ -10,7 +10,9 @@
     ## string|null The key of the explanation of the panel (`help.<key>.answer` and `dashboard/help/<key>.html.twig`), shown in a dialog behind an info button.
     help = null,
     ## bool True while the past snapshots are recalculated after an edit of the lease terms: the rows without figures say so.
-    recalculating = false
+    recalculating = false,
+    ## bool True when more than before is good news (the margin): the colours of the gap are swapped.
+    higherIsBetter = false
 -%}
 {# A card with one row per period: the period with the two figures under it (what happened, what was expected), and the gap on the right, as large as the period. A positive gap is more than expected: the gap is a red pill, and a gap of zero or less a green one. Only the digits are monospaced. Before any period has history (the first days after deploy), one line says so instead of four empty rows. #}
 {% set withHistory = rows|filter(row => row.figures is not null or row.awaitingReading)|length > 0 %}
@@ -84,8 +86,8 @@
                                     {% elseif figures.delta.metres > 0 %}
                                         {% set sign = '+' %}
                                     {% endif %}
-                                    {# Every panel compares a distance driven or projected: more than expected is bad news (red), the same or less is good news (green). #}
-                                    {% set good = figures.delta.metres <= 0 %}
+                                    {# A distance driven: more than expected is bad news (red), the same or less is good news (green). The margin is the other way round. #}
+                                    {% set good = higherIsBetter ? figures.delta.metres >= 0 : figures.delta.metres <= 0 %}
                                     {% set tone = good ? 'border-success/30 bg-success-surface text-success-foreground' : 'border-danger/30 bg-danger-surface text-danger-foreground' %}
                                     {# The arrow says it too, so the colour is never alone: down is under the expectation, up is over it, a dash is on it. #}
                                     {% set trend = 'lucide:minus' %}

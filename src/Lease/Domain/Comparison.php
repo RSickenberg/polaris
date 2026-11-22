@@ -14,8 +14,8 @@ use Polaris\Shared\Domain\DistanceDelta;
 final readonly class Comparison
 {
     private function __construct(
-        public Distance $actual,
-        public Distance $expected,
+        public Distance|DistanceDelta $actual,
+        public Distance|DistanceDelta $expected,
         public DistanceDelta $delta,
         /** The delta as a share of the expected distance (0.1 is 10 %); null when nothing was expected. */
         public ?float $ratio,
@@ -31,6 +31,22 @@ final readonly class Comparison
             $expected,
             $delta,
             0 === $expected->metres() ? null : $delta->metres() / $expected->metres(),
+        );
+    }
+
+    /**
+     * A margin now against a margin then: both are signed, and the delta is how much the margin grew (positive) or
+     * shrank. The share is taken over the size of the margin then, whatever its sign.
+     */
+    public static function ofMargins(DistanceDelta $now, DistanceDelta $then): self
+    {
+        $change = $now->metres() - $then->metres();
+
+        return new self(
+            $now,
+            $then,
+            DistanceDelta::fromMetres($change),
+            0 === $then->metres() ? null : $change / abs($then->metres()),
         );
     }
 

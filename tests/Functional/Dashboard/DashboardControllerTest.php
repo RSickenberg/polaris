@@ -294,7 +294,7 @@ final class DashboardControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
 
-        foreach (['budget', 'pace', 'projected_end'] as $panel) {
+        foreach (['budget', 'pace', 'margin'] as $panel) {
             self::assertSelectorExists(\sprintf('[data-comparison=%s]', $panel));
             // No snapshot has been saved yet: one line says so instead of four rows without figures.
             self::assertSelectorCount(0, \sprintf('[data-comparison=%s] tr[data-period]', $panel));
@@ -342,7 +342,7 @@ final class DashboardControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('[data-as-of] [data-snapshot-at]');
 
-        foreach (['budget', 'pace', 'projected_end'] as $panel) {
+        foreach (['budget', 'pace', 'margin'] as $panel) {
             $today = \sprintf('[data-comparison=%s] [data-period=today]', $panel);
             self::assertSelectorExists($today . ' [data-figure=delta]');
             self::assertSelectorNotExists($today . ' [data-no-history]');

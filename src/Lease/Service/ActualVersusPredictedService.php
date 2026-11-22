@@ -13,6 +13,7 @@ use Polaris\Lease\Domain\PredictionComparison;
 use Polaris\Lease\Domain\SnapshotFigures;
 use Polaris\Lease\Domain\SnapshotPolicy;
 use Polaris\Lease\Service\Exception\LeaseTermsRejected;
+use Polaris\Shared\Domain\DistanceDelta;
 use Polaris\Shared\Domain\OwnerMidnight;
 use Polaris\Vehicle\Entity\Vehicle;
 use Psr\Clock\ClockInterface;
@@ -73,7 +74,7 @@ final readonly class ActualVersusPredictedService
 
         foreach ($history as $point) {
             $snapshots[$point->localDay->format('Y-m-d')] = new SnapshotFigures(
-                $point->projectedAtEnd,
+                DistanceDelta::between($point->driven, $point->allowedToDate),
                 $point->dailyBudget,
                 $point->blendedPace
             );
@@ -112,7 +113,7 @@ final readonly class ActualVersusPredictedService
         return new PredictionComparison(
             $comparison->budget,
             $comparison->pace,
-            $comparison->projectedEnd,
+            $comparison->margin,
             $recalculating,
             $latestCutoff,
         );
@@ -135,7 +136,7 @@ final readonly class ActualVersusPredictedService
         }
 
         return new SnapshotFigures(
-            $assessment->projection->projectedAtEnd,
+            $assessment->projection->margin,
             $assessment->budget->perDay,
             $assessment->projection->blendedPace,
             live: true,
