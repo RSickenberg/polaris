@@ -64,11 +64,11 @@ final class PredictionComparerTest extends TestCase
         self::assertNull($comparison->pace[3]->comparison);
         self::assertSame([3_050_000, 0, 3_050_000], $this->figures($comparison->pace[4]));
 
-        // Projected end: 36,000,000 m now against 36,500,000 m projected this morning.
-        self::assertSame([36_000_000, 36_500_000, -500_000], $this->figures($comparison->projectedEnd[0]));
-        self::assertEqualsWithDelta(-500_000 / 36_500_000, $comparison->projectedEnd[0]->comparison?->ratio, 1e-12);
-        self::assertSame([36_000_000, 36_000_000, 0], $this->figures($comparison->projectedEnd[2]));
-        self::assertNull($comparison->projectedEnd[3]->comparison);
+        // Margin: 36,000,000 m now against 36,500,000 m this morning.
+        self::assertSame([36_000_000, 36_500_000, -500_000], $this->figures($comparison->margin[0]));
+        self::assertEqualsWithDelta(-500_000 / 36_500_000, $comparison->margin[0]->comparison?->ratio, 1e-12);
+        self::assertSame([36_000_000, 36_000_000, 0], $this->figures($comparison->margin[2]));
+        self::assertNull($comparison->margin[3]->comparison);
     }
 
     public function testTodayCanBeMeasuredAgainstTheWholeDayAndTheOtherWindowsStayTheSame(): void
@@ -89,9 +89,9 @@ final class PredictionComparerTest extends TestCase
         // The pace: 80,000 m a day.
         self::assertSame([50_000, 80_000, -30_000], $this->figures($wholeDay->pace[0]));
         self::assertEqualsWithDelta(-0.375, $wholeDay->pace[0]->comparison?->ratio, 1e-12);
-        // The 7 day window and the projected end do not move.
+        // The 7 day window and the margin do not move.
         self::assertSame($this->figures($prorated->budget[2]), $this->figures($wholeDay->budget[2]));
-        self::assertSame($this->figures($prorated->projectedEnd[0]), $this->figures($wholeDay->projectedEnd[0]));
+        self::assertSame($this->figures($prorated->margin[0]), $this->figures($wholeDay->margin[0]));
     }
 
     public function testTheWholeDayIsTheLengthOfTheLocalDayOnADaylightSavingChange(): void
@@ -114,7 +114,7 @@ final class PredictionComparerTest extends TestCase
 
         $comparison = $this->compare($latest, 36_000_000, []);
 
-        foreach ([$comparison->budget, $comparison->pace, $comparison->projectedEnd] as $rows) {
+        foreach ([$comparison->budget, $comparison->pace, $comparison->margin] as $rows) {
             self::assertSame(
                 [
                     ComparisonWindow::Today,
@@ -157,7 +157,7 @@ final class PredictionComparerTest extends TestCase
             now: '2026-07-10 02:00:00',
         );
 
-        foreach ([$comparison->budget, $comparison->pace, $comparison->projectedEnd] as $rows) {
+        foreach ([$comparison->budget, $comparison->pace, $comparison->margin] as $rows) {
             self::assertTrue($rows[0]->awaitingReading);
             self::assertNull($rows[0]->comparison, 'Yesterday\'s figures are not today\'s.');
             self::assertFalse($rows[1]->awaitingReading);
@@ -179,8 +179,8 @@ final class PredictionComparerTest extends TestCase
         self::assertSame([100_000, 90_000, 10_000], $this->figures($comparison->budget[1]));
         self::assertSame([100_000, 80_000, 20_000], $this->figures($comparison->pace[1]));
         self::assertEqualsWithDelta(10_000 / 90_000, $comparison->budget[1]->comparison?->ratio, 1e-12);
-        // The estimate moved from 36,200,000 m (start of the 9th) to 36,500,000 m (start of the 10th): during the day.
-        self::assertSame([36_500_000, 36_200_000, 300_000], $this->figures($comparison->projectedEnd[1]));
+        // The margin moved from 36,200,000 m (start of the 9th) to 36,500,000 m (start of the 10th): during the day.
+        self::assertSame([36_500_000, 36_200_000, 300_000], $this->figures($comparison->margin[1]));
     }
 
     public function testYesterdayStopsAtTheLatestReadingWhenItCameBeforeMidnight(): void
@@ -211,8 +211,8 @@ final class PredictionComparerTest extends TestCase
         self::assertNull($comparison->budget[0]->comparison?->ratio);
         self::assertNull($comparison->pace[0]->comparison?->ratio);
         self::assertFalse($comparison->budget[0]->awaitingReading);
-        // The projected end does not depend on the length of the window: its share stays.
-        self::assertNotNull($comparison->projectedEnd[0]->comparison?->ratio);
+        // The margin does not depend on the length of the window: its share stays.
+        self::assertNotNull($comparison->margin[0]->comparison?->ratio);
     }
 
     public function testThePercentageComesBackOnceSixHoursOfTheWindowHavePassed(): void
@@ -297,9 +297,9 @@ final class PredictionComparerTest extends TestCase
         // 80,000 m a day over 2.5 days expects 200,000 m.
         self::assertSame([250_000, 200_000, 50_000], $this->figures($comparison->pace[0]));
         self::assertSame(2, $comparison->pace[0]->fallbackDays);
-        // The projection of the 8th, not of the 1st.
-        self::assertSame([36_000_000, 36_500_000, -500_000], $this->figures($comparison->projectedEnd[0]));
-        self::assertSame(2, $comparison->projectedEnd[0]->fallbackDays);
+        // The margin of the 8th, not of the 1st.
+        self::assertSame([36_000_000, 36_500_000, -500_000], $this->figures($comparison->margin[0]));
+        self::assertSame(2, $comparison->margin[0]->fallbackDays);
     }
 
     public function testTodayKeepsItsOwnSnapshotWhenThereIsOneAndTheOtherWindowsNeverFallBack(): void
@@ -387,11 +387,11 @@ final class PredictionComparerTest extends TestCase
      */
     private function compare(
         string $latest,
-        int $projectedAtEnd,
+        int $margin,
         array $snapshots,
         ?string $now = null,
     ): PredictionComparison {
-        return $this->compareIn('UTC', $latest, $snapshots, $projectedAtEnd, $now);
+        return $this->compareIn('UTC', $latest, $snapshots, $margin, $now);
     }
 
     /**
@@ -401,13 +401,13 @@ final class PredictionComparerTest extends TestCase
         string $timeZone,
         string $latest,
         array $snapshots,
-        int $projectedAtEnd = 1,
+        int $margin = 1,
         ?string $now = null,
         bool $todayWholeDay = false,
     ): PredictionComparison {
         return new PredictionComparer()->compare(
             $this->timeline($latest),
-            $this->projection($latest, $projectedAtEnd),
+            $this->projection($latest, $margin),
             $timeZone,
             $snapshots,
             CarbonImmutable::parse($now ?? $latest, 'UTC'),
@@ -415,10 +415,10 @@ final class PredictionComparerTest extends TestCase
         );
     }
 
-    private static function snapshot(int $projectedAtEnd, int $dailyBudget, ?float $metresPerDay): SnapshotFigures
+    private static function snapshot(int $margin, int $dailyBudget, ?float $metresPerDay): SnapshotFigures
     {
         return new SnapshotFigures(
-            Distance::fromMetres($projectedAtEnd),
+            DistanceDelta::fromMetres($margin),
             Distance::fromMetres($dailyBudget),
             null === $metresPerDay ? null : Pace::fromMetresPerDay($metresPerDay),
         );
@@ -435,7 +435,7 @@ final class PredictionComparerTest extends TestCase
         return OdometerTimeline::fromSamples($start, Distance::fromMetres(0), [$sample], $at->addDay());
     }
 
-    private function projection(string $latest, int $projectedAtEnd): Projection
+    private function projection(string $latest, int $margin): Projection
     {
         $pace = Pace::fromMetresPerDay((float) self::METRES_PER_DAY);
 
@@ -443,11 +443,11 @@ final class PredictionComparerTest extends TestCase
             CarbonImmutable::parse($latest, 'UTC'),
             Distance::fromMetres(1),
             Distance::fromMetres(1),
-            DistanceDelta::between(Distance::fromMetres(1), Distance::fromMetres(1)),
+            DistanceDelta::fromMetres($margin),
             $pace,
             null,
             $pace,
-            Distance::fromMetres($projectedAtEnd),
+            Distance::fromMetres(1),
         );
     }
 }

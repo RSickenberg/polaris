@@ -6,6 +6,7 @@ namespace Polaris\Lease\Domain;
 
 use Carbon\CarbonImmutable;
 use Polaris\Shared\Domain\Distance;
+use Polaris\Shared\Domain\DistanceDelta;
 use Polaris\Shared\Domain\OwnerMidnight;
 
 /**
@@ -16,7 +17,7 @@ use Polaris\Shared\Domain\OwnerMidnight;
  * one). A window with no snapshot, or that starts before the lease did, has no result ("not enough history").
  *
  * "Yesterday" is the closed previous day: its midnight to the owner's current midnight (or the latest reading when that
- * is earlier), against the snapshot of that day; its projected end is the snapshot of today's midnight against it.
+ * is earlier), against the snapshot of that day; its margin is the snapshot of today's midnight against it.
  *
  * "Today" with no reading since the owner's current midnight has nothing to measure: it is marked
  * {@see WindowComparison::$awaitingReading} instead of showing the figures of an earlier day.
@@ -52,7 +53,7 @@ final readonly class PredictionComparer
         $lastMidnight = OwnerMidnight::latestAt($now, $timeZone);
         $budget = [];
         $pace = [];
-        $projectedEnd = [];
+        $margin = [];
 
         foreach (ComparisonWindow::cases() as $window) {
             $day = $lastMidnight->localDay->subDays($window->days());
@@ -61,7 +62,7 @@ final readonly class PredictionComparer
                 $waiting = new WindowComparison($window, null, awaitingReading: true);
                 $budget[] = $waiting;
                 $pace[] = $waiting;
-                $projectedEnd[] = $waiting;
+                $margin[] = $waiting;
 
                 continue;
             }
@@ -103,20 +104,20 @@ final readonly class PredictionComparer
                 $fallbackDays,
                 $figures->live ?? false,
             );
-            $projectedEnd[] = new WindowComparison(
+            $margin[] = new WindowComparison(
                 $window,
-                $this->againstProjectedEnd(
+                $this->againstMargin(
                     $figures,
                     ComparisonWindow::Yesterday === $window
-                        ? ($snapshots[$lastMidnight->localDay->format('Y-m-d')]->projectedAtEnd ?? null)
-                        : $latest->projectedAtEnd,
+                        ? ($snapshots[$lastMidnight->localDay->format('Y-m-d')]->margin ?? null)
+                        : $latest->margin,
                 ),
                 $fallbackDays,
                 $figures->live ?? false,
             );
         }
 
-        return new PredictionComparison($budget, $pace, $projectedEnd);
+        return new PredictionComparison($budget, $pace, $margin);
     }
 
     /**
@@ -166,13 +167,13 @@ final readonly class PredictionComparer
         return $seconds < self::MIN_SECONDS_FOR_RATIO ? $comparison->withoutRatio() : $comparison;
     }
 
-    private function againstProjectedEnd(?SnapshotFigures $figures, ?Distance $projectedNow): ?Comparison
+    private function againstMargin(?SnapshotFigures $figures, ?DistanceDelta $marginNow): ?Comparison
     {
-        if (null === $figures || null === $projectedNow) {
+        if (null === $figures || null === $marginNow) {
             return null;
         }
 
-        return Comparison::of($projectedNow, $figures->projectedAtEnd);
+        return Comparison::ofMargins($marginNow, $figures->margin);
     }
 
     /**

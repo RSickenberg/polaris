@@ -60,9 +60,9 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
         $this->lease();
         $this->reading('2026-07-10 12:00:00', 19_050);
         // Today started at 00:00, 12 hours before the reading: 50 km driven.
-        $this->snapshot('2026-07-10', projectedAtEndKm: 36_000, dailyBudgetKm: 90, paceMetresPerDay: 80_000.0);
+        $this->snapshot('2026-07-10', marginKm: 10, dailyBudgetKm: 90, paceMetresPerDay: 80_000.0);
         // 7 days before: 7.5 days, 750 km driven; the budget expects exactly that.
-        $this->snapshot('2026-07-03', projectedAtEndKm: 36_500, dailyBudgetKm: 100, paceMetresPerDay: 100_000.0);
+        $this->snapshot('2026-07-03', marginKm: 0, dailyBudgetKm: 100, paceMetresPerDay: 100_000.0);
 
         $result = $this->comparison->compare($this->vehicle);
 
@@ -74,8 +74,8 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
         self::assertSame([50_000, 40_000, 10_000], $this->figures($pace));
         $week = $result->budget[2]->comparison;
         self::assertSame([750_000, 750_000, 0], $this->figures($week));
-        // The projection now is 36,500 km; this morning's said 36,000 km.
-        self::assertSame(500_000, $result->projectedEnd[0]->comparison?->delta->metres());
+        // The margin now is 0 km (the car drives exactly the allowance); this morning's was 10 km.
+        self::assertSame(-10_000, $result->margin[0]->comparison?->delta->metres());
         self::assertNull($result->budget[3]->comparison, 'No snapshot 14 days before.');
         self::assertNull($result->budget[4]->comparison, 'No snapshot 30 days before.');
     }
@@ -86,7 +86,7 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
         $this->reading('2026-07-02 12:00:00', 18_250);
         $this->reading('2026-07-10 12:00:00', 19_050);
         // A row taken under the original terms: 90 km a day, projecting 36,000 km.
-        $this->snapshot('2026-07-03', projectedAtEndKm: 36_000, dailyBudgetKm: 90, paceMetresPerDay: 100_000.0);
+        $this->snapshot('2026-07-03', marginKm: 36_000, dailyBudgetKm: 90, paceMetresPerDay: 100_000.0);
         self::assertNotNull($this->comparison->compare($this->vehicle)?->budget[2]->comparison, 'Before the edit.');
 
         // Half the allowance: the budget and the projection of every past day change.
@@ -96,7 +96,7 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
         self::assertNotNull($stale);
         self::assertTrue($stale->recalculating);
         self::assertNull($stale->budget[2]->comparison, 'The row of 7 days ago is on other terms, so it is not shown.');
-        self::assertNull($stale->projectedEnd[2]->comparison);
+        self::assertNull($stale->margin[2]->comparison);
         self::assertNotNull($stale->budget[0]->comparison, 'Today is rebuilt under the current terms.');
         self::assertTrue($stale->budget[0]->live);
 
@@ -118,8 +118,8 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
     {
         $this->lease();
         $this->reading('2026-07-09 12:00:00', 18_950);
-        $this->snapshot('2026-07-10', projectedAtEndKm: 36_000, dailyBudgetKm: 90, paceMetresPerDay: 80_000.0);
-        $this->snapshot('2026-07-03', projectedAtEndKm: 36_500, dailyBudgetKm: 100, paceMetresPerDay: 100_000.0);
+        $this->snapshot('2026-07-10', marginKm: 36_000, dailyBudgetKm: 90, paceMetresPerDay: 80_000.0);
+        $this->snapshot('2026-07-03', marginKm: 36_500, dailyBudgetKm: 100, paceMetresPerDay: 100_000.0);
         // 02:00 on the 10th: the reading of the evening before is not today's.
         self::mockTime('2026-07-10 02:00:00 UTC');
 
@@ -138,7 +138,7 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
         $this->reading('2026-07-09 12:00:00', 19_000);
         $this->reading('2026-07-10 12:00:00', 19_050);
         // An older snapshot exists, but today must not fall back on it: the job's own figures are rebuilt.
-        $this->snapshot('2026-07-08', projectedAtEndKm: 30_000, dailyBudgetKm: 10, paceMetresPerDay: 10_000.0);
+        $this->snapshot('2026-07-08', marginKm: 30_000, dailyBudgetKm: 10, paceMetresPerDay: 10_000.0);
 
         $result = $this->comparison->compare($this->vehicle);
 
@@ -148,7 +148,7 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
         // The odometer is linear between the readings: 19,025 km at midnight, so 25 km driven today.
         self::assertSame(25_000, $result->budget[0]->comparison?->actual->metres());
         self::assertNotNull($result->pace[0]->comparison);
-        self::assertNotNull($result->projectedEnd[0]->comparison);
+        self::assertNotNull($result->margin[0]->comparison);
         self::assertNull($result->budget[2]->comparison, 'The other windows still need a stored snapshot.');
         $this->assertNoSnapshotStoredFor('2026-07-10');
     }
@@ -168,7 +168,7 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
     {
         $this->lease();
         $this->reading('2026-07-10 12:00:00', 19_050);
-        $this->snapshot('2026-07-10', projectedAtEndKm: 36_000, dailyBudgetKm: 90, paceMetresPerDay: null);
+        $this->snapshot('2026-07-10', marginKm: 36_000, dailyBudgetKm: 90, paceMetresPerDay: null);
 
         $result = $this->comparison->compare($this->vehicle);
 
@@ -233,7 +233,7 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
 
     private function snapshot(
         string $localDay,
-        int $projectedAtEndKm,
+        int $marginKm,
         int $dailyBudgetKm,
         ?float $paceMetresPerDay,
     ): void {
@@ -248,8 +248,8 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
             $midnight->addMinutes(5),
             $midnight->subHours(1),
             Distance::fromKilometres(1),
+            Distance::fromKilometres(1 + $marginKm),
             Distance::fromKilometres(1),
-            Distance::fromKilometres($projectedAtEndKm),
             Distance::fromKilometres($dailyBudgetKm),
             RiskLevel::Ok,
             $pace ?? Pace::fromMetresPerDay(1.0),

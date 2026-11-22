@@ -25,11 +25,11 @@ final readonly class ComparisonPanels
          */
         public array $pace,
         /**
-         * Distance projected at the lease end against the one projected by the snapshot.
+         * Margin left on the allowance now against the margin of the snapshot.
          *
          * @var list<ComparisonRow>
          */
-        public array $projectedEnd,
+        public array $margin,
         /** True while the snapshots are recalculated after an edit of the lease terms: the empty rows say so. */
         public bool $recalculating = false,
         /** The midnight the newest stored snapshot the rows compare with describes; null when there is none. */

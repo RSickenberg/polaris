@@ -163,9 +163,9 @@ final class ComparisonPanelTest extends KernelTestCase
         self::assertStringContainsString('Driving hours', $dialog->filter('[data-help-details]')->text());
     }
 
-    public function testTheProjectedEndExplanationDoesNotTalkAboutTheNight(): void
+    public function testTheMarginExplanationDoesNotTalkAboutTheNight(): void
     {
-        $dialog = $this->panel('en', help: 'compare_projected_end')->filter('dialog');
+        $dialog = $this->panel('en', help: 'compare_margin')->filter('dialog');
 
         self::assertCount(4, $dialog->filter('[data-help-section]'));
         self::assertStringNotContainsString('Driving hours', $dialog->filter('[data-help-details]')->text());

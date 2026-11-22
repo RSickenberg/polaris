@@ -202,13 +202,13 @@
         <source>compare.pace.basis</source>
         <target>Driven / expected at your usual pace</target>
       </trans-unit>
-      <trans-unit id="compare.projected_end.title">
-        <source>compare.projected_end.title</source>
-        <target>Projected at lease end</target>
+      <trans-unit id="compare.margin.title">
+        <source>compare.margin.title</source>
+        <target>Allowed to date</target>
       </trans-unit>
-      <trans-unit id="compare.projected_end.basis">
-        <source>compare.projected_end.basis</source>
-        <target>Estimate today / at the start of the period</target>
+      <trans-unit id="compare.margin.basis">
+        <source>compare.margin.basis</source>
+        <target>Margin today / at the start of the period</target>
       </trans-unit>
       <trans-unit id="compare.period.today">
         <source>compare.period.today</source>
@@ -440,35 +440,35 @@ Polaris records this average every day at midnight. If no data is available for 
         <source>help.compare_pace.percent</source>
         <target>The percentage shows the gap between the two values, relative to your usual pace. It only appears once 6 hours of the period have passed, to avoid swings that are too large.</target>
       </trans-unit>
-      <trans-unit id="help.compare_projected_end.answer">
-        <source>help.compare_projected_end.answer</source>
-        <target>Is your end-of-lease estimate improving or getting worse?</target>
+      <trans-unit id="help.compare_margin.answer">
+        <source>help.compare_margin.answer</source>
+        <target>Is your margin on the allowance growing or shrinking?</target>
       </trans-unit>
-      <trans-unit id="help.compare_projected_end.actual">
-        <source>help.compare_projected_end.actual</source>
-        <target>Current estimate</target>
+      <trans-unit id="help.compare_margin.actual">
+        <source>help.compare_margin.actual</source>
+        <target>Current margin</target>
       </trans-unit>
-      <trans-unit id="help.compare_projected_end.expected">
-        <source>help.compare_projected_end.expected</source>
-        <target>Estimate at the start of the period</target>
+      <trans-unit id="help.compare_margin.expected">
+        <source>help.compare_margin.expected</source>
+        <target>Margin at the start of the period</target>
       </trans-unit>
-      <trans-unit id="help.compare_projected_end.over">
-        <source>help.compare_projected_end.over</source>
-        <target>The estimate went up: you should drive more kilometres by the end of the lease.</target>
+      <trans-unit id="help.compare_margin.over">
+        <source>help.compare_margin.over</source>
+        <target>The margin grew: you are further ahead of the allowance than at the start of the period.</target>
       </trans-unit>
-      <trans-unit id="help.compare_projected_end.under">
-        <source>help.compare_projected_end.under</source>
-        <target>The estimate went down: you should drive fewer kilometres by the end of the lease.</target>
+      <trans-unit id="help.compare_margin.under">
+        <source>help.compare_margin.under</source>
+        <target>The margin shrank: you are closer to the allowance, or further over it, than at the start of the period.</target>
       </trans-unit>
-      <trans-unit id="help.compare_projected_end.reference">
-        <source>help.compare_projected_end.reference</source>
-        <target>Every day at midnight, Polaris estimates the total number of kilometres you will have driven by the end of your lease and records that estimate.
+      <trans-unit id="help.compare_margin.reference">
+        <source>help.compare_margin.reference</source>
+        <target>Every day at midnight, Polaris records the allowance earned so far and the distance driven; their difference is your margin (negative when over the allowance).
 
-If no estimate is available for the first day of a period, the row says “Not enough history”.</target>
+If no snapshot is available for the first day of a period, the row says “Not enough history”.</target>
       </trans-unit>
-      <trans-unit id="help.compare_projected_end.percent">
-        <source>help.compare_projected_end.percent</source>
-        <target>The percentage shows how the estimate changed compared with its value at the start of the period.</target>
+      <trans-unit id="help.compare_margin.percent">
+        <source>help.compare_margin.percent</source>
+        <target>The percentage shows how the margin changed compared with its value at the start of the period.</target>
       </trans-unit>
       <trans-unit id="page.debug.title">
         <source>page.debug.title</source>

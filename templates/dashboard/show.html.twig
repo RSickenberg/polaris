@@ -194,12 +194,13 @@
                         help="compare_budget"
                     />
                     <twig:Dashboard:ComparisonPanel
-                        key="projected_end"
-                        title="{{ 'compare.projected_end.title'|trans(domain='dashboard') }}"
-                        basis="{{ 'compare.projected_end.basis'|trans(domain='dashboard') }}"
-                        :rows="dashboard.comparison.projectedEnd"
+                        key="margin"
+                        title="{{ 'compare.margin.title'|trans(domain='dashboard') }}"
+                        basis="{{ 'compare.margin.basis'|trans(domain='dashboard') }}"
+                        :rows="dashboard.comparison.margin"
                         :recalculating="dashboard.comparison.recalculating"
-                        help="compare_projected_end"
+                        :higherIsBetter="true"
+                        help="compare_margin"
                     />
                 </div>
             {% endif %}

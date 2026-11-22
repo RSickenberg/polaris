@@ -17,6 +17,11 @@ final readonly class DistanceDelta
     ) {
     }
 
+    public static function fromMetres(int $metres): self
+    {
+        return new self($metres);
+    }
+
     /**
      * The distance to add to $from to reach $to: negative when $to is shorter.
      */
