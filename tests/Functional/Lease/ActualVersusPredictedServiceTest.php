@@ -69,7 +69,7 @@ final class ActualVersusPredictedServiceTest extends KernelTestCase
         self::assertNotNull($result);
         $today = $result->budget[0]->comparison;
         self::assertSame([50_000, 45_000, 5_000], $this->figures($today));
-        self::assertFalse($result->budget[0]->live, 'A stored snapshot is not live.');
+        self::assertTrue($result->budget[0]->live, 'Today is live even against a stored snapshot.');
         $pace = $result->pace[0]->comparison;
         self::assertSame([50_000, 40_000, 10_000], $this->figures($pace));
         $week = $result->budget[2]->comparison;

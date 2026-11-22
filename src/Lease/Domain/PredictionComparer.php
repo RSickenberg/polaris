@@ -92,17 +92,20 @@ final readonly class PredictionComparer
                 ? OwnerMidnight::opening($day->addDay(), $timeZone)->at->getTimestamp() - $start->getTimestamp()
                 : $seconds;
 
+            // "Today" always runs up to the latest reading, so it is live whatever snapshot it is compared with.
+            $live = ComparisonWindow::Today === $window;
+
             $budget[] = new WindowComparison(
                 $window,
                 $this->againstBudget($figures, $driven, $expectedSeconds),
                 $fallbackDays,
-                $figures->live ?? false,
+                $live,
             );
             $pace[] = new WindowComparison(
                 $window,
                 $this->againstPace($figures, $driven, $expectedSeconds),
                 $fallbackDays,
-                $figures->live ?? false,
+                $live,
             );
             $margin[] = new WindowComparison(
                 $window,
@@ -113,7 +116,7 @@ final readonly class PredictionComparer
                         : $latest->margin,
                 ),
                 $fallbackDays,
-                $figures->live ?? false,
+                $live,
             );
         }
 

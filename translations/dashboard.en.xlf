@@ -248,7 +248,7 @@
       </trans-unit>
       <trans-unit id="compare.live_hint">
         <source>compare.live_hint</source>
-        <target>Compared with a projection rebuilt just now: the snapshot of the day is saved at midnight.</target>
+        <target>Measured up to the latest reading, so it changes with every new reading until the day is over.</target>
       </trans-unit>
       <trans-unit id="compare.no_reading_today">
         <source>compare.no_reading_today</source>
@@ -372,11 +372,9 @@ By default the “Today” row is compared with what was expected up to your lat
       </trans-unit>
       <trans-unit id="help.common.live">
         <source>help.common.live</source>
-        <target>Today’s data is not permanently saved yet: Polaris saves it every day at midnight.
+        <target>The “Today” row is live: it is measured up to your latest reading, so it changes with every new reading until the day is over.
 
-Until then, the “Today” row is compared with an estimate refreshed in real time. It shows the values Polaris would save if the midnight job ran at this moment.
-
-This estimate is temporary and is not kept in the history.</target>
+Polaris saves the day’s reference figures at midnight. Until then, if no saved figures exist yet, they are an estimate refreshed in real time: the values Polaris would save if the midnight job ran at this moment. That estimate is temporary and is not kept in the history.</target>
       </trans-unit>
       <trans-unit id="help.common.fallback">
         <source>help.common.fallback</source>
