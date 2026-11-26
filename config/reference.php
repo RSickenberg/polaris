@@ -259,7 +259,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         gc_divisor?: scalar|Param|null,
  *         gc_probability?: scalar|Param|null,
  *         gc_maxlifetime?: scalar|Param|null,
- *         save_path?: scalar|Param|null, // Defaults to "%kernel.cache_dir%/sessions" if the "handler_id" option is not null.
+ *         save_path?: scalar|Param|null, // Defaults to "%kernel.share_dir%/sessions" if the "handler_id" option is not null.
  *         metadata_update_threshold?: int|Param, // Seconds to wait between 2 session metadata updates. // Default: 0
  *     },
  *     request?: bool|array{ // Request configuration
@@ -522,7 +522,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         },
  *         mock_response_factory?: scalar|Param|null, // `true` to always return empty 200 responses, or the id of the service to use to generate mock responses - which should be either an invokable or an iterable.
  *         scoped_clients?: array<string, Param|string|array{ // Default: []
- *             scope?: scalar|Param|null, // The regular expression that the request URL must match before adding the other options. When none is provided, the base URI is used instead.
+ *             scope?: scalar|Param|null, // The regular expression that the request URL must match before adding the other options. When none is provided, the base URI is used instead. The regular expression should end with a "/", for example "https://api\.github\.com/", so that it doesn't match other hosts.
  *             base_uri?: scalar|Param|null, // The URI to resolve relative URLs, following rules in RFC 3985, section 2.
  *             auth_basic?: scalar|Param|null, // An HTTP Basic authentication "username:password".
  *             auth_bearer?: scalar|Param|null, // A token enabling HTTP Bearer authorization.
@@ -1566,8 +1566,12 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         traces_sample_rate?: float|Param, // The sampling factor to apply to transactions. A value of 0 will deny sending any transaction, and a value of 1 will send all transactions. A value of null disables tracing unless "traces_sampler" is set.
  *         traces_sampler?: scalar|Param|null,
  *         profiles_sample_rate?: float|Param, // The sampling factor to apply to profiles. A value of 0 will deny sending any profiles, and a value of 1 will send all profiles. Profiles are sampled in relation to traces_sample_rate
+ *         profiles_sampler?: scalar|Param|null,
+ *         profile_session_sample_rate?: float|Param, // The sampling factor to apply to continuous profiling sessions. A value of 0 disables continuous profiling, and a value of 1 profiles every session.
+ *         profile_lifecycle?: "manual"|"trace"|Param, // Whether the continuous profiler is started and stopped manually ("manual") or runs while a sampled transaction is active ("trace").
  *         enable_logs?: bool|Param,
  *         log_flush_threshold?: mixed, // Default: null
+ *         metric_flush_threshold?: mixed, // Default: null
  *         enable_metrics?: bool|Param, // Default: true
  *         attach_stacktrace?: bool|Param,
  *         attach_metric_code_locations?: bool|Param,
@@ -1593,6 +1597,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         tags?: array<string, scalar|Param|null>,
  *         error_types?: scalar|Param|null,
  *         max_breadcrumbs?: int|Param,
+ *         max_breadth?: mixed,
+ *         send_client_reports?: bool|Param,
  *         before_breadcrumb?: mixed,
  *         in_app_exclude?: list<scalar|Param|null>,
  *         in_app_include?: list<scalar|Param|null>,
@@ -1640,6 +1646,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         http_connect_timeout?: float|Param, // The maximum number of seconds to wait while trying to connect to a server. It works only when using the default transport.
  *         http_timeout?: float|Param, // The maximum execution time for the request+response as a whole. It works only when using the default transport.
  *         http_ssl_verify_peer?: bool|Param,
+ *         http_ssl_native_ca?: bool|Param,
  *         http_compression?: bool|Param,
  *         capture_silenced_errors?: bool|Param,
  *         max_request_body_size?: "none"|"never"|"small"|"medium"|"always"|Param,
