@@ -248,7 +248,7 @@
       </trans-unit>
       <trans-unit id="compare.live_hint">
         <source>compare.live_hint</source>
-        <target>Comparé à une projection recalculée à l’instant : l’instantané du jour est enregistré à minuit.</target>
+        <target>Mesuré jusqu’au dernier relevé : il change à chaque nouveau relevé jusqu’à la fin de la journée.</target>
       </trans-unit>
       <trans-unit id="compare.no_reading_today">
         <source>compare.no_reading_today</source>
@@ -372,11 +372,9 @@ Par défaut, la ligne « Aujourd’hui » est comparée à ce qui était atten
       </trans-unit>
       <trans-unit id="help.common.live">
         <source>help.common.live</source>
-        <target>Les données d’aujourd’hui ne sont pas encore enregistrées définitivement : Polaris effectue cet enregistrement chaque jour à minuit.
+        <target>La ligne « Aujourd’hui » est en direct : elle est mesurée jusqu’au dernier relevé, donc elle change à chaque nouveau relevé jusqu’à la fin de la journée.
 
-En attendant, la ligne « Aujourd’hui » est comparée à une estimation actualisée en temps réel. Elle représente les valeurs que Polaris enregistrerait si le traitement de minuit avait lieu à cet instant.
-
-Cette estimation est temporaire et n’est pas conservée dans l’historique.</target>
+Polaris enregistre les chiffres de référence du jour à minuit. En attendant, s’ils n’existent pas encore, ils sont une estimation actualisée en temps réel : les valeurs que Polaris enregistrerait si le traitement de minuit avait lieu à cet instant. Cette estimation est temporaire et n’est pas conservée dans l’historique.</target>
       </trans-unit>
       <trans-unit id="help.common.fallback">
         <source>help.common.fallback</source>
