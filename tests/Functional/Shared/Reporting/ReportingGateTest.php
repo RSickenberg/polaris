@@ -29,6 +29,7 @@ use Sentry\Logs\Log;
 use Sentry\Logs\LogLevel;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -77,7 +78,11 @@ final class ReportingGateTest extends KernelTestCase
         $this->events = new EventFilter($gate, $scrubber);
         $this->logs = new LogFilter($gate, $scrubber);
         $this->crumbs = new BreadcrumbFilter($scrubber);
-        $this->bindRequestUser = new BindReportingUser($container->get('security.token_storage'), $this->context);
+        $this->bindRequestUser = new BindReportingUser(
+            $container->get('security.token_storage'),
+            $this->context,
+            new RequestStack(),
+        );
         $this->bindMessageUser = new BindReportingUserOfMessage($this->context, new VehicleOwnerLookup($connection));
     }
 
